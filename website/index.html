@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klinika - Sog'ligingiz bizning g'amxo'rligimiz</title>
+    <meta name="description" content="Zamonaviy klinika - Sifatli tibbiy xizmatlar, tajribali shifokorlar, zamonaviy uskunalar">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🏥 Klinika</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#bosh">Bosh sahifa</a></li>
+                <li><a href="#shifokorlar">Shifokorlar</a></li>
+                <li><a href="#xizmatlar">Xizmatlar</a></li>
+                <li><a href="#aloqa">Aloqa</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="bosh" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Sog'ligingiz bizning g'amxo'rligimiz</h1>
+                <p class="hero-subtitle">Zamonaviy uskunalar va tajribali shifokorlar bilan yuqori sifatli tibbiy xizmatlar</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="scrollTo('#aloqa')">Navbatga yozilish</button>
+                    <button class="btn btn-secondary" id="open-chatbot">💬 AI Maslahatchi</button>
+                </div>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <h3>10+</h3>
+                    <p>Tajribali shifokorlar</p>
+                </div>
+                <div class="stat-card">
+                    <h3>5000+</h3>
+                    <p>Mamnun bemorlar</p>
+                </div>
+                <div class="stat-card">
+                    <h3>15+</h3>
+                    <p>Yillik tajriba</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="xizmatlar" class="services">
+        <div class="container">
+            <h2 class="section-title">Bizning Xizmatlarimiz</h2>
+            <div class="services-grid" id="services-container">
+                <div class="service-card">
+                    <div class="service-icon">🩺</div>
+                    <h3>Shifokor konsultatsiyasi</h3>
+                    <p>Malakali shifokorlar tomonidan to'liq ko'rik va maslahat</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🔬</div>
+                    <h3>Laboratoriya tahlillari</h3>
+                    <p>Zamonaviy uskunalar bilan barcha turdagi tahlillar</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">💉</div>
+                    <h3>Muolajalar</h3>
+                    <p>Ukol va tomchi muolajalar professional hamshiralar tomonidan</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🏥</div>
+                    <h3>Statsionar</h3>
+                    <p>Qulay palatalar va 24/7 tibbiy nazorat</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🩹</div>
+                    <h3>Davolash</h3>
+                    <p>Turli kasalliklar uchun kompleks davolash</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">📊</div>
+                    <h3>Diagnostika</h3>
+                    <p>Zamonaviy diagnostika usullari va jihozlari</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Doctors Section -->
+    <section id="shifokorlar" class="doctors">
+        <div class="container">
+            <h2 class="section-title">Bizning Shifokorlarimiz</h2>
+            <div class="doctors-grid" id="doctors-container">
+                <!-- Shifokorlar JS orqali yuklanadi -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="aloqa" class="contact">
+        <div class="container">
+            <h2 class="section-title">Biz bilan bog'laning</h2>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="info-item">
+                        <span class="icon">📍</span>
+                        <div>
+                            <h4>Manzil</h4>
+                            <p>Toshkent shahar, Yunusobod tumani</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">📞</span>
+                        <div>
+                            <h4>Telefon</h4>
+                            <p>+998 (71) 123-45-67</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">⏰</span>
+                        <div>
+                            <h4>Ish vaqti</h4>
+                            <p>Dush-Juma: 8:00 - 20:00<br>Shanba: 9:00 - 15:00</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">💬</span>
+                        <div>
+                            <h4>Telegram Bot</h4>
+                            <p><a href="https://t.me/your_clinic_bot" target="_blank">@your_clinic_bot</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>Navbatga yozilish</h3>
+                    <form id="appointment-form">
+                        <input type="text" placeholder="Ism Familiya" required>
+                        <input type="tel" placeholder="Telefon raqam" required>
+                        <select required>
+                            <option value="">Shifokorni tanlang</option>
+                            <!-- Shifokorlar JS orqali yuklanadi -->
+                        </select>
+                        <textarea placeholder="Izoh (ixtiyoriy)"></textarea>
+                        <button type="submit" class="btn btn-primary">Yuborish</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Chatbot -->
+    <div id="chatbot" class="chatbot">
+        <div class="chatbot-header">
+            <h3>🤖 AI Maslahatchi</h3>
+            <button id="close-chatbot">✕</button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="bot-message">
+                Salom! Men sizga qanday yordam bera olaman?
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbot-input-field" placeholder="Savolingizni yozing...">
+            <button id="send-message">📤</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Klinika. Barcha huquqlar himoyalangan.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

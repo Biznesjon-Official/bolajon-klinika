@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cache Tozalash</title>
+</head>
+<body>
+    <h1>Cache va localStorage tozalanmoqda...</h1>
+    <script>
+        // LocalStorage tozalash
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Cookie'larni tozalash
+        document.cookie.split(";").forEach(function(c) { 
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        });
+        
+        // Service Worker'ni tozalash
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+        
+        // Cache'ni tozalash
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    caches.delete(name);
+                }
+            });
+        }
+        
+        alert('Cache va localStorage tozalandi! Endi /login sahifasiga o\'tasiz.');
+        window.location.href = '/login';
+    </script>
+</body>
+</html>

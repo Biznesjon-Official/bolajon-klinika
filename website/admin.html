@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Klinika Boshqaruv Tizimi</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="login-page">
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>🏥 Klinika</h1>
+                <p>Admin Panel</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Login</label>
+                    <input type="text" id="username" placeholder="Loginingizni kiriting" required>
+                </div>
+                <div class="form-group">
+                    <label>Parol</label>
+                    <input type="password" id="password" placeholder="Parolingizni kiriting" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Kirish</button>
+            </form>
+            <div class="login-footer">
+                <p>Klinika Boshqaruv Tizimi v1.0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="dashboard-container" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏥 Klinika</h2>
+                <p id="user-info">Admin</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-page="bemorlar">
+                    <span class="icon">👥</span>
+                    <span>Bemorlar</span>
+                </a>
+                <a href="#" class="nav-item" data-page="navbat">
+                    <span class="icon">📋</span>
+                    <span>Navbat</span>
+                </a>
+                <a href="#" class="nav-item" data-page="statsionar">
+                    <span class="icon">🛏️</span>
+                    <span>Statsionar</span>
+                </a>
+                <a href="#" class="nav-item" data-page="tahlillar">
+                    <span class="icon">🔬</span>
+                    <span>Tahlillar</span>
+                </a>
+                <a href="#" class="nav-item" data-page="muolajalar">
+                    <span class="icon">💉</span>
+                    <span>Muolajalar</span>
+                </a>
+                <a href="#" class="nav-item" data-page="xodimlar">
+                    <span class="icon">👔</span>
+                    <span>Xodimlar</span>
+                </a>
+                <a href="#" class="nav-item" data-page="tolovlar">
+                    <span class="icon">💰</span>
+                    <span>To'lovlar</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn-logout">
+                    <span class="icon">🚪</span>
+                    <span>Chiqish</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="topbar">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="topbar-actions">
+                    <button class="btn-icon" title="Yangilash">🔄</button>
+                    <button class="btn-icon" title="Bildirishnomalar">🔔</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Dashboard Page -->
+                <div id="page-dashboard" class="page-content active">
+                    <div class="stats-grid">
+                        <div class="stat-box blue">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-info">
+                                <h3 id="stat-bemorlar">0</h3>
+                                <p>Jami Bemorlar</p>
+                            </div>
+                        </div>
+                        <div class="stat-box green">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-info">
+                                <h3 id="stat-navbat">0</h3>
+                                <p>Bugungi Navbat</p>
+                            </div>
+                        </div>
+                        <div class="stat-box orange">
+                            <div class="stat-icon">🛏️</div>
+                            <div class="stat-info">
+                                <h3 id="stat-statsionar">0</h3>
+                                <p>Band Koykalar</p>
+                            </div>
+                        </div>
+                        <div class="stat-box purple">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-info">
+                                <h3 id="stat-tolovlar">0</h3>
+                                <p>Bugungi To'lovlar</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h3>So'nggi Bemorlar</h3>
+                            <div id="recent-patients" class="list-container">
+                                <!-- Dynamically loaded -->
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3>Bugungi Tahlillar</h3>
+                            <div id="today-tests" class="list-container">
+                                <!-- Dynamically loaded -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bemorlar Page -->
+                <div id="page-bemorlar" class="page-content">
+                    <div class="page-header">
+                        <button class="btn btn-primary" id="add-patient-btn">+ Yangi Bemor</button>
+                        <input type="search" placeholder="Qidirish..." class="search-input">
+                    </div>
+                    <div class="data-table">
+                        <table id="patients-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Ism Familiya</th>
+                                    <th>JShShIR</th>
+                                    <th>Telefon</th>
+                                    <th>Amallar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamically loaded -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Statsionar Page -->
+                <div id="page-statsionar" class="page-content">
+                    <h2>Koykalar Xaritasi</h2>
+                    <div id="beds-grid" class="beds-grid">
+                        <!-- Dynamically loaded -->
+                    </div>
+                </div>
+
+                <!-- Other pages... -->
+                <div id="page-navbat" class="page-content">
+                    <h2>Navbat Tizimi</h2>
+                    <div id="queue-list"></div>
+                </div>
+
+                <div id="page-tahlillar" class="page-content">
+                    <h2>Laboratoriya Tahlillari</h2>
+                    <div id="tests-list"></div>
+                </div>
+
+                <div id="page-muolajalar" class="page-content">
+                    <h2>Muolajalar Jadvali</h2>
+                    <div id="treatments-list"></div>
+                </div>
+
+                <div id="page-xodimlar" class="page-content">
+                    <h2>Xodimlar Boshqaruvi</h2>
+                    <div id="employees-list"></div>
+                </div>
+
+                <div id="page-tolovlar" class="page-content">
+                    <h2>To'lovlar va Kassa</h2>
+                    <div id="payments-list"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Modal</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+
+</html>

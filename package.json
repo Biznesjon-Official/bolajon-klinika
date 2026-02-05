@@ -1,0 +1,30 @@
+{
+  "name": "clinic-management-system",
+  "version": "1.0.0",
+  "description": "Full-stack Clinic Management System",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:bot\" --names \"BACKEND,FRONTEND,BOT\" --prefix-colors \"blue,green,cyan\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:bot": "cd bot && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build:frontend": "cd frontend && npm run build",
+    "start:backend": "cd backend && npm start",
+    "migrate": "cd backend && npm run migrate",
+    "seed": "cd backend && npm run seed",
+    "test": "cd backend && npm test",
+    "docker:up": "cd backend && docker-compose up -d",
+    "docker:down": "cd backend && docker-compose down"
+  },
+  "keywords": [
+    "clinic",
+    "management",
+    "healthcare",
+    "hospital"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
