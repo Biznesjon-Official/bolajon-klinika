@@ -125,7 +125,8 @@ router.get('/treatments', authenticate, async (req, res) => {
     console.log('Nurse ID:', nurseId);
     console.log('Status filter:', status);
     
-    const query = { nurse_id: nurseId };
+    // YANGI: Barcha muolajalarni olish (nurse_id filter yo'q)
+    const query = {};
     
     if (status && status !== 'all') {
       query.status = status;
@@ -138,6 +139,7 @@ router.get('/treatments', authenticate, async (req, res) => {
       Task.find(query)
         .populate('patient_id', 'first_name last_name patient_number')
         .populate('assigned_by', 'first_name last_name')
+        .populate('nurse_id', 'first_name last_name')
         .populate('admission_id')
         .populate('prescription_id')
         .sort({ scheduled_time: 1 })

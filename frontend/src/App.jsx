@@ -31,6 +31,7 @@ const LabPharmacy = lazy(() => import('./pages/LabPharmacy'));
 const NursePanel = lazy(() => import('./pages/NursePanel'));
 const SanitarPanel = lazy(() => import('./pages/SanitarPanel'));
 const PharmacyPanel = lazy(() => import('./pages/PharmacyPanel'));
+const ReceptionPanel = lazy(() => import('./pages/ReceptionPanel'));
 const AmbulatorRoom = lazy(() => import('./pages/AmbulatorRoom'));
 const Communications = lazy(() => import('./pages/Communications'));
 const Reports = lazy(() => import('./pages/Reports'));
@@ -91,6 +92,9 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin" element={<Login />} />
+              
+              {/* Reception Routes */}
+              <Route path="/reception" element={<ProtectedRoute><DashboardLayout><ReceptionPanel /></DashboardLayout></ProtectedRoute>} />
               
               {/* Patient Portal Routes - TEMPORARILY DISABLED 
               <Route path="/patient/portal" element={<PatientLayout><PatientPortal /></PatientLayout>} />

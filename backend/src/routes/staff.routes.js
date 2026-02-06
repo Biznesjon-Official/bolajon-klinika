@@ -47,7 +47,11 @@ router.get('/', authenticate, async (req, res, next) => {
         salary: s.salary,
         status: s.status,
         user_active: s.status === 'active',
-        created_at: s.createdAt
+        created_at: s.createdAt,
+        access_code: s.access_code,
+        telegram_chat_id: s.telegram_chat_id,
+        telegram_username: s.telegram_username,
+        telegram_notifications_enabled: s.telegram_notifications_enabled
       }))
     });
   } catch (error) {
@@ -83,7 +87,7 @@ router.get('/:id', authenticate, async (req, res, next) => {
 });
 
 // Create staff
-router.post('/', authenticate, authorize('admin'), async (req, res, next) => {
+router.post('/', authenticate, authorize('admin', 'doctor'), async (req, res, next) => {
   try {
     const { username, password, email, first_name, last_name, middle_name, phone, role_id, department, specialization, license_number, salary, hire_date } = req.body;
     
@@ -106,6 +110,21 @@ router.post('/', authenticate, authorize('admin'), async (req, res, next) => {
       });
     }
     
+    // Generate unique access code for staff (LI-XXXXXXXX format)
+    let accessCode;
+    let isUnique = false;
+    while (!isUnique) {
+      // Generate 8-digit random number
+      const randomNum = Math.floor(10000000 + Math.random() * 90000000);
+      accessCode = `LI${randomNum}`;
+      
+      // Check if this code already exists
+      const existing = await Staff.findOne({ access_code: accessCode });
+      if (!existing) {
+        isUnique = true;
+      }
+    }
+    
     // Create staff (password will be hashed by pre-save hook)
     const staff = new Staff({
       username,
@@ -121,7 +140,9 @@ router.post('/', authenticate, authorize('admin'), async (req, res, next) => {
       license_number,
       salary: parseFloat(salary) || 0,
       hire_date: hire_date || new Date(),
-      status: 'active'
+      status: 'active',
+      access_code: accessCode,
+      telegram_notifications_enabled: true
     });
     await staff.save();
     
@@ -141,7 +162,8 @@ router.post('/', authenticate, authorize('admin'), async (req, res, next) => {
         license_number: staff.license_number,
         salary: staff.salary,
         hire_date: staff.hire_date,
-        status: staff.status
+        status: staff.status,
+        access_code: accessCode
       }
     });
   } catch (error) {
@@ -157,7 +179,7 @@ router.post('/', authenticate, authorize('admin'), async (req, res, next) => {
 });
 
 // Update staff
-router.put('/:id', authenticate, authorize('admin'), async (req, res, next) => {
+router.put('/:id', authenticate, authorize('admin', 'doctor'), async (req, res, next) => {
   try {
     const { first_name, last_name, middle_name, email, phone, department, specialization, license_number, salary, is_active } = req.body;
     
@@ -203,7 +225,7 @@ router.put('/:id', authenticate, authorize('admin'), async (req, res, next) => {
 });
 
 // Delete staff
-router.delete('/:id', authenticate, authorize('admin'), async (req, res, next) => {
+router.delete('/:id', authenticate, authorize('admin', 'doctor'), async (req, res, next) => {
   try {
     const staff = await Staff.findByIdAndDelete(req.params.id);
     

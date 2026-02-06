@@ -15,7 +15,7 @@ const router = express.Router();
  */
 router.get('/dashboard',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const today = new Date();
@@ -181,7 +181,7 @@ router.get('/dashboard',
  */
 router.get('/financial',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { from_date, to_date } = req.query;
@@ -345,7 +345,7 @@ router.get('/financial',
  */
 router.get('/debtors',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const debtors = await Invoice.aggregate([
@@ -415,7 +415,7 @@ router.get('/debtors',
  */
 router.get('/patients',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { from_date, to_date } = req.query;
@@ -543,7 +543,7 @@ router.get('/patients',
  */
 router.get('/services',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { from_date, to_date } = req.query;
@@ -621,7 +621,7 @@ router.get('/services',
  */
 router.get('/inpatient',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       // Import Bed model

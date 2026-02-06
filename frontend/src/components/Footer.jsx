@@ -10,7 +10,7 @@ const Footer = () => {
                   <path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
                 </svg>
               </div>
-              <h2 className="text-base sm:text-lg font-black tracking-tight">VITALIS</h2>
+              <h2 className="text-base sm:text-lg font-black tracking-tight">Bolajon klinikasi</h2>
             </div>
             <p className="text-xs sm:text-sm text-[#617589] dark:text-gray-400 leading-relaxed">
               Eng zamonaviy texnologiya va tajriba bilan yuqori sifatli, bemorga yo'naltirilgan tibbiy xizmat ko'rsatishga bag'ishlangan.
@@ -46,7 +46,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-base">mail</span>
-                info@vitalis.uz
+                info@bolajon.uz
               </li>
               <li className="flex items-start gap-2">
                 <span className="material-symbols-outlined text-base mt-0.5">location_on</span>
@@ -58,7 +58,7 @@ const Footer = () => {
         
         <div className="pt-6 sm:pt-8 border-t border-[#dbe0e6] dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-[10px] sm:text-xs text-[#617589] dark:text-gray-500 text-center sm:text-left">
-            © 2024 Vitalis Klinika. Barcha huquqlar himoyalangan.
+            © 2024 Bolajon klinikasi. Barcha huquqlar himoyalangan.
           </p>
           <div className="flex gap-4 sm:gap-6">
             <a className="text-[#617589] hover:text-primary transition-colors" href="#" aria-label="Website">

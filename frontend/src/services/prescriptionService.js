@@ -116,7 +116,7 @@ export const prescriptionService = {
       </head>
       <body>
         <div class="header">
-          <div class="clinic-name">VITALIS KLINIKA</div>
+          <div class="clinic-name">BOLAJON KLINIKASI</div>
           <div>Retsept Cheki</div>
           <div style="font-size: 12px; margin-top: 5px;">
             ${new Date().toLocaleString('uz-UZ')}

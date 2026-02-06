@@ -37,7 +37,7 @@ const staffSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['admin', 'doctor', 'nurse', 'laborant', 'pharmacist', 'sanitar'],
+    enum: ['admin', 'doctor', 'nurse', 'laborant', 'pharmacist', 'sanitar', 'receptionist'],
     lowercase: true
   },
   specialization: {
@@ -102,6 +102,24 @@ const staffSchema = new mongoose.Schema({
   },
   notes: {
     type: String
+  },
+  // Telegram bot integratsiyasi
+  access_code: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true
+  },
+  telegram_chat_id: {
+    type: String,
+    sparse: true
+  },
+  telegram_username: {
+    type: String
+  },
+  telegram_notifications_enabled: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true,

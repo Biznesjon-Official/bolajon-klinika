@@ -25,7 +25,12 @@ const Hero = () => {
               Kirish
             </a>
             
-            <a href="/login" className="flex min-w-[140px] cursor-pointer items-center justify-center rounded-xl h-12 sm:h-14 px-5 sm:px-6 bg-white dark:bg-gray-800 border border-[#dbe0e6] dark:border-gray-700 text-[#111418] dark:text-white text-sm sm:text-base font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+            <a 
+              href="https://t.me/klinika_01_bot" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-w-[140px] cursor-pointer items-center justify-center rounded-xl h-12 sm:h-14 px-5 sm:px-6 bg-white dark:bg-gray-800 border border-[#dbe0e6] dark:border-gray-700 text-[#111418] dark:text-white text-sm sm:text-base font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+            >
               Tahlil Natijalari
             </a>
             

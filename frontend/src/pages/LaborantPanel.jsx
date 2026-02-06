@@ -20,6 +20,12 @@ export default function LaborantPanel() {
     test_results: [],
     notes: ''
   });
+  const [tableRows, setTableRows] = useState([
+    ['', ''],
+    ['', ''],
+    ['', ''],
+    ['', '']
+  ]);
   const [filters, setFilters] = useState({
     date: '',
     test_type: '',
@@ -96,35 +102,53 @@ export default function LaborantPanel() {
 
   const handleOpenResultModal = (order) => {
     setSelectedOrder(order);
-    // Test parametrlarini olish
-    const testResults = order.test_parameters?.map(param => ({
-      parameter_name: param.name,
-      value: '',
-      unit: param.unit,
-      normal_range: param.normal_range,
-      is_normal: true
-    })) || [];
-    setResultForm({ test_results: testResults, notes: '' });
+    // Reset table to 4x2
+    setTableRows([
+      ['', ''],
+      ['', ''],
+      ['', ''],
+      ['', '']
+    ]);
+    setResultForm({ test_results: [], notes: '' });
     setShowResultModal(true);
   };
 
-  const handleResultChange = (index, field, value) => {
-    const newResults = [...resultForm.test_results];
-    newResults[index][field] = value;
-    
-    // Normal diapazonni tekshirish
-    if (field === 'value' && newResults[index].normal_range) {
-      const [min, max] = newResults[index].normal_range.split('-').map(v => parseFloat(v.trim()));
-      const numValue = parseFloat(value);
-      newResults[index].is_normal = numValue >= min && numValue <= max;
+  const addTableRow = () => {
+    setTableRows([...tableRows, ['', '']]);
+  };
+
+  const removeTableRow = (index) => {
+    if (tableRows.length > 1) {
+      const newRows = tableRows.filter((_, i) => i !== index);
+      setTableRows(newRows);
     }
-    
-    setResultForm({ ...resultForm, test_results: newResults });
+  };
+
+  const updateTableCell = (rowIndex, colIndex, value) => {
+    const newRows = [...tableRows];
+    newRows[rowIndex][colIndex] = value;
+    setTableRows(newRows);
   };
 
   const handleSubmitResults = async () => {
     try {
-      const response = await laboratoryService.submitResults(selectedOrder.id, resultForm);
+      // Convert table to text format
+      const tableText = tableRows
+        .filter(row => row[0] || row[1]) // Only include non-empty rows
+        .map(row => `${row[0]}\t${row[1]}`)
+        .join('\n');
+      
+      const response = await laboratoryService.submitResults(selectedOrder.id, {
+        test_results: [{
+          parameter_name: 'Natija',
+          value: tableText,
+          unit: '',
+          normal_range: '',
+          is_normal: null
+        }],
+        notes: resultForm.notes
+      });
+      
       if (response.success) {
         toast.success('Natijalar muvaffaqiyatli kiritildi');
         setShowResultModal(false);
@@ -582,45 +606,60 @@ export default function LaborantPanel() {
               </div>
 
               <div className="space-y-4">
-                {resultForm.test_results.map((result, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <p className="font-semibold mb-2">{result.parameter_name}</p>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label className="text-sm text-gray-600">Qiymat</label>
-                        <input
-                          type="number"
-                          value={result.value}
-                          onChange={(e) => handleResultChange(index, 'value', e.target.value)}
-                          className="w-full px-3 py-2 border rounded-lg"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm text-gray-600">Birlik</label>
-                        <input
-                          type="text"
-                          value={result.unit}
-                          readOnly
-                          className="w-full px-3 py-2 border rounded-lg bg-gray-50"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm text-gray-600">Normal</label>
-                        <div className="flex items-center h-10">
-                          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                            result.is_normal ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {result.is_normal ? '✓ Normal' : '✗ Normal emas'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {result.normal_range && (
-                      <p className="text-xs text-gray-500 mt-2">Normal diapazon: {result.normal_range}</p>
-                    )}
+                {/* Natija - Jadval */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-semibold">Natija *</label>
+                    <button
+                      type="button"
+                      onClick={addTableRow}
+                      className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 flex items-center gap-1"
+                    >
+                      <span className="text-lg">+</span>
+                      Qator qo'shish
+                    </button>
                   </div>
-                ))}
+                  
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <tbody>
+                        {tableRows.map((row, rowIndex) => (
+                          <tr key={rowIndex} className="border-b last:border-b-0">
+                            <td className="p-0 w-1/2 border-r">
+                              <input
+                                type="text"
+                                value={row[0]}
+                                onChange={(e) => updateTableCell(rowIndex, 0, e.target.value)}
+                                className="w-full px-3 py-2 border-0 focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Parametr"
+                              />
+                            </td>
+                            <td className="p-0 w-1/2 relative">
+                              <input
+                                type="text"
+                                value={row[1]}
+                                onChange={(e) => updateTableCell(rowIndex, 1, e.target.value)}
+                                className="w-full px-3 py-2 pr-10 border-0 focus:outline-none focus:ring-2 focus:ring-primary"
+                                placeholder="Qiymat"
+                              />
+                              {tableRows.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeTableRow(rowIndex)}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700"
+                                >
+                                  <span className="text-lg">−</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
+                {/* Izohlar */}
                 <div>
                   <label className="block text-sm font-semibold mb-2">Izohlar</label>
                   <textarea

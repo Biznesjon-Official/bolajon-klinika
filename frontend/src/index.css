@@ -275,3 +275,63 @@ body {
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(107, 114, 128, 0.7);
 }
+
+  /* 24-soatlik vaqt formati uchun */
+  input[type="time"] {
+    -webkit-appearance: textfield;
+  }
+  
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+  }
+
+  .dark input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+  }
+
+  /* AM/PM ko'rsatmaslik uchun */
+  input[type="time"]::-webkit-datetime-edit-ampm-field {
+    display: none;
+  }
+  
+  input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+    display: flex;
+  }
+
+
+/* Nurse Call Bell Animation */
+@keyframes ring-bell {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30%, 50%, 70%, 90% { transform: rotate(-15deg); }
+  20%, 40%, 60%, 80% { transform: rotate(15deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% { 
+    box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes bounce-attention {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.nurse-call-active {
+  animation: pulse-glow 1.5s infinite, bounce-attention 1s infinite;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border: 3px solid #fca5a5 !important;
+}
+
+.nurse-call-bell {
+  animation: ring-bell 1s infinite;
+  color: #ffffff !important;
+  font-size: 2rem !important;
+}
+
+.nurse-call-badge {
+  animation: pulse-glow 1s infinite;
+}

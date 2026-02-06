@@ -31,15 +31,19 @@ router.get('/tests', authenticate, async (req, res, next) => {
       success: true,
       data: tests.map(t => ({
         id: t._id,
+        test_name: t.name,
+        test_code: t.code,
         name: t.name,
         code: t.code,
         category: t.category,
         description: t.description,
         price: t.price,
         duration_minutes: t.duration_minutes,
+        turnaround_time: t.duration_minutes ? Math.round(t.duration_minutes / 60) : null,
         sample_type: t.sample_type,
         preparation_instructions: t.preparation_instructions,
         normal_range: t.normal_range,
+        test_parameters: t.test_parameters || [],
         is_active: t.is_active
       }))
     });
@@ -75,7 +79,7 @@ router.get('/tests/:id', authenticate, async (req, res, next) => {
 });
 
 // Create lab test
-router.post('/tests', authenticate, authorize('admin'), async (req, res, next) => {
+router.post('/tests', authenticate, authorize('admin', 'laborant', 'doctor'), async (req, res, next) => {
   try {
     const {
       name,
@@ -86,10 +90,11 @@ router.post('/tests', authenticate, authorize('admin'), async (req, res, next) =
       duration_minutes,
       sample_type,
       preparation_instructions,
-      normal_range
+      normal_range,
+      test_parameters
     } = req.body;
     
-    if (!name || !category || price === undefined) {
+    if (!name || price === undefined) {
       return res.status(400).json({
         success: false,
         message: 'Majburiy maydonlarni to\'ldiring'
@@ -99,13 +104,14 @@ router.post('/tests', authenticate, authorize('admin'), async (req, res, next) =
     const test = new LabTest({
       name,
       code,
-      category,
+      category: category || 'Umumiy',
       description,
       price,
       duration_minutes,
       sample_type,
       preparation_instructions,
       normal_range,
+      test_parameters: test_parameters || [],
       is_active: true
     });
     
@@ -126,7 +132,7 @@ router.post('/tests', authenticate, authorize('admin'), async (req, res, next) =
 });
 
 // Update lab test
-router.put('/tests/:id', authenticate, authorize('admin'), async (req, res, next) => {
+router.put('/tests/:id', authenticate, authorize('admin', 'laborant', 'doctor'), async (req, res, next) => {
   try {
     const {
       name,
@@ -138,6 +144,7 @@ router.put('/tests/:id', authenticate, authorize('admin'), async (req, res, next
       sample_type,
       preparation_instructions,
       normal_range,
+      test_parameters,
       is_active
     } = req.body;
     
@@ -152,6 +159,7 @@ router.put('/tests/:id', authenticate, authorize('admin'), async (req, res, next
     if (sample_type) updateData.sample_type = sample_type;
     if (preparation_instructions !== undefined) updateData.preparation_instructions = preparation_instructions;
     if (normal_range !== undefined) updateData.normal_range = normal_range;
+    if (test_parameters !== undefined) updateData.test_parameters = test_parameters;
     if (is_active !== undefined) updateData.is_active = is_active;
     
     const test = await LabTest.findByIdAndUpdate(
@@ -179,7 +187,7 @@ router.put('/tests/:id', authenticate, authorize('admin'), async (req, res, next
 });
 
 // Delete lab test
-router.delete('/tests/:id', authenticate, authorize('admin'), async (req, res, next) => {
+router.delete('/tests/:id', authenticate, authorize('admin', 'laborant', 'doctor'), async (req, res, next) => {
   try {
     const test = await LabTest.findByIdAndDelete(req.params.id);
     
@@ -243,12 +251,14 @@ router.get('/orders', authenticate, async (req, res, next) => {
         patient_id: o.patient_id?._id,
         patient_first_name: o.patient_id?.first_name,
         patient_last_name: o.patient_id?.last_name,
+        patient_name: o.patient_id ? `${o.patient_id.first_name} ${o.patient_id.last_name}` : null,
         patient_number: o.patient_id?.patient_number,
         patient_phone: o.patient_id?.phone,
         doctor_id: o.doctor_id?._id,
         doctor_name: o.doctor_id ? `${o.doctor_id.first_name} ${o.doctor_id.last_name}` : null,
         laborant_id: o.laborant_id?._id,
         laborant_name: o.laborant_id ? `${o.laborant_id.first_name} ${o.laborant_id.last_name}` : null,
+        test_id: o.test_id,
         test_type: o.test_type,
         test_name: o.test_name,
         status: o.status,
@@ -259,6 +269,7 @@ router.get('/orders', authenticate, async (req, res, next) => {
         notes: o.notes,
         completed_at: o.completed_at,
         price: o.price,
+        order_date: o.createdAt,
         created_at: o.createdAt
       }))
     });
@@ -334,6 +345,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant'), a
     const order = new LabOrder({
       patient_id,
       doctor_id: doctor_id || req.user.id,
+      test_id: test._id,
       test_type: test.category,
       test_name: test.name,
       priority: priority || 'normal',

@@ -796,24 +796,63 @@ const DoctorPanel = () => {
                       {/* Qabul qilish vaqtlari */}
                       {med.frequency_per_day > 0 && (
                         <div className="mb-3 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-200 dark:border-purple-700">
-                          <label className="block text-sm font-bold mb-2 text-purple-900 dark:text-purple-100">
+                          <label className="block text-sm font-bold mb-3 text-purple-900 dark:text-purple-100">
                             🕐 Qabul qilish vaqtlari
                           </label>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {Array.from({ length: med.frequency_per_day }).map((_, timeIndex) => (
-                              <div key={timeIndex} className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                              <div key={timeIndex} className="flex flex-col gap-1">
+                                <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
                                   {timeIndex + 1}-marta:
                                 </span>
                                 <input
-                                  type="time"
+                                  type="text"
+                                  pattern="[0-2][0-9]:[0-5][0-9]"
+                                  placeholder="HH:MM"
+                                  maxLength="5"
                                   value={med.schedule_times?.[timeIndex] || ''}
                                   onChange={(e) => {
-                                    const newTimes = [...(med.schedule_times || [])];
-                                    newTimes[timeIndex] = e.target.value;
-                                    updateMedication(index, 'schedule_times', newTimes);
+                                    let value = e.target.value.replace(/[^0-9:]/g, '');
+                                    
+                                    // Avtomatik : qo'shish
+                                    if (value.length === 2 && !value.includes(':')) {
+                                      value = value + ':';
+                                    }
+                                    
+                                    // Format tekshirish
+                                    if (value.length === 5) {
+                                      const [hours, minutes] = value.split(':');
+                                      const h = parseInt(hours);
+                                      const m = parseInt(minutes);
+                                      
+                                      if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+                                        const newTimes = [...(med.schedule_times || [])];
+                                        newTimes[timeIndex] = value;
+                                        updateMedication(index, 'schedule_times', newTimes);
+                                      }
+                                    } else if (value.length < 5) {
+                                      const newTimes = [...(med.schedule_times || [])];
+                                      newTimes[timeIndex] = value;
+                                      updateMedication(index, 'schedule_times', newTimes);
+                                    }
                                   }}
-                                  className="flex-1 px-3 py-2 border-2 border-purple-300 rounded-lg font-medium"
+                                  onBlur={(e) => {
+                                    // Format to'g'rilash
+                                    const value = e.target.value;
+                                    if (value.length === 5) {
+                                      const [hours, minutes] = value.split(':');
+                                      const h = parseInt(hours);
+                                      const m = parseInt(minutes);
+                                      
+                                      if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+                                        const formatted = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                                        const newTimes = [...(med.schedule_times || [])];
+                                        newTimes[timeIndex] = formatted;
+                                        updateMedication(index, 'schedule_times', newTimes);
+                                      }
+                                    }
+                                  }}
+                                  className="w-full px-3 py-2 border-2 border-purple-300 rounded-lg font-bold text-base text-center focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                 />
                               </div>
                             ))}

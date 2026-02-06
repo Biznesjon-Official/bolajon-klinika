@@ -47,6 +47,8 @@ const Login = () => {
           navigate('/pharmacy');
         } else if (roleName === 'sanitar') {
           navigate('/sanitar');
+        } else if (roleName === 'receptionist') {
+          navigate('/reception');
         } else {
           navigate('/dashboard');
         }
@@ -186,7 +188,7 @@ const Login = () => {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-8">
-          © 2024 Vitalis Klinika. Barcha huquqlar himoyalangan.
+          © 2024 Bolajon klinikasi. Barcha huquqlar himoyalangan.
         </p>
       </div>
     </div>

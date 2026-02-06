@@ -15,8 +15,7 @@ const labTestSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['hematology', 'biochemistry', 'microbiology', 'immunology', 'urine', 'other'],
-    default: 'other'
+    trim: true
   },
   description: {
     type: String,
@@ -42,6 +41,21 @@ const labTestSchema = new mongoose.Schema({
   normal_range: {
     type: String
   },
+  test_parameters: [{
+    name: {
+      type: String,
+      required: true
+    },
+    unit: {
+      type: String
+    },
+    normal_range: {
+      type: String
+    },
+    description: {
+      type: String
+    }
+  }],
   is_active: {
     type: Boolean,
     default: true

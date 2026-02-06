@@ -5,6 +5,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
 import { useAuth } from '../contexts/AuthContext';
 import BedTreatmentWrapper from '../components/BedTreatmentWrapper';
+import { io } from 'socket.io-client';
 
 export default function Inpatient() {
   const { user } = useAuth();
@@ -22,10 +23,11 @@ export default function Inpatient() {
   
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('map');
-  const [selectedFloor, setSelectedFloor] = useState(3); // Faqat 3-qavat
+  const [selectedFloor, setSelectedFloor] = useState(null); // Barcha qavatlar
   const [visualMap, setVisualMap] = useState({ floors: {}, total_beds: 0 });
   const [treatments, setTreatments] = useState([]);
   const [pendingCalls, setPendingCalls] = useState([]);
+  const [nurseCallsMap, setNurseCallsMap] = useState(new Map()); // patientId -> call data
   const [cabinets, setCabinets] = useState([]);
   const [stats, setStats] = useState({});
   const [rooms, setRooms] = useState([]);
@@ -36,7 +38,8 @@ export default function Inpatient() {
     floor_number: 1,
     room_type: 'standard',
     daily_rate: 200000,
-    bed_count: 2
+    bed_count: 2,
+    department: 'inpatient' // Statsionar bo'limi
   });
   
   // Bemor tanlash modali
@@ -68,10 +71,56 @@ export default function Inpatient() {
 
   useEffect(() => {
     loadData();
-    // Avtomatik yangilanish o'chirilgan
-    // const interval = setInterval(loadData, 30000);
-    // return () => clearInterval(interval);
-  }, []); // selectedFloor ni dependency dan olib tashladik
+    
+    // WebSocket ulanishi
+    const socket = io('http://localhost:5001');
+    
+    socket.on('connect', () => {
+      console.log('✅ WebSocket connected');
+    });
+    
+    socket.on('nurse-call', (data) => {
+      console.log('🔔 Nurse call received:', data);
+      
+      // Qo'ng'iroqni map'ga qo'shish
+      setNurseCallsMap(prev => {
+        const newMap = new Map(prev);
+        newMap.set(data.patientId, {
+          ...data,
+          timestamp: new Date(data.timestamp)
+        });
+        return newMap;
+      });
+      
+      // Toast xabari
+      toast.error(
+        `🚨 BEMOR CHAQIRYAPTI!\n${data.patientName}\nXona: ${data.roomNumber}, Ko'rpa: ${data.bedNumber}`,
+        {
+          duration: 10000,
+          position: 'top-center',
+          style: {
+            background: '#ef4444',
+            color: '#fff',
+            fontWeight: 'bold',
+            fontSize: '16px'
+          }
+        }
+      );
+      
+      // 30 soniyadan keyin qo'ng'iroqni o'chirish
+      setTimeout(() => {
+        setNurseCallsMap(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(data.patientId);
+          return newMap;
+        });
+      }, 30000);
+    });
+    
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   // Qavat o'zgarganida faqat kerakli ma'lumotlarni yangilash
   useEffect(() => {
@@ -86,7 +135,7 @@ export default function Inpatient() {
       const [mapData, cabinetData, roomsData] = await Promise.all([
         inpatientRoomService.getVisualMap(selectedFloor),
         inpatientRoomService.getMedicineCabinets(selectedFloor),
-        inpatientRoomService.getRooms(selectedFloor)
+        inpatientRoomService.getRooms() // Barcha qavatlar
       ]);
       
       if (mapData.success) setVisualMap(mapData.data);
@@ -111,7 +160,7 @@ export default function Inpatient() {
         inpatientRoomService.getPendingCalls(),
         inpatientRoomService.getMedicineCabinets(selectedFloor),
         inpatientRoomService.getStats(),
-        inpatientRoomService.getRooms(selectedFloor)
+        inpatientRoomService.getRooms() // Barcha qavatlar
       ];
       
       // Agar hamshira bo'lsa, unga biriktirilgan bemorlarni ham yuklash
@@ -217,10 +266,11 @@ export default function Inpatient() {
           setEditingRoom(null);
           setRoomForm({
             room_number: '',
-            floor_number: selectedFloor,
+            floor_number: 1,
             room_type: 'standard',
             daily_rate: 200000,
-            bed_count: 2
+            bed_count: 2,
+            department: 'inpatient'
           });
           loadData();
         }
@@ -228,7 +278,7 @@ export default function Inpatient() {
         // Yangi yaratish
         const dataToSend = {
           ...roomForm,
-          floor_number: selectedFloor
+          department: 'inpatient' // Statsionar bo'limi
         };
         
         const result = await inpatientRoomService.createRoom(dataToSend);
@@ -238,10 +288,11 @@ export default function Inpatient() {
           setShowRoomModal(false);
           setRoomForm({
             room_number: '',
-            floor_number: selectedFloor,
+            floor_number: 1,
             room_type: 'standard',
             daily_rate: 200000,
-            bed_count: 2
+            bed_count: 2,
+            department: 'inpatient'
           });
           loadData();
         }
@@ -523,19 +574,7 @@ export default function Inpatient() {
         </div>
       </div>
 
-      {/* Floor Selector */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <span className="text-gray-700 dark:text-gray-300 font-semibold">Qavat:</span>
-          {/* Faqat 3-qavat */}
-          <button
-            onClick={() => setSelectedFloor(3)}
-            className="px-6 py-2 rounded-lg font-semibold bg-primary text-white"
-          >
-            3-qavat
-          </button>
-        </div>
-      </div>
+      {/* Floor Selector - OLIB TASHLANDI, endi barcha qavatlar ko'rinadi */}
 
       {/* Tabs */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
@@ -669,8 +708,8 @@ export default function Inpatient() {
                               ? (statusMap[bed.status] || (typeof bed.status === 'string' ? bed.status.toLowerCase() : 'available'))
                               : 'available';
                             
-                            // Hamshiraga biriktirilgan bemormi?
-                            const hasMyTreatments = isNurse && bedDetails.patient_id && myPatientIds.includes(bedDetails.patient_id);
+                            // YANGI: Barcha band koykalar uchun muolajalarni ko'rsatish
+                            const hasMyTreatments = isNurse && bedDetails.patient_id;
                             
                             return (
                               <BedTreatmentWrapper
@@ -682,12 +721,11 @@ export default function Inpatient() {
                                 onTreatmentComplete={loadData}
                                 hasMyTreatments={hasMyTreatments}
                                 admissionType="inpatient"
+                                isNurseCalling={nurseCallsMap.has(bedDetails.patient_id)}
                               >
                                 <div
                                   className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
-                                    hasMyTreatments 
-                                      ? 'bg-blue-50 border-blue-500 dark:bg-blue-900/20 ring-2 ring-blue-300'
-                                      : frontendStatus === 'available'
+                                    frontendStatus === 'available'
                                       ? 'bg-green-50 border-green-500 dark:bg-green-900/20'
                                       : frontendStatus === 'occupied'
                                       ? 'bg-red-50 border-red-500 dark:bg-red-900/20'
@@ -714,11 +752,13 @@ export default function Inpatient() {
                                           <p className="text-xs font-semibold mt-1">
                                             {bedDetails.first_name} {bedDetails.last_name}
                                           </p>
+                                          {/* OLIB TASHLANDI: Barcha hamshiralar barcha bemorlarni ko'radi
                                           {hasMyTreatments && (
                                             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-semibold">
                                               💊 Sizning bemorngiz
                                             </p>
                                           )}
+                                          */}
                                         </>
                                       )}
                                     </div>

@@ -47,28 +47,28 @@ const responses = {
   
   // TIBBIY MASLAHATLAR - Kengaytirilgan
   cold_flu: [
-    'Shamollash (sovuq tushish) uchun:\n\n1. Ko\'p suyuqlik iching (iliq suv, choy, sho\'rva)\n2. Dam oling va yetarli uxlang\n3. Retseptsiz dorilar: Paracetamol (temperatura uchun), Vitamin C\n4. Burun tomchilar (tiqilgan burun uchun)\n5. Iliq kiyining va sovuqdan saqlaning\n\nAgar 3-5 kun ichida yaxshilanmasangiz yoki temperatura 39°C dan yuqori bo\'lsa, shifokorga murojaat qiling.',
-    'Shamollash belgilari:\n- Burun oqishi\n- Yo\'tal\n- Bosh og\'rig\'i\n- Temperatura\n\nDavolash:\n1. Uyda dam oling\n2. Iliq ichimliklar (choy, limon, asal)\n3. Paracetamol yoki Ibuprofen (og\'riq va temperatura uchun)\n4. Vitamin C va multivitaminlar\n5. Namlik - xonani ventilyatsiya qiling\n\nOg\'ir holatlarda shifokorga murojaat qiling!'
+    'Shamollash (sovuq tushish) uchun:\n\n1. Ko\'p suyuqlik iching (iliq suv, choy, sho\'rva)\n2. Dam oling va yetarli uxlang\n3. Retseptsiz dorilar: Paracetamol (temperatura uchun), Vitamin C\n4. Burun tomchilar (tiqilgan burun uchun)\n5. Iliq kiyining va sovuqdan saqlaning\n\nAgar 3-5 kun ichida yaxshilanmasangiz yoki temperatura 39°C dan yuqori bo\'lsa:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88',
+    'Shamollash belgilari:\n- Burun oqishi\n- Yo\'tal\n- Bosh og\'rig\'i\n- Temperatura\n\nDavolash:\n1. Uyda dam oling\n2. Iliq ichimliklar (choy, limon, asal)\n3. Paracetamol yoki Ibuprofen (og\'riq va temperatura uchun)\n4. Vitamin C va multivitaminlar\n5. Namlik - xonani ventilyatsiya qiling\n\nOg\'ir holatlarda:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88'
   ],
   
   headache: [
-    'Bosh og\'rig\'i uchun:\n\n1. Retseptsiz dorilar: Paracetamol, Ibuprofen, Aspirin\n2. Dam oling va tinch joyda yoting\n3. Ko\'p suv iching\n4. Sovuq kompres peshonaga qo\'ying\n5. Stressdan qoching\n\nAgar bosh og\'rig\'i doimiy yoki juda kuchli bo\'lsa, shifokorga murojaat qiling.',
-    'Bosh og\'rig\'i sabablari:\n- Stress\n- Uyqusizlik\n- Dehidratsiya\n- Ko\'z toliqishi\n\nYengil davolash:\n1. Paracetamol 500mg (kerak bo\'lsa)\n2. Tinch muhitda dam oling\n3. Ko\'proq suv iching\n4. Massaj qiling (chakka va bo\'yin)\n\nOg\'ir bosh og\'rig\'i, ko\'rish buzilishi yoki qusish bo\'lsa, darhol shifokorga boring!'
+    'Bosh og\'rig\'i uchun:\n\n1. Retseptsiz dorilar: Paracetamol, Ibuprofen, Aspirin\n2. Dam oling va tinch joyda yoting\n3. Ko\'p suv iching\n4. Sovuq kompres peshonaga qo\'ying\n5. Stressdan qoching\n\nOg\'ir bosh og\'rig\'i, ko\'rish buzilishi yoki qusish bo\'lsa:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88',
+    'Bosh og\'rig\'i sabablari:\n- Stress\n- Uyqusizlik\n- Dehidratsiya\n- Ko\'z toliqishi\n\nYengil davolash:\n1. Paracetamol 500mg (kerak bo\'lsa)\n2. Tinch muhitda dam oling\n3. Ko\'proq suv iching\n4. Massaj qiling (chakka va bo\'yin)\n\nOg\'ir bosh og\'rig\'i, ko\'rish buzilishi yoki qusish bo\'lsa:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88'
   ],
   
   stomach_pain: [
-    'Qorin og\'rig\'i uchun:\n\n1. Yengil ovqatlanish (sho\'rva, guruch, non)\n2. Ko\'p suyuqlik iching\n3. Issiq kompres qoringa qo\'ying\n4. Retseptsiz dorilar: Aktivlangan ko\'mir, Smekta\n5. Og\'ir ovqatlardan qoching\n\nAgar og\'riq kuchli, qusish yoki ishal bo\'lsa, shifokorga murojaat qiling.',
-    'Qorin og\'rig\'i turlari:\n- Hazm qilish muammosi\n- Ovqat zaharlanishi\n- Gastrit\n\nBirinchi yordam:\n1. Yengil ovqatlar (sho\'rva, guruch)\n2. Ko\'p suv iching\n3. Aktivlangan ko\'mir (zaharlanish uchun)\n4. Dam oling\n\nOg\'ir holatlarda (qon, yuqori temperatura, kuchli og\'riq) darhol shifokorga boring!'
+    'Qorin og\'rig\'i uchun:\n\n1. Yengil ovqatlanish (sho\'rva, guruch, non)\n2. Ko\'p suyuqlik iching\n3. Issiq kompres qoringa qo\'ying\n4. Retseptsiz dorilar: Aktivlangan ko\'mir, Smekta\n5. Og\'ir ovqatlardan qoching\n\nAgar og\'riq kuchli, qusish yoki ishal bo\'lsa:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88',
+    'Qorin og\'rig\'i turlari:\n- Hazm qilish muammosi\n- Ovqat zaharlanishi\n- Gastrit\n\nBirinchi yordam:\n1. Yengil ovqatlar (sho\'rva, guruch)\n2. Ko\'p suv iching\n3. Aktivlangan ko\'mir (zaharlanish uchun)\n4. Dam oling\n\nOg\'ir holatlarda (qon, yuqori temperatura, kuchli og\'riq):\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88'
   ],
   
   fever: [
-    'Temperatura (isitma) uchun:\n\n1. Retseptsiz dorilar: Paracetamol, Ibuprofen\n2. Ko\'p suyuqlik iching\n3. Yengil kiyining\n4. Iliq suvda artib oling (sovuq emas!)\n5. Dam oling\n\nTemperatura 39°C dan yuqori yoki 3 kundan ko\'p davom etsa, shifokorga murojaat qiling.',
-    'Temperatura davolash:\n\n1. Paracetamol 500mg (har 6 soatda)\n2. Ko\'p suv, choy, meva sharbatlari\n3. Yengil kiyim\n4. Xonani ventilyatsiya qiling\n5. Uyda dam oling\n\nBolalarda temperatura 38.5°C dan yuqori bo\'lsa, darhol shifokorga murojaat qiling!'
+    'Temperatura (isitma) uchun:\n\n1. Retseptsiz dorilar: Paracetamol, Ibuprofen\n2. Ko\'p suyuqlik iching\n3. Yengil kiyining\n4. Iliq suvda artib oling (sovuq emas!)\n5. Dam oling\n\nTemperatura 39°C dan yuqori yoki 3 kundan ko\'p davom etsa:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88',
+    'Temperatura davolash:\n\n1. Paracetamol 500mg (har 6 soatda)\n2. Ko\'p suv, choy, meva sharbatlari\n3. Yengil kiyim\n4. Xonani ventilyatsiya qiling\n5. Uyda dam oling\n\nBolalarda temperatura 38.5°C dan yuqori bo\'lsa:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88'
   ],
   
   cough: [
-    'Yo\'tal uchun:\n\n1. Ko\'p iliq suyuqlik iching (choy, asal, limon)\n2. Yo\'tal siropi (retseptsiz)\n3. Namlik - bug\' inhalatsiyasi\n4. Asal va limon\n5. Chekishdan qoching\n\nYo\'tal 2 haftadan ko\'p davom etsa yoki qonda bo\'lsa, shifokorga murojaat qiling.',
-    'Yo\'tal turlari:\n- Quruq yo\'tal\n- Balg\'amli yo\'tal\n\nDavolash:\n1. Iliq ichimliklar (choy, sho\'rva)\n2. Asal va limon\n3. Yo\'tal siropi (dorixonadan)\n4. Bug\' inhalatsiyasi\n5. Namlik - xonani namlang\n\nUzoq davom etadigan yo\'tal uchun shifokorga murojaat qiling!'
+    'Yo\'tal uchun:\n\n1. Ko\'p iliq suyuqlik iching (choy, asal, limon)\n2. Yo\'tal siropi (retseptsiz)\n3. Namlik - bug\' inhalatsiyasi\n4. Asal va limon\n5. Chekishdan qoching\n\nYo\'tal 2 haftadan ko\'p davom etsa yoki qonda bo\'lsa:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88',
+    'Yo\'tal turlari:\n- Quruq yo\'tal\n- Balg\'amli yo\'tal\n\nDavolash:\n1. Iliq ichimliklar (choy, sho\'rva)\n2. Asal va limon\n3. Yo\'tal siropi (dorixonadan)\n4. Bug\' inhalatsiyasi\n5. Namlik - xonani namlang\n\nUzoq davom etadigan yo\'tal uchun:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88'
   ],
   
   allergy: [
@@ -77,8 +77,8 @@ const responses = {
   ],
   
   pain_relief: [
-    'Og\'riq qoldiruvchi retseptsiz dorilar:\n\n1. Paracetamol - bosh og\'rig\'i, temperatura\n2. Ibuprofen - yallig\'lanish, og\'riq\n3. Aspirin - bosh og\'rig\'i (bolalarga berilmaydi!)\n4. No-Shpa - qorin og\'rig\'i, spazm\n\nDoimiy og\'riq uchun shifokorga murojaat qiling.',
-    'Og\'riq qoldiruvchi dorilar:\n\n1. Paracetamol 500mg - har 6 soatda\n2. Ibuprofen 400mg - har 8 soatda\n3. Aspirin 500mg - har 6 soatda (18 yoshdan katta)\n\nEslatma: Dorilarni dozasiga rioya qiling va shifokor maslahati bilan qabul qiling!'
+    'Og\'riq qoldiruvchi retseptsiz dorilar:\n\n1. Paracetamol - bosh og\'rig\'i, temperatura\n2. Ibuprofen - yallig\'lanish, og\'riq\n3. Aspirin - bosh og\'rig\'i (bolalarga berilmaydi!)\n4. No-Shpa - qorin og\'rig\'i, spazm\n\nDoimiy og\'riq uchun:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88',
+    'Og\'riq qoldiruvchi dorilar:\n\n1. Paracetamol 500mg - har 6 soatda\n2. Ibuprofen 400mg - har 8 soatda\n3. Aspirin 500mg - har 6 soatda (18 yoshdan katta)\n\nEslatma: Dorilarni dozasiga rioya qiling!\n\nKo\'proq ma\'lumot uchun:\n📞 Bolajon klinikasiga tashrif buyuring yoki quyidagi raqamlarga tel qiling:\n+998 77 310 98 28\n+998 77 252 86 88'
   ],
   
   website: [
@@ -88,9 +88,9 @@ const responses = {
   ],
   
   default: [
-    'Kechirasiz, bu savolga aniq javob berolmayman. Iltimos, aniqroq savol bering yoki quyidagi mavzulardan birini tanlang:\n\n- Shamollash va sovuq tushish\n- Bosh og\'rig\'i\n- Qorin og\'rig\'i\n- Temperatura\n- Yo\'tal\n- Allergiya\n- Sayt haqida\n- Klinika xizmatlari\n\nYoki administrator bilan bog\'laning.',
-    'Bu haqda aniq ma\'lumot yo\'q. Iltimos, quyidagilardan birini so\'rang:\n\n✅ Tibbiy maslahatlar (shamollash, bosh og\'riq, temperatura)\n✅ Sayt qanday ishlaydi\n✅ Klinika xizmatlari\n✅ Ish vaqti va narxlar\n\nYoki resepsiyaga murojaat qiling.',
-    'Sizning savolingizga javob topilmadi. Men quyidagi mavzularda yordam bera olaman:\n\n🏥 Tibbiy maslahatlar\n💊 Retseptsiz dorilar\n🌐 Sayt imkoniyatlari\n📞 Klinika ma\'lumotlari\n\nIltimos, boshqa savol bering yoki administrator bilan gaplashing.'
+    'Kechirasiz, bu savolga aniq javob berolmayman. Iltimos, aniqroq savol bering yoki quyidagi mavzulardan birini tanlang:\n\n- Shamollash va sovuq tushish\n- Bosh og\'rig\'i\n- Qorin og\'rig\'i\n- Temperatura\n- Yo\'tal\n- Allergiya\n- Sayt haqida\n- Klinika xizmatlari\n\nYoki administrator bilan bog\'laning:\n📞 +998 77 310 98 28\n📞 +998 77 252 86 88',
+    'Bu haqda aniq ma\'lumot yo\'q. Iltimos, quyidagilardan birini so\'rang:\n\n✅ Tibbiy maslahatlar (shamollash, bosh og\'riq, temperatura)\n✅ Sayt qanday ishlaydi\n✅ Klinika xizmatlari\n✅ Ish vaqti va narxlar\n\nYoki klinikaga murojaat qiling:\n📞 +998 77 310 98 28\n📞 +998 77 252 86 88',
+    'Sizning savolingizga javob topilmadi. Men quyidagi mavzularda yordam bera olaman:\n\n🏥 Tibbiy maslahatlar\n💊 Retseptsiz dorilar\n🌐 Sayt imkoniyatlari\n📞 Klinika ma\'lumotlari\n\nIltimos, boshqa savol bering yoki administrator bilan gaplashing:\n📞 +998 77 310 98 28\n📞 +998 77 252 86 88'
   ]
 };
 

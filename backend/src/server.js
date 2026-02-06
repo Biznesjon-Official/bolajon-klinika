@@ -48,6 +48,9 @@ import patientPortalRoutes from './routes/patient-portal.routes.js';
 import botRoutes from './routes/bot.routes.js';
 import aiChatbotRoutes from './routes/ai-chatbot.routes.js';
 
+// Import services
+import { startTreatmentNotificationService } from './services/treatmentNotificationService.js';
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

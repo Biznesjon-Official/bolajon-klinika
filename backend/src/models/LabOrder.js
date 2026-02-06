@@ -19,6 +19,10 @@ const labOrderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Staff'
   },
+  test_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'LabTest'
+  },
   test_type: {
     type: String,
     required: true

@@ -154,9 +154,18 @@ export default function Laboratory() {
     return texts[status] || status;
   };
 
-  const isAdmin = user?.role?.name === 'admin' || user?.role?.name === 'Administrator';
-  const isLaborant = user?.role?.name === 'laborant' || user?.role?.name === 'Laborant';
-  const isDoctor = user?.role?.name === 'doctor' || user?.role?.name === 'Shifokor';
+  const isAdmin = user?.role?.name === 'admin' || user?.role?.name === 'Administrator' || user?.role_name === 'admin' || user?.role_name === 'Administrator';
+  const isLaborant = user?.role?.name === 'laborant' || user?.role?.name === 'Laborant' || user?.role?.name === 'Lab' || user?.role_name === 'laborant' || user?.role_name === 'Laborant' || user?.role_name === 'Lab';
+  const isDoctor = user?.role?.name === 'doctor' || user?.role?.name === 'Shifokor' || user?.role?.name === 'Doctor' || user?.role_name === 'doctor' || user?.role_name === 'Shifokor' || user?.role_name === 'Doctor';
+
+  // Debug
+  console.log('=== LABORATORY PAGE ===');
+  console.log('User:', user);
+  console.log('User role:', user?.role);
+  console.log('User role_name:', user?.role_name);
+  console.log('isAdmin:', isAdmin);
+  console.log('isLaborant:', isLaborant);
+  console.log('isDoctor:', isDoctor);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
@@ -171,7 +180,7 @@ export default function Laboratory() {
           </p>
         </div>
         
-        {(isAdmin || isLaborant) && (
+        {(isAdmin || isLaborant || isDoctor) && (
           <button
             onClick={handleNewOrder}
             className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center justify-center gap-2"
@@ -216,7 +225,7 @@ export default function Laboratory() {
         >
           {t('lab.orders')}
         </button>
-        {isAdmin && (
+        {(isAdmin || isLaborant) && (
           <button
             onClick={() => setActiveTab('tests')}
             className={`px-4 py-2 font-semibold transition-colors whitespace-nowrap ${
@@ -520,27 +529,219 @@ function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isD
   );
 }
 
-// TestsCatalog component (minimal)
+// TestsCatalog component with add/edit/delete functionality
 function TestsCatalog({ tests, onRefresh, t }) {
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingTest, setEditingTest] = useState(null);
+  const [formData, setFormData] = useState({
+    test_name: '',
+    price: '',
+    description: '',
+    turnaround_time: '',
+    category: ''
+  });
+
+  const handleAdd = () => {
+    setEditingTest(null);
+    setFormData({
+      test_name: '',
+      price: '',
+      description: '',
+      turnaround_time: '',
+      category: ''
+    });
+    setShowAddModal(true);
+  };
+
+  const handleEdit = (test) => {
+    setEditingTest(test);
+    setFormData({
+      test_name: test.test_name || '',
+      price: test.price || '',
+      description: test.description || '',
+      turnaround_time: test.turnaround_time || '',
+      category: test.category || ''
+    });
+    setShowAddModal(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Backend formatiga o'zgartirish
+      const backendData = {
+        name: formData.test_name,
+        category: formData.category || 'Umumiy',
+        price: formData.price,
+        description: formData.description,
+        duration_minutes: formData.turnaround_time ? parseInt(formData.turnaround_time) * 60 : null
+      };
+
+      if (editingTest) {
+        await laboratoryService.updateTest(editingTest.id, backendData);
+        toast.success('Xizmat yangilandi');
+      } else {
+        await laboratoryService.createTest(backendData);
+        toast.success('Xizmat qo\'shildi');
+      }
+      setShowAddModal(false);
+      onRefresh();
+    } catch (error) {
+      toast.error('Xatolik: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleDelete = async (testId) => {
+    if (!window.confirm('Ushbu xizmatni o\'chirmoqchimisiz?')) return;
+    try {
+      await laboratoryService.deleteTest(testId);
+      toast.success('Xizmat o\'chirildi');
+      onRefresh();
+    } catch (error) {
+      toast.error('Xatolik: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 overflow-hidden">
-      <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">{t('lab.catalogTitle')}</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {tests.map((test) => (
-          <div key={test.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800 overflow-hidden">
-            <h4 className="font-bold text-gray-900 dark:text-white break-words">{test.test_name}</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{test.test_code}</p>
-            <p className="text-lg font-semibold text-primary mt-2">
-              {test.price.toLocaleString()} {t('lab.price')}
-            </p>
-            {test.normal_value_min && test.normal_value_max && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words">
-                {t('lab.normalRange')}: {test.normal_value_min} - {test.normal_value_max} {test.unit}
-              </p>
-            )}
-          </div>
-        ))}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Laboratoriya xizmatlari</h3>
+        <button
+          onClick={handleAdd}
+          className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined">add</span>
+          Xizmat qo'shish
+        </button>
       </div>
+
+      {tests.length === 0 ? (
+        <div className="text-center py-12">
+          <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">science</span>
+          <p className="text-gray-600 dark:text-gray-400">Hali xizmatlar qo'shilmagan</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          {tests.map((test) => (
+            <div key={test.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800 overflow-hidden">
+              <div className="flex items-start justify-between mb-2">
+                <h4 className="font-bold text-gray-900 dark:text-white break-words flex-1">{test.test_name}</h4>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => handleEdit(test)}
+                    className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                  >
+                    <span className="material-symbols-outlined text-lg">edit</span>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(test.id)}
+                    className="p-1 text-red-600 hover:bg-red-50 rounded"
+                  >
+                    <span className="material-symbols-outlined text-lg">delete</span>
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{test.test_code}</p>
+              <p className="text-lg font-semibold text-primary mt-2">
+                {test.price?.toLocaleString() || 0} so'm
+              </p>
+              {test.description && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 break-words">{test.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold">{editingTest ? 'Xizmatni tahrirlash' : 'Yangi xizmat qo\'shish'}</h3>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Xizmat nomi *</label>
+                  <input
+                    type="text"
+                    value={formData.test_name}
+                    onChange={(e) => setFormData({ ...formData, test_name: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Narxi (so'm) *</label>
+                  <input
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Tavsif</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    rows="3"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Tayyorlanish vaqti (soat)</label>
+                  <input
+                    type="number"
+                    value={formData.turnaround_time}
+                    onChange={(e) => setFormData({ ...formData, turnaround_time: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Kategoriya</label>
+                  <input
+                    type="text"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    placeholder="Masalan: Biokimyo, Gematologiya"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Bekor qilish
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90"
+                  >
+                    {editingTest ? 'Yangilash' : 'Qo\'shish'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -752,18 +953,30 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
     e.preventDefault();
     
     if (!formData.result_value && !formData.result_text) {
-      toast.error(t('lab.enterResultValue'));
+      toast.error('Natijalarni kiriting');
       return;
     }
 
     try {
       setLoading(true);
-      await laboratoryService.createResult(formData);
-      toast.success(t('lab.resultEntered'));
+      
+      // Submit traditional way - convert to test_results format
+      await laboratoryService.submitResults(order.id, {
+        test_results: [{
+          parameter_name: 'Natija',
+          value: formData.result_value || formData.result_text,
+          unit: formData.unit || '',
+          normal_range: '',
+          is_normal: null
+        }],
+        notes: formData.technician_notes
+      });
+
+      toast.success('Natija muvaffaqiyatli kiritildi');
       onClose();
       onSuccess();
     } catch (error) {
-      toast.error(t('lab.error') + ': ' + (error.response?.data?.message || error.message));
+      toast.error('Xatolik: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -790,58 +1003,35 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
           <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 overflow-hidden">
             <p className="font-semibold text-gray-900 dark:text-white break-words">{order?.patient_name}</p>
             <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{order?.test_name}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{t('lab.orderInfo')}: {order?.order_number}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 break-words">Buyurtma: {order?.order_number}</p>
           </div>
 
-          {/* Sonli natija */}
+          {/* Natija - Katta textarea */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              {t('lab.numericResult')}
-            </label>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="number"
-                step="0.0001"
-                value={formData.result_value}
-                onChange={(e) => setFormData({ ...formData, result_value: e.target.value })}
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
-                placeholder={t('lab.value')}
-              />
-              <input
-                type="text"
-                value={formData.unit}
-                onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                className="w-full sm:w-32 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
-                placeholder={t('lab.unit')}
-              />
-            </div>
-          </div>
-
-          {/* Matnli natija */}
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              {t('lab.textResult')}
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Natija *
             </label>
             <textarea
               value={formData.result_text}
               onChange={(e) => setFormData({ ...formData, result_text: e.target.value })}
-              rows="4"
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm sm:text-base"
-              placeholder={t('lab.detailedResult')}
+              rows="12"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono text-sm"
+              placeholder="Natijalarni kiriting..."
+              required
             />
           </div>
 
-          {/* Laborant izohi */}
+          {/* Izohlar */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              {t('lab.technicianNotes')}
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Izohlar
             </label>
             <textarea
               value={formData.technician_notes}
               onChange={(e) => setFormData({ ...formData, technician_notes: e.target.value })}
-              rows="2"
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm sm:text-base"
-              placeholder={t('lab.notesPlaceholder')}
+              rows="3"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm"
+              placeholder="Qo'shimcha izohlar..."
             />
           </div>
 

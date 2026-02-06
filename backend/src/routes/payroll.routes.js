@@ -15,7 +15,7 @@ const router = express.Router();
  */
 router.get('/staff-salaries',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const salaries = await StaffSalary.find()
@@ -53,7 +53,7 @@ router.get('/staff-salaries',
  */
 router.post('/staff-salaries',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { staff_id, base_salary, position_bonus, experience_bonus, commission_rate, room_cleaning_rate, notes } = req.body;
@@ -413,7 +413,7 @@ router.post('/penalties',
  */
 router.get('/monthly-payroll',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { month, year } = req.query;

@@ -4,7 +4,7 @@ import doctorNurseService from '../services/doctorNurseService';
 import MedicineSelectionModal from './MedicineSelectionModal';
 import TreatmentTimer from './TreatmentTimer';
 
-export default function BedTreatmentWrapper({ children, patientId, patientName, roomNumber, bedNumber, onTreatmentComplete, hasMyTreatments, admissionType }) {
+export default function BedTreatmentWrapper({ children, patientId, patientName, roomNumber, bedNumber, onTreatmentComplete, hasMyTreatments, admissionType, isNurseCalling }) {
   const [showModal, setShowModal] = useState(false);
   const [treatments, setTreatments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -586,8 +586,23 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
     <>
       <div 
         onClick={handleBedClick}
-        className={`relative ${hasMyTreatments && patientId ? 'cursor-pointer' : ''}`}
+        className={`relative ${hasMyTreatments && patientId ? 'cursor-pointer' : ''} ${isNurseCalling ? 'nurse-call-active' : ''}`}
       >
+        {/* Nurse Call Indicator */}
+        {isNurseCalling && (
+          <div className="absolute -top-2 -right-2 z-10">
+            <div className="relative">
+              <span className="material-symbols-outlined nurse-call-bell text-red-500 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg">
+                notifications_active
+              </span>
+              <span className="absolute top-0 right-0 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+            </div>
+          </div>
+        )}
+        
         {/* Treatment Timer - shows in top-right corner */}
         {hasMyTreatments && patientId && treatments.length > 0 && (
           <TreatmentTimer treatments={treatments} />

@@ -10,7 +10,7 @@ const router = express.Router();
  */
 router.post('/create',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { title, description, taskType, priority, assignedTo, dueDate, locationDetails } = req.body;
@@ -71,7 +71,7 @@ router.post('/create',
  */
 router.get('/all',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { status } = req.query;
@@ -270,7 +270,7 @@ router.put('/:id/complete',
  */
 router.put('/:id/verify',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -314,7 +314,7 @@ router.put('/:id/verify',
  */
 router.put('/:id/reject',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -366,7 +366,7 @@ router.put('/:id/reject',
  */
 router.delete('/:id',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -396,7 +396,7 @@ router.delete('/:id',
  */
 router.get('/staff-list',
   authenticate,
-  authorize('admin'),
+  authorize('admin', 'doctor'),
   async (req, res, next) => {
     try {
       const { role } = req.query;

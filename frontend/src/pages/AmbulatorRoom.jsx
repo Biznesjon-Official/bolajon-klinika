@@ -21,7 +21,7 @@ export default function AmbulatorRoom() {
   
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('map');
-  const [selectedFloor, setSelectedFloor] = useState(2); // Faqat 2-qavat
+  const [selectedFloor, setSelectedFloor] = useState(null); // Barcha qavatlar
   const [visualMap, setVisualMap] = useState({ floors: {}, total_beds: 0 });
   const [treatments, setTreatments] = useState([]);
   const [pendingCalls, setPendingCalls] = useState([]);
@@ -35,7 +35,8 @@ export default function AmbulatorRoom() {
     floor_number: 1,
     room_type: 'standard',
     hourly_rate: 0, // BEPUL
-    bed_count: 2
+    bed_count: 2,
+    department: 'ambulator' // Ambulator bo'limi
   });
   
   // Bemor tanlash modali
@@ -85,7 +86,7 @@ export default function AmbulatorRoom() {
       const [mapData, cabinetData, roomsData] = await Promise.all([
         ambulatorInpatientService.getVisualMap(selectedFloor),
         ambulatorInpatientService.getMedicineCabinets(selectedFloor),
-        ambulatorInpatientService.getRooms(selectedFloor)
+        ambulatorInpatientService.getRooms() // Barcha qavatlar
       ]);
       
       if (mapData.success) setVisualMap(mapData.data);
@@ -110,7 +111,7 @@ export default function AmbulatorRoom() {
         ambulatorInpatientService.getPendingCalls(),
         ambulatorInpatientService.getMedicineCabinets(selectedFloor),
         ambulatorInpatientService.getStats(),
-        ambulatorInpatientService.getRooms(selectedFloor)
+        ambulatorInpatientService.getRooms() // Barcha qavatlar
       ];
       
       // Agar hamshira bo'lsa, unga biriktirilgan bemorlarni ham yuklash
@@ -216,10 +217,11 @@ export default function AmbulatorRoom() {
           setEditingRoom(null);
           setRoomForm({
             room_number: '',
-            floor_number: selectedFloor,
+            floor_number: 1,
             room_type: 'standard',
             hourly_rate: 0,
-            bed_count: 2
+            bed_count: 2,
+            department: 'ambulator'
           });
           loadData();
         }
@@ -227,7 +229,7 @@ export default function AmbulatorRoom() {
         // Yangi yaratish
         const dataToSend = {
           ...roomForm,
-          floor_number: selectedFloor
+          department: 'ambulator' // Ambulator bo'limi
         };
         
         const result = await ambulatorInpatientService.createRoom(dataToSend);
@@ -237,10 +239,11 @@ export default function AmbulatorRoom() {
           setShowRoomModal(false);
           setRoomForm({
             room_number: '',
-            floor_number: selectedFloor,
+            floor_number: 1,
             room_type: 'standard',
             hourly_rate: 0,
-            bed_count: 2
+            bed_count: 2,
+            department: 'ambulator'
           });
           loadData();
         }
@@ -524,19 +527,7 @@ export default function AmbulatorRoom() {
         </div>
       </div>
 
-      {/* Floor Selector */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <span className="text-gray-700 dark:text-gray-300 font-semibold">Qavat:</span>
-          {/* Faqat 2-qavat */}
-          <button
-            onClick={() => setSelectedFloor(2)}
-            className="px-6 py-2 rounded-lg font-semibold bg-primary text-white"
-          >
-            2-qavat
-          </button>
-        </div>
-      </div>
+      {/* Floor Selector - OLIB TASHLANDI, endi barcha qavatlar ko'rinadi */}
 
       {/* Tabs */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
@@ -673,8 +664,8 @@ export default function AmbulatorRoom() {
                             const bedStatus = bed.bed_status || bed.status || 'available';
                             const frontendStatus = statusMap[bedStatus] || (typeof bedStatus === 'string' ? bedStatus.toLowerCase() : 'available');
                             
-                            // Hamshiraga biriktirilgan bemormi?
-                            const hasMyTreatments = isNurse && bedDetails.patient_id && myPatientIds.includes(bedDetails.patient_id);
+                            // YANGI: Barcha band koykalar uchun muolajalarni ko'rsatish
+                            const hasMyTreatments = isNurse && bedDetails.patient_id;
                             
                             return (
                               <BedTreatmentWrapper
@@ -689,9 +680,7 @@ export default function AmbulatorRoom() {
                               >
                                 <div
                                   className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
-                                    hasMyTreatments 
-                                      ? 'bg-blue-50 border-blue-500 dark:bg-blue-900/20 ring-2 ring-blue-300'
-                                      : frontendStatus === 'available'
+                                    frontendStatus === 'available'
                                       ? 'bg-green-50 border-green-500 dark:bg-green-900/20'
                                       : frontendStatus === 'occupied'
                                       ? 'bg-red-50 border-red-500 dark:bg-red-900/20'
@@ -718,11 +707,13 @@ export default function AmbulatorRoom() {
                                           <p className="text-xs font-semibold mt-1">
                                             {bedDetails.first_name} {bedDetails.last_name}
                                           </p>
+                                          {/* OLIB TASHLANDI: Barcha hamshiralar barcha bemorlarni ko'radi
                                           {hasMyTreatments && (
                                             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-semibold">
                                               💊 Sizning bemorngiz
                                             </p>
                                           )}
+                                          */}
                                         </>
                                       )}
                                     </div>

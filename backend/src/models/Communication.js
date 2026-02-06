@@ -1,10 +1,20 @@
 import mongoose from 'mongoose';
 
 const communicationSchema = new mongoose.Schema({
+  // Recipient info - can be patient or staff
+  recipient_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+  recipient_type: {
+    type: String,
+    enum: ['patient', 'staff'],
+    default: 'patient'
+  },
+  // Legacy field for backward compatibility
   patient_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Patient',
-    required: true
+    ref: 'Patient'
   },
   recipient_name: {
     type: String
@@ -12,10 +22,24 @@ const communicationSchema = new mongoose.Schema({
   recipient_phone: {
     type: String
   },
+  // Sender info
+  sender_id: {
+    type: mongoose.Schema.Types.ObjectId
+  },
+  sender_name: {
+    type: String
+  },
+  sender_role: {
+    type: String
+  },
+  // Message info
+  subject: {
+    type: String
+  },
   channel: {
     type: String,
     enum: ['sms', 'telegram', 'web', 'email'],
-    default: 'sms'
+    default: 'telegram'
   },
   content: {
     type: String,
@@ -50,7 +74,8 @@ const communicationSchema = new mongoose.Schema({
 });
 
 // Indexes
-communicationSchema.index({ patient_id: 1 });
+communicationSchema.index({ recipient_id: 1, recipient_type: 1 });
+communicationSchema.index({ patient_id: 1 }); // Legacy
 communicationSchema.index({ status: 1 });
 communicationSchema.index({ channel: 1 });
 communicationSchema.index({ created_at: -1 });

@@ -40,13 +40,25 @@ function formatPhone(phone) {
   return cleaned;
 }
 
-// Asosiy menyu klaviaturasi
+// Asosiy menyu klaviaturasi - bemor uchun
 function getMainMenuKeyboard() {
   return {
     keyboard: [
       [{ text: '📊 Navbat' }, { text: '💊 Retseptlar' }],
       [{ text: '🔬 Tahlillar' }, { text: '💰 Qarzlar' }],
-      [{ text: '📨 Xabarlar' }, { text: '⚙️ Sozlamalar' }]
+      [{ text: '📨 Xabarlar' }, { text: '🔔 Hamshirani chaqirish' }],
+      [{ text: '⚙️ Sozlamalar' }, { text: '🚪 Chiqish' }]
+    ],
+    resize_keyboard: true
+  };
+}
+
+// Xodim uchun menyu klaviaturasi
+function getStaffMenuKeyboard() {
+  return {
+    keyboard: [
+      [{ text: '📨 Xabarlar' }],
+      [{ text: '🚪 Chiqish' }]
     ],
     resize_keyboard: true
   };
@@ -86,23 +98,38 @@ bot.onText(/\/start\s*(.*)/, async (msg, match) => {
   console.log('Full message text:', msg.text);
   console.log('Match array:', match);
   
-  // Agar deep link parametri yoki 8-xonali kod bor bo'lsa
+  // Agar deep link parametri yoki kod bor bo'lsa
   if (startParam && startParam.length > 0) {
     try {
       await bot.sendMessage(chatId, '⏳ Yuklanmoqda...');
       
-      let patient = null;
+      let user = null;
+      let userType = null; // 'patient' yoki 'staff'
       
-      // Agar 8 xonali raqam bo'lsa (access_code)
-      if (/^\d{8}$/.test(startParam)) {
-        console.log('🔢 8-digit access code detected:', startParam);
+      // Agar LI bilan boshlansa - xodim kodi
+      if (/^LI\d{8}$/.test(startParam)) {
+        console.log('👔 Staff access code detected:', startParam);
+        
+        // Access code bo'yicha xodimni topish
+        const response = await api.get(`/bot/staff/by-access-code/${startParam}`);
+        
+        if (response.data.success && response.data.data) {
+          user = response.data.data;
+          userType = 'staff';
+          console.log('✅ Staff found:', user.first_name, user.last_name, '- Role:', user.role);
+        }
+      }
+      // Agar 8 xonali raqam bo'lsa (access_code) - bemor
+      else if (/^\d{8}$/.test(startParam)) {
+        console.log('🔢 Patient access code detected:', startParam);
         
         // Access code bo'yicha bemorni topish
         const response = await api.get(`/bot/patients/by-access-code/${startParam}`);
         
         if (response.data.success && response.data.data) {
-          patient = response.data.data;
-          console.log('✅ Patient found by access code:', patient.first_name, patient.last_name);
+          user = response.data.data;
+          userType = 'patient';
+          console.log('✅ Patient found:', user.first_name, user.last_name);
         }
       } else {
         // Patient number bo'yicha topish (eski usul)
@@ -111,66 +138,104 @@ bot.onText(/\/start\s*(.*)/, async (msg, match) => {
         const response = await api.get(`/bot/patients/by-number/${startParam}`);
         
         if (response.data.success && response.data.data) {
-          patient = response.data.data;
-          console.log('✅ Patient found by patient number:', patient.first_name, patient.last_name);
+          user = response.data.data;
+          userType = 'patient';
+          console.log('✅ Patient found by patient number:', user.first_name, user.last_name);
         }
       }
       
-      if (patient) {
+      if (user) {
         // Chat ID ni database'ga saqlash
         console.log('Saving chat_id to database...');
-        console.log('Patient ID:', patient._id || patient.id);
-        await api.put(`/bot/patients/telegram/${patient._id || patient.id}`, {
-          telegram_chat_id: chatId.toString(),
-          telegram_username: msg.from.username || null,
-          telegram_notifications_enabled: true
-        });
+        console.log('User ID:', user._id || user.id);
+        console.log('User Type:', userType);
+        
+        if (userType === 'staff') {
+          await api.put(`/bot/staff/telegram/${user._id || user.id}`, {
+            telegram_chat_id: chatId.toString(),
+            telegram_username: msg.from.username || null,
+            telegram_notifications_enabled: true
+          });
+        } else {
+          await api.put(`/bot/patients/telegram/${user._id || user.id}`, {
+            telegram_chat_id: chatId.toString(),
+            telegram_username: msg.from.username || null,
+            telegram_notifications_enabled: true
+          });
+        }
         
         console.log('✅ Chat ID saved to database!');
         
         // Sessiyaga saqlash
         userSessions.set(chatId, {
-          patient,
-          phone: patient.phone,
+          [userType]: user,
+          userType,
+          phone: user.phone,
           language: 'uz'
         });
         
         await bot.sendMessage(
           chatId,
-          `✅ Muvaffaqiyatli ulandi!\n\n🎉 Xush kelibsiz, ${patient.first_name} ${patient.last_name}!`,
+          `✅ Muvaffaqiyatli ulandi!\n\n🎉 Xush kelibsiz, ${user.first_name} ${user.last_name}!`,
           { parse_mode: 'Markdown' }
         );
         
-        // Bot haqida batafsil ma'lumot
-        const infoMessage = `📱 *Bot imkoniyatlari:*\n\n` +
-          `🔹 *Navbat* - Navbat ma'lumotlaringizni real vaqtda kuzatib boring\n` +
-          `🔹 *Retseptlar* - Shifokorlar tomonidan yozilgan barcha retseptlaringizni ko'ring\n` +
-          `🔹 *Tahlillar* - Tahlil natijalaringizni darhol bilib oling\n` +
-          `🔹 *Qarzlar* - Moliyaviy ma'lumotlaringizni nazorat qiling\n\n` +
-          `🔔 *Avtomatik xabarnomalar:*\n` +
-          `• Navbatga chaqirilganingizda\n` +
-          `• Yangi retsept yozilganda\n` +
-          `• Tahlil natijasi tayyor bo'lganda\n\n` +
-          `💡 Quyidagi menyudan kerakli bo'limni tanlang!`;
+        // Xodim yoki bemor uchun turli xabarlar
+        if (userType === 'staff') {
+          const roleNames = {
+            'admin': 'Administrator',
+            'doctor': 'Shifokor',
+            'nurse': 'Hamshira',
+            'laborant': 'Laborant',
+            'pharmacist': 'Dorixona xodimi',
+            'sanitar': 'Tozalovchi',
+            'receptionist': 'Qabulxona xodimi'
+          };
+          
+          const roleName = roleNames[user.role] || user.role;
+          
+          const infoMessage = `👔 *Xodim paneli*\n\n` +
+            `📋 Lavozim: ${roleName}\n` +
+            `🏢 Bo'lim: ${user.department || 'Belgilanmagan'}\n\n` +
+            `📱 *Bot imkoniyatlari:*\n\n` +
+            `🔹 *Xabarlar* - Sizga yuborilgan xabarlarni ko'ring\n\n` +
+            `🔔 *Avtomatik xabarnomalar:*\n` +
+            `• Yangi xabar kelganda\n` +
+            `• Muhim bildirishnomalar\n` +
+            `• Tizim yangilanishlari\n\n` +
+            `💡 Quyidagi menyudan "Xabarlar" tugmasini bosing!`;
+          
+          await bot.sendMessage(chatId, infoMessage, { parse_mode: 'Markdown' });
+        } else {
+          // Bemor uchun xabar
+          const infoMessage = `📱 *Bot imkoniyatlari:*\n\n` +
+            `🔹 *Navbat* - Navbat ma'lumotlaringizni real vaqtda kuzatib boring\n` +
+            `🔹 *Retseptlar* - Shifokorlar tomonidan yozilgan barcha retseptlaringizni ko'ring\n` +
+            `🔹 *Tahlillar* - Tahlil natijalaringizni darhol bilib oling\n` +
+            `🔹 *Qarzlar* - Moliyaviy ma'lumotlaringizni nazorat qiling\n\n` +
+            `🔔 *Avtomatik xabarnomalar:*\n` +
+            `• Navbatga chaqirilganingizda\n` +
+            `• Yangi retsept yozilganda\n` +
+            `• Tahlil natijasi tayyor bo'lganda\n\n` +
+            `💡 Quyidagi menyudan kerakli bo'limni tanlang!`;
+          
+          await bot.sendMessage(chatId, infoMessage, { parse_mode: 'Markdown' });
+        }
         
-        await bot.sendMessage(chatId, infoMessage, { parse_mode: 'Markdown' });
-        
-        // Inline tugmalar bilan menyu
-        await bot.sendMessage(
-          chatId,
-          '📋 *Ma\'lumotlaringizni ko\'rish uchun quyidagi tugmalardan birini tanlang:*',
-          { 
-            parse_mode: 'Markdown',
-            reply_markup: getPatientInfoKeyboard()
-          }
-        );
-        
-        // Oddiy menyu ham qo'shish
-        await bot.sendMessage(
-          chatId,
-          'Yoki quyidagi menyudan tanlang:',
-          { reply_markup: getMainMenuKeyboard() }
-        );
+        // Menyu - xodim yoki bemor uchun
+        if (userType === 'staff') {
+          await bot.sendMessage(
+            chatId,
+            '📋 Xodim menyusi:',
+            { reply_markup: getStaffMenuKeyboard() }
+          );
+        } else {
+          await bot.sendMessage(
+            chatId,
+            config.MESSAGES.uz.main_menu,
+            { reply_markup: getMainMenuKeyboard() }
+          );
+        }
         
         return;
       } else {
@@ -334,96 +399,207 @@ bot.on('message', async (msg) => {
   const text = msg.text;
   const session = userSessions.get(chatId);
   
-  if (!session || !session.patient) {
-    // 8-xonali kod kiritilgan bo'lishi mumkin
-    if (text && /^\d{8}$/.test(text.trim())) {
-      const accessCode = text.trim();
-      await bot.sendMessage(chatId, config.MESSAGES.uz.loading);
+  if (!session || (!session.patient && !session.staff)) {
+    // Kod kiritilgan bo'lishi mumkin
+    if (text && text.trim()) {
+      const code = text.trim();
       
-      try {
-        console.log('🔢 Attempting to find patient by access code:', accessCode);
-        console.log('API URL:', `${config.API_URL}/bot/patients/by-access-code/${accessCode}`);
+      // LI bilan boshlanadigan 10 belgili kod - xodim
+      if (/^LI\d{8}$/.test(code)) {
+        await bot.sendMessage(chatId, config.MESSAGES.uz.loading);
         
-        const response = await api.get(`/bot/patients/by-access-code/${accessCode}`);
-        
-        console.log('✅ API Response:', response.data);
-        
-        if (response.data.success && response.data.data) {
-          const patient = response.data.data;
+        try {
+          console.log('👔 Attempting to find staff by access code:', code);
+          console.log('API URL:', `${config.API_URL}/bot/staff/by-access-code/${code}`);
           
-          console.log('✅ Patient found:', patient.first_name, patient.last_name);
+          const response = await api.get(`/bot/staff/by-access-code/${code}`);
           
-          // Chat ID ni database'ga saqlash
-          await api.put(`/bot/patients/telegram/${patient._id || patient.id}`, {
-            telegram_chat_id: chatId.toString(),
-            telegram_username: msg.from.username || null,
-            telegram_notifications_enabled: true
+          console.log('✅ API Response:', response.data);
+          
+          if (response.data.success && response.data.data) {
+            const staff = response.data.data;
+            
+            console.log('✅ Staff found:', staff.first_name, staff.last_name, '- Role:', staff.role);
+            
+            // Chat ID ni database'ga saqlash
+            await api.put(`/bot/staff/telegram/${staff._id || staff.id}`, {
+              telegram_chat_id: chatId.toString(),
+              telegram_username: msg.from.username || null,
+              telegram_notifications_enabled: true
+            });
+            
+            userSessions.set(chatId, {
+              staff,
+              userType: 'staff',
+              phone: staff.phone,
+              language: 'uz'
+            });
+            
+            await bot.sendMessage(
+              chatId,
+              `✅ Xush kelibsiz, ${staff.first_name} ${staff.last_name}!`,
+              { parse_mode: 'Markdown' }
+            );
+            
+            // Xodim uchun xabar
+            const roleNames = {
+              'admin': 'Administrator',
+              'doctor': 'Shifokor',
+              'nurse': 'Hamshira',
+              'laborant': 'Laborant',
+              'pharmacist': 'Dorixona xodimi',
+              'sanitar': 'Tozalovchi',
+              'receptionist': 'Qabulxona xodimi'
+            };
+            
+            const roleName = roleNames[staff.role] || staff.role;
+            
+            const infoMessage = `👔 *Xodim paneli*\n\n` +
+              `📋 Lavozim: ${roleName}\n` +
+              `🏢 Bo'lim: ${staff.department || 'Belgilanmagan'}\n\n` +
+              `📱 *Bot imkoniyatlari:*\n\n` +
+              `🔹 *Xabarlar* - Sizga yuborilgan xabarlarni ko'ring\n\n` +
+              `🔔 *Avtomatik xabarnomalar:*\n` +
+              `• Yangi xabar kelganda\n` +
+              `• Muhim bildirishnomalar\n` +
+              `• Tizim yangilanishlari\n\n` +
+              `💡 Quyidagi menyudan "Xabarlar" tugmasini bosing!`;
+            
+            await bot.sendMessage(chatId, infoMessage, { parse_mode: 'Markdown' });
+            
+            await bot.sendMessage(
+              chatId,
+              '📋 Xodim menyusi:',
+              { reply_markup: getStaffMenuKeyboard() }
+            );
+          } else {
+            console.log('❌ Staff not found in response');
+            await bot.sendMessage(chatId, '❌ Noto\'g\'ri kod. Iltimos, to\'g\'ri kodni kiriting.');
+          }
+        } catch (error) {
+          console.error('❌ Error finding staff by access code:', error);
+          console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            response: error.response?.data,
+            status: error.response?.status
           });
           
-          userSessions.set(chatId, {
-            patient,
-            phone: patient.phone,
-            language: 'uz'
+          let errorMessage = '❌ Xatolik yuz berdi.\n\n';
+          
+          if (error.code === 'ECONNREFUSED') {
+            errorMessage += 'Server bilan bog\'lanib bo\'lmadi. Iltimos, biroz kutib qayta urinib ko\'ring.';
+          } else if (error.response?.status === 404) {
+            errorMessage += 'Xodim topilmadi. Iltimos, to\'g\'ri kodni kiriting.';
+          } else if (error.response?.status === 400) {
+            errorMessage += error.response?.data?.message || 'Noto\'g\'ri kod formati.';
+          } else {
+            errorMessage += 'Iltimos, qayta urinib ko\'ring yoki klinikaga murojaat qiling.';
+          }
+          
+          await bot.sendMessage(chatId, errorMessage);
+        }
+        return;
+      }
+      // 8 xonali raqam - bemor
+      else if (/^\d{8}$/.test(code)) {
+        const accessCode = code;
+        await bot.sendMessage(chatId, config.MESSAGES.uz.loading);
+        
+        try {
+          console.log('🔢 Attempting to find patient by access code:', accessCode);
+          console.log('API URL:', `${config.API_URL}/bot/patients/by-access-code/${accessCode}`);
+          
+          const response = await api.get(`/bot/patients/by-access-code/${accessCode}`);
+          
+          console.log('✅ API Response:', response.data);
+          
+          if (response.data.success && response.data.data) {
+            const patient = response.data.data;
+            
+            console.log('✅ Patient found:', patient.first_name, patient.last_name);
+            
+            // Chat ID ni database'ga saqlash
+            await api.put(`/bot/patients/telegram/${patient._id || patient.id}`, {
+              telegram_chat_id: chatId.toString(),
+              telegram_username: msg.from.username || null,
+              telegram_notifications_enabled: true
+            });
+            
+            userSessions.set(chatId, {
+              patient,
+              userType: 'patient',
+              phone: patient.phone,
+              language: 'uz'
+            });
+            
+            await bot.sendMessage(
+              chatId,
+              `✅ Xush kelibsiz, ${patient.first_name} ${patient.last_name}!`,
+              { parse_mode: 'Markdown' }
+            );
+            
+            // Bot haqida batafsil ma'lumot
+            const infoMessage = `📱 *Bot imkoniyatlari:*\n\n` +
+              `🔹 *Navbat* - Navbat ma'lumotlaringizni real vaqtda kuzatib boring\n` +
+              `🔹 *Retseptlar* - Shifokorlar tomonidan yozilgan barcha retseptlaringizni ko'ring\n` +
+              `🔹 *Tahlillar* - Tahlil natijalaringizni darhol bilib oling\n` +
+              `🔹 *Qarzlar* - Moliyaviy ma'lumotlaringizni nazorat qiling\n\n` +
+              `🔔 *Avtomatik xabarnomalar:*\n` +
+              `• Navbatga chaqirilganingizda\n` +
+              `• Yangi retsept yozilganda\n` +
+              `• Tahlil natijasi tayyor bo'lganda\n\n` +
+              `💡 Quyidagi menyudan kerakli bo'limni tanlang!`;
+            
+            await bot.sendMessage(chatId, infoMessage, { parse_mode: 'Markdown' });
+            
+            await bot.sendMessage(
+              chatId,
+              config.MESSAGES.uz.main_menu,
+              { reply_markup: getMainMenuKeyboard() }
+            );
+          } else {
+            console.log('❌ Patient not found in response');
+            await bot.sendMessage(chatId, '❌ Noto\'g\'ri kod. Iltimos, to\'g\'ri 8-xonali kodni kiriting.');
+          }
+        } catch (error) {
+          console.error('❌ Error finding patient by access code:', error);
+          console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            response: error.response?.data,
+            status: error.response?.status
           });
           
-          await bot.sendMessage(
-            chatId,
-            `✅ Xush kelibsiz, ${patient.first_name} ${patient.last_name}!`,
-            { parse_mode: 'Markdown' }
-          );
+          // Foydalanuvchiga tushunarli xabar
+          let errorMessage = '❌ Xatolik yuz berdi.\n\n';
           
-          // Bot haqida batafsil ma'lumot
-          const infoMessage = `📱 *Bot imkoniyatlari:*\n\n` +
-            `🔹 *Navbat* - Navbat ma'lumotlaringizni real vaqtda kuzatib boring\n` +
-            `🔹 *Retseptlar* - Shifokorlar tomonidan yozilgan barcha retseptlaringizni ko'ring\n` +
-            `🔹 *Tahlillar* - Tahlil natijalaringizni darhol bilib oling\n` +
-            `🔹 *Qarzlar* - Moliyaviy ma'lumotlaringizni nazorat qiling\n\n` +
-            `🔔 *Avtomatik xabarnomalar:*\n` +
-            `• Navbatga chaqirilganingizda\n` +
-            `• Yangi retsept yozilganda\n` +
-            `• Tahlil natijasi tayyor bo'lganda\n\n` +
-            `💡 Quyidagi menyudan kerakli bo'limni tanlang!`;
+          if (error.code === 'ECONNREFUSED') {
+            errorMessage += 'Server bilan bog\'lanib bo\'lmadi. Iltimos, biroz kutib qayta urinib ko\'ring.';
+          } else if (error.response?.status === 404) {
+            errorMessage += 'Bemor topilmadi. Iltimos, to\'g\'ri 8-xonali kodni kiriting.';
+          } else if (error.response?.status === 400) {
+            errorMessage += error.response?.data?.message || 'Noto\'g\'ri kod formati.';
+          } else {
+            errorMessage += 'Iltimos, qayta urinib ko\'ring yoki klinikaga murojaat qiling.';
+          }
           
-          await bot.sendMessage(chatId, infoMessage, { parse_mode: 'Markdown' });
-          
-          await bot.sendMessage(
-            chatId,
-            config.MESSAGES.uz.main_menu,
-            { reply_markup: getMainMenuKeyboard() }
-          );
-        } else {
-          console.log('❌ Patient not found in response');
-          await bot.sendMessage(chatId, '❌ Noto\'g\'ri kod. Iltimos, to\'g\'ri 8-xonali kodni kiriting.');
+          await bot.sendMessage(chatId, errorMessage);
         }
-      } catch (error) {
-        console.error('❌ Error finding patient by access code:', error);
-        console.error('Error details:', {
-          message: error.message,
-          code: error.code,
-          response: error.response?.data,
-          status: error.response?.status
-        });
-        
-        // Foydalanuvchiga tushunarli xabar
-        let errorMessage = '❌ Xatolik yuz berdi.\n\n';
-        
-        if (error.code === 'ECONNREFUSED') {
-          errorMessage += 'Server bilan bog\'lanib bo\'lmadi. Iltimos, biroz kutib qayta urinib ko\'ring.';
-        } else if (error.response?.status === 404) {
-          errorMessage += 'Bemor topilmadi. Iltimos, to\'g\'ri 8-xonali kodni kiriting.';
-        } else if (error.response?.status === 400) {
-          errorMessage += error.response?.data?.message || 'Noto\'g\'ri kod formati.';
-        } else {
-          errorMessage += 'Iltimos, qayta urinib ko\'ring yoki klinikaga murojaat qiling.';
-        }
-        
-        await bot.sendMessage(chatId, errorMessage);
+      } else {
+        await bot.sendMessage(
+          chatId,
+          '❌ Noto\'g\'ri kod formati.\n\n' +
+          '• Bemor kodi: 8 ta raqam (masalan: 12345678)\n' +
+          '• Xodim kodi: LI + 8 ta raqam (masalan: LI12345678)'
+        );
       }
     } else {
       await bot.sendMessage(
         chatId,
-        '❌ Iltimos, 8-xonali maxsus kodingizni kiriting.\n\n' +
-        'Kod klinikada ro\'yxatdan o\'tganingizda berilgan.'
+        '❌ Iltimos, kodingizni kiriting.\n\n' +
+        '• Bemor: 8-xonali kod\n' +
+        '• Xodim: LI bilan boshlanadigan kod'
       );
     }
     return;
@@ -432,36 +608,70 @@ bot.on('message', async (msg) => {
   // Menyu tugmalari
   switch (text) {
     case '📊 Navbat':
-      await handleQueue(chatId, session);
+      if (session.userType === 'patient') {
+        await handleQueue(chatId, session);
+      }
       break;
     case '💊 Retseptlar':
-      await handlePrescriptions(chatId, session);
+      if (session.userType === 'patient') {
+        await handlePrescriptions(chatId, session);
+      }
       break;
     case '🔬 Tahlillar':
-      await handleLabResults(chatId, session);
+      if (session.userType === 'patient') {
+        await handleLabResults(chatId, session);
+      }
       break;
     case '💰 Qarzlar':
-      await handleDebts(chatId, session);
+      if (session.userType === 'patient') {
+        await handleDebts(chatId, session);
+      }
       break;
     case '📨 Xabarlar':
       await handleMessages(chatId, session);
       break;
+    case '🔔 Hamshirani chaqirish':
+      if (session.userType === 'patient') {
+        await handleCallNurse(chatId, session);
+      }
+      break;
     case '⚙️ Sozlamalar':
-      await handleSettings(chatId, session);
+      if (session.userType === 'patient') {
+        await handleSettings(chatId, session);
+      }
+      break;
+    case '🚪 Chiqish':
+      await handleLogout(chatId, session);
       break;
     case '◀️ Orqaga':
-      await bot.sendMessage(
-        chatId,
-        config.MESSAGES.uz.main_menu,
-        { reply_markup: getMainMenuKeyboard() }
-      );
+      if (session.userType === 'staff') {
+        await bot.sendMessage(
+          chatId,
+          '📋 Xodim menyusi:',
+          { reply_markup: getStaffMenuKeyboard() }
+        );
+      } else {
+        await bot.sendMessage(
+          chatId,
+          config.MESSAGES.uz.main_menu,
+          { reply_markup: getMainMenuKeyboard() }
+        );
+      }
       break;
     default:
-      await bot.sendMessage(
-        chatId,
-        'Iltimos, menyudan tanlang:',
-        { reply_markup: getMainMenuKeyboard() }
-      );
+      if (session.userType === 'staff') {
+        await bot.sendMessage(
+          chatId,
+          'Iltimos, menyudan tanlang:',
+          { reply_markup: getStaffMenuKeyboard() }
+        );
+      } else {
+        await bot.sendMessage(
+          chatId,
+          'Iltimos, menyudan tanlang:',
+          { reply_markup: getMainMenuKeyboard() }
+        );
+      }
   }
 });
 
@@ -746,47 +956,192 @@ async function handleSettings(chatId, session) {
   await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
 }
 
+// Akkauntdan chiqish
+async function handleLogout(chatId, session) {
+  try {
+    const userName = session.userType === 'staff' 
+      ? `${session.staff.first_name} ${session.staff.last_name}`
+      : `${session.patient.first_name} ${session.patient.last_name}`;
+    
+    // Sessiyani o'chirish
+    userSessions.delete(chatId);
+    
+    await bot.sendMessage(
+      chatId,
+      `👋 Xayr, ${userName}!\n\n` +
+      `✅ Siz akkauntdan chiqdingiz.\n\n` +
+      `🔐 Qayta kirish uchun kodingizni kiriting yoki /start buyrug'ini yuboring.`,
+      { 
+        parse_mode: 'Markdown',
+        reply_markup: { remove_keyboard: true }
+      }
+    );
+    
+    console.log(`✅ User logged out: ${userName} (Chat ID: ${chatId})`);
+  } catch (error) {
+    console.error('Error logging out:', error);
+    await bot.sendMessage(chatId, 'Xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring.');
+  }
+}
+
+// Hamshirani chaqirish
+async function handleCallNurse(chatId, session) {
+  try {
+    await bot.sendMessage(chatId, '⏳ Hamshiralar chaqirilmoqda...');
+    
+    const patientId = session.patient.id || session.patient._id;
+    
+    console.log('=== CALL NURSE ===');
+    console.log('Patient ID:', patientId);
+    console.log('Patient Name:', session.patient.first_name, session.patient.last_name);
+    
+    // Bemorning admission ma'lumotlarini olish (xona va ko'rpa)
+    const admissionResponse = await api.get(`/bot/patient/${patientId}/admission`);
+    
+    if (!admissionResponse.data.success || !admissionResponse.data.data) {
+      await bot.sendMessage(
+        chatId,
+        '❌ Sizning xona ma\'lumotlaringiz topilmadi.\n\n' +
+        'Iltimos, qabulxonaga murojaat qiling.'
+      );
+      return;
+    }
+    
+    const admission = admissionResponse.data.data;
+    
+    // Barcha hamshiralarga xabar yuborish
+    const callResponse = await api.post('/bot/call-nurse', {
+      patientId: patientId,
+      patientName: `${session.patient.first_name} ${session.patient.last_name}`,
+      patientNumber: session.patient.patient_number,
+      roomNumber: admission.room_number,
+      roomFloor: admission.room_floor,
+      bedNumber: admission.bed_number,
+      department: admission.department
+    });
+    
+    if (callResponse.data.success) {
+      let successMessage = `✅ *Hamshiralar chaqirildi!*\n\n`;
+      
+      if (admission.department) {
+        successMessage += `🏥 Bo'lim: ${admission.department}\n`;
+      }
+      successMessage += `🚪 Xona: ${admission.room_number}`;
+      if (admission.room_floor) {
+        successMessage += ` (${admission.room_floor}-qavat)`;
+      }
+      successMessage += `\n`;
+      successMessage += `🛏 Ko'rpa: ${admission.bed_number}\n\n`;
+      successMessage += `⏰ ${new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}\n\n`;
+      successMessage += `💡 Hamshira tez orada keladi.`;
+      
+      await bot.sendMessage(chatId, successMessage, { parse_mode: 'Markdown' });
+    } else {
+      await bot.sendMessage(
+        chatId,
+        '❌ Xatolik yuz berdi. Iltimos, qaytadan urinib ko\'ring.'
+      );
+    }
+  } catch (error) {
+    console.error('Error calling nurse:', error);
+    console.error('Error details:', error.response?.data || error.message);
+    
+    if (error.response?.status === 404) {
+      await bot.sendMessage(
+        chatId,
+        '❌ Sizning xona ma\'lumotlaringiz topilmadi.\n\n' +
+        'Iltimos, qabulxonaga murojaat qiling.'
+      );
+    } else {
+      await bot.sendMessage(chatId, config.MESSAGES.uz.error);
+    }
+  }
+}
+
 // Xabarlar
 async function handleMessages(chatId, session) {
   try {
     await bot.sendMessage(chatId, config.MESSAGES.uz.loading);
     
-    const response = await api.get(`/bot/messages/patient/${session.patient.id}`);
-    
-    if (response.data.success && response.data.data.length > 0) {
-      const messages = response.data.data;
-      let message = '📨 *Sizga yuborilgan xabarlar:*\n\n';
+    // Xodim yoki bemor ekanligini tekshirish
+    if (session.userType === 'staff') {
+      // Xodim uchun xabarlar
+      const response = await api.get(`/bot/messages/staff/${session.staff.id || session.staff._id}`);
       
-      messages.slice(0, 10).forEach((msg, index) => {
-        message += `${index + 1}. 📅 ${new Date(msg.created_at).toLocaleDateString('uz-UZ')} ${new Date(msg.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}\n`;
+      if (response.data.success && response.data.data.length > 0) {
+        const messages = response.data.data;
+        let message = '📨 *Sizga yuborilgan xabarlar:*\n\n';
         
-        // Mavzu
-        if (msg.subject) {
-          message += `   📌 ${msg.subject}\n`;
-        }
-        
-        // Xabar matni
-        if (msg.content) {
-          message += `   💬 ${msg.content}\n`;
-        }
-        
-        // Yuboruvchi
-        if (msg.sender_name) {
-          message += `   👤 ${msg.sender_name}`;
-          if (msg.sender_role) {
-            message += ` (${msg.sender_role})`;
+        messages.slice(0, 10).forEach((msg, index) => {
+          message += `${index + 1}. 📅 ${new Date(msg.created_at).toLocaleDateString('uz-UZ')} ${new Date(msg.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}\n`;
+          
+          // Mavzu
+          if (msg.subject) {
+            message += `   📌 ${msg.subject}\n`;
           }
-          message += '\n';
-        }
+          
+          // Xabar matni
+          if (msg.content) {
+            message += `   💬 ${msg.content}\n`;
+          }
+          
+          // Yuboruvchi
+          if (msg.sender_name) {
+            message += `   👤 ${msg.sender_name}`;
+            if (msg.sender_role) {
+              message += ` (${msg.sender_role})`;
+            }
+            message += '\n';
+          }
+          
+          // Status
+          const statusEmoji = msg.status === 'read' ? '✅' : '📬';
+          message += `   ${statusEmoji} ${msg.status === 'read' ? 'O\'qilgan' : 'Yangi'}\n\n`;
+        });
         
-        // Status
-        const statusEmoji = msg.status === 'read' ? '✅' : '📬';
-        message += `   ${statusEmoji} ${msg.status === 'read' ? 'O\'qilgan' : 'Yangi'}\n\n`;
-      });
-      
-      await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+        await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+      } else {
+        await bot.sendMessage(chatId, '📨 Sizga hozircha xabar yuborilmagan.');
+      }
     } else {
-      await bot.sendMessage(chatId, '📨 Sizga hozircha xabar yuborilmagan.');
+      // Bemor uchun xabarlar
+      const response = await api.get(`/bot/messages/patient/${session.patient.id}`);
+      
+      if (response.data.success && response.data.data.length > 0) {
+        const messages = response.data.data;
+        let message = '📨 *Sizga yuborilgan xabarlar:*\n\n';
+        
+        messages.slice(0, 10).forEach((msg, index) => {
+          message += `${index + 1}. 📅 ${new Date(msg.created_at).toLocaleDateString('uz-UZ')} ${new Date(msg.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}\n`;
+          
+          // Mavzu
+          if (msg.subject) {
+            message += `   📌 ${msg.subject}\n`;
+          }
+          
+          // Xabar matni
+          if (msg.content) {
+            message += `   💬 ${msg.content}\n`;
+          }
+          
+          // Yuboruvchi
+          if (msg.sender_name) {
+            message += `   👤 ${msg.sender_name}`;
+            if (msg.sender_role) {
+              message += ` (${msg.sender_role})`;
+            }
+            message += '\n';
+          }
+          
+          // Status
+          const statusEmoji = msg.status === 'read' ? '✅' : '📬';
+          message += `   ${statusEmoji} ${msg.status === 'read' ? 'O\'qilgan' : 'Yangi'}\n\n`;
+        });
+        
+        await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+      } else {
+        await bot.sendMessage(chatId, '📨 Sizga hozircha xabar yuborilmagan.');
+      }
     }
   } catch (error) {
     console.error('Error fetching messages:', error);

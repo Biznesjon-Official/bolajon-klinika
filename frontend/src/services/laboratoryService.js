@@ -11,6 +11,12 @@ export const laboratoryService = {
     return response.data;
   },
   
+  // Bitta tahlilni olish
+  getTestById: async (id) => {
+    const response = await api.get(`/laboratory/tests/${id}`);
+    return response.data;
+  },
+  
   // Tahlil qo'shish
   createTest: async (data) => {
     const response = await api.post('/laboratory/tests', data);
@@ -20,6 +26,12 @@ export const laboratoryService = {
   // Tahlilni yangilash
   updateTest: async (id, data) => {
     const response = await api.put(`/laboratory/tests/${id}`, data);
+    return response.data;
+  },
+  
+  // Tahlilni o'chirish
+  deleteTest: async (id) => {
+    const response = await api.delete(`/laboratory/tests/${id}`);
     return response.data;
   },
   
