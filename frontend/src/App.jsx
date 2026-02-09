@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleBasedRedirect from './components/RoleBasedRedirect';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 
 // Eager load - critical pages
 import LandingPage from './pages/LandingPage';
@@ -92,6 +93,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Toaster position="top-right" />
+        <PWAInstallPrompt />
         <RoleBasedRedirect>
           <Suspense fallback={<PageLoader />}>
             <Routes>

@@ -16,14 +16,16 @@ export const connectMongoDB = async () => {
     console.log('URI:', MONGODB_URI.substring(0, 50) + '...');
     
     const options = {
-      maxPoolSize: 10,
-      minPoolSize: 2,
+      maxPoolSize: 100, // Increased from 10 to 100 for better parallel request handling
+      minPoolSize: 10,  // Increased from 2 to 10 for better performance
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
       connectTimeoutMS: 10000,
       family: 4,
       retryWrites: true,
-      w: 'majority'
+      w: 'majority',
+      maxIdleTimeMS: 30000, // Close idle connections after 30 seconds
+      waitQueueTimeoutMS: 10000 // Wait up to 10 seconds for a connection from the pool
     };
 
     await mongoose.connect(MONGODB_URI, options);

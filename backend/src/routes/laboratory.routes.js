@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { authenticate, authorize } from '../middleware/auth.js';
 import LabOrder from '../models/LabOrder.js';
 import LabTest from '../models/LabTest.js';
@@ -7,6 +8,33 @@ import Staff from '../models/Staff.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
+
+// Rate limiter for lab order creation (prevent abuse)
+const createOrderLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // Max 30 orders per minute per IP
+  message: {
+    success: false,
+    message: 'Juda ko\'p so\'rov. Iltimos, bir daqiqa kuting.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// General rate limiter for all lab routes
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // Max 100 requests per minute per IP
+  message: {
+    success: false,
+    message: 'Juda ko\'p so\'rov. Iltimos, bir daqiqa kuting.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Apply general rate limiter to all routes
+router.use(generalLimiter);
 
 // Get all lab tests
 router.get('/tests', authenticate, async (req, res, next) => {
@@ -364,7 +392,7 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
 });
 
 // Create lab order
-router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant'), async (req, res, next) => {
+router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant', 'receptionist'), createOrderLimiter, async (req, res, next) => {
   const session = await mongoose.startSession();
   
   try {
@@ -378,11 +406,58 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant'), a
       notes
     } = req.body;
     
+    // Validation: Required fields
     if (!patient_id || !test_id) {
       await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: `Majburiy maydonlarni to'ldiring. Patient ID: ${patient_id ? 'OK' : 'MISSING'}, Test ID: ${test_id ? 'OK' : 'MISSING'}`
+      });
+    }
+    
+    // Validation: Check if IDs are valid MongoDB ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(patient_id)) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: 'Noto\'g\'ri patient ID formati'
+      });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(test_id)) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: 'Noto\'g\'ri test ID formati'
+      });
+    }
+    
+    // Validation: Notes length (max 1000 characters)
+    if (notes && notes.length > 1000) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: 'Izoh juda uzun (maksimal 1000 belgi)'
+      });
+    }
+    
+    // Validation: Priority value
+    const validPriorities = ['normal', 'urgent', 'stat'];
+    if (priority && !validPriorities.includes(priority)) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: `Noto'g'ri priority qiymati. Faqat: ${validPriorities.join(', ')}`
+      });
+    }
+    
+    // Validation: Check if patient exists
+    const patient = await Patient.findById(patient_id).session(session);
+    if (!patient) {
+      await session.abortTransaction();
+      return res.status(404).json({
+        success: false,
+        message: 'Bemor topilmadi'
       });
     }
     
@@ -396,6 +471,15 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant'), a
       });
     }
     
+    // Validation: Check if test is active
+    if (!test.is_active) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: 'Bu tahlil faol emas'
+      });
+    }
+    
     // Create lab order
     const order = new LabOrder({
       patient_id,
@@ -405,7 +489,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant'), a
       test_name: test.name,
       priority: priority || 'normal',
       sample_type: test.sample_type,
-      notes,
+      notes: notes || '',
       price: test.price,
       status: 'pending'
     });
@@ -416,7 +500,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant'), a
     const Invoice = (await import('../models/Invoice.js')).default;
     const BillingItem = (await import('../models/BillingItem.js')).default;
     const Transaction = (await import('../models/Transaction.js')).default;
-    const Patient = (await import('../models/Patient.js')).default;
+    // Patient already imported at the top, no need to re-import
     
     // Generate invoice number
     const invoiceCount = await Invoice.countDocuments().session(session);

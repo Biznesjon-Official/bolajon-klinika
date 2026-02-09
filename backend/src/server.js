@@ -84,6 +84,10 @@ app.use(cors({
   ].filter(Boolean),
   credentials: true
 }));
+
+// Apply rate limiting before other middleware
+app.use(rateLimiter);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));

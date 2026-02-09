@@ -6,6 +6,14 @@
     <title>Bolajon Klinika - Sog'ligingiz bizning g'amxo'rligimiz</title>
     <meta name="description" content="Bolajon Klinika - Sifatli tibbiy xizmatlar, tajribali shifokorlar, zamonaviy uskunalar">
     <link rel="icon" type="image/jpeg" href="image.jpg">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Bolajon Med">
+    
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -34,7 +42,7 @@
                 <p class="hero-subtitle">Zamonaviy uskunalar va tajribali shifokorlar bilan yuqori sifatli tibbiy xizmatlar</p>
                 <div class="hero-buttons">
                     <button class="btn btn-primary" onclick="scrollTo('#aloqa')">Navbatga yozilish</button>
-                    <button class="btn btn-secondary" id="install-app-btn" style="display: none;">
+                    <button class="btn btn-secondary" id="install-app-btn">
                         📱 Ilovani yuklab olish
                     </button>
                     <button class="btn btn-secondary" id="open-chatbot">💬 AI Maslahatchi</button>
@@ -184,32 +192,507 @@
 
     <script src="script.js"></script>
     
-    <!-- PWA Install Script -->
+    <!-- PWA Advanced Features -->
     <script>
+        // Register Service Worker with update detection
+        if ('serviceWorker' in navigator) {
+            let refreshing = false;
+            
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('[PWA] SW registered:', registration);
+
+                    // Check for updates every 60 seconds
+                    setInterval(() => {
+                        registration.update();
+                    }, 60000);
+
+                    // Listen for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        console.log('[PWA] New SW found, installing...');
+
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New SW is installed, show update notification
+                                showUpdateNotification(newWorker);
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('[PWA] SW registration failed:', error);
+                }
+            });
+        }
+
+        // Show update notification
+        function showUpdateNotification(worker) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #10b981;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                animation: slideUp 0.3s ease;
+            `;
+            notification.innerHTML = `
+                <span>🎉 Yangi versiya mavjud!</span>
+                <button onclick="updateApp()" style="
+                    background: white;
+                    color: #10b981;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                ">Yangilash</button>
+            `;
+            document.body.appendChild(notification);
+
+            window.updateApp = () => {
+                worker.postMessage({ action: 'skipWaiting' });
+            };
+        }
+
+        // Install prompt handling
         let deferredPrompt;
         const installBtn = document.getElementById('install-app-btn');
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installBtn.style.display = 'inline-block';
+            console.log('[PWA] beforeinstallprompt event fired');
+            
+            // Show install button with animation
+            if (installBtn) {
+                installBtn.style.display = 'inline-flex';
+                installBtn.style.animation = 'pulse 2s infinite';
+            }
         });
 
-        installBtn.addEventListener('click', async () => {
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) {
+                    console.log('[PWA] No install prompt available');
+                    
+                    // Check if already installed
+                    if (window.matchMedia('(display-mode: standalone)').matches || 
+                        window.navigator.standalone === true) {
+                        showSuccessMessage('✅ Ilova allaqachon o\'rnatilgan!');
+                        return;
+                    }
+                    
+                    // Try to detect browser and show specific instructions
+                    const userAgent = navigator.userAgent.toLowerCase();
+                    const isIOS = /iphone|ipad|ipod/.test(userAgent);
+                    const isAndroid = /android/.test(userAgent);
+                    const isChrome = /chrome/.test(userAgent) && !/edg/.test(userAgent);
+                    
+                    console.log('[PWA] User Agent:', userAgent);
+                    console.log('[PWA] isIOS:', isIOS, 'isAndroid:', isAndroid, 'isChrome:', isChrome);
+                    
+                    if (isIOS) {
+                        console.log('[PWA] Showing iOS instructions');
+                        showIOSInstructions();
+                    } else if (isAndroid) {
+                        console.log('[PWA] Showing Android instructions');
+                        // For Android, show Android instructions
+                        showAndroidInstructions();
+                    } else if (isChrome) {
+                        console.log('[PWA] Chrome detected, waiting for prompt...');
+                        // For Chrome Desktop, try to trigger install after a delay
+                        showWaitingMessage();
+                        setTimeout(() => {
+                            const waitingMsg = document.getElementById('waiting-message');
+                            if (waitingMsg) waitingMsg.remove();
+                            
+                            if (deferredPrompt) {
+                                console.log('[PWA] Deferred prompt available, triggering install');
+                                triggerInstall();
+                            } else {
+                                console.log('[PWA] No deferred prompt, showing desktop instructions');
+                                // Chrome Desktop - show desktop instructions
+                                showDesktopInstructions();
+                            }
+                        }, 1000);
+                    } else {
+                        console.log('[PWA] Other browser, showing desktop instructions');
+                        // Other browsers - show general instructions
+                        showDesktopInstructions();
+                    }
+                    return;
+                }
+
+                // Directly trigger install prompt
+                triggerInstall();
+            });
+        }
+
+        async function triggerInstall() {
             if (!deferredPrompt) {
+                console.log('[PWA] No deferred prompt available');
                 return;
             }
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response: ${outcome}`);
-            deferredPrompt = null;
-            installBtn.style.display = 'none';
+
+            try {
+                console.log('[PWA] Showing install prompt...');
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`[PWA] User response: ${outcome}`);
+                
+                if (outcome === 'accepted') {
+                    console.log('[PWA] User accepted install');
+                    installBtn.style.display = 'none';
+                    showSuccessMessage('✅ Ilova o\'rnatilmoqda...');
+                } else {
+                    console.log('[PWA] User dismissed install');
+                    showInfoMessage('ℹ️ Ilovani keyinroq o\'rnatishingiz mumkin');
+                }
+                
+                deferredPrompt = null;
+            } catch (error) {
+                console.error('[PWA] Install error:', error);
+                showDesktopInstructions();
+            }
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            const success = document.createElement('div');
+            success.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            success.textContent = message;
+            document.body.appendChild(success);
+            setTimeout(() => success.remove(), 3000);
+        }
+
+        // Show info message
+        function showInfoMessage(message) {
+            const info = document.createElement('div');
+            info.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #3b82f6;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            info.textContent = message;
+            document.body.appendChild(info);
+            setTimeout(() => info.remove(), 3000);
+        }
+
+        // Show waiting message
+        function showWaitingMessage() {
+            const waiting = document.createElement('div');
+            waiting.id = 'waiting-message';
+            waiting.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f59e0b;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            waiting.textContent = '⏳ Yuklanmoqda...';
+            document.body.appendChild(waiting);
+        }
+
+        // Show iOS specific instructions
+        function showIOSInstructions() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 16px;
+                    padding: 32px;
+                    max-width: 500px;
+                    text-align: center;
+                ">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
+                    <h2 style="margin-bottom: 16px; color: #111;">iPhone/iPad uchun</h2>
+                    <p style="color: #666; margin-bottom: 24px;">
+                        Safari brauzerida quyidagi qadamlarni bajaring:
+                    </p>
+                    <div style="text-align: left; background: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="font-size: 16px; color: #111; margin-bottom: 12px;">
+                            <strong>1.</strong> Pastdagi <strong>Share</strong> tugmasiga bosing 
+                            <span style="font-size: 24px;">⬆️</span>
+                        </p>
+                        <p style="font-size: 16px; color: #111; margin-bottom: 12px;">
+                            <strong>2.</strong> <strong>"Add to Home Screen"</strong> ni toping va bosing
+                        </p>
+                        <p style="font-size: 16px; color: #111;">
+                            <strong>3.</strong> <strong>"Add"</strong> tugmasini bosing
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: #10b981;
+                        color: white;
+                        border: none;
+                        padding: 12px 32px;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">Tushundim</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
+
+        // Show Android specific instructions
+        function showAndroidInstructions() {
+            const waitingMsg = document.getElementById('waiting-message');
+            if (waitingMsg) waitingMsg.remove();
+
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 16px;
+                    padding: 32px;
+                    max-width: 500px;
+                    text-align: center;
+                ">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
+                    <h2 style="margin-bottom: 16px; color: #111;">Android uchun</h2>
+                    <p style="color: #666; margin-bottom: 24px;">
+                        Chrome brauzerida quyidagi qadamlarni bajaring:
+                    </p>
+                    <div style="text-align: left; background: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="font-size: 16px; color: #111; margin-bottom: 12px;">
+                            <strong>1.</strong> O'ng yuqoridagi <strong>Menu</strong> tugmasiga bosing 
+                            <span style="font-size: 24px;">⋮</span>
+                        </p>
+                        <p style="font-size: 16px; color: #111; margin-bottom: 12px;">
+                            <strong>2.</strong> <strong>"Add to Home screen"</strong> yoki <strong>"Install app"</strong> ni tanlang
+                        </p>
+                        <p style="font-size: 16px; color: #111;">
+                            <strong>3.</strong> <strong>"Install"</strong> tugmasini bosing
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: #10b981;
+                        color: white;
+                        border: none;
+                        padding: 12px 32px;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">Tushundim</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
+
+        // Show Desktop specific instructions (Chrome/Edge/Brave)
+        function showDesktopInstructions() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 16px;
+                    padding: 32px;
+                    max-width: 500px;
+                    text-align: center;
+                ">
+                    <div style="font-size: 48px; margin-bottom: 16px;">💻</div>
+                    <h2 style="margin-bottom: 16px; color: #111;">Desktop uchun</h2>
+                    <p style="color: #666; margin-bottom: 24px;">
+                        Chrome yoki Edge brauzerida quyidagi qadamlarni bajaring:
+                    </p>
+                    <div style="text-align: left; background: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="font-size: 16px; color: #111; margin-bottom: 12px;">
+                            <strong>1.</strong> Address bar'da <strong>"Install"</strong> icon'ga bosing
+                        </p>
+                        <p style="font-size: 16px; color: #111; margin-bottom: 12px;">
+                            <strong>2.</strong> Yoki Menu (⋮) → <strong>"Install Bolajon Med"</strong>
+                        </p>
+                        <p style="font-size: 16px; color: #111;">
+                            <strong>3.</strong> <strong>"Install"</strong> tugmasini bosing
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: #10b981;
+                        color: white;
+                        border: none;
+                        padding: 12px 32px;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">Tushundim</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+        }
+
+        // App installed event
+        window.addEventListener('appinstalled', () => {
+            console.log('[PWA] App installed successfully');
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
+            
+            // Show success message with icon
+            const success = document.createElement('div');
+            success.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                color: #111;
+                padding: 32px;
+                border-radius: 16px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+                z-index: 10000;
+                text-align: center;
+                animation: scaleIn 0.3s ease;
+            `;
+            success.innerHTML = `
+                <div style="font-size: 64px; margin-bottom: 16px;">🎉</div>
+                <h2 style="margin-bottom: 8px; color: #10b981;">Muvaffaqiyatli!</h2>
+                <p style="color: #666;">Bolajon Med ilovasi o'rnatildi</p>
+            `;
+            document.body.appendChild(success);
+            setTimeout(() => success.remove(), 3000);
         });
 
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA installed');
-            installBtn.style.display = 'none';
+        // Check if app is already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('[PWA] App is running in standalone mode');
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
+        }
+
+        // Online/Offline detection
+        window.addEventListener('online', () => {
+            console.log('[PWA] Back online');
+            showConnectionStatus('✅ Internet aloqasi qayta tiklandi', '#10b981');
         });
+
+        window.addEventListener('offline', () => {
+            console.log('[PWA] Gone offline');
+            showConnectionStatus('⚠️ Internet aloqasi yo\'q - Offline rejim', '#f59e0b');
+        });
+
+        function showConnectionStatus(message, color) {
+            const status = document.createElement('div');
+            status.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${color};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            status.textContent = message;
+            document.body.appendChild(status);
+            setTimeout(() => status.remove(), 3000);
+        }
+
+        // Add animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUp {
+                from { transform: translate(-50%, 100px); opacity: 0; }
+                to { transform: translate(-50%, 0); opacity: 1; }
+            }
+            @keyframes slideIn {
+                from { transform: translateX(100px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+            @keyframes scaleIn {
+                from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
