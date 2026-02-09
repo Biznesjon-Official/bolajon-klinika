@@ -18,8 +18,8 @@ const DashboardLayout = ({ children }) => {
   };
 
   const navigation = [
-    // 1. Bosh sahifa
-    { name: t('nav.dashboard'), icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Administrator', 'Manager', 'Menejer', 'Shifokor', 'Doctor'] },
+    // 1. Bosh sahifa (faqat Admin va Manager uchun)
+    { name: t('nav.dashboard'), icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Administrator', 'Manager', 'Menejer'] },
     
     // 2. Qabulxona - Bemorlar qabul qilish
     { name: t('nav.patients'), icon: 'groups', path: '/patients', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Qabulxona', 'Reception', 'receptionist'] },
