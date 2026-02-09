@@ -34,6 +34,9 @@
                 <p class="hero-subtitle">Zamonaviy uskunalar va tajribali shifokorlar bilan yuqori sifatli tibbiy xizmatlar</p>
                 <div class="hero-buttons">
                     <button class="btn btn-primary" onclick="scrollTo('#aloqa')">Navbatga yozilish</button>
+                    <button class="btn btn-secondary" id="install-app-btn" style="display: none;">
+                        📱 Ilovani yuklab olish
+                    </button>
                     <button class="btn btn-secondary" id="open-chatbot">💬 AI Maslahatchi</button>
                 </div>
             </div>
@@ -180,5 +183,33 @@
     </footer>
 
     <script src="script.js"></script>
+    
+    <!-- PWA Install Script -->
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-app-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                return;
+            }
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA installed');
+            installBtn.style.display = 'none';
+        });
+    </script>
 </body>
 </html>
