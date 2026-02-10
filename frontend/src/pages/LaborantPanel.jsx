@@ -177,8 +177,6 @@ export default function LaborantPanel() {
   useEffect(() => {
     loadData();
     loadReagents();
-    const interval = setInterval(loadData, 30000); // 30 soniyada yangilanadi
-    return () => clearInterval(interval);
   }, [activeTab]);
 
   const loadData = async () => {
