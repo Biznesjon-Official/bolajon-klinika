@@ -36,7 +36,8 @@ const createInvoiceSchema = Joi.object({
   payment_method: Joi.string().valid('cash', 'card', 'transfer').allow(null),
   paid_amount: Joi.number().min(0).default(0),
   discount_amount: Joi.number().min(0).default(0),
-  notes: Joi.string().allow('', null)
+  notes: Joi.string().allow('', null),
+  doctor_id: Joi.string().allow(null)
 });
 
 const addPaymentSchema = Joi.object({
@@ -281,14 +282,16 @@ router.post('/invoices',
           });
         }
 
-        const itemTotal = service.base_price * (item.quantity || 1);
+        // Use base_price if available, otherwise use price
+        const servicePrice = service.base_price || service.price || 0;
+        const itemTotal = servicePrice * (item.quantity || 1);
         totalAmount += itemTotal;
 
         invoiceItems.push({
           service_id: item.service_id,
           service_name: service.name,
           quantity: item.quantity || 1,
-          unit_price: service.base_price,
+          unit_price: servicePrice,
           total_price: itemTotal
         });
       }

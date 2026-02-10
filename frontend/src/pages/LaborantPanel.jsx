@@ -805,13 +805,22 @@ export default function LaborantPanel() {
                           </button>
                         )}
                         {order.status === 'completed' && (
-                          <button
-                            onClick={() => window.open(`/laboratory/result/${order.id}`, '_blank')}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm flex items-center gap-1"
-                          >
-                            <span className="material-symbols-outlined text-sm">download</span>
-                            Yuklab olish
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => window.open(`/laboratory/result/${order.id}`, '_blank')}
+                              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm flex items-center gap-1"
+                            >
+                              <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
+                              PDF
+                            </button>
+                            <button
+                              onClick={() => handleOpenResultModal(order)}
+                              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm flex items-center gap-1"
+                            >
+                              <span className="material-symbols-outlined text-sm">edit</span>
+                              Tahrirlash
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>

@@ -243,6 +243,16 @@ router.get('/orders', authenticate, async (req, res, next) => {
     
     const query = {};
     
+    // Agar laborant bo'lsa, faqat o'ziga biriktirilgan yoki hech kimga biriktirilmagan buyurtmalarni ko'rsatish
+    const userRole = req.user.role?.name || req.user.role_name || '';
+    if (userRole.toLowerCase() === 'laborant') {
+      query.$or = [
+        { laborant_id: req.user.id },
+        { laborant_id: null },
+        { laborant_id: { $exists: false } }
+      ];
+    }
+    
     if (date_from) {
       query.createdAt = { $gte: new Date(date_from) };
     }
@@ -406,6 +416,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant', 'r
       patient_id,
       doctor_id,
       test_id,
+      laborant_id,
       priority,
       notes
     } = req.body;
@@ -488,6 +499,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant', 'r
     const order = new LabOrder({
       patient_id,
       doctor_id: doctor_id || req.user.id,
+      laborant_id: laborant_id || null,
       test_id: test._id,
       test_type: test.category,
       test_name: test.name,
@@ -834,6 +846,13 @@ router.get('/laborant/stats', authenticate, authorize('laborant', 'admin'), asyn
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
+    // Laborant uchun faqat o'ziga biriktirilgan buyurtmalar
+    const baseQuery = {};
+    const userRole = req.user.role?.name || req.user.role_name || '';
+    if (userRole.toLowerCase() === 'laborant') {
+      baseQuery.laborant_id = req.user.id;
+    }
+    
     const [
       todayPending,
       notReady,
@@ -842,20 +861,24 @@ router.get('/laborant/stats', authenticate, authorize('laborant', 'admin'), asyn
     ] = await Promise.all([
       // Bugungi kutilayotgan
       LabOrder.countDocuments({
+        ...baseQuery,
         status: 'pending',
         createdAt: { $gte: today, $lt: tomorrow }
       }),
       // Tayyorlanmagan (sample_collected yoki in_progress)
       LabOrder.countDocuments({
+        ...baseQuery,
         status: { $in: ['sample_collected', 'in_progress'] }
       }),
       // Kechikkan (24 soatdan ortiq pending)
       LabOrder.countDocuments({
+        ...baseQuery,
         status: 'pending',
         createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
       }),
       // Oxirgi natijalar (bugun tayyor bo'lgan)
       LabOrder.countDocuments({
+        ...baseQuery,
         status: 'completed',
         completed_at: { $gte: today, $lt: tomorrow }
       })
@@ -933,13 +956,6 @@ router.post('/orders/:id/results', authenticate, authorize('laborant', 'admin'),
       });
     }
 
-    if (!reagent_id) {
-      return res.status(400).json({
-        success: false,
-        message: 'Reaktiv tanlash majburiy'
-      });
-    }
-
     // First get the order to get patient_id
     const existingOrder = await LabOrder.findById(req.params.id);
     if (!existingOrder) {
@@ -959,98 +975,81 @@ router.post('/orders/:id/results', authenticate, authorize('laborant', 'admin'),
     existingOrder.laborant_id = req.user.id;
     await existingOrder.save();
 
-    // Use reagent
-    const LabReagent = (await import('../models/LabReagent.js')).default;
-    const LabReagentUsage = (await import('../models/LabReagentUsage.js')).default;
-    const Patient = (await import('../models/Patient.js')).default;
+    // Use reagent if provided
+    if (reagent_id) {
+      const LabReagent = (await import('../models/LabReagent.js')).default;
+      const LabReagentUsage = (await import('../models/LabReagentUsage.js')).default;
 
-    const reagent = await LabReagent.findById(reagent_id);
-    if (!reagent) {
-      return res.status(404).json({
-        success: false,
-        message: 'Reaktiv topilmadi'
-      });
+      const reagent = await LabReagent.findById(reagent_id);
+      if (reagent) {
+        if (reagent.remaining_tests >= 1 && reagent.status !== 'expired') {
+          // Record reagent usage
+          const usage = new LabReagentUsage({
+            reagent: reagent_id,
+            patient: patientId,
+            lab_order: existingOrder._id,
+            test_name: existingOrder.test_name,
+            quantity_used: 1,
+            cost_per_test: reagent.price_per_test,
+            total_cost: reagent.price_per_test * 1,
+            used_by: req.user.id,
+            notes: `Tahlil: ${existingOrder.test_name}`
+          });
+
+          await usage.save();
+
+          // Decrease reagent stock
+          reagent.remaining_tests -= 1;
+          await reagent.save();
+
+          // Add debt to patient
+          const Patient = (await import('../models/Patient.js')).default;
+          const patient = await Patient.findById(patientId);
+          if (patient) {
+            patient.total_debt = (patient.total_debt || 0) + reagent.price_per_test;
+            await patient.save();
+          }
+
+          // Create invoice for reagent cost
+          const Invoice = (await import('../models/Invoice.js')).default;
+          const BillingItem = (await import('../models/BillingItem.js')).default;
+
+          // Generate invoice number
+          const invoiceCount = await Invoice.countDocuments();
+          const invoiceNumber = `INV-${Date.now()}-${invoiceCount + 1}`;
+
+          // Create invoice
+          const invoice = await Invoice.create({
+            patient_id: patientId,
+            invoice_number: invoiceNumber,
+            total_amount: reagent.price_per_test,
+            paid_amount: 0,
+            discount_amount: 0,
+            payment_status: 'pending',
+            notes: `Laboratoriya reaktivi: ${reagent.name} (${existingOrder.test_name})`,
+            created_by: req.user.id
+          });
+
+          // Create billing item
+          await BillingItem.create({
+            billing_id: invoice._id,
+            service_id: reagent._id,
+            service_name: `Lab reaktiv: ${reagent.name}`,
+            quantity: 1,
+            unit_price: reagent.price_per_test,
+            total_price: reagent.price_per_test
+          });
+        }
+      }
     }
-
-    if (reagent.remaining_tests < 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'Reaktiv yetarli emas'
-      });
-    }
-
-    if (reagent.status === 'expired') {
-      return res.status(400).json({
-        success: false,
-        message: 'Reaktiv muddati o\'tgan'
-      });
-    }
-
-    // Record reagent usage
-    const usage = new LabReagentUsage({
-      reagent: reagent_id,
-      patient: patientId,
-      lab_order: existingOrder._id,
-      test_name: existingOrder.test_name,
-      quantity_used: 1,
-      cost_per_test: reagent.price_per_test,
-      total_cost: reagent.price_per_test * 1,
-      used_by: req.user.id,
-      notes: `Tahlil: ${existingOrder.test_name}`
-    });
-
-    await usage.save();
-
-    // Decrease reagent stock
-    reagent.remaining_tests -= 1;
-    await reagent.save();
-
-    // Add debt to patient
-    const patient = await Patient.findById(patientId);
-    if (patient) {
-      patient.total_debt = (patient.total_debt || 0) + reagent.price_per_test;
-      await patient.save();
-    }
-
-    // Create invoice for reagent cost
-    const Invoice = (await import('../models/Invoice.js')).default;
-    const BillingItem = (await import('../models/BillingItem.js')).default;
-
-    // Generate invoice number
-    const invoiceCount = await Invoice.countDocuments();
-    const invoiceNumber = `INV-${Date.now()}-${invoiceCount + 1}`;
-
-    // Create invoice
-    const invoice = await Invoice.create({
-      patient_id: patientId,
-      invoice_number: invoiceNumber,
-      total_amount: reagent.price_per_test,
-      paid_amount: 0,
-      discount_amount: 0,
-      payment_status: 'pending',
-      notes: `Laboratoriya reaktivi: ${reagent.name} (${existingOrder.test_name})`,
-      created_by: req.user.id
-    });
-
-    // Create billing item
-    await BillingItem.create({
-      billing_id: invoice._id,
-      service_id: reagent._id,
-      service_name: `Lab reaktiv: ${reagent.name}`,
-      quantity: 1,
-      unit_price: reagent.price_per_test,
-      total_price: reagent.price_per_test
-    });
     
     res.json({
       success: true,
-      message: 'Natijalar kiritildi va reaktiv ishlatildi',
+      message: 'Natijalar kiritildi',
       data: {
         id: existingOrder._id,
         order_number: existingOrder.order_number,
-        status: existingOrder.status,
-        reagent_cost: reagent.price_per_test,
-        patient_debt: patient?.total_debt || 0
+        status: existingOrder.status
       }
     });
   } catch (error) {

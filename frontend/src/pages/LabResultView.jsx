@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import laboratoryService from '../services/laboratoryService';
 import toast from 'react-hot-toast';
+import logoImage from '/image.jpg';
 
 export default function LabResultView() {
   const { orderId } = useParams();
@@ -124,11 +125,11 @@ export default function LabResultView() {
           {/* Header */}
           <div className="flex items-start justify-between mb-8 pb-6 border-b-2 border-gray-300">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/>
-                </svg>
-              </div>
+              <img 
+                src={logoImage}
+                alt="Bolajon Med Klinikasi Logo" 
+                className="w-20 h-20 object-contain rounded-lg"
+              />
               <div>
                 <h1 className="text-2xl font-black text-gray-900">Bolajon Med Klinikasi</h1>
                 <p className="text-sm text-gray-600">Диагностика ва даволаш маркази</p>

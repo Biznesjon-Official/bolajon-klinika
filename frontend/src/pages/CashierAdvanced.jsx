@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import billingService from '../services/billingService';
 import patientService from '../services/patientService';
 import servicesService from '../services/servicesService';
+import { queueService } from '../services/queueService';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
@@ -26,6 +27,9 @@ const CashierAdvanced = () => {
   const [invoices, setInvoices] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [services, setServices] = useState([]);
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const [serviceFilter, setServiceFilter] = useState('all'); // all, category
+  const [serviceSearch, setServiceSearch] = useState('');
   const [activeTab, setActiveTab] = useState('new-invoice');
   
   // Services Management State
@@ -33,6 +37,7 @@ const CashierAdvanced = () => {
   const [editingService, setEditingService] = useState(null);
   const [serviceForm, setServiceForm] = useState({
     name: '',
+    category: '',
     price: '',
     duration_minutes: '',
     description: '',
@@ -49,6 +54,9 @@ const CashierAdvanced = () => {
   const [notes, setNotes] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [onDutyDoctors, setOnDutyDoctors] = useState([]);
+  const [allDoctors, setAllDoctors] = useState([]);
+  const [showDoctorModal, setShowDoctorModal] = useState(false);
+  const [doctorSelectionMode, setDoctorSelectionMode] = useState(''); // 'queue' or 'onduty'
   
   // Patient Creation State
   const [showPatientModal, setShowPatientModal] = useState(false);
@@ -101,6 +109,7 @@ const CashierAdvanced = () => {
     loadTransactions(); // Tranzaksiyalarni yuklash
     loadStats(); // Statistikani yuklash
     loadOnDutyDoctors(); // Dejur shifokorlarni yuklash
+    loadAllDoctors(); // Barcha shifokorlarni yuklash
   }, []);
 
   useEffect(() => {
@@ -138,11 +147,72 @@ const CashierAdvanced = () => {
     try {
       const servicesData = await servicesService.getServices();
       if (servicesData.success) {
-        setServices(servicesData.data);
+        // Faqat faol xizmatlarni ko'rsatish
+        const activeServices = servicesData.data.filter(s => s.is_active !== false);
+        setServices(activeServices);
       }
     } catch (error) {
       console.error('Load services error:', error);
     }
+  };
+
+  // Xizmatlarni kategoriya bo'yicha guruhlash
+  const groupServicesByCategory = () => {
+    // Kategoriyalarni qattiq belgilash
+    const CATEGORIES = [
+      "Shifokor ko'rigi",
+      "Kunduzgi muolaja",
+      "Laboratoriya xizmatlari",
+      "Fizioterapiya xizmatlari",
+      "Boshqa"
+    ];
+    
+    const grouped = {};
+    
+    // Avval barcha kategoriyalarni bo'sh massiv bilan yaratish
+    CATEGORIES.forEach(category => {
+      grouped[category] = [];
+    });
+    
+    // Xizmatlarni tegishli kategoriyalarga joylashtirish
+    services.forEach(service => {
+      const category = service.category || 'Boshqa';
+      if (grouped[category]) {
+        grouped[category].push(service);
+      } else {
+        // Agar kategoriya ro'yxatda bo'lmasa, "Boshqa"ga qo'shish
+        grouped['Boshqa'].push(service);
+      }
+    });
+    
+    return grouped;
+  };
+
+  // Xizmatlarni filtrlash
+  const getFilteredServices = () => {
+    let filtered = services;
+    
+    // Kategoriya bo'yicha filtrlash
+    if (serviceFilter !== 'all') {
+      filtered = filtered.filter(s => s.category === serviceFilter);
+    }
+    
+    // Qidiruv
+    if (serviceSearch) {
+      filtered = filtered.filter(s => 
+        s.name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+        (s.category && s.category.toLowerCase().includes(serviceSearch.toLowerCase()))
+      );
+    }
+    
+    return filtered;
+  };
+
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
   };
 
   const loadStats = async () => {
@@ -208,6 +278,17 @@ const CashierAdvanced = () => {
     } catch (error) {
       console.error('Load on-duty doctors error:', error);
       // Xatolik bo'lsa ham davom etish (dejur shifokorlar ixtiyoriy)
+    }
+  };
+
+  const loadAllDoctors = async () => {
+    try {
+      const response = await queueService.getDoctors();
+      if (response.success) {
+        setAllDoctors(response.data);
+      }
+    } catch (error) {
+      console.error('Load all doctors error:', error);
     }
   };
 
@@ -298,6 +379,41 @@ const CashierAdvanced = () => {
     return calculateSubtotal() - discount;
   };
 
+  const handleAddToQueue = async () => {
+    if (!selectedPatient || !selectedDoctor) {
+      showAlert('Bemor va shifokorni tanlang', 'warning', 'Ogohlantirish');
+      return;
+    }
+
+    try {
+      const patient = selectedPatient.patient || selectedPatient;
+      
+      const queueData = {
+        patient_id: patient.id,
+        doctor_id: selectedDoctor,
+        priority: 'normal',
+        notes: invoiceItems.map(item => item.description).join(', ')
+      };
+
+      const response = await queueService.addToQueue(queueData);
+
+      if (response.success) {
+        showAlert('Bemor navbatga qo\'shildi!', 'success', 'Muvaffaqiyatli');
+        setShowDoctorModal(false);
+        setSelectedDoctor(null);
+        setDoctorSelectionMode('');
+      }
+    } catch (error) {
+      console.error('Add to queue error:', error);
+      showAlert(error.response?.data?.message || 'Navbatga qo\'shishda xatolik', 'error', 'Xatolik');
+    }
+  };
+
+  const openDoctorModal = (mode) => {
+    setDoctorSelectionMode(mode);
+    setShowDoctorModal(true);
+  };
+
   const handleCreateInvoice = async () => {
     if (!selectedPatient) {
       showAlert('Iltimos, bemorni tanlang', 'warning', 'Ogohlantirish');
@@ -327,6 +443,8 @@ const CashierAdvanced = () => {
       const invoiceData = {
         patient_id: patient.id,
         items: items,
+        paid_amount: 0,
+        payment_method: null,
         discount_amount: discount || 0,
         notes: notes || ''
       };
@@ -426,15 +544,6 @@ const CashierAdvanced = () => {
 
       const invoiceData = response.data;
       const items = invoiceData.items || [];
-      
-      // Generate QR code
-      const qrData = JSON.stringify({
-        type: 'invoice',
-        id: invoiceData.id,
-        number: invoiceData.invoice_number,
-        amount: invoiceData.total_amount
-      });
-      const qrUrl = await QRCode.toDataURL(qrData, { width: 150 });
 
       // Create print window
       const printWindow = window.open('', '_blank');
@@ -457,7 +566,6 @@ const CashierAdvanced = () => {
             .header {
               text-align: center;
               margin-bottom: 20px;
-              border-bottom: 2px solid #000;
               padding-bottom: 10px;
             }
             .header h1 {
@@ -478,7 +586,7 @@ const CashierAdvanced = () => {
               margin: 15px 0;
             }
             th, td {
-              border: 1px solid #000;
+              border: 1px solid #ddd;
               padding: 8px;
               text-align: left;
             }
@@ -493,36 +601,42 @@ const CashierAdvanced = () => {
               margin-top: 15px;
               float: right;
               width: 300px;
+              border: none !important;
+            }
+            .totals::before {
+              display: none !important;
             }
             .totals-row {
               display: flex;
               justify-content: space-between;
               padding: 5px 0;
+              border: none !important;
+            }
+            .totals-row::before {
+              display: none !important;
             }
             .totals-row.grand-total {
-              border-top: 2px solid #000;
               font-weight: bold;
               font-size: 16px;
               padding-top: 10px;
+              border: none !important;
+            }
+            .totals-row.grand-total::before {
+              display: none !important;
             }
             .footer {
               margin-top: 40px;
               clear: both;
               text-align: center;
             }
-            .qr-code {
-              text-align: center;
-              margin: 20px 0;
-            }
-            .qr-code img {
-              width: 150px;
-              height: 150px;
-            }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>KLINIKA HISOB-FAKTURASI</h1>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+              <img src="/image.jpg" alt="Bolajon Logo" style="width: 60px; height: 60px; object-fit: contain;" />
+              <h1>KLINIKA HISOB-FAKTURASI</h1>
+            </div>
             <p>Faktura raqami: <strong>${invoiceData.invoice_number}</strong></p>
             <p>Sana: ${formatDate(invoiceData.created_at)}</p>
           </div>
@@ -565,8 +679,8 @@ const CashierAdvanced = () => {
             </tbody>
           </table>
 
-          <div class="totals">
-            <div class="totals-row grand-total">
+          <div class="totals" style="border-top: none;">
+            <div class="totals-row grand-total" style="border-top: none; padding-top: 0;">
               <span>TO'LOV SUMMASI:</span>
               <strong>${formatCurrency(invoiceData.total_amount)}</strong>
             </div>
@@ -578,11 +692,6 @@ const CashierAdvanced = () => {
               <span>Qoldiq:</span>
               <strong>${formatCurrency(invoiceData.total_amount - invoiceData.paid_amount)}</strong>
             </div>
-          </div>
-
-          <div class="qr-code">
-            <img src="${qrUrl}" alt="QR Code" />
-            <p>To'lov uchun QR kodni skanerlang</p>
           </div>
 
           <div class="footer">
@@ -611,6 +720,7 @@ const CashierAdvanced = () => {
       setEditingService(service);
       setServiceForm({
         name: service.name,
+        category: service.category || '',
         price: service.price,
         duration_minutes: service.duration_minutes || '',
         description: service.description || '',
@@ -620,6 +730,7 @@ const CashierAdvanced = () => {
       setEditingService(null);
       setServiceForm({
         name: '',
+        category: '',
         price: '',
         duration_minutes: '',
         description: '',
@@ -640,7 +751,7 @@ const CashierAdvanced = () => {
     try {
       const data = {
         name: serviceForm.name,
-        category: serviceForm.name, // Xizmat nomi kategoriya sifatida
+        category: serviceForm.category || 'Boshqa',
         price: parseFloat(serviceForm.price),
         description: serviceForm.description || '',
         is_active: serviceForm.is_active
@@ -660,6 +771,15 @@ const CashierAdvanced = () => {
 
       setShowServiceModal(false);
       await loadServices(); // Faqat xizmatlarni qayta yuklash
+      
+      // Qo'shilgan xizmatning kategoriyasini ochish
+      if (data.category) {
+        setExpandedCategories(prev => ({
+          ...prev,
+          [data.category]: true
+        }));
+      }
+      
       setActiveTab('services'); // Xizmatlar tabiga o'tish
     } catch (error) {
       console.error('Service submit error:', error);
@@ -927,64 +1047,80 @@ const CashierAdvanced = () => {
                   )}
                 </div>
 
-                {/* Services List */}
+                {/* Services List by Category */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Xizmatlar
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-                    {services.map(service => (
-                      <button
-                        key={service._id || service.id}
-                        onClick={() => addServiceToInvoice(service)}
-                        disabled={!selectedPatient}
-                        className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <p className="font-semibold text-gray-900 dark:text-white">{service.name}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{service.category_name || service.category}</p>
-                        <p className="text-primary font-bold mt-1">{formatCurrency(service.price)}</p>
-                      </button>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {Object.entries(groupServicesByCategory()).map(([category, categoryServices]) => (
+                      <div key={category} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        {/* Category Header */}
+                        <button
+                          onClick={() => toggleCategory(category)}
+                          className="w-full p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between transition-colors"
+                        >
+                          <span className="font-semibold text-gray-900 dark:text-white">{category}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {categoryServices.length} ta xizmat
+                            </span>
+                            <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
+                              {expandedCategories[category] ? 'expand_less' : 'expand_more'}
+                            </span>
+                          </div>
+                        </button>
+                        
+                        {/* Category Services */}
+                        {expandedCategories[category] && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-2 bg-white dark:bg-gray-900">
+                            {categoryServices.map(service => (
+                              <button
+                                key={service._id || service.id}
+                                onClick={() => addServiceToInvoice(service)}
+                                disabled={!selectedPatient}
+                                className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <p className="font-semibold text-gray-900 dark:text-white text-sm">{service.name}</p>
+                                <p className="text-primary font-bold mt-1">{formatCurrency(service.price)}</p>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Doctor Selection (Optional) */}
-                {invoiceItems.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Shifokor (ixtiyoriy)
+                {/* Doctor Selection Buttons */}
+                {invoiceItems.length > 0 && selectedPatient && (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Shifokor biriktirish
                     </label>
-                    <select
-                      value={selectedDoctor || ''}
-                      onChange={(e) => setSelectedDoctor(e.target.value || null)}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Shifokor tanlanmagan</option>
-                      {onDutyDoctors.length > 0 && (
-                        <optgroup label="🟢 Navbatdagi shifokorlar (bugun)">
-                          {onDutyDoctors.map(shift => (
-                            <option 
-                              key={shift._id} 
-                              value={shift.doctor_id?._id || shift.doctor_id?.id}
-                            >
-                              👨‍⚕️ {shift.doctor_id?.first_name} {shift.doctor_id?.last_name} 
-                              {shift.doctor_id?.specialization ? ` - ${shift.doctor_id.specialization}` : ''}
-                              {' '}({shift.start_time} - {shift.end_time})
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </select>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => openDoctorModal('onduty')}
+                        className="px-4 py-3 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined">medical_services</span>
+                        Dejur shifokor
+                      </button>
+                      
+                      <button
+                        onClick={() => openDoctorModal('queue')}
+                        className="px-4 py-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined">queue</span>
+                        Navbatga qo'shish
+                      </button>
+                    </div>
+                    
                     {onDutyDoctors.length > 0 && (
-                      <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
+                      <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
                         <span className="material-symbols-outlined text-sm">info</span>
                         Bugun {onDutyDoctors.length} ta shifokor navbatda
-                      </p>
-                    )}
-                    {onDutyDoctors.length === 0 && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">info</span>
-                        Bugun navbatdagi shifokorlar yo'q
                       </p>
                     )}
                   </div>
@@ -1250,7 +1386,7 @@ const CashierAdvanced = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex-1">
                   <p className="text-gray-600 dark:text-gray-400">
-                    Jami: {services.length} ta xizmat
+                    Jami: {getFilteredServices().length} ta xizmat
                   </p>
                 </div>
                 
@@ -1263,23 +1399,48 @@ const CashierAdvanced = () => {
                 </button>
               </div>
 
-              {services.length === 0 ? (
+              {/* Filter and Search */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={serviceSearch}
+                    onChange={(e) => setServiceSearch(e.target.value)}
+                    placeholder="Xizmat qidirish..."
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <select
+                  value={serviceFilter}
+                  onChange={(e) => setServiceFilter(e.target.value)}
+                  className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="all">Barcha kategoriyalar</option>
+                  <option value="Shifokor ko'rigi">Shifokor ko'rigi</option>
+                  <option value="Kunduzgi muolaja">Kunduzgi muolaja</option>
+                  <option value="Laboratoriya xizmatlari">Laboratoriya xizmatlari</option>
+                  <option value="Fizioterapiya xizmatlari">Fizioterapiya xizmatlari</option>
+                  <option value="Boshqa">Boshqa</option>
+                </select>
+              </div>
+
+              {getFilteredServices().length === 0 ? (
                 <div className="text-center py-12">
                   <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
                     medical_services
                   </span>
                   <p className="text-gray-500 dark:text-gray-400">
-                    Xizmatlar yo'q
+                    {serviceSearch || serviceFilter !== 'all' ? 'Xizmat topilmadi' : 'Xizmatlar yo\'q'}
                   </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {services.map(service => (
+                  {getFilteredServices().map(service => (
                     <div key={service._id || service.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
                           <h3 className="font-bold text-gray-900 dark:text-white">{service.name}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{service.category_name}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{service.category}</p>
                         </div>
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${
                           service.is_active 
@@ -1349,6 +1510,25 @@ const CashierAdvanced = () => {
               placeholder="Masalan: Qon tahlili"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Kategoriya <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={serviceForm.category}
+              onChange={(e) => setServiceForm({ ...serviceForm, category: e.target.value })}
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            >
+              <option value="">Kategoriya tanlang</option>
+              <option value="Shifokor ko'rigi">Shifokor ko'rigi</option>
+              <option value="Kunduzgi muolaja">Kunduzgi muolaja</option>
+              <option value="Laboratoriya xizmatlari">Laboratoriya xizmatlari</option>
+              <option value="Fizioterapiya xizmatlari">Fizioterapiya xizmatlari</option>
+              <option value="Boshqa">Boshqa</option>
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -1710,6 +1890,131 @@ const CashierAdvanced = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Doctor Selection Modal */}
+      <Modal
+        isOpen={showDoctorModal}
+        onClose={() => {
+          setShowDoctorModal(false);
+          setSelectedDoctor(null);
+          setDoctorSelectionMode('');
+        }}
+        title={doctorSelectionMode === 'onduty' ? 'Dejur shifokor tanlash' : 'Navbatga qo\'shish'}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {doctorSelectionMode === 'onduty' 
+              ? 'Bugun navbatdagi shifokorlardan birini tanlang'
+              : 'Barcha shifokorlardan birini tanlang va navbatga qo\'shing'
+            }
+          </p>
+
+          {doctorSelectionMode === 'onduty' && onDutyDoctors.length === 0 && (
+            <div className="text-center py-8">
+              <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
+                medical_services
+              </span>
+              <p className="text-gray-500 dark:text-gray-400">Bugun dejur shifokorlar yo'q</p>
+            </div>
+          )}
+
+          {doctorSelectionMode === 'queue' && allDoctors.length === 0 && (
+            <div className="text-center py-8">
+              <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
+                person
+              </span>
+              <p className="text-gray-500 dark:text-gray-400">Shifokorlar topilmadi</p>
+            </div>
+          )}
+
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {doctorSelectionMode === 'onduty' && onDutyDoctors.map(shift => (
+              <button
+                key={shift._id}
+                onClick={() => setSelectedDoctor(shift.doctor_id?._id || shift.doctor_id?.id)}
+                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                  selectedDoctor === (shift.doctor_id?._id || shift.doctor_id?.id)
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="size-12 bg-primary/20 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary">person</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {shift.doctor_id?.first_name} {shift.doctor_id?.last_name}
+                    </p>
+                    {shift.doctor_id?.specialization && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {shift.doctor_id.specialization}
+                      </p>
+                    )}
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      🟢 Navbatda: {shift.start_time} - {shift.end_time}
+                    </p>
+                  </div>
+                  {selectedDoctor === (shift.doctor_id?._id || shift.doctor_id?.id) && (
+                    <span className="material-symbols-outlined text-primary">check_circle</span>
+                  )}
+                </div>
+              </button>
+            ))}
+
+            {doctorSelectionMode === 'queue' && allDoctors.map(doctor => (
+              <button
+                key={doctor._id || doctor.id}
+                onClick={() => setSelectedDoctor(doctor._id || doctor.id)}
+                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                  selectedDoctor === (doctor._id || doctor.id)
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="size-12 bg-primary/20 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary">person</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {doctor.first_name} {doctor.last_name}
+                    </p>
+                    {doctor.specialization && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {doctor.specialization}
+                      </p>
+                    )}
+                  </div>
+                  {selectedDoctor === (doctor._id || doctor.id) && (
+                    <span className="material-symbols-outlined text-primary">check_circle</span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => {
+                setShowDoctorModal(false);
+                setSelectedDoctor(null);
+                setDoctorSelectionMode('');
+              }}
+              className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              Bekor qilish
+            </button>
+            <button
+              onClick={handleAddToQueue}
+              disabled={!selectedDoctor}
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Navbatga qo'shish
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
