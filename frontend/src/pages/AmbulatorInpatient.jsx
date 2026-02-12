@@ -337,7 +337,7 @@ export default function AmbulatorInpatient() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
@@ -349,22 +349,22 @@ export default function AmbulatorInpatient() {
   // Hamshira uchun faqat ko'rish rejimi
   if (isReadOnly) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8">
+      <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8">
         <Toaster position="top-right" />
         
-        <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl p-6 text-white shadow-xl mb-6">
-          <div className="flex items-center gap-4">
+        <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-xl mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             <span className="material-symbols-outlined text-5xl">meeting_room</span>
             <div>
-              <h1 className="text-3xl font-black">AMBULATORXONA</h1>
-              <p className="text-lg opacity-90">Faqat ko'rish rejimi</p>
+              <h1 className="text-2xl sm:text-3xl font-black">AMBULATORXONA</h1>
+              <p className="text-base sm:text-lg opacity-90">Faqat ko'rish rejimi</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-6">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-2xl">info</span>
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-xl sm:text-2xl">info</span>
             <p className="text-yellow-800 dark:text-yellow-200">
               Siz faqat ma'lumotlarni ko'rishingiz mumkin. Tahrirlash va boshqarish uchun admin yoki shifokor huquqi kerak.
             </p>
@@ -372,8 +372,8 @@ export default function AmbulatorInpatient() {
         </div>
 
         {/* Xonalar ro'yxati - faqat ko'rish */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <h3 className="text-2xl font-bold mb-4">Xonalar: {rooms.length} ta</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6">
+          <h3 className="text-xl sm:text-2xl font-bold mb-4">Xonalar: {rooms.length} ta</h3>
           
           {rooms.length === 0 ? (
             <div className="text-center py-12">
@@ -381,13 +381,13 @@ export default function AmbulatorInpatient() {
               <p className="text-gray-500">Xonalar yo'q</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {rooms.map(room => (
-                <div key={room.id} className="border dark:border-gray-700 rounded-xl p-4">
+                <div key={room.id} className="border dark:border-gray-700 rounded-lg sm:rounded-xl p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h4 className="font-bold text-lg">Xona {room.room_number}</h4>
-                      <p className="text-sm text-gray-500">{room.floor_number}-qavat</p>
+                      <h4 className="font-bold text-base sm:text-lg">Xona {room.room_number}</h4>
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-500">{room.floor_number}-qavat</p>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       room.status === 'active' ? 'bg-green-100 text-green-700' :
@@ -398,15 +398,15 @@ export default function AmbulatorInpatient() {
                     </span>
                   </div>
                   
-                  <div className="space-y-2">
-                    <p className="text-sm"><span className="font-semibold">Koykalar:</span> {room.available_beds} / {room.total_beds} bo'sh</p>
+                  <div className="space-y-2 sm:space-y-2 sm:space-y-3">
+                    <p className="text-sm sm:text-sm sm:text-base"><span className="font-semibold">Koykalar:</span> {room.available_beds} / {room.total_beds} bo'sh</p>
                     
                     {room.beds && room.beds.length > 0 && (
-                      <div className="mt-3 space-y-2">
+                      <div className="mt-3 space-y-2 sm:space-y-2 sm:space-y-3">
                         {room.beds.map(bed => (
-                          <div key={bed.id} className={`p-2 rounded-lg border-2 ${getBedStatusColor(bed.bed_status)}`}>
+                          <div key={bed.id} className={`p-2 rounded-lg sm:rounded-lg sm:rounded-xl border-2 ${getBedStatusColor(bed.bed_status)}`}>
                             <div className="flex items-center justify-between">
-                              <span className="font-semibold text-sm">Ko'rpa {bed.bed_number}</span>
+                              <span className="font-semibold text-sm sm:text-sm sm:text-base">Ko'rpa {bed.bed_number}</span>
                               <span className="text-xs">{getBedStatusText(bed.bed_status)}</span>
                             </div>
                             {bed.bed_status === 'occupied' && bed.first_name && (

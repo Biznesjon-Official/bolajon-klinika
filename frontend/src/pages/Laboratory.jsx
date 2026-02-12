@@ -180,14 +180,14 @@ export default function Laboratory() {
   console.log('isReception:', isReception);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white break-words">{t('lab.pageTitle')}</h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl sm:text-2xl sm:text-3xl font-black text-gray-900 dark:text-white break-words">{t('lab.pageTitle')}</h1>
+          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
             {t('lab.pageSubtitle')}
           </p>
         </div>
@@ -195,7 +195,7 @@ export default function Laboratory() {
         {(isAdmin || isLaborant || isDoctor || isReception) && (
           <button
             onClick={handleNewOrder}
-            className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
           >
             <span className="material-symbols-outlined">add</span>
             <span>{t('lab.newOrder')}</span>
@@ -208,37 +208,37 @@ export default function Laboratory() {
         <>
           {/* Admin uchun kengaytirilgan statistika */}
           {isAdmin && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-5 border-2 border-blue-200 dark:border-blue-800">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="material-symbols-outlined text-3xl text-blue-600">payments</span>
+            <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 sm:gap-3 sm:gap-4 mb-4">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg sm:rounded-xl p-5 border-2 border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <span className="material-symbols-outlined text-2xl sm:text-3xl text-blue-600">payments</span>
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Bugungi tushum</p>
-                    <p className="text-2xl font-black text-blue-700 dark:text-blue-400">
+                    <p className="text-xl sm:text-2xl font-black text-blue-700 dark:text-blue-400">
                       {(stats.today_revenue || 0).toLocaleString()} so'm
                     </p>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-5 border-2 border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="material-symbols-outlined text-3xl text-green-600">group</span>
+              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg sm:rounded-xl p-5 border-2 border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <span className="material-symbols-outlined text-2xl sm:text-3xl text-green-600">group</span>
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Bugungi bemorlar</p>
-                    <p className="text-2xl font-black text-green-700 dark:text-green-400">
+                    <p className="text-xl sm:text-2xl font-black text-green-700 dark:text-green-400">
                       {stats.today_patients || 0} ta
                     </p>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl p-5 border-2 border-purple-200 dark:border-purple-800">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="material-symbols-outlined text-3xl text-purple-600">check_circle</span>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg sm:rounded-xl p-5 border-2 border-purple-200 dark:border-purple-800">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <span className="material-symbols-outlined text-2xl sm:text-3xl text-purple-600">check_circle</span>
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Bugun tayyor</p>
-                    <p className="text-2xl font-black text-purple-700 dark:text-purple-400">
+                    <p className="text-xl sm:text-2xl font-black text-purple-700 dark:text-purple-400">
                       {stats.completed_today || 0} ta
                     </p>
                   </div>
@@ -249,30 +249,30 @@ export default function Laboratory() {
           
           {/* Reaktiv statistikasi (faqat admin) */}
           {isAdmin && stats.reagent_stats && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 mb-4">
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-5 border border-gray-200 dark:border-gray-700 mb-4">
+              <h3 className="text-base sm:text-lg font-bold mb-4 flex items-center gap-2 sm:gap-2 sm:gap-3">
                 <span className="material-symbols-outlined text-purple-600">science</span>
                 Lab Reaktivlar Statistikasi
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-2xl font-black text-gray-900 dark:text-white">{stats.reagent_stats.total}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
+                <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl">
+                  <p className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{stats.reagent_stats.total}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">Jami</p>
                 </div>
-                <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <p className="text-2xl font-black text-green-700 dark:text-green-400">{stats.reagent_stats.active}</p>
+                <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl">
+                  <p className="text-xl sm:text-2xl font-black text-green-700 dark:text-green-400">{stats.reagent_stats.active}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">Yaroqli</p>
                 </div>
-                <div className="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                  <p className="text-2xl font-black text-red-700 dark:text-red-400">{stats.reagent_stats.expired}</p>
+                <div className="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg sm:rounded-lg sm:rounded-xl">
+                  <p className="text-xl sm:text-2xl font-black text-red-700 dark:text-red-400">{stats.reagent_stats.expired}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">Yaroqsiz</p>
                 </div>
-                <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                  <p className="text-2xl font-black text-yellow-700 dark:text-yellow-400">{stats.reagent_stats.low_stock}</p>
+                <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg sm:rounded-lg sm:rounded-xl">
+                  <p className="text-xl sm:text-2xl font-black text-yellow-700 dark:text-yellow-400">{stats.reagent_stats.low_stock}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">Kam qolgan</p>
                 </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-2xl font-black text-gray-700 dark:text-gray-400">{stats.reagent_stats.depleted}</p>
+                <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl">
+                  <p className="text-xl sm:text-2xl font-black text-gray-700 dark:text-gray-400">{stats.reagent_stats.depleted}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">Tugagan</p>
                 </div>
               </div>
@@ -280,32 +280,32 @@ export default function Laboratory() {
           )}
           
           {/* Buyurtmalar statistikasi */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 sm:p-5 border-l-4 border-yellow-500">
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('lab.pending')}</p>
-              <p className="text-2xl sm:text-3xl font-black text-yellow-700 dark:text-yellow-400">{stats.pending_orders || 0}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-5 border-l-4 border-yellow-500">
+              <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{t('lab.pending')}</p>
+              <p className="text-2xl sm:text-2xl sm:text-3xl font-black text-yellow-700 dark:text-yellow-400">{stats.pending_orders || 0}</p>
             </div>
-            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 sm:p-5 border-l-4 border-purple-500">
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('lab.inProgress')}</p>
-              <p className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-400">{stats.in_progress_orders || 0}</p>
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-5 border-l-4 border-purple-500">
+              <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{t('lab.inProgress')}</p>
+              <p className="text-2xl sm:text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-400">{stats.in_progress_orders || 0}</p>
             </div>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 sm:p-5 border-l-4 border-green-500">
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Jami buyurtmalar</p>
-              <p className="text-2xl sm:text-3xl font-black text-green-700 dark:text-green-400">{stats.total_orders || 0}</p>
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-5 border-l-4 border-green-500">
+              <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Jami buyurtmalar</p>
+              <p className="text-2xl sm:text-2xl sm:text-3xl font-black text-green-700 dark:text-green-400">{stats.total_orders || 0}</p>
             </div>
-            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 sm:p-5 border-l-4 border-orange-500">
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Bugun tayyor</p>
-              <p className="text-2xl sm:text-3xl font-black text-orange-700 dark:text-orange-400">{stats.completed_today || 0}</p>
+            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-5 border-l-4 border-orange-500">
+              <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Bugun tayyor</p>
+              <p className="text-2xl sm:text-2xl sm:text-3xl font-black text-orange-700 dark:text-orange-400">{stats.completed_today || 0}</p>
             </div>
           </div>
         </>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="flex gap-2 sm:gap-2 sm:gap-3 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
         <button
           onClick={() => setActiveTab('orders')}
-          className={`px-4 py-2 font-semibold transition-colors whitespace-nowrap ${
+          className={`px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 font-semibold transition-colors whitespace-nowrap ${
             activeTab === 'orders'
               ? 'text-primary border-b-2 border-primary'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -316,7 +316,7 @@ export default function Laboratory() {
         {(isAdmin || isLaborant) && (
           <button
             onClick={() => setActiveTab('tests')}
-            className={`px-4 py-2 font-semibold transition-colors whitespace-nowrap ${
+            className={`px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 font-semibold transition-colors whitespace-nowrap ${
               activeTab === 'tests'
                 ? 'text-primary border-b-2 border-primary'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -328,13 +328,13 @@ export default function Laboratory() {
         {isAdmin && (
           <button
             onClick={() => setActiveTab('pharmacy')}
-            className={`px-4 py-2 font-semibold transition-colors whitespace-nowrap flex items-center gap-2 ${
+            className={`px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 font-semibold transition-colors whitespace-nowrap flex items-center gap-2 sm:gap-2 sm:gap-3 ${
               activeTab === 'pharmacy'
                 ? 'text-primary border-b-2 border-primary'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            <span className="material-symbols-outlined text-lg">science</span>
+            <span className="material-symbols-outlined text-base sm:text-lg">science</span>
             Lab Dorixonasi
           </button>
         )}
@@ -342,11 +342,11 @@ export default function Laboratory() {
 
       {/* Filters */}
       {activeTab === 'orders' && (
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="w-full sm:flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg text-sm sm:text-base"
+            className="w-full sm:flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base"
           >
             <option value="all">{t('lab.allStatuses')}</option>
             <option value="pending">{t('lab.pending')}</option>
@@ -359,7 +359,7 @@ export default function Laboratory() {
           <select
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="w-full sm:flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg text-sm sm:text-base"
+            className="w-full sm:flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base"
           >
             <option value="today">{t('lab.today')}</option>
             <option value="week">{t('lab.lastWeek')}</option>
@@ -446,51 +446,51 @@ function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isD
 
   if (orders.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-xl p-8 sm:p-12 text-center border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl p-4 sm:p-6 lg:p-8 sm:p-12 text-center border border-gray-200 dark:border-gray-800">
         <span className="material-symbols-outlined text-5xl sm:text-6xl text-gray-300 dark:text-gray-700 mb-4">science</span>
-        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">{t('lab.noOrders')}</p>
+        <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">{t('lab.noOrders')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden sm:block">
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">{t('lab.orderNumber')}</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">{t('lab.patient')}</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">{t('lab.test')}</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">{t('lab.doctor')}</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">{t('lab.date')}</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">{t('lab.status')}</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">{t('lab.actions')}</th>
+              <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">{t('lab.orderNumber')}</th>
+              <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">{t('lab.patient')}</th>
+              <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">{t('lab.test')}</th>
+              <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">{t('lab.doctor')}</th>
+              <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">{t('lab.date')}</th>
+              <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">{t('lab.status')}</th>
+              <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">{t('lab.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {orders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white">{order.order_number}</td>
-                <td className="px-4 py-3 text-sm">
+                <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{order.order_number}</td>
+                <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base">
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">{order.patient_name}</p>
                     <p className="text-gray-500 dark:text-gray-400">{order.patient_number}</p>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{order.test_name}</td>
-                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{order.doctor_name}</td>
-                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white">{order.test_name}</td>
+                <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-gray-700 dark:text-gray-300">{order.doctor_name}</td>
+                <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-gray-700 dark:text-gray-300">
                   {new Date(order.order_date).toLocaleDateString('uz-UZ')}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getStatusColor(order.status)}`}>
                     {getStatusText(order.status)}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2 flex-wrap">
+                <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+                  <div className="flex gap-2 sm:gap-2 sm:gap-3 flex-wrap">
                     {isLaborant && order.status === 'pending' && (
                       <button
                         onClick={() => handleStatusChange(order.id, 'in_progress')}
@@ -512,7 +512,7 @@ function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isD
                         onClick={() => window.open(`/laboratory/result/${order.id}`, '_blank')}
                         className="px-3 py-1 bg-blue-500 text-white rounded text-xs font-semibold hover:bg-blue-600 whitespace-nowrap flex items-center gap-1"
                       >
-                        <span className="material-symbols-outlined text-sm">download</span>
+                        <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">download</span>
                         {t('lab.download')}
                       </button>
                     )}
@@ -533,17 +533,17 @@ function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isD
       </div>
 
       {/* Mobile Card View */}
-      <div className="lg:hidden p-3 sm:p-4 space-y-3">
+      <div className="lg:hidden sm:block p-3 sm:p-3 sm:p-4 space-y-2 sm:space-y-3">
         {orders.map((order) => (
           <div 
             key={order.id} 
-            className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700 overflow-hidden"
+            className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-gray-200 dark:border-gray-700 overflow-hidden sm:block"
           >
             {/* Order Number & Status */}
-            <div className="flex items-center justify-between mb-3 gap-2">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="flex items-center justify-between mb-3 gap-2 sm:gap-2 sm:gap-3">
+              <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 min-w-0 flex-1">
                 <span className="material-symbols-outlined text-primary flex-shrink-0">science</span>
-                <span className="text-lg font-bold text-gray-900 dark:text-white truncate">{order.order_number}</span>
+                <span className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{order.order_number}</span>
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 ${getStatusColor(order.status)}`}>
                 {getStatusText(order.status)}
@@ -551,41 +551,41 @@ function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isD
             </div>
 
             {/* Order Details */}
-            <div className="space-y-2 mb-3">
+            <div className="space-y-2 sm:space-y-2 sm:space-y-3 mb-3">
               {/* Patient */}
-              <div className="flex items-start gap-2">
-                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg flex-shrink-0">person</span>
+              <div className="flex items-start gap-2 sm:gap-2 sm:gap-3">
+                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-base sm:text-lg flex-shrink-0">person</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-500 dark:text-gray-400">{t('lab.patient')}</p>
                   <p className="font-semibold text-gray-900 dark:text-white break-words">{order.patient_name}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{order.patient_number}</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">{order.patient_number}</p>
                 </div>
               </div>
 
               {/* Test */}
-              <div className="flex items-start gap-2">
-                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg flex-shrink-0">biotech</span>
+              <div className="flex items-start gap-2 sm:gap-2 sm:gap-3">
+                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-base sm:text-lg flex-shrink-0">biotech</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-500 dark:text-gray-400">{t('lab.test')}</p>
-                  <p className="text-sm text-gray-900 dark:text-white break-words">{order.test_name}</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white break-words">{order.test_name}</p>
                 </div>
               </div>
 
               {/* Doctor */}
-              <div className="flex items-start gap-2">
-                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg flex-shrink-0">medical_services</span>
+              <div className="flex items-start gap-2 sm:gap-2 sm:gap-3">
+                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-base sm:text-lg flex-shrink-0">medical_services</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-500 dark:text-gray-400">{t('lab.doctor')}</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 break-words">{order.doctor_name}</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-700 dark:text-gray-300 break-words">{order.doctor_name}</p>
                 </div>
               </div>
 
               {/* Date */}
-              <div className="flex items-start gap-2">
-                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg flex-shrink-0">calendar_today</span>
+              <div className="flex items-start gap-2 sm:gap-2 sm:gap-3">
+                <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-base sm:text-lg flex-shrink-0">calendar_today</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-500 dark:text-gray-400">{t('lab.date')}</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-700 dark:text-gray-300">
                     {new Date(order.order_date).toLocaleDateString('uz-UZ')}
                   </p>
                 </div>
@@ -593,11 +593,11 @@ function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isD
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col gap-2 sm:gap-2 sm:gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
               {isLaborant && order.status === 'pending' && (
                 <button
                   onClick={() => handleStatusChange(order.id, 'in_progress')}
-                  className="w-full px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600"
                 >
                   Namuna olindi
                 </button>
@@ -605,7 +605,7 @@ function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isD
               {isLaborant && order.status === 'in_progress' && !order.result_id && (
                 <button
                   onClick={() => onEnterResult(order)}
-                  className="w-full px-3 py-2 bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-600"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-purple-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-purple-600"
                 >
                   {t('lab.enterResult')}
                 </button>
@@ -613,16 +613,16 @@ function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isD
               {order.result_id && (order.approved_at || isAdmin || isLaborant) && (
                 <button
                   onClick={() => window.open(`/laboratory/result/${order.id}`, '_blank')}
-                  className="w-full px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 flex items-center justify-center gap-2"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-blue-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-blue-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                 >
-                  <span className="material-symbols-outlined text-lg">download</span>
+                  <span className="material-symbols-outlined text-base sm:text-lg">download</span>
                   Yuklab olish
                 </button>
               )}
               {isAdmin && order.status === 'ready' && order.result_id && !order.approved_at && (
                 <button
                   onClick={() => handleApprove(order.result_id)}
-                  className="w-full px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600"
                 >
                   Tasdiqlash
                 </button>
@@ -709,12 +709,12 @@ function TestsCatalog({ tests, onRefresh, t }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4 sm:p-4 sm:p-6 overflow-hidden sm:block">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Laboratoriya xizmatlari</h3>
+        <h3 className="text-lg sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Laboratoriya xizmatlari</h3>
         <button
           onClick={handleAdd}
-          className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+          className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
         >
           <span className="material-symbols-outlined">add</span>
           Xizmat qo'shish
@@ -727,9 +727,9 @@ function TestsCatalog({ tests, onRefresh, t }) {
           <p className="text-gray-600 dark:text-gray-400">Hali xizmatlar qo'shilmagan</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
           {tests.map((test) => (
-            <div key={test.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800 overflow-hidden">
+            <div key={test.id} className="border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 overflow-hidden sm:block">
               <div className="flex items-start justify-between mb-2">
                 <h4 className="font-bold text-gray-900 dark:text-white break-words flex-1">{test.test_name}</h4>
                 <div className="flex gap-1">
@@ -737,22 +737,22 @@ function TestsCatalog({ tests, onRefresh, t }) {
                     onClick={() => handleEdit(test)}
                     className="p-1 text-blue-600 hover:bg-blue-50 rounded"
                   >
-                    <span className="material-symbols-outlined text-lg">edit</span>
+                    <span className="material-symbols-outlined text-base sm:text-lg">edit</span>
                   </button>
                   <button
                     onClick={() => handleDelete(test.id)}
                     className="p-1 text-red-600 hover:bg-red-50 rounded"
                   >
-                    <span className="material-symbols-outlined text-lg">delete</span>
+                    <span className="material-symbols-outlined text-base sm:text-lg">delete</span>
                   </button>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{test.test_code}</p>
-              <p className="text-lg font-semibold text-primary mt-2">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">{test.test_code}</p>
+              <p className="text-base sm:text-lg font-semibold text-primary mt-2">
                 {test.price?.toLocaleString() || 0} so'm
               </p>
               {test.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 break-words">{test.description}</p>
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2 break-words">{test.description}</p>
               )}
             </div>
           ))}
@@ -761,11 +761,11 @@ function TestsCatalog({ tests, onRefresh, t }) {
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl max-w-xl sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold">{editingTest ? 'Xizmatni tahrirlash' : 'Yangi xizmat qo\'shish'}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold">{editingTest ? 'Xizmatni tahrirlash' : 'Yangi xizmat qo\'shish'}</h3>
                 <button
                   onClick={() => setShowAddModal(false)}
                   className="text-gray-500 hover:text-gray-700"
@@ -774,71 +774,71 @@ function TestsCatalog({ tests, onRefresh, t }) {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Xizmat nomi *</label>
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Xizmat nomi *</label>
                   <input
                     type="text"
                     value={formData.test_name}
                     onChange={(e) => setFormData({ ...formData, test_name: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Narxi (so'm) *</label>
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Narxi (so'm) *</label>
                   <input
                     type="number"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Tavsif</label>
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Tavsif</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
                     rows="3"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Tayyorlanish vaqti (soat)</label>
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Tayyorlanish vaqti (soat)</label>
                   <input
                     type="number"
                     value={formData.turnaround_time}
                     onChange={(e) => setFormData({ ...formData, turnaround_time: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Kategoriya</label>
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Kategoriya</label>
                   <input
                     type="text"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
                     placeholder="Masalan: Biokimyo, Gematologiya"
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex gap-2 sm:gap-3 pt-4 border-t">
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border border-gray-300 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50"
                   >
                     Bekor qilish
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90"
+                    className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:opacity-90"
                   >
                     {editingTest ? 'Yangilash' : 'Qo\'shish'}
                   </button>
@@ -891,11 +891,11 @@ function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl max-w-xl sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-4 sm:p-4 sm:p-6 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-900 pb-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{t('lab.newOrderTitle')}</h2>
+            <h2 className="text-xl sm:text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{t('lab.newOrderTitle')}</h2>
             <button
               type="button"
               onClick={onClose}
@@ -907,14 +907,14 @@ function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t
 
           {/* Bemor */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {t('lab.patient')} <span className="text-red-500">{t('lab.required')}</span>
             </label>
             <select
               required
               value={formData.patient_id}
               onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-sm sm:text-base"
             >
               <option value="">{t('lab.selectPatient')}</option>
               {patients.map((patient) => (
@@ -927,13 +927,13 @@ function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t
 
           {/* Shifokor */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {t('lab.doctor')}
             </label>
             <select
               value={formData.doctor_id}
               onChange={(e) => setFormData({ ...formData, doctor_id: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-sm sm:text-base"
             >
               <option value="">{t('lab.selectDoctor')}</option>
               {doctors.map((doctor) => (
@@ -946,14 +946,14 @@ function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t
 
           {/* Tahlil */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {t('lab.test')} <span className="text-red-500">{t('lab.required')}</span>
             </label>
             <select
               required
               value={formData.test_id}
               onChange={(e) => setFormData({ ...formData, test_id: e.target.value })}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-sm sm:text-base"
             >
               <option value="">{t('lab.selectTest')}</option>
               {tests.map((test) => (
@@ -966,14 +966,14 @@ function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t
 
           {/* Muhimlik */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {t('lab.priority')}
             </label>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, priority: 'normal' })}
-                className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
+                className={`flex-1 px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all text-sm sm:text-sm sm:text-base ${
                   formData.priority === 'normal'
                     ? 'bg-primary text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
@@ -984,7 +984,7 @@ function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, priority: 'urgent' })}
-                className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
+                className={`flex-1 px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all text-sm sm:text-sm sm:text-base ${
                   formData.priority === 'urgent'
                     ? 'bg-orange-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
@@ -995,7 +995,7 @@ function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, priority: 'stat' })}
-                className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
+                className={`flex-1 px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all text-sm sm:text-sm sm:text-base ${
                   formData.priority === 'stat'
                     ? 'bg-red-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
@@ -1008,31 +1008,31 @@ function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t
 
           {/* Izoh */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {t('lab.notes')}
             </label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows="3"
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm sm:text-base"
+              className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm sm:text-sm sm:text-base"
               placeholder={t('lab.notesPlaceholder')}
             />
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+          <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 text-sm sm:text-base"
+              className="w-full sm:flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 text-sm sm:text-sm sm:text-base"
             >
               {t('lab.cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 text-sm sm:text-base"
+              className="w-full sm:flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 text-sm sm:text-sm sm:text-base"
             >
               {loading ? t('lab.loading') : t('lab.createOrder')}
             </button>
@@ -1508,11 +1508,11 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl max-w-2xl sm:max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-4 sm:p-4 sm:p-6 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-900 pb-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
+            <h2 className="text-xl sm:text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
               {isBiochemistry ? 'Биохимик таҳлил натижаси' : 
                isBloodTest ? 'Умумий қон таҳлили натижаси' : 
                isVitaminD ? 'Витамин Д натижаси' :
@@ -1534,10 +1534,10 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
           </div>
 
           {/* Buyurtma ma'lumotlari */}
-          <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 overflow-hidden">
+          <div className="p-3 sm:p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl border border-green-200 dark:border-green-800 overflow-hidden sm:block">
             <p className="font-semibold text-gray-900 dark:text-white break-words">{order?.patient_name}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{order?.test_name}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 break-words">Buyurtma: {order?.order_number}</p>
+            <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">{order?.test_name}</p>
+            <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">Buyurtma: {order?.order_number}</p>
           </div>
 
           {isBiochemistry ? (
@@ -1546,19 +1546,19 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               <table className="w-full border-collapse border border-gray-300 dark:border-gray-700">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-left text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       №
                     </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-left text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       ТАҲЛИЛ НОМИ
                     </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-left text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       НАТИЖА
                     </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-left text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       МЕ'ЁР
                     </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-left text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       ЎЛЧОВ БИРЛИГИ
                     </th>
                   </tr>
@@ -1566,25 +1566,25 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
                 <tbody>
                   {biochemParams.map((param, index) => (
                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm text-gray-900 dark:text-white">
+                      <td className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white">
                         {index + 1}.
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white">
+                      <td className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-sm sm:text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
                         {param.name}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-700 px-2 py-2">
+                      <td className="border border-gray-300 dark:border-gray-700 px-2 py-2 sm:py-2.5">
                         <input
                           type="text"
                           value={param.value}
                           onChange={(e) => handleBiochemParamChange(index, e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                          className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-sm sm:text-base"
                           placeholder="Қиймат"
                         />
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 font-medium whitespace-pre-line">
+                      <td className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-sm sm:text-sm sm:text-base text-blue-600 dark:text-blue-400 font-medium whitespace-pre-line">
                         {param.normalRange}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 font-medium">
+                      <td className="border border-gray-300 dark:border-gray-700 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-sm sm:text-sm sm:text-base text-blue-600 dark:text-blue-400 font-medium">
                         {param.unit}
                       </td>
                     </tr>
@@ -1598,16 +1598,16 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               <table className="w-full border-collapse border border-gray-300 dark:border-gray-700">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border border-gray-300 dark:border-gray-700 px-2 py-2 text-center text-sm font-bold text-red-600 dark:text-red-400">
+                    <th className="border border-gray-300 dark:border-gray-700 px-2 py-2 sm:py-2.5 text-center text-sm sm:text-sm sm:text-base font-bold text-red-600 dark:text-red-400">
                       Показатель
                     </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-2 py-2 text-center text-sm font-bold text-red-600 dark:text-red-400">
+                    <th className="border border-gray-300 dark:border-gray-700 px-2 py-2 sm:py-2.5 text-center text-sm sm:text-sm sm:text-base font-bold text-red-600 dark:text-red-400">
                       Результат
                     </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-2 py-2 text-center text-sm font-bold text-red-600 dark:text-red-400">
+                    <th className="border border-gray-300 dark:border-gray-700 px-2 py-2 sm:py-2.5 text-center text-sm sm:text-sm sm:text-base font-bold text-red-600 dark:text-red-400">
                       Норма<br/>Erkak | Ayol
                     </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-2 py-2 text-center text-sm font-bold text-red-600 dark:text-red-400">
+                    <th className="border border-gray-300 dark:border-gray-700 px-2 py-2 sm:py-2.5 text-center text-sm sm:text-sm sm:text-base font-bold text-red-600 dark:text-red-400">
                       Единица<br/>измерения
                     </th>
                   </tr>
@@ -1615,22 +1615,22 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
                 <tbody>
                   {bloodTestParams.map((param, index) => (
                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white whitespace-pre-line">
+                      <td className="border border-gray-300 dark:border-gray-700 px-3 py-2 sm:py-2.5 text-sm sm:text-sm sm:text-base font-semibold text-gray-900 dark:text-white whitespace-pre-line">
                         {param.name}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-700 px-2 py-2">
+                      <td className="border border-gray-300 dark:border-gray-700 px-2 py-2 sm:py-2.5">
                         <input
                           type="text"
                           value={param.value}
                           onChange={(e) => handleBloodTestParamChange(index, e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm text-center"
+                          className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-sm sm:text-base text-center"
                           placeholder="—"
                         />
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 font-semibold text-center whitespace-pre-line">
+                      <td className="border border-gray-300 dark:border-gray-700 px-3 py-2 sm:py-2.5 text-sm sm:text-sm sm:text-base text-blue-600 dark:text-blue-400 font-semibold text-center whitespace-pre-line">
                         {param.normalRange}
                       </td>
-                      <td className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 font-semibold text-center">
+                      <td className="border border-gray-300 dark:border-gray-700 px-3 py-2 sm:py-2.5 text-sm sm:text-sm sm:text-base text-blue-600 dark:text-blue-400 font-semibold text-center">
                         {param.unit}
                       </td>
                     </tr>
@@ -1644,32 +1644,32 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               <table className="w-full border-collapse border-2 border-gray-800">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-yellow-600 dark:text-yellow-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-yellow-600 dark:text-yellow-400">
                       Наименивование анализа
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-yellow-600 dark:text-yellow-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-yellow-600 dark:text-yellow-400">
                       Результат
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-yellow-600 dark:text-yellow-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-yellow-600 dark:text-yellow-400">
                       Норма
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-gray-900 dark:text-white">
+                    <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-gray-900 dark:text-white">
                       25-OH Vitamin D
                     </td>
-                    <td className="border-2 border-gray-800 px-3 py-3">
+                    <td className="border-2 border-gray-800 px-3 py-2 sm:py-3">
                       <input
                         type="text"
                         value={vitaminDResult}
                         onChange={(e) => handleVitaminDChange(e.target.value)}
-                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
+                        className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
                         placeholder="Natijani kiriting"
                       />
                     </td>
-                    <td className="border-2 border-gray-800 px-4 py-3 text-sm text-blue-600 dark:text-blue-400 font-semibold">
+                    <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-blue-600 dark:text-blue-400 font-semibold">
                       <div className="space-y-1">
                         <p>Выраженный дефицит-<span className="font-bold">0,1-9нг/мл</span></p>
                         <p>Достоточный уровень-<span className="font-bold">30-100нг/мл</span></p>
@@ -1687,13 +1687,13 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               <table className="w-full border-collapse border-2 border-gray-800">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-purple-600 dark:text-purple-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-purple-600 dark:text-purple-400">
                       Наименивование анализа
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-purple-600 dark:text-purple-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-purple-600 dark:text-purple-400">
                       Результат
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-purple-600 dark:text-purple-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-purple-600 dark:text-purple-400">
                       Норма(ОП)
                     </th>
                   </tr>
@@ -1701,19 +1701,19 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
                 <tbody>
                   {torchParams.map((param, index) => (
                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-gray-900 dark:text-white italic">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-gray-900 dark:text-white italic">
                         {param.name}
                       </td>
-                      <td className="border-2 border-gray-800 px-3 py-3">
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-3">
                         <input
                           type="text"
                           value={param.value}
                           onChange={(e) => handleTorchParamChange(index, e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
+                          className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
                           placeholder="—"
                         />
                       </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 dark:text-blue-400 font-semibold whitespace-pre-line">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 dark:text-blue-400 font-semibold whitespace-pre-line">
                         {param.normalRange}
                       </td>
                     </tr>
@@ -1723,143 +1723,143 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
             </div>
           ) : isUrine ? (
             /* Сийдик таҳлили uchun forma */
-            <div className="space-y-4">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                <h3 className="font-bold text-lg mb-3 text-blue-800 dark:text-blue-400">ФИЗИК-КИМЁВИЙ ХОССАСИ</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl">
+                <h3 className="font-bold text-base sm:text-lg mb-3 text-blue-800 dark:text-blue-400">ФИЗИК-КИМЁВИЙ ХОССАСИ</h3>
+                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Миқдори (л/мл)</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Миқдори (л/мл)</label>
                     <input
                       type="text"
                       value={urineParams.miqdori}
                       onChange={(e) => handleUrineParamChange('miqdori', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Ранги</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Ранги</label>
                     <input
                       type="text"
                       value={urineParams.rangi}
                       onChange={(e) => handleUrineParamChange('rangi', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Тиниқлиги</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Тиниқлиги</label>
                     <input
                       type="text"
                       value={urineParams.tiniqlik}
                       onChange={(e) => handleUrineParamChange('tiniqlik', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Нисбий зичлиги</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Нисбий зичлиги</label>
                     <input
                       type="text"
                       value={urineParams.nisbiy_zichlik}
                       onChange={(e) => handleUrineParamChange('nisbiy_zichlik', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Реакция</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Реакция</label>
                     <input
                       type="text"
                       value={urineParams.reaktsiya}
                       onChange={(e) => handleUrineParamChange('reaktsiya', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                <h3 className="font-bold text-lg mb-3 text-green-800 dark:text-green-400">МИКРОСКОПИЯ</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-green-50 dark:bg-green-900/20 p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl">
+                <h3 className="font-bold text-base sm:text-lg mb-3 text-green-800 dark:text-green-400">МИКРОСКОПИЯ</h3>
+                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Оқсил</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Оқсил</label>
                     <input
                       type="text"
                       value={urineParams.oqsil}
                       onChange={(e) => handleUrineParamChange('oqsil', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Қанд</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Қанд</label>
                     <input
                       type="text"
                       value={urineParams.qand}
                       onChange={(e) => handleUrineParamChange('qand', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Эпителий</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Эпителий</label>
                     <input
                       type="text"
                       value={urineParams.epiteliy}
                       onChange={(e) => handleUrineParamChange('epiteliy', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Лейкоцит</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Лейкоцит</label>
                     <input
                       type="text"
                       value={urineParams.leykotsit}
                       onChange={(e) => handleUrineParamChange('leykotsit', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Эритроцит</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Эритроцит</label>
                     <input
                       type="text"
                       value={urineParams.eritrotsit}
                       onChange={(e) => handleUrineParamChange('eritrotsit', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Тузлар</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Тузлар</label>
                     <input
                       type="text"
                       value={urineParams.tuzlar}
                       onChange={(e) => handleUrineParamChange('tuzlar', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Бактерия</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Бактерия</label>
                     <input
                       type="text"
                       value={urineParams.bakteriya}
                       onChange={(e) => handleUrineParamChange('bakteriya', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Шилимшиқ</label>
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Шилимшиқ</label>
                     <input
                       type="text"
                       value={urineParams.shilimshiq}
                       onChange={(e) => handleUrineParamChange('shilimshiq', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="—"
                     />
                   </div>
@@ -1872,16 +1872,16 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               <table className="w-full border-collapse border-2 border-gray-800">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-orange-600 dark:text-orange-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-orange-600 dark:text-orange-400">
                       Наименивование анализа
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-orange-600 dark:text-orange-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-orange-600 dark:text-orange-400">
                       Результат
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-orange-600 dark:text-orange-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-orange-600 dark:text-orange-400">
                       Норма
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-orange-600 dark:text-orange-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-orange-600 dark:text-orange-400">
                       Единица измерения
                     </th>
                   </tr>
@@ -1889,22 +1889,22 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
                 <tbody>
                   {hormoneParams.map((param, index) => (
                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-gray-900 dark:text-white">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-gray-900 dark:text-white">
                         {param.name}
                       </td>
-                      <td className="border-2 border-gray-800 px-3 py-3">
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-3">
                         <input
                           type="text"
                           value={param.value}
                           onChange={(e) => handleHormoneParamChange(index, e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
+                          className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
                           placeholder="—"
                         />
                       </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 dark:text-blue-400 font-semibold whitespace-pre-line">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 dark:text-blue-400 font-semibold whitespace-pre-line">
                         {param.normalRange}
                       </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 dark:text-blue-400 font-semibold">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 dark:text-blue-400 font-semibold">
                         {param.unit}
                       </td>
                     </tr>
@@ -1918,13 +1918,13 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               <table className="w-full border-collapse border-2 border-gray-800">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-red-600 dark:text-red-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-red-600 dark:text-red-400">
                       Наименивование анализа
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-red-600 dark:text-red-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-red-600 dark:text-red-400">
                       Результат
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-red-600 dark:text-red-400">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-red-600 dark:text-red-400">
                       Норма
                     </th>
                   </tr>
@@ -1932,19 +1932,19 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
                 <tbody>
                   {oncomarkerParams.map((param, index) => (
                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-gray-900 dark:text-white">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-gray-900 dark:text-white">
                         {param.name}
                       </td>
-                      <td className="border-2 border-gray-800 px-3 py-3">
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-3">
                         <input
                           type="text"
                           value={param.value}
                           onChange={(e) => handleOncomarkerParamChange(index, e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
+                          className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
                           placeholder="—"
                         />
                       </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 dark:text-blue-400 font-semibold whitespace-pre-line text-sm">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 dark:text-blue-400 font-semibold whitespace-pre-line text-sm sm:text-sm sm:text-base">
                         {param.normalRange}
                       </td>
                     </tr>
@@ -1958,16 +1958,16 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               <table className="w-full border-collapse border-2 border-gray-800">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       Таҳлил номи
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       Натижа
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       Норма
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       Ўлчов бирлиги
                     </th>
                   </tr>
@@ -1975,22 +1975,22 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
                 <tbody>
                   {coagulogramParams.map((param, index) => (
                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-gray-900 dark:text-white">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-gray-900 dark:text-white">
                         {param.name}
                       </td>
-                      <td className="border-2 border-gray-800 px-3 py-3">
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-3">
                         <input
                           type="text"
                           value={param.value}
                           onChange={(e) => handleCoagulogramParamChange(index, e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
+                          className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
                           placeholder="—"
                         />
                       </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 dark:text-blue-400 font-semibold">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 dark:text-blue-400 font-semibold">
                         {param.normalRange}
                       </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 dark:text-blue-400 font-semibold">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 dark:text-blue-400 font-semibold">
                         {param.unit}
                       </td>
                     </tr>
@@ -2004,13 +2004,13 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               <table className="w-full border-collapse border-2 border-gray-800">
                 <thead>
                   <tr className="bg-gray-100 dark:bg-gray-800">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       Показатель
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       Результат
                     </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                       Норма
                     </th>
                   </tr>
@@ -2018,19 +2018,19 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
                 <tbody>
                   {lipidParams.map((param, index) => (
                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-gray-900 dark:text-white">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-gray-900 dark:text-white">
                         {param.name}
                       </td>
-                      <td className="border-2 border-gray-800 px-3 py-3">
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-3">
                         <input
                           type="text"
                           value={param.value}
                           onChange={(e) => handleLipidParamChange(index, e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
+                          className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-primary text-center font-semibold"
                           placeholder="—"
                         />
                       </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left text-blue-600 dark:text-blue-400 font-semibold whitespace-pre-line text-sm">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-blue-600 dark:text-blue-400 font-semibold whitespace-pre-line text-sm sm:text-sm sm:text-base">
                         {param.normalRange}
                       </td>
                     </tr>
@@ -2041,14 +2041,14 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
           ) : (
             /* Oddiy tahlillar uchun textarea */
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Natija *
               </label>
               <textarea
                 value={formData.result_text}
                 onChange={(e) => setFormData({ ...formData, result_text: e.target.value })}
                 rows="12"
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono text-sm"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono text-sm sm:text-sm sm:text-base"
                 placeholder="Natijalarni kiriting..."
                 required
               />
@@ -2057,31 +2057,31 @@ function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
 
           {/* Izohlar */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Изоҳлар
             </label>
             <textarea
               value={formData.technician_notes}
               onChange={(e) => setFormData({ ...formData, technician_notes: e.target.value })}
               rows="3"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm sm:text-sm sm:text-base"
               placeholder="Қўшимча изоҳлар..."
             />
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+          <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 text-sm sm:text-base"
+              className="w-full sm:flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 text-sm sm:text-sm sm:text-base"
             >
               Бекор қилиш
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 text-sm sm:text-base"
+              className="w-full sm:flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 text-sm sm:text-sm sm:text-base"
             >
               {loading ? 'Юкланмоқда...' : 'Натижани юбориш'}
             </button>

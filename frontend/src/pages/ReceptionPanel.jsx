@@ -53,73 +53,73 @@ export default function ReceptionPanel() {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
       
       {/* SUCCESS BANNER */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-8 text-white shadow-2xl">
-        <div className="flex items-center gap-4 mb-4">
+      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white shadow-2xl">
+        <div className="flex items-center gap-3 sm:gap-4 mb-4">
           <span className="material-symbols-outlined text-6xl">check_circle</span>
           <div>
-            <h1 className="text-4xl font-black flex items-center gap-3">
+            <h1 className="text-3xl sm:text-4xl font-black flex items-center gap-2 sm:gap-3">
               <span className="material-symbols-outlined text-5xl">desk</span>
               QABULXONA PANELI
             </h1>
-            <p className="text-xl mt-2">Xush kelibsiz, {user?.full_name || user?.username}!</p>
+            <p className="text-lg sm:text-xl mt-2">Xush kelibsiz, {user?.full_name || user?.username}!</p>
           </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-blue-600 text-2xl">groups</span>
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center">
+              <span className="material-symbols-outlined text-blue-600 text-xl sm:text-2xl">groups</span>
             </div>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{stats.todayPatients}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.todayPatients}</span>
           </div>
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Bugungi bemorlar</h3>
+          <h3 className="text-sm sm:text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">Bugungi bemorlar</h3>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-yellow-600 text-2xl">schedule</span>
+            <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center">
+              <span className="material-symbols-outlined text-yellow-600 text-xl sm:text-2xl">schedule</span>
             </div>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{stats.waitingQueue}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.waitingQueue}</span>
           </div>
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Navbatda</h3>
+          <h3 className="text-sm sm:text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">Navbatda</h3>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-green-600 text-2xl">check_circle</span>
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center">
+              <span className="material-symbols-outlined text-green-600 text-xl sm:text-2xl">check_circle</span>
             </div>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{stats.completedToday}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.completedToday}</span>
           </div>
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Yakunlangan</h3>
+          <h3 className="text-sm sm:text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">Yakunlangan</h3>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-purple-600 text-2xl">payments</span>
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center">
+              <span className="material-symbols-outlined text-purple-600 text-xl sm:text-2xl">payments</span>
             </div>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalRevenue.toLocaleString()}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.totalRevenue.toLocaleString()}</span>
           </div>
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Bugungi tushum (so'm)</h3>
+          <h3 className="text-sm sm:text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">Bugungi tushum (so'm)</h3>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Tez harakatlar</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-900 dark:text-white">Tez harakatlar</h2>
+        <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           <a
             href="/patients"
-            className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl hover:shadow-lg transition-all border-2 border-blue-200 dark:border-blue-800"
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-blue-200 dark:border-blue-800"
           >
             <span className="material-symbols-outlined text-5xl text-blue-600">groups</span>
             <span className="font-semibold text-gray-900 dark:text-white">Bemorlar</span>
@@ -127,7 +127,7 @@ export default function ReceptionPanel() {
 
           <a
             href="/queue"
-            className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-xl hover:shadow-lg transition-all border-2 border-yellow-200 dark:border-yellow-800"
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-yellow-200 dark:border-yellow-800"
           >
             <span className="material-symbols-outlined text-5xl text-yellow-600">format_list_numbered</span>
             <span className="font-semibold text-gray-900 dark:text-white">Navbat</span>
@@ -135,7 +135,7 @@ export default function ReceptionPanel() {
 
           <a
             href="/cashier"
-            className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl hover:shadow-lg transition-all border-2 border-green-200 dark:border-green-800"
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-green-200 dark:border-green-800"
           >
             <span className="material-symbols-outlined text-5xl text-green-600">payments</span>
             <span className="font-semibold text-gray-900 dark:text-white">Kassa</span>
@@ -143,7 +143,7 @@ export default function ReceptionPanel() {
 
           <a
             href="/laboratory"
-            className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl hover:shadow-lg transition-all border-2 border-purple-200 dark:border-purple-800"
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-purple-200 dark:border-purple-800"
           >
             <span className="material-symbols-outlined text-5xl text-purple-600">biotech</span>
             <span className="font-semibold text-gray-900 dark:text-white">Laboratoriya</span>
@@ -151,7 +151,7 @@ export default function ReceptionPanel() {
 
           <button
             onClick={handleNewLabOrder}
-            className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-xl hover:shadow-lg transition-all border-2 border-indigo-200 dark:border-indigo-800"
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-indigo-200 dark:border-indigo-800"
           >
             <span className="material-symbols-outlined text-5xl text-indigo-600">add_circle</span>
             <span className="font-semibold text-gray-900 dark:text-white">Lab Buyurtma</span>
@@ -159,7 +159,7 @@ export default function ReceptionPanel() {
 
           <a
             href="/my-tasks"
-            className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-xl hover:shadow-lg transition-all border-2 border-orange-200 dark:border-orange-800"
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-orange-200 dark:border-orange-800"
           >
             <span className="material-symbols-outlined text-5xl text-orange-600">task</span>
             <span className="font-semibold text-gray-900 dark:text-white">Mening Vazifalarim</span>
@@ -167,7 +167,7 @@ export default function ReceptionPanel() {
 
           <a
             href="/my-salary"
-            className="flex flex-col items-center gap-3 p-6 bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-xl hover:shadow-lg transition-all border-2 border-teal-200 dark:border-teal-800"
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-teal-200 dark:border-teal-800"
           >
             <span className="material-symbols-outlined text-5xl text-teal-600">account_balance_wallet</span>
             <span className="font-semibold text-gray-900 dark:text-white">Mening Maoshim</span>
@@ -228,11 +228,11 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl max-w-xl sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-900 pb-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2 sm:gap-2 sm:gap-3">
               <span className="material-symbols-outlined text-purple-600">biotech</span>
               Laboratoriya Buyurtmasi
             </h2>
@@ -247,14 +247,14 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
 
           {/* Bemor */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Bemor <span className="text-red-500">*</span>
             </label>
             <select
               required
               value={formData.patient_id}
               onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Bemorni tanlang</option>
               {patients.map((patient) => (
@@ -267,13 +267,13 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
 
           {/* Laborant */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Laborant
             </label>
             <select
               value={formData.doctor_id}
               onChange={(e) => setFormData({ ...formData, doctor_id: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Laborantni tanlang</option>
               {doctors.map((doctor) => (
@@ -286,14 +286,14 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
 
           {/* Tahlil */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Tahlil <span className="text-red-500">*</span>
             </label>
             <select
               required
               value={formData.test_id}
               onChange={(e) => setFormData({ ...formData, test_id: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Tahlilni tanlang</option>
               {tests.map((test) => (
@@ -306,14 +306,14 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
 
           {/* Muhimlik */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Muhimlik darajasi
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, priority: 'normal' })}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+                className={`flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
                   formData.priority === 'normal'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
@@ -324,7 +324,7 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, priority: 'urgent' })}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+                className={`flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
                   formData.priority === 'urgent'
                     ? 'bg-orange-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
@@ -335,7 +335,7 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, priority: 'stat' })}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+                className={`flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
                   formData.priority === 'stat'
                     ? 'bg-red-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
@@ -348,31 +348,31 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
 
           {/* Izoh */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Izoh
             </label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows="3"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
               placeholder="Qo'shimcha ma'lumot..."
             />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-purple-600 text-white rounded-lg sm:rounded-xl font-semibold hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
             >
               {loading ? (
                 <>

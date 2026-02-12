@@ -290,7 +290,7 @@ const StaffManagementAdvanced = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
@@ -300,18 +300,18 @@ const StaffManagementAdvanced = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white">Xodimlar boshqaruvi</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Xodimlar boshqaruvi</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Jami: {staff.length} ta xodim
           </p>
         </div>
         <button
           onClick={() => openStaffModal()}
-          className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-2"
+          className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
         >
           <span className="material-symbols-outlined">add</span>
           Xodim qo'shish
@@ -319,16 +319,16 @@ const StaffManagementAdvanced = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Lavozim
             </label>
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl"
             >
               <option value="all">Barchasi</option>
               {roles.map(role => (
@@ -338,13 +338,13 @@ const StaffManagementAdvanced = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Holat
             </label>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl"
             >
               <option value="all">Barchasi</option>
               <option value="active">Faol</option>
@@ -355,7 +355,7 @@ const StaffManagementAdvanced = () => {
       </div>
 
       {/* Staff List */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800">
         {filteredStaff.length === 0 ? (
           <div className="p-12 text-center">
             <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
@@ -366,17 +366,17 @@ const StaffManagementAdvanced = () => {
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredStaff.map((member) => (
-              <div key={member.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+              <div key={member.id} className="p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 flex-1">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-1">
                     <div className="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center">
-                      <span className="text-2xl font-black">
+                      <span className="text-xl sm:text-2xl font-black">
                         {member.first_name[0]}{member.last_name[0]}
                       </span>
                     </div>
                     
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                         <p className="font-bold text-gray-900 dark:text-white">
                           {member.first_name} {member.last_name} {member.middle_name}
                         </p>
@@ -388,10 +388,10 @@ const StaffManagementAdvanced = () => {
                           {member.user_active ? 'Faol' : 'Nofaol'}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                         {getRoleDisplayName(member.role)} {member.specialization && `• ${member.specialization}`}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-500">
                         {member.phone} • {member.email}
                       </p>
                       {member.license_number && (
@@ -400,8 +400,8 @@ const StaffManagementAdvanced = () => {
                         </p>
                       )}
                       {member.access_code && (
-                        <div className="mt-1 inline-flex items-center gap-2 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                          <span className="material-symbols-outlined text-sm text-blue-600 dark:text-blue-400">qr_code</span>
+                        <div className="mt-1 inline-flex items-center gap-2 sm:gap-2 sm:gap-3 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg sm:rounded-lg sm:rounded-xl">
+                          <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base text-blue-600 dark:text-blue-400">qr_code</span>
                           <span className="text-xs font-mono font-bold text-blue-700 dark:text-blue-300">
                             {member.access_code}
                           </span>
@@ -411,43 +411,43 @@ const StaffManagementAdvanced = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     {member.salary && (
                       <div className="text-right">
-                        <p className="text-sm text-gray-500">Maosh</p>
+                        <p className="text-sm sm:text-sm sm:text-base text-gray-500">Maosh</p>
                         <p className="font-bold text-gray-900 dark:text-white">
                           {formatCurrency(member.salary)}
                         </p>
                       </div>
                     )}
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 sm:gap-2 sm:gap-3">
                       <button
                         onClick={() => handleToggleStatus(member)}
-                        className={`px-3 py-2 rounded-lg text-sm font-semibold ${
+                        className={`px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold ${
                           member.user_active
                             ? 'bg-yellow-500 text-white hover:bg-yellow-600'
                             : 'bg-green-500 text-white hover:bg-green-600'
                         }`}
                         title={member.user_active ? 'Faolsizlantirish' : 'Faollashtirish'}
                       >
-                        <span className="material-symbols-outlined text-lg">
+                        <span className="material-symbols-outlined text-base sm:text-lg">
                           {member.user_active ? 'block' : 'check_circle'}
                         </span>
                       </button>
                       <button
                         onClick={() => openStaffModal(member)}
-                        className="px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600"
+                        className="px-3 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600"
                         title="Tahrirlash"
                       >
-                        <span className="material-symbols-outlined text-lg">edit</span>
+                        <span className="material-symbols-outlined text-base sm:text-lg">edit</span>
                       </button>
                       <button
                         onClick={() => handleDeleteStaff(member.id)}
-                        className="px-3 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600"
+                        className="px-3 py-2 sm:py-2.5 bg-red-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-red-600"
                         title="O'chirish"
                       >
-                        <span className="material-symbols-outlined text-lg">delete</span>
+                        <span className="material-symbols-outlined text-base sm:text-lg">delete</span>
                       </button>
                     </div>
                   </div>
@@ -465,11 +465,11 @@ const StaffManagementAdvanced = () => {
         size="sm"
         title={editingStaff ? 'Xodimni tahrirlash' : 'Yangi xodim qo\'shish'}
       >
-        <form onSubmit={handleStaffSubmit} className="space-y-3">
+        <form onSubmit={handleStaffSubmit} className="space-y-2 sm:space-y-3">
           {/* Stepper Indicator - Only for new staff */}
           {!editingStaff && (
-            <div className="flex items-center justify-center gap-2 -mt-2 mb-3">
-                <div className={`size-9 rounded-xl flex items-center justify-center font-bold transition-all ${
+            <div className="flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 -mt-2 mb-3">
+                <div className={`size-9 rounded-lg sm:rounded-xl flex items-center justify-center font-bold transition-all ${
                   currentStep >= 1 
                     ? 'bg-primary text-white shadow-lg scale-110' 
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
@@ -481,7 +481,7 @@ const StaffManagementAdvanced = () => {
                   currentStep >= 2 ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'
                 }`}></div>
                 
-                <div className={`size-9 rounded-xl flex items-center justify-center font-bold transition-all ${
+                <div className={`size-9 rounded-lg sm:rounded-xl flex items-center justify-center font-bold transition-all ${
                   currentStep >= 2 
                     ? 'bg-primary text-white shadow-lg scale-110' 
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
@@ -493,7 +493,7 @@ const StaffManagementAdvanced = () => {
                   currentStep >= 3 ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'
                 }`}></div>
                 
-                <div className={`size-9 rounded-xl flex items-center justify-center font-bold transition-all ${
+                <div className={`size-9 rounded-lg sm:rounded-xl flex items-center justify-center font-bold transition-all ${
                   currentStep >= 3 
                     ? 'bg-primary text-white shadow-lg scale-110' 
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
@@ -506,19 +506,19 @@ const StaffManagementAdvanced = () => {
 
           {/* Step 1: Login ma'lumotlari - Only for new staff */}
           {!editingStaff && currentStep === 1 && (
-            <div className="space-y-3 animate-fadeIn">
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-2">
-                <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-                  <span className="material-symbols-outlined text-base">info</span>
+            <div className="space-y-2 sm:space-y-3 animate-fadeIn">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg sm:rounded-lg sm:rounded-xl p-2">
+                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-green-700 dark:text-green-400">
+                  <span className="material-symbols-outlined text-sm sm:text-base">info</span>
                   <span className="text-xs font-semibold">Login ma'lumotlari</span>
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="group">
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    <span className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-base">person</span>
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                      <span className="material-symbols-outlined text-sm sm:text-base">person</span>
                       Foydalanuvchi nomi <span className="text-red-500">*</span>
                     </span>
                   </label>
@@ -526,15 +526,15 @@ const StaffManagementAdvanced = () => {
                     type="text"
                     value={staffForm.username}
                     onChange={(e) => setStaffForm({ ...staffForm, username: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="username"
                   />
                 </div>
 
                 <div className="group">
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    <span className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-base">lock</span>
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                      <span className="material-symbols-outlined text-sm sm:text-base">lock</span>
                       Parol <span className="text-red-500">*</span>
                     </span>
                   </label>
@@ -542,23 +542,23 @@ const StaffManagementAdvanced = () => {
                     type="password"
                     value={staffForm.password}
                     onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="••••••••"
                   />
                 </div>
               </div>
 
               <div className="group">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-base">badge</span>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                    <span className="material-symbols-outlined text-sm sm:text-base">badge</span>
                     Lavozim <span className="text-red-500">*</span>
                   </span>
                 </label>
                 <select
                   value={staffForm.role_id}
                   onChange={(e) => setStaffForm({ ...staffForm, role_id: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                  className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                 >
                   <option value="">Lavozimni tanlang</option>
                   {roles.map(role => (
@@ -571,15 +571,15 @@ const StaffManagementAdvanced = () => {
 
           {/* Step 2: Shaxsiy ma'lumotlar */}
           {(!editingStaff && currentStep === 2) || editingStaff ? (
-            <div className="space-y-3 animate-fadeIn">
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-2">
-                <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-                  <span className="material-symbols-outlined text-base">account_circle</span>
+            <div className="space-y-2 sm:space-y-3 animate-fadeIn">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg sm:rounded-lg sm:rounded-xl p-2">
+                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-green-700 dark:text-green-400">
+                  <span className="material-symbols-outlined text-sm sm:text-base">account_circle</span>
                   <span className="text-xs font-semibold">Shaxsiy ma'lumotlar</span>
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="group">
                   <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                     Ism <span className="text-red-500">*</span>
@@ -588,7 +588,7 @@ const StaffManagementAdvanced = () => {
                     type="text"
                     value={staffForm.first_name}
                     onChange={(e) => setStaffForm({ ...staffForm, first_name: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="Ism"
                     required
                   />
@@ -602,7 +602,7 @@ const StaffManagementAdvanced = () => {
                     type="text"
                     value={staffForm.last_name}
                     onChange={(e) => setStaffForm({ ...staffForm, last_name: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="Familiya"
                     required
                   />
@@ -616,23 +616,23 @@ const StaffManagementAdvanced = () => {
                     type="text"
                     value={staffForm.middle_name}
                     onChange={(e) => setStaffForm({ ...staffForm, middle_name: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="Otasining ismi"
                   />
                 </div>
               </div>
 
               <div className="group">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-base">phone</span>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                    <span className="material-symbols-outlined text-sm sm:text-base">phone</span>
                     Telefon <span className="text-red-500">*</span>
                   </span>
                 </label>
                 <PhoneInput
                   value={staffForm.phone}
                   onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                  className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                   placeholder="+998 XX XXX XX XX"
                   required
                 />
@@ -642,10 +642,10 @@ const StaffManagementAdvanced = () => {
 
           {/* Step 3: Qo'shimcha ma'lumotlar - Only for new staff */}
           {!editingStaff && currentStep === 3 && (
-            <div className="space-y-3 animate-fadeIn">
-              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-2">
-                <div className="flex items-center gap-2 text-purple-700 dark:text-purple-400">
-                  <span className="material-symbols-outlined text-base">work</span>
+            <div className="space-y-2 sm:space-y-3 animate-fadeIn">
+              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg sm:rounded-lg sm:rounded-xl p-2">
+                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-purple-700 dark:text-purple-400">
+                  <span className="material-symbols-outlined text-sm sm:text-base">work</span>
                   <span className="text-xs font-semibold">Qo'shimcha ma'lumotlar</span>
                 </div>
               </div>
@@ -657,11 +657,11 @@ const StaffManagementAdvanced = () => {
                 const needsSpecialization = ['doctor', 'nurse', 'laborant', 'pharmacist'].includes(roleName);
                 
                 return needsSpecialization && (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     <div className="group">
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        <span className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-base">medical_services</span>
+                      <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                          <span className="material-symbols-outlined text-sm sm:text-base">medical_services</span>
                           Mutaxassislik {roleName === 'doctor' && <span className="text-red-500">*</span>}
                         </span>
                       </label>
@@ -669,16 +669,16 @@ const StaffManagementAdvanced = () => {
                         type="text"
                         value={staffForm.specialization}
                         onChange={(e) => setStaffForm({ ...staffForm, specialization: e.target.value })}
-                        className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                        className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                         placeholder={roleName === 'doctor' ? 'Masalan: Kardiolog' : roleName === 'nurse' ? 'Masalan: Operatsion hamshira' : roleName === 'laborant' ? 'Masalan: Klinik laborant' : 'Mutaxassislik'}
                         required={roleName === 'doctor'}
                       />
                     </div>
 
                     <div className="group">
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        <span className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-base">verified</span>
+                      <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                          <span className="material-symbols-outlined text-sm sm:text-base">verified</span>
                           Litsenziya raqami {roleName === 'doctor' && <span className="text-red-500">*</span>}
                         </span>
                       </label>
@@ -686,7 +686,7 @@ const StaffManagementAdvanced = () => {
                         type="text"
                         value={staffForm.license_number}
                         onChange={(e) => setStaffForm({ ...staffForm, license_number: e.target.value })}
-                        className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                        className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                         placeholder="LIC-12345"
                         required={roleName === 'doctor'}
                       />
@@ -696,16 +696,16 @@ const StaffManagementAdvanced = () => {
               })()}
 
               <div className="group">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-base">calendar_today</span>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                    <span className="material-symbols-outlined text-sm sm:text-base">calendar_today</span>
                     Ishga qabul qilingan sana <span className="text-red-500">*</span>
                   </span>
                 </label>
                 <DateInput
                   value={staffForm.hire_date}
                   onChange={(e) => setStaffForm({ ...staffForm, hire_date: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                  className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                   required
                 />
               </div>
@@ -713,14 +713,14 @@ const StaffManagementAdvanced = () => {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex gap-2 sm:gap-2 sm:gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
             {/* Bekor qilish button - always visible */}
             <button
               type="button"
               onClick={() => setShowStaffModal(false)}
-              className="px-5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2 text-sm"
+              className="px-5 py-2 sm:py-2.5.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base"
             >
-              <span className="material-symbols-outlined text-base">close</span>
+              <span className="material-symbols-outlined text-sm sm:text-base">close</span>
               Bekor qilish
             </button>
 
@@ -729,9 +729,9 @@ const StaffManagementAdvanced = () => {
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className="px-5 py-2.5 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 transition-all flex items-center gap-2 shadow-lg hover:shadow-xl text-sm"
+                className="px-5 py-2 sm:py-2.5.5 bg-gray-500 text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-600 transition-all flex items-center gap-2 sm:gap-2 sm:gap-3 shadow-lg hover:shadow-xl text-sm sm:text-sm sm:text-base"
               >
-                <span className="material-symbols-outlined text-base">arrow_back</span>
+                <span className="material-symbols-outlined text-sm sm:text-base">arrow_back</span>
                 Orqaga
               </button>
             )}
@@ -741,10 +741,10 @@ const StaffManagementAdvanced = () => {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="flex-1 px-5 py-2.5 bg-gradient-to-r from-primary to-green-600 text-white rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2 shadow-lg text-sm"
+                className="flex-1 px-5 py-2 sm:py-2.5.5 bg-gradient-to-r from-primary to-green-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 shadow-lg text-sm sm:text-sm sm:text-base"
               >
                 Keyingi
-                <span className="material-symbols-outlined text-base">arrow_forward</span>
+                <span className="material-symbols-outlined text-sm sm:text-base">arrow_forward</span>
               </button>
             )}
 
@@ -752,9 +752,9 @@ const StaffManagementAdvanced = () => {
             {(editingStaff || currentStep === 3) && (
               <button
                 type="submit"
-                className="flex-1 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2 shadow-lg text-sm"
+                className="flex-1 px-5 py-2 sm:py-2.5.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 shadow-lg text-sm sm:text-sm sm:text-base"
               >
-                <span className="material-symbols-outlined text-base">
+                <span className="material-symbols-outlined text-sm sm:text-base">
                   {editingStaff ? 'save' : 'check_circle'}
                 </span>
                 {editingStaff ? 'Saqlash' : 'Qo\'shish'}

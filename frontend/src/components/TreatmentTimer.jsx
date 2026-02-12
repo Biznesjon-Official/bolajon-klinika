@@ -144,11 +144,11 @@ export default function TreatmentTimer({ treatments, onTimerComplete, audioEnabl
   };
 
   return (
-    <div className={`absolute top-2 right-2 ${colorClasses[urgencyLevel]} px-3 py-2 rounded-xl shadow-lg border-2 flex items-center gap-2 z-10 transition-all duration-300`}>
-      <span className={`material-symbols-outlined text-lg ${iconClasses[urgencyLevel]}`}>
+    <div className={`absolute top-2 right-2 ${colorClasses[urgencyLevel]} px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg border-2 flex items-center gap-2 sm:gap-2 sm:gap-3 z-10 transition-all duration-300`}>
+      <span className={`material-symbols-outlined text-base sm:text-lg ${iconClasses[urgencyLevel]}`}>
         {urgencyLevel === 'critical' ? 'emergency' : 'schedule'}
       </span>
-      <div className="text-sm font-bold">
+      <div className="text-sm sm:text-sm sm:text-base font-bold">
         <div className="leading-tight">
           {timeLeft.minutes}:{String(timeLeft.seconds).padStart(2, '0')}
         </div>

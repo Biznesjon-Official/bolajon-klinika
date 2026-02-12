@@ -133,7 +133,7 @@ const Dashboard = () => {
 
   if (loading && !stats.totalPatients) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
@@ -143,14 +143,14 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 sm:gap-0">
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 break-words">
+          <h1 className="text-2xl sm:text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
+          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 break-words">
             {t('dashboard.welcome')}, Dr. Admin
-            <span className="block sm:inline sm:ml-2 text-xs sm:text-sm mt-1 sm:mt-0">
+            <span className="block sm:inline sm:ml-2 text-xs sm:text-sm sm:text-sm sm:text-base mt-1 sm:mt-0">
               {new Date().toLocaleDateString('uz-UZ', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -160,13 +160,13 @@ const Dashboard = () => {
             </span>
           </p>
         </div>
-        <div className="flex gap-2 sm:gap-3">
+        <div className="flex gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
           <button 
             onClick={loadDashboardData}
-            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 sm:flex-none px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
             disabled={loading}
           >
-            <span className={`material-symbols-outlined text-base ${loading ? 'animate-spin' : ''}`}>
+            <span className={`material-symbols-outlined text-sm sm:text-base ${loading ? 'animate-spin' : ''}`}>
               refresh
             </span>
             <span className="hidden sm:inline">Yangilash</span>
@@ -176,16 +176,16 @@ const Dashboard = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 sm:p-4">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-red-600 text-xl sm:text-2xl flex-shrink-0">error</span>
-            <p className="text-sm sm:text-base text-red-600 font-semibold break-words">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+            <span className="material-symbols-outlined text-red-600 text-xl sm:text-xl sm:text-2xl flex-shrink-0">error</span>
+            <p className="text-sm sm:text-sm sm:text-base text-red-600 font-semibold break-words">{error}</p>
           </div>
         </div>
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 sm:gap-3 sm:gap-4 lg:gap-4 sm:gap-6">
         <StatCard
           title="Jami xodimlar"
           value={stats.totalStaff?.toLocaleString() || '0'}
@@ -217,47 +217,47 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 sm:gap-4 sm:gap-6">
         {/* Today's Queue */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{t('dashboard.todayQueue')}</h2>
+        <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4 sm:p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 sm:gap-0 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{t('dashboard.todayQueue')}</h2>
             <button 
               onClick={() => navigate('/queue')}
-              className="text-primary text-sm font-semibold hover:underline self-start sm:self-auto"
+              className="text-primary text-sm sm:text-sm sm:text-base font-semibold hover:underline self-start sm:self-auto"
             >
               {t('dashboard.viewAll')}
             </button>
           </div>
           
           {todayQueue.length === 0 ? (
-            <div className="text-center py-8 sm:py-12">
+            <div className="text-center py-4 sm:py-6 lg:py-8 sm:py-12">
               <span className="material-symbols-outlined text-5xl sm:text-6xl text-gray-300 dark:text-gray-700 mb-3 sm:mb-4">
                 event_available
               </span>
-              <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Bugun navbat yo'q</p>
+              <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">Bugun navbat yo'q</p>
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3 sm:space-y-3 sm:space-y-4">
               {todayQueue.slice(0, 5).map((patient) => (
                 <div 
                   key={patient.id} 
                   onClick={() => navigate(`/patients/${patient.patientId || patient.patient_id}`)}
-                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 sm:gap-3 sm:gap-4 p-3 sm:p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                    <div className="size-10 sm:size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm sm:text-base flex-shrink-0">
+                  <div className="flex items-center gap-2 sm:gap-3 sm:gap-3 sm:gap-4 min-w-0 flex-1">
+                    <div className="size-10 sm:size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm sm:text-sm sm:text-base flex-shrink-0">
                       {patient.queueNumber || patient.patientName?.split(' ').map(n => n[0]).join('') || '?'}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{patient.patientName || 'Noma\'lum'}</p>
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
+                      <p className="font-semibold text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white truncate">{patient.patientName || 'Noma\'lum'}</p>
+                      <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
                         {patient.patientNumber || patient.patientId || 'ID yo\'q'} • {patient.doctorName || 'Shifokor belgilanmagan'}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
-                    <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
+                    <span className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       {patient.appointmentTime || new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     <StatusBadge 
@@ -272,26 +272,26 @@ const Dashboard = () => {
         </div>
 
         {/* Alerts Panel */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">{t('dashboard.alerts')}</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4 sm:p-4 sm:p-6">
+          <h2 className="text-lg sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">{t('dashboard.alerts')}</h2>
           
           {alerts.length === 0 ? (
-            <div className="text-center py-8 sm:py-12">
+            <div className="text-center py-4 sm:py-6 lg:py-8 sm:py-12">
               <span className="material-symbols-outlined text-5xl sm:text-6xl text-gray-300 dark:text-gray-700 mb-3 sm:mb-4">
                 notifications_off
               </span>
-              <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Ogohlantirishlar yo'q</p>
+              <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">Ogohlantirishlar yo'q</p>
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3 sm:space-y-3 sm:space-y-4">
               {alerts.slice(0, 5).map((alert, index) => (
-                <div key={index} className={`p-3 sm:p-4 rounded-lg border ${getAlertBg(alert.type)}`}>
-                  <div className="flex gap-2 sm:gap-3">
-                    <span className={`material-symbols-outlined text-xl sm:text-2xl flex-shrink-0 ${getAlertColor(alert.type)}`}>
+                <div key={index} className={`p-3 sm:p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl border ${getAlertBg(alert.type)}`}>
+                  <div className="flex gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
+                    <span className={`material-symbols-outlined text-xl sm:text-xl sm:text-2xl flex-shrink-0 ${getAlertColor(alert.type)}`}>
                       {getAlertIcon(alert.type)}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white break-words">{alert.message}</p>
+                      <p className="text-xs sm:text-sm sm:text-sm sm:text-base font-medium text-gray-900 dark:text-white break-words">{alert.message}</p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {alert.time || new Date().toLocaleTimeString('uz-UZ')}
                       </p>
@@ -305,7 +305,7 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
         {[
           { icon: 'person_add', label: t('dashboard.registerPatient'), color: 'bg-green-500', path: '/patients' },
           { icon: 'event_available', label: t('dashboard.bookAppointment'), color: 'bg-green-500', path: '/queue' },
@@ -315,12 +315,12 @@ const Dashboard = () => {
           <button 
             key={index} 
             onClick={() => navigate(action.path)}
-            className="p-4 sm:p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all group"
+            className="p-3 sm:p-4 sm:p-4 sm:p-6 bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all group"
           >
-            <div className={`size-10 sm:size-12 ${action.color} rounded-lg flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:scale-110 transition-transform`}>
-              <span className="material-symbols-outlined text-xl sm:text-2xl">{action.icon}</span>
+            <div className={`size-10 sm:size-12 ${action.color} rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:scale-110 transition-transform`}>
+              <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl">{action.icon}</span>
             </div>
-            <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white break-words">{action.label}</p>
+            <p className="text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">{action.label}</p>
           </button>
         ))}
       </div>

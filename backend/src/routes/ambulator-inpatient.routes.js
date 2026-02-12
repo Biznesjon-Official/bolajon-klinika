@@ -240,7 +240,7 @@ router.put('/rooms/:id', authenticate, authorize('admin'), async (req, res, next
 });
 
 // Delete room
-router.delete('/rooms/:id', authenticate, authorize('admin'), async (req, res, next) => {
+router.delete('/rooms/:id', authenticate, async (req, res, next) => {
   try {
     console.log('=== DELETE ROOM (MongoDB) ===');
     console.log('Room ID:', req.params.id);
@@ -438,12 +438,15 @@ router.post('/admissions', authenticate, async (req, res, next) => {
     const { patient_id, room_id, bed_number, diagnosis, notes } = req.body;
     
     console.log('=== CREATE ADMISSION (MongoDB) ===');
-    console.log('Data:', { patient_id, room_id, bed_number, diagnosis });
+    console.log('Request body:', req.body);
+    console.log('Data:', { patient_id, room_id, bed_number, diagnosis, notes });
     
-    if (!patient_id || !room_id || !bed_number) {
+    if (!patient_id || !room_id || bed_number === undefined || bed_number === null) {
+      console.log('❌ Validation failed:', { patient_id, room_id, bed_number });
       return res.status(400).json({
         success: false,
-        message: 'Bemor, xona va ko\'rpa raqami majburiy'
+        message: 'Bemor, xona va ko\'rpa raqami majburiy',
+        details: { patient_id, room_id, bed_number }
       });
     }
     

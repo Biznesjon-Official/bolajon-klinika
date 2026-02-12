@@ -322,28 +322,28 @@ export default function PayrollManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 via-green-600 to-green-600 rounded-3xl p-8 text-white shadow-2xl">
+      <div className="bg-gradient-to-r from-purple-600 via-green-600 to-green-600 rounded-3xl p-4 sm:p-6 lg:p-8 text-white shadow-2xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-5">
-            <div className="size-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center ring-4 ring-white/30">
+            <div className="size-20 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center ring-4 ring-white/30">
               <span className="material-symbols-outlined text-6xl">payments</span>
             </div>
             <div>
-              <h1 className="text-4xl font-black tracking-tight">MAOSHLAR TIZIMI</h1>
-              <p className="text-xl opacity-95 mt-1">Xodimlar ish haqi boshqaruvi</p>
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">MAOSHLAR TIZIMI</h1>
+              <p className="text-lg sm:text-xl opacity-95 mt-1">Xodimlar ish haqi boshqaruvi</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+      <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg">
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-2 px-6 overflow-x-auto">
+          <div className="flex gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 overflow-x-auto">
             {[
               // { id: 'monthly', label: 'Oylik maoshlar', icon: 'calendar_month', color: 'purple' }, // YASHIRILGAN
               { id: 'staff', label: 'Xodimlar maoshi', icon: 'badge', color: 'indigo' },
@@ -353,13 +353,13 @@ export default function PayrollManagement() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-4 font-bold border-b-4 transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 font-bold border-b-4 transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? `border-${tab.color}-500 text-${tab.color}-600 bg-${tab.color}-50`
                     : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white hover:bg-gray-50 dark:bg-gray-700'
                 }`}
               >
-                <span className="material-symbols-outlined text-2xl">{tab.icon}</span>
+                <span className="material-symbols-outlined text-xl sm:text-2xl">{tab.icon}</span>
                 {tab.label}
               </button>
             ))}
@@ -367,71 +367,71 @@ export default function PayrollManagement() {
         </div>
 
         {/* Tab Content */}
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {/* OYLIK MAOSHLAR */}
           {activeTab === 'monthly' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Statistics Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
+              <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-all">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="size-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <span className="material-symbols-outlined text-3xl">group</span>
+                    <div className="size-14 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <span className="material-symbols-outlined text-2xl sm:text-3xl">group</span>
                     </div>
-                    <span className="text-4xl font-black">{payrollStats.totalStaff}</span>
+                    <span className="text-3xl sm:text-4xl font-black">{payrollStats.totalStaff}</span>
                   </div>
-                  <p className="text-sm font-bold opacity-90">Jami xodimlar</p>
+                  <p className="text-sm sm:text-sm sm:text-base font-bold opacity-90">Jami xodimlar</p>
                   <p className="text-xs opacity-75 mt-1">Maosh oluvchilar soni</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-all">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="size-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <span className="material-symbols-outlined text-3xl">payments</span>
+                    <div className="size-14 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <span className="material-symbols-outlined text-2xl sm:text-3xl">payments</span>
                     </div>
-                    <span className="text-2xl font-black">
+                    <span className="text-xl sm:text-2xl font-black">
                       {(payrollStats.totalSalary / 1000000).toFixed(1)}M
                     </span>
                   </div>
-                  <p className="text-sm font-bold opacity-90">Jami maosh</p>
+                  <p className="text-sm sm:text-sm sm:text-base font-bold opacity-90">Jami maosh</p>
                   <p className="text-xs opacity-75 mt-1">
                     {formatCurrency(payrollStats.totalSalary)}
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
+                <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-all">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="size-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <span className="material-symbols-outlined text-3xl">star</span>
+                    <div className="size-14 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <span className="material-symbols-outlined text-2xl sm:text-3xl">star</span>
                     </div>
-                    <span className="text-4xl font-black">
+                    <span className="text-3xl sm:text-4xl font-black">
                       {payrollStats.totalBonusesCount}
                     </span>
                   </div>
-                  <p className="text-sm font-bold opacity-90">Bonuslar soni</p>
+                  <p className="text-sm sm:text-sm sm:text-base font-bold opacity-90">Bonuslar soni</p>
                   <p className="text-xs opacity-75 mt-1">Jami bonuslar</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
+                <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-xl hover:shadow-2xl transition-all">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="size-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <span className="material-symbols-outlined text-3xl">warning</span>
+                    <div className="size-14 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <span className="material-symbols-outlined text-2xl sm:text-3xl">warning</span>
                     </div>
-                    <span className="text-4xl font-black">
+                    <span className="text-3xl sm:text-4xl font-black">
                       {payrollStats.totalPenaltiesCount}
                     </span>
                   </div>
-                  <p className="text-sm font-bold opacity-90">Jarimalar soni</p>
+                  <p className="text-sm sm:text-sm sm:text-base font-bold opacity-90">Jarimalar soni</p>
                   <p className="text-xs opacity-75 mt-1">Jami jarimalar</p>
                 </div>
               </div>
 
               {/* Month/Year Selector */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
                 <select
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                  className="px-5 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl font-semibold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+                  className="px-5 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl font-semibold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
                 >
                   {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                     <option key={month} value={month}>
@@ -442,7 +442,7 @@ export default function PayrollManagement() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="px-5 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl font-semibold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+                  className="px-5 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl font-semibold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
                 >
                   {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
                     <option key={year} value={year}>{year}</option>
@@ -452,10 +452,10 @@ export default function PayrollManagement() {
 
               {/* Charts Section */}
               {monthlyPayroll.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {/* Bar Chart - Top 10 Maoshlar */}
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-                    <h4 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 sm:p-6 shadow-lg">
+                    <h4 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2 sm:gap-2 sm:gap-3">
                       <span className="material-symbols-outlined text-purple-600">bar_chart</span>
                       Eng yuqori maoshlar (Top 10)
                     </h4>
@@ -507,8 +507,8 @@ export default function PayrollManagement() {
                   </div>
 
                   {/* Doughnut Chart - Status bo'yicha */}
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-                    <h4 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 sm:p-6 shadow-lg">
+                    <h4 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2 sm:gap-2 sm:gap-3">
                       <span className="material-symbols-outlined text-purple-600">donut_large</span>
                       Maoshlar holati
                     </h4>
@@ -569,17 +569,17 @@ export default function PayrollManagement() {
                   <div className="relative">
                     <div className="w-20 h-20 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-purple-600 text-3xl">payments</span>
+                      <span className="material-symbols-outlined text-purple-600 text-2xl sm:text-3xl">payments</span>
                     </div>
                   </div>
                 </div>
               ) : monthlyPayroll.length === 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {/* Sample Charts Preview */}
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Sample Bar Chart */}
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-6 shadow-lg">
-                      <h4 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 p-4 sm:p-6 shadow-lg">
+                      <h4 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2 sm:gap-2 sm:gap-3">
                         <span className="material-symbols-outlined text-purple-600">bar_chart</span>
                         Eng yuqori maoshlar
                       </h4>
@@ -626,58 +626,58 @@ export default function PayrollManagement() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden shadow-lg">
+                <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden sm:block shadow-lg">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-gradient-to-r from-purple-600 to-green-600 text-white">
                         <tr>
-                          <th className="px-6 py-4 text-left text-sm font-bold">Xodim</th>
-                          <th className="px-6 py-4 text-left text-sm font-bold">Lavozim</th>
-                          <th className="px-6 py-4 text-right text-sm font-bold">Asosiy maosh</th>
-                          <th className="px-6 py-4 text-right text-sm font-bold">Foizlar</th>
-                          <th className="px-6 py-4 text-right text-sm font-bold">Bonuslar</th>
-                          <th className="px-6 py-4 text-right text-sm font-bold">Jarimalar</th>
-                          <th className="px-6 py-4 text-right text-sm font-bold">Jami</th>
-                          <th className="px-6 py-4 text-center text-sm font-bold">Status</th>
-                          <th className="px-6 py-4 text-center text-sm font-bold">Amallar</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-left text-sm sm:text-sm sm:text-base font-bold">Xodim</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-left text-sm sm:text-sm sm:text-base font-bold">Lavozim</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-sm sm:text-sm sm:text-base font-bold">Asosiy maosh</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-sm sm:text-sm sm:text-base font-bold">Foizlar</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-sm sm:text-sm sm:text-base font-bold">Bonuslar</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-sm sm:text-sm sm:text-base font-bold">Jarimalar</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-sm sm:text-sm sm:text-base font-bold">Jami</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-center text-sm sm:text-sm sm:text-base font-bold">Status</th>
+                          <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-center text-sm sm:text-sm sm:text-base font-bold">Amallar</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         {monthlyPayroll.map(payroll => (
                           <tr key={payroll.id} className="hover:bg-purple-50 transition-colors">
-                            <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{payroll.staff_name}</td>
-                            <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{payroll.role_name}</td>
-                            <td className="px-6 py-4 text-right font-semibold">{formatCurrency(payroll.base_salary)}</td>
-                            <td className="px-6 py-4 text-right text-green-600 font-semibold">+{formatCurrency(payroll.service_commissions)}</td>
-                            <td className="px-6 py-4 text-right text-green-600 font-semibold">+{formatCurrency(payroll.shift_bonuses + payroll.other_bonuses)}</td>
-                            <td className="px-6 py-4 text-right text-red-600 font-semibold">-{formatCurrency(payroll.penalties)}</td>
-                            <td className="px-6 py-4 text-right font-black text-xl text-purple-600">{formatCurrency(payroll.net_salary)}</td>
-                            <td className="px-6 py-4 text-center">{getStatusBadge(payroll.status)}</td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center justify-center gap-2">
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 font-bold text-gray-900 dark:text-white">{payroll.staff_name}</td>
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">{payroll.role_name}</td>
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right font-semibold">{formatCurrency(payroll.base_salary)}</td>
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-green-600 font-semibold">+{formatCurrency(payroll.service_commissions)}</td>
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-green-600 font-semibold">+{formatCurrency(payroll.shift_bonuses + payroll.other_bonuses)}</td>
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-red-600 font-semibold">-{formatCurrency(payroll.penalties)}</td>
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right font-black text-lg sm:text-xl text-purple-600">{formatCurrency(payroll.net_salary)}</td>
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-center">{getStatusBadge(payroll.status)}</td>
+                            <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+                              <div className="flex items-center justify-center gap-2 sm:gap-2 sm:gap-3">
                                 <button
                                   onClick={() => handleViewDetails(payroll)}
-                                  className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                  className="p-2 text-green-600 hover:bg-green-100 rounded-lg sm:rounded-lg sm:rounded-xl transition-colors"
                                   title="Batafsil"
                                 >
-                                  <span className="material-symbols-outlined text-xl">visibility</span>
+                                  <span className="material-symbols-outlined text-lg sm:text-xl">visibility</span>
                                 </button>
                                 {payroll.status === 'draft' && (
                                   <button
                                     onClick={() => handleApprove(payroll.id)}
-                                    className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
+                                    className="p-2 text-green-600 hover:bg-green-100 rounded-lg sm:rounded-lg sm:rounded-xl transition-colors"
                                     title="Tasdiqlash"
                                   >
-                                    <span className="material-symbols-outlined text-xl">check_circle</span>
+                                    <span className="material-symbols-outlined text-lg sm:text-xl">check_circle</span>
                                   </button>
                                 )}
                                 {payroll.status === 'approved' && (
                                   <button
                                     onClick={() => handlePay(payroll)}
-                                    className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
+                                    className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg sm:rounded-lg sm:rounded-xl transition-colors"
                                     title="To'lash"
                                   >
-                                    <span className="material-symbols-outlined text-xl">payments</span>
+                                    <span className="material-symbols-outlined text-lg sm:text-xl">payments</span>
                                   </button>
                                 )}
                               </div>
@@ -687,8 +687,8 @@ export default function PayrollManagement() {
                       </tbody>
                       <tfoot className="bg-gradient-to-r from-gray-50 to-gray-100 font-bold">
                         <tr>
-                          <td colSpan="6" className="px-6 py-4 text-right text-lg">JAMI:</td>
-                          <td className="px-6 py-4 text-right text-2xl text-purple-700">
+                          <td colSpan="6" className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-base sm:text-lg">JAMI:</td>
+                          <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right text-xl sm:text-2xl text-purple-700">
                             {formatCurrency(monthlyPayroll.reduce((sum, p) => sum + parseFloat(p.net_salary), 0))}
                           </td>
                           <td colSpan="2"></td>
@@ -703,10 +703,10 @@ export default function PayrollManagement() {
 
           {/* XODIMLAR MAOSHI */}
           {activeTab === 'staff' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-3xl font-black text-gray-900 dark:text-white">Xodimlar maoshi</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Xodimlar maoshi</h3>
                   <p className="text-gray-600 dark:text-gray-300 mt-2">Xodimlar uchun oylik maosh yoki foizni belgilang</p>
                 </div>
                 <button
@@ -717,9 +717,9 @@ export default function PayrollManagement() {
                     }
                     setShowSalaryModal(true);
                   }}
-                  className="px-8 py-3 bg-gradient-to-r from-purple-600 to-green-600 text-white rounded-xl hover:from-purple-700 hover:to-green-700 font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition-all"
+                  className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-green-600 text-white rounded-lg sm:rounded-xl hover:from-purple-700 hover:to-green-700 font-bold flex items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-all"
                 >
-                  <span className="material-symbols-outlined text-2xl">add_circle</span>
+                  <span className="material-symbols-outlined text-xl sm:text-2xl">add_circle</span>
                   Maosh o'rnatish
                 </button>
               </div>
@@ -729,55 +729,55 @@ export default function PayrollManagement() {
                   <div className="relative">
                     <div className="w-20 h-20 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-purple-600 text-3xl">payments</span>
+                      <span className="material-symbols-outlined text-purple-600 text-2xl sm:text-3xl">payments</span>
                     </div>
                   </div>
                 </div>
               ) : staffSalaries.length === 0 ? (
-                <div className="text-center py-20 bg-gradient-to-br from-purple-50 to-green-50 dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-green-900/20 rounded-2xl border-2 border-dashed border-purple-200 dark:border-purple-800">
+                <div className="text-center py-20 bg-gradient-to-br from-purple-50 to-green-50 dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-green-900/20 rounded-xl sm:rounded-2xl border-2 border-dashed border-purple-200 dark:border-purple-800">
                   <div className="w-28 h-28 bg-purple-100 dark:bg-purple-900/40 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-6xl">account_balance_wallet</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Hali maosh o'rnatilmagan</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3">Hali maosh o'rnatilmagan</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-8">Xodimlar uchun oylik maosh yoki foizni belgilang</p>
                   <button
                     onClick={() => {
                       if (allStaff.length === 0) loadStaffData();
                       setShowSalaryModal(true);
                     }}
-                    className="px-8 py-3 bg-gradient-to-r from-purple-600 to-green-600 text-white rounded-xl hover:from-purple-700 hover:to-green-700 font-bold inline-flex items-center gap-3 shadow-lg hover:shadow-xl transition-all"
+                    className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-green-600 text-white rounded-lg sm:rounded-xl hover:from-purple-700 hover:to-green-700 font-bold inline-flex items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-all"
                   >
-                    <span className="material-symbols-outlined text-2xl">add_circle</span>
+                    <span className="material-symbols-outlined text-xl sm:text-2xl">add_circle</span>
                     Birinchi komissiyani o'rnatish
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {staffSalaries.map(staff => (
                     <div 
                       key={staff.staff_id} 
-                      className="group bg-white rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                      className="group bg-white rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 hover:shadow-2xl transition-all duration-300 overflow-hidden sm:block"
                     >
                       <div className="bg-gradient-to-r from-purple-600 to-green-600 p-5">
-                        <div className="flex items-center gap-4">
-                          <div className="size-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center ring-2 ring-white/30">
-                            <span className="material-symbols-outlined text-white text-3xl">person</span>
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="size-16 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center ring-2 ring-white/30">
+                            <span className="material-symbols-outlined text-white text-2xl sm:text-3xl">person</span>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-black text-white text-lg truncate">{staff.staff_name}</p>
-                            <p className="text-purple-100 text-sm font-semibold">{staff.role_name}</p>
+                            <p className="font-black text-white text-base sm:text-lg truncate">{staff.staff_name}</p>
+                            <p className="text-purple-100 text-sm sm:text-sm sm:text-base font-semibold">{staff.role_name}</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="p-6 space-y-4">
-                        <div className="bg-gradient-to-br from-purple-50 to-green-50 dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-green-900/20 rounded-xl p-5 border-2 border-purple-100 dark:border-purple-800">
+                      <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                        <div className="bg-gradient-to-br from-purple-50 to-green-50 dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-green-900/20 rounded-lg sm:rounded-xl p-5 border-2 border-purple-100 dark:border-purple-800">
                           <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-2">
                             {staff.role_name === 'Bosh shifokor' 
                               ? 'Statsionar foizi'
                               : 'Oylik maosh'}
                           </p>
-                          <p className="text-3xl font-black text-purple-700 dark:text-purple-300">
+                          <p className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-300">
                             {staff.role_name === 'Bosh shifokor'
                               ? `${staff.inpatient_percentage || 0}%`
                               : formatCurrency(staff.commission_value || staff.base_salary || 0)}
@@ -795,8 +795,8 @@ export default function PayrollManagement() {
                         </div>
 
                         {staff.effective_from && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="material-symbols-outlined text-gray-400 text-lg">calendar_today</span>
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base">
+                            <span className="material-symbols-outlined text-gray-400 text-base sm:text-lg">calendar_today</span>
                             <span className="text-gray-600 dark:text-gray-300">Amal qiladi:</span>
                             <span className="font-bold text-gray-900 dark:text-white">
                               {new Date(staff.effective_from).toLocaleDateString('uz-UZ', { 
@@ -809,36 +809,36 @@ export default function PayrollManagement() {
                         )}
 
                         {staff.id ? (
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-green-50 rounded-xl">
-                              <span className="material-symbols-outlined text-green-600 text-sm">check_circle</span>
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                            <div className="flex-1 flex items-center gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-50 rounded-lg sm:rounded-xl">
+                              <span className="material-symbols-outlined text-green-600 text-sm sm:text-sm sm:text-base">check_circle</span>
                               <span className="text-xs font-bold text-green-700">Aktiv</span>
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
-                              <span className="material-symbols-outlined text-amber-600 text-sm">info</span>
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                            <div className="flex-1 flex items-center gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-amber-50 dark:bg-amber-900/20 rounded-lg sm:rounded-xl">
+                              <span className="material-symbols-outlined text-amber-600 text-sm sm:text-sm sm:text-base">info</span>
                               <span className="text-xs font-bold text-amber-700 dark:text-amber-400">Komissiya o'rnatilmagan</span>
                             </div>
                           </div>
                         )}
 
                         {staff.id && (
-                          <div className="flex gap-3 pt-2">
+                          <div className="flex gap-2 sm:gap-3 pt-2">
                             <button
                               onClick={() => handleEditSalary(staff)}
-                              className="flex-1 px-4 py-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 font-bold flex items-center justify-center gap-2 transition-all group-hover:shadow-lg"
+                              className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-50 text-green-600 rounded-lg sm:rounded-xl hover:bg-green-100 font-bold flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 transition-all group-hover:shadow-lg"
                             >
-                              <span className="material-symbols-outlined text-lg">edit</span>
-                              <span className="text-sm">Tahrirlash</span>
+                              <span className="material-symbols-outlined text-base sm:text-lg">edit</span>
+                              <span className="text-sm sm:text-sm sm:text-base">Tahrirlash</span>
                             </button>
                             <button
                               onClick={() => handleDeleteSalary(staff)}
-                              className="flex-1 px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 font-bold flex items-center justify-center gap-2 transition-all group-hover:shadow-lg"
+                              className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-red-50 text-red-600 rounded-lg sm:rounded-xl hover:bg-red-100 font-bold flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 transition-all group-hover:shadow-lg"
                             >
-                              <span className="material-symbols-outlined text-lg">delete</span>
-                              <span className="text-sm">O'chirish</span>
+                              <span className="material-symbols-outlined text-base sm:text-lg">delete</span>
+                              <span className="text-sm sm:text-sm sm:text-base">O'chirish</span>
                             </button>
                           </div>
                         )}
@@ -852,30 +852,30 @@ export default function PayrollManagement() {
 
           {/* BONUSLAR */}
           {activeTab === 'bonuses' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Bonus Settings Card */}
-              <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border-2 border-orange-200 p-6 shadow-lg">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="size-14 bg-orange-500 rounded-xl flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white text-3xl">settings</span>
+              <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl sm:rounded-2xl border-2 border-orange-200 p-4 sm:p-6 shadow-lg">
+                <div className="flex items-center gap-3 sm:gap-4 mb-6">
+                  <div className="size-14 bg-orange-500 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white text-2xl sm:text-3xl">settings</span>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-gray-900">Bonus sozlamalari</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-gray-900">Bonus sozlamalari</h3>
                     <p className="text-gray-600 mt-1">Oylik avtomatik bonus berish sozlamalari</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {/* Enable/Disable Toggle */}
-                  <div className="bg-white rounded-xl p-5 border-2 border-gray-200">
+                  <div className="bg-white rounded-lg sm:rounded-xl p-5 border-2 border-gray-200">
                     <label className="flex items-center justify-between cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-orange-600 text-2xl">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="material-symbols-outlined text-orange-600 text-xl sm:text-2xl">
                           {bonusSettings.enabled ? 'toggle_on' : 'toggle_off'}
                         </span>
                         <div>
                           <p className="font-bold text-gray-900">Bonus berish</p>
-                          <p className="text-sm text-gray-600">Oylik avtomatik bonus</p>
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-600">Oylik avtomatik bonus</p>
                         </div>
                       </div>
                       <div className="relative">
@@ -892,13 +892,13 @@ export default function PayrollManagement() {
                   </div>
 
                   {/* Bonus Amount Input */}
-                  <div className="bg-white rounded-xl p-5 border-2 border-gray-200">
+                  <div className="bg-white rounded-lg sm:rounded-xl p-5 border-2 border-gray-200">
                     <label className="block">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="material-symbols-outlined text-orange-600 text-2xl">payments</span>
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-3">
+                        <span className="material-symbols-outlined text-orange-600 text-xl sm:text-2xl">payments</span>
                         <div>
                           <p className="font-bold text-gray-900">Bonus summasi</p>
-                          <p className="text-sm text-gray-600">Har bir xodimga</p>
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-600">Har bir xodimga</p>
                         </div>
                       </div>
                       <input
@@ -906,12 +906,12 @@ export default function PayrollManagement() {
                         value={bonusSettings.amount}
                         onChange={(e) => handleBonusSettingsChange('amount', parseFloat(e.target.value) || 0)}
                         disabled={savingBonusSettings || !bonusSettings.enabled}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-bold text-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl font-bold text-base sm:text-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="0"
                         min="0"
                         step="10000"
                       />
-                      <p className="text-sm text-gray-500 mt-2">
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-500 mt-2">
                         {formatCurrency(bonusSettings.amount)}
                       </p>
                     </label>
@@ -919,19 +919,19 @@ export default function PayrollManagement() {
                 </div>
 
                 {savingBonusSettings && (
-                  <div className="mt-4 flex items-center gap-2 text-orange-600">
+                  <div className="mt-4 flex items-center gap-2 sm:gap-2 sm:gap-3 text-orange-600">
                     <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm font-semibold">Saqlanmoqda...</span>
+                    <span className="text-sm sm:text-sm sm:text-base font-semibold">Saqlanmoqda...</span>
                   </div>
                 )}
 
                 {/* Info Message */}
-                <div className="mt-4 bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-blue-600 text-2xl">info</span>
+                <div className="mt-4 bg-blue-50 border-2 border-blue-200 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <span className="material-symbols-outlined text-blue-600 text-xl sm:text-2xl">info</span>
                     <div>
                       <p className="font-bold text-blue-900 mb-1">Avtomatik bonus berish</p>
-                      <p className="text-sm text-blue-700">
+                      <p className="text-sm sm:text-sm sm:text-base text-blue-700">
                         Oylik maosh hisoblanganda (Calculate Monthly), jarimasi yo'q xodimlarga avtomatik bonus beriladi.
                       </p>
                     </div>
@@ -941,14 +941,14 @@ export default function PayrollManagement() {
 
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-3xl font-black text-gray-900 dark:text-white">Bonuslar va mukofotlar</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Bonuslar va mukofotlar</h3>
                   <p className="text-gray-600 dark:text-gray-300 mt-2">Xodimlar uchun bonus va mukofotlar</p>
                 </div>
                 <button
                   onClick={() => setShowBonusModal(true)}
-                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition-all"
+                  className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:from-green-700 hover:to-emerald-700 font-bold flex items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-all"
                 >
-                  <span className="material-symbols-outlined text-2xl">add_circle</span>
+                  <span className="material-symbols-outlined text-xl sm:text-2xl">add_circle</span>
                   Bonus qo'shish
                 </button>
               </div>
@@ -958,70 +958,70 @@ export default function PayrollManagement() {
                   <div className="relative">
                     <div className="w-20 h-20 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-green-600 text-3xl">star</span>
+                      <span className="material-symbols-outlined text-green-600 text-2xl sm:text-3xl">star</span>
                     </div>
                   </div>
                 </div>
               ) : bonuses.length === 0 ? (
-                <div className="text-center py-20 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border-2 border-dashed border-green-200">
+                <div className="text-center py-20 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl sm:rounded-2xl border-2 border-dashed border-green-200">
                   <div className="w-28 h-28 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span className="material-symbols-outlined text-green-600 text-6xl">star</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Bonuslar yo'q</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3">Bonuslar yo'q</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-8">Xodimlar uchun bonus qo'shing</p>
                   <button
                     onClick={() => setShowBonusModal(true)}
-                    className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 font-bold inline-flex items-center gap-3 shadow-lg hover:shadow-xl transition-all"
+                    className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:from-green-700 hover:to-emerald-700 font-bold inline-flex items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-all"
                   >
-                    <span className="material-symbols-outlined text-2xl">add_circle</span>
+                    <span className="material-symbols-outlined text-xl sm:text-2xl">add_circle</span>
                     Birinchi bonusni qo'shish
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {bonuses.map(bonus => (
                     <div 
                       key={bonus.id} 
-                      className="group bg-white rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-green-400 hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                      className="group bg-white rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-green-400 hover:shadow-2xl transition-all duration-300 overflow-hidden sm:block"
                     >
                       <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-5">
-                        <div className="flex items-center gap-4">
-                          <div className="size-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center ring-2 ring-white/30">
-                            <span className="material-symbols-outlined text-white text-3xl">star</span>
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="size-16 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center ring-2 ring-white/30">
+                            <span className="material-symbols-outlined text-white text-2xl sm:text-3xl">star</span>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-black text-white text-lg truncate">{bonus.staff_name}</p>
-                            <p className="text-green-100 text-sm font-semibold">{bonus.role_name}</p>
+                            <p className="font-black text-white text-base sm:text-lg truncate">{bonus.staff_name}</p>
+                            <p className="text-green-100 text-sm sm:text-sm sm:text-base font-semibold">{bonus.role_name}</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="p-6 space-y-4">
-                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border-2 border-green-100">
+                      <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg sm:rounded-xl p-5 border-2 border-green-100">
                           <p className="text-xs font-bold text-green-600 uppercase tracking-wider mb-2">Bonus miqdori</p>
-                          <p className="text-3xl font-black text-green-700">
+                          <p className="text-2xl sm:text-3xl font-black text-green-700">
                             {formatCurrency(bonus.amount)}
                           </p>
                         </div>
 
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-gray-400 text-lg">category</span>
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Turi:</span>
-                            <span className="text-sm font-bold text-gray-900 dark:text-white">{getBonusTypeLabel(bonus.bonus_type)}</span>
+                        <div className="space-y-2 sm:space-y-2 sm:space-y-3">
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                            <span className="material-symbols-outlined text-gray-400 text-base sm:text-lg">category</span>
+                            <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">Turi:</span>
+                            <span className="text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">{getBonusTypeLabel(bonus.bonus_type)}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-gray-400 text-lg">calendar_today</span>
-                            <span className="text-sm text-gray-600 dark:text-gray-300">Sana:</span>
-                            <span className="text-sm font-bold text-gray-900 dark:text-white">
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                            <span className="material-symbols-outlined text-gray-400 text-base sm:text-lg">calendar_today</span>
+                            <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">Sana:</span>
+                            <span className="text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                               {new Date(bonus.bonus_date).toLocaleDateString('uz-UZ')}
                             </span>
                           </div>
                         </div>
 
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg sm:rounded-xl p-3 sm:p-4">
                           <p className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-1">Sabab</p>
-                          <p className="text-sm text-gray-900 dark:text-white">{bonus.reason}</p>
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white">{bonus.reason}</p>
                         </div>
                       </div>
                     </div>
@@ -1033,17 +1033,17 @@ export default function PayrollManagement() {
 
           {/* JARIMALAR */}
           {activeTab === 'penalties' && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-3xl font-black text-gray-900 dark:text-white">Jarimalar va chegirmalar</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Jarimalar va chegirmalar</h3>
                   <p className="text-gray-600 dark:text-gray-300 mt-2">Xodimlar uchun jarimalar</p>
                 </div>
                 <button
                   onClick={() => setShowPenaltyModal(true)}
-                  className="px-8 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl hover:from-red-700 hover:to-rose-700 font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition-all"
+                  className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg sm:rounded-xl hover:from-red-700 hover:to-rose-700 font-bold flex items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-all"
                 >
-                  <span className="material-symbols-outlined text-2xl">add_circle</span>
+                  <span className="material-symbols-outlined text-xl sm:text-2xl">add_circle</span>
                   Jarima qo'shish
                 </button>
               </div>
@@ -1053,86 +1053,86 @@ export default function PayrollManagement() {
                   <div className="relative">
                     <div className="w-20 h-20 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-red-600 text-3xl">warning</span>
+                      <span className="material-symbols-outlined text-red-600 text-2xl sm:text-3xl">warning</span>
                     </div>
                   </div>
                 </div>
               ) : penalties.length === 0 ? (
-                <div className="text-center py-20 bg-gradient-to-br from-red-50 to-rose-50 rounded-2xl border-2 border-dashed border-red-200">
+                <div className="text-center py-20 bg-gradient-to-br from-red-50 to-rose-50 rounded-xl sm:rounded-2xl border-2 border-dashed border-red-200">
                   <div className="w-28 h-28 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span className="material-symbols-outlined text-red-600 text-6xl">warning</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Jarimalar yo'q</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3">Jarimalar yo'q</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-8">Xodimlar uchun jarima qo'shing</p>
                   <button
                     onClick={() => setShowPenaltyModal(true)}
-                    className="px-8 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl hover:from-red-700 hover:to-rose-700 font-bold inline-flex items-center gap-3 shadow-lg hover:shadow-xl transition-all"
+                    className="px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg sm:rounded-xl hover:from-red-700 hover:to-rose-700 font-bold inline-flex items-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transition-all"
                   >
-                    <span className="material-symbols-outlined text-2xl">add_circle</span>
+                    <span className="material-symbols-outlined text-xl sm:text-2xl">add_circle</span>
                     Birinchi jarimani qo'shish
                   </button>
                 </div>
               ) : (
-                <div className="space-y-8">
+                <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                   {/* Pending Penalties */}
                   {penalties.filter(p => p.status === 'pending').length > 0 && (
                     <div>
-                      <h4 className="text-2xl font-black text-orange-600 mb-4 flex items-center gap-2">
+                      <h4 className="text-xl sm:text-2xl font-black text-orange-600 mb-4 flex items-center gap-2 sm:gap-2 sm:gap-3">
                         <span className="material-symbols-outlined">pending_actions</span>
                         Tasdiqlash kutilmoqda ({penalties.filter(p => p.status === 'pending').length})
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {penalties.filter(p => p.status === 'pending').map(penalty => (
                           <div 
                             key={penalty._id || penalty.id} 
-                            className="group bg-white rounded-2xl border-2 border-orange-300 dark:border-orange-700 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                            className="group bg-white rounded-xl sm:rounded-2xl border-2 border-orange-300 dark:border-orange-700 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden sm:block"
                           >
                             <div className="bg-gradient-to-r from-orange-600 to-amber-600 p-5">
-                              <div className="flex items-center gap-4">
-                                <div className="size-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center ring-2 ring-white/30">
-                                  <span className="material-symbols-outlined text-white text-3xl">pending</span>
+                              <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="size-16 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center ring-2 ring-white/30">
+                                  <span className="material-symbols-outlined text-white text-2xl sm:text-3xl">pending</span>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-black text-white text-lg truncate">
+                                  <p className="font-black text-white text-base sm:text-lg truncate">
                                     {penalty.staff_id?.first_name} {penalty.staff_id?.last_name}
                                   </p>
-                                  <p className="text-orange-100 text-sm font-semibold">
+                                  <p className="text-orange-100 text-sm sm:text-sm sm:text-base font-semibold">
                                     {getRoleNameUz(penalty.staff_id?.role)}
                                   </p>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="p-6 space-y-4">
-                              <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-5 border-2 border-orange-100">
+                            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                              <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg sm:rounded-xl p-5 border-2 border-orange-100">
                                 <p className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-2">Jarima miqdori</p>
-                                <p className="text-3xl font-black text-orange-700">
+                                <p className="text-2xl sm:text-3xl font-black text-orange-700">
                                   {formatCurrency(penalty.amount)}
                                 </p>
                               </div>
 
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="material-symbols-outlined text-gray-400 text-lg">category</span>
-                                  <span className="text-sm text-gray-600 dark:text-gray-300">Turi:</span>
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white">{getPenaltyTypeLabel(penalty.penalty_type)}</span>
+                              <div className="space-y-2 sm:space-y-2 sm:space-y-3">
+                                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                                  <span className="material-symbols-outlined text-gray-400 text-base sm:text-lg">category</span>
+                                  <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">Turi:</span>
+                                  <span className="text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">{getPenaltyTypeLabel(penalty.penalty_type)}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="material-symbols-outlined text-gray-400 text-lg">calendar_today</span>
-                                  <span className="text-sm text-gray-600 dark:text-gray-300">Sana:</span>
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white">
+                                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                                  <span className="material-symbols-outlined text-gray-400 text-base sm:text-lg">calendar_today</span>
+                                  <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">Sana:</span>
+                                  <span className="text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                                     {new Date(penalty.penalty_date).toLocaleDateString('uz-UZ')}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+                              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg sm:rounded-xl p-3 sm:p-4">
                                 <p className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-1">Sabab</p>
-                                <p className="text-sm text-gray-900 dark:text-white">{penalty.reason}</p>
+                                <p className="text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white">{penalty.reason}</p>
                               </div>
 
                               {/* Action Buttons */}
-                              <div className="flex gap-2 pt-2">
+                              <div className="flex gap-2 sm:gap-2 sm:gap-3 pt-2">
                                 <button
                                   onClick={async () => {
                                     if (!confirm('Jarimani tasdiqlaysizmi?')) return;
@@ -1146,9 +1146,9 @@ export default function PayrollManagement() {
                                       toast.error('Xatolik yuz berdi');
                                     }
                                   }}
-                                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold flex items-center justify-center gap-2 transition-colors"
+                                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700 font-bold flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 transition-colors"
                                 >
-                                  <span className="material-symbols-outlined text-lg">check_circle</span>
+                                  <span className="material-symbols-outlined text-base sm:text-lg">check_circle</span>
                                   Tasdiqlash
                                 </button>
                                 <button
@@ -1164,9 +1164,9 @@ export default function PayrollManagement() {
                                       toast.error('Xatolik yuz berdi');
                                     }
                                   }}
-                                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold flex items-center justify-center gap-2 transition-colors"
+                                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-red-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-red-700 font-bold flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 transition-colors"
                                 >
-                                  <span className="material-symbols-outlined text-lg">cancel</span>
+                                  <span className="material-symbols-outlined text-base sm:text-lg">cancel</span>
                                   Bekor qilish
                                 </button>
                               </div>
@@ -1180,58 +1180,58 @@ export default function PayrollManagement() {
                   {/* Approved Penalties */}
                   {penalties.filter(p => p.status === 'approved').length > 0 && (
                     <div>
-                      <h4 className="text-2xl font-black text-red-600 mb-4 flex items-center gap-2">
+                      <h4 className="text-xl sm:text-2xl font-black text-red-600 mb-4 flex items-center gap-2 sm:gap-2 sm:gap-3">
                         <span className="material-symbols-outlined">check_circle</span>
                         Tasdiqlangan jarimalar ({penalties.filter(p => p.status === 'approved').length})
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {penalties.filter(p => p.status === 'approved').map(penalty => (
                           <div 
                             key={penalty._id || penalty.id} 
-                            className="group bg-white rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-red-400 hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                            className="group bg-white rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-red-400 hover:shadow-2xl transition-all duration-300 overflow-hidden sm:block"
                           >
                             <div className="bg-gradient-to-r from-red-600 to-rose-600 p-5">
-                              <div className="flex items-center gap-4">
-                                <div className="size-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center ring-2 ring-white/30">
-                                  <span className="material-symbols-outlined text-white text-3xl">warning</span>
+                              <div className="flex items-center gap-3 sm:gap-4">
+                                <div className="size-16 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center ring-2 ring-white/30">
+                                  <span className="material-symbols-outlined text-white text-2xl sm:text-3xl">warning</span>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-black text-white text-lg truncate">
+                                  <p className="font-black text-white text-base sm:text-lg truncate">
                                     {penalty.staff_id?.first_name} {penalty.staff_id?.last_name}
                                   </p>
-                                  <p className="text-red-100 text-sm font-semibold">
+                                  <p className="text-red-100 text-sm sm:text-sm sm:text-base font-semibold">
                                     {getRoleNameUz(penalty.staff_id?.role)}
                                   </p>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="p-6 space-y-4">
-                              <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl p-5 border-2 border-red-100">
+                            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                              <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-lg sm:rounded-xl p-5 border-2 border-red-100">
                                 <p className="text-xs font-bold text-red-600 uppercase tracking-wider mb-2">Jarima miqdori</p>
-                                <p className="text-3xl font-black text-red-700">
+                                <p className="text-2xl sm:text-3xl font-black text-red-700">
                                   {formatCurrency(penalty.amount)}
                                 </p>
                               </div>
 
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="material-symbols-outlined text-gray-400 text-lg">category</span>
-                                  <span className="text-sm text-gray-600 dark:text-gray-300">Turi:</span>
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white">{getPenaltyTypeLabel(penalty.penalty_type)}</span>
+                              <div className="space-y-2 sm:space-y-2 sm:space-y-3">
+                                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                                  <span className="material-symbols-outlined text-gray-400 text-base sm:text-lg">category</span>
+                                  <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">Turi:</span>
+                                  <span className="text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">{getPenaltyTypeLabel(penalty.penalty_type)}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="material-symbols-outlined text-gray-400 text-lg">calendar_today</span>
-                                  <span className="text-sm text-gray-600 dark:text-gray-300">Sana:</span>
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white">
+                                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                                  <span className="material-symbols-outlined text-gray-400 text-base sm:text-lg">calendar_today</span>
+                                  <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">Sana:</span>
+                                  <span className="text-sm sm:text-sm sm:text-base font-bold text-gray-900 dark:text-white">
                                     {new Date(penalty.penalty_date).toLocaleDateString('uz-UZ')}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+                              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg sm:rounded-xl p-3 sm:p-4">
                                 <p className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-1">Sabab</p>
-                                <p className="text-sm text-gray-900 dark:text-white">{penalty.reason}</p>
+                                <p className="text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white">{penalty.reason}</p>
                               </div>
                             </div>
                           </div>
@@ -1248,58 +1248,58 @@ export default function PayrollManagement() {
 
       {/* Details Modal */}
       {showDetailsModal && payrollDetails && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 sm:p-6 lg:p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-3xl font-black text-gray-900 dark:text-white">Maosh detallari</h3>
+              <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Maosh detallari</h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
                 className="p-3 hover:bg-gray-100 dark:bg-gray-700 rounded-full transition-colors"
               >
-                <span className="material-symbols-outlined text-2xl">close</span>
+                <span className="material-symbols-outlined text-xl sm:text-2xl">close</span>
               </button>
             </div>
 
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-purple-50 to-green-50 rounded-2xl p-6 border-2 border-purple-100">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-gradient-to-br from-purple-50 to-green-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-purple-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   <div>
-                    <p className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-1">Asosiy maosh</p>
-                    <p className="text-xl font-black text-gray-900 dark:text-white">{formatCurrency(payrollDetails.base_salary)}</p>
+                    <p className="text-sm sm:text-sm sm:text-base font-bold text-gray-600 dark:text-gray-300 mb-1">Asosiy maosh</p>
+                    <p className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">{formatCurrency(payrollDetails.base_salary)}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-1">Foizlar</p>
-                    <p className="text-xl font-black text-green-600">+{formatCurrency(payrollDetails.service_commissions)}</p>
+                    <p className="text-sm sm:text-sm sm:text-base font-bold text-gray-600 dark:text-gray-300 mb-1">Foizlar</p>
+                    <p className="text-lg sm:text-xl font-black text-green-600">+{formatCurrency(payrollDetails.service_commissions)}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-1">Bonuslar</p>
-                    <p className="text-xl font-black text-green-600">+{formatCurrency(payrollDetails.shift_bonuses + payrollDetails.other_bonuses)}</p>
+                    <p className="text-sm sm:text-sm sm:text-base font-bold text-gray-600 dark:text-gray-300 mb-1">Bonuslar</p>
+                    <p className="text-lg sm:text-xl font-black text-green-600">+{formatCurrency(payrollDetails.shift_bonuses + payrollDetails.other_bonuses)}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-1">Jarimalar</p>
-                    <p className="text-xl font-black text-red-600">-{formatCurrency(payrollDetails.penalties)}</p>
+                    <p className="text-sm sm:text-sm sm:text-base font-bold text-gray-600 dark:text-gray-300 mb-1">Jarimalar</p>
+                    <p className="text-lg sm:text-xl font-black text-red-600">-{formatCurrency(payrollDetails.penalties)}</p>
                   </div>
                 </div>
                 <div className="mt-6 pt-6 border-t-2 border-purple-200">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-gray-900 dark:text-white">Jami to'lanadigan:</span>
-                    <span className="text-3xl font-black text-purple-600">{formatCurrency(payrollDetails.net_salary)}</span>
+                    <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Jami to'lanadigan:</span>
+                    <span className="text-2xl sm:text-3xl font-black text-purple-600">{formatCurrency(payrollDetails.net_salary)}</span>
                   </div>
                 </div>
               </div>
 
               {payrollDetails.services && payrollDetails.services.length > 0 && (
                 <div>
-                  <h4 className="font-black text-xl mb-4">Bajarilgan xizmatlar</h4>
-                  <div className="space-y-3">
+                  <h4 className="font-black text-lg sm:text-xl mb-4">Bajarilgan xizmatlar</h4>
+                  <div className="space-y-2 sm:space-y-3">
                     {payrollDetails.services.map((service, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:bg-gray-700 transition-colors">
+                      <div key={idx} className="flex justify-between items-center p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-100 dark:bg-gray-700 transition-colors">
                         <div>
                           <p className="font-bold text-gray-900 dark:text-white">{service.service_name}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">{new Date(service.service_date).toLocaleDateString('uz-UZ')}</p>
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">{new Date(service.service_date).toLocaleDateString('uz-UZ')}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-600 dark:text-gray-300">Xizmat: {formatCurrency(service.service_amount)}</p>
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">Xizmat: {formatCurrency(service.service_amount)}</p>
                           <p className="font-black text-green-600">Foiz: {formatCurrency(service.commission_earned)}</p>
                         </div>
                       </div>
@@ -1523,10 +1523,10 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 sm:p-6 max-w-xl sm:max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
         <div className="flex justify-between items-center mb-4 sticky top-0 bg-white dark:bg-gray-800 pb-4 border-b border-gray-200 dark:border-gray-700 z-10">
-          <h3 className="text-xl font-black text-gray-900 dark:text-white">
+          <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white">
             {editingSalary ? 'Maoshni tahrirlash' : 'Maosh o\'rnatish'}
           </h3>
           <button
@@ -1540,11 +1540,11 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-5">
           {!editingSalary && (
             <div>
-              <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Xodim *</label>
+              <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Xodim *</label>
               <select
                 value={selectedStaff}
                 onChange={(e) => handleStaffChange(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
                 required
               >
                 <option value="">Xodimni tanlang</option>
@@ -1558,17 +1558,17 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
           )}
 
           {editingSalary && (
-            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border-2 border-purple-100 dark:border-purple-800">
-              <p className="text-sm text-gray-600 dark:text-gray-300 font-semibold">Xodim:</p>
-              <p className="font-black text-lg text-gray-900 dark:text-white">{editingSalary.staff_name}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{editingSalary.role_name}</p>
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-purple-100 dark:border-purple-800">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300 font-semibold">Xodim:</p>
+              <p className="font-black text-base sm:text-lg text-gray-900 dark:text-white">{editingSalary.staff_name}</p>
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">{editingSalary.role_name}</p>
             </div>
           )}
 
           {selectedRole && (
             <>
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border-2 border-green-100 dark:border-green-800">
-                <p className="text-sm text-green-800 dark:text-green-200 leading-relaxed">
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-green-100 dark:border-green-800">
+                <p className="text-sm sm:text-sm sm:text-base text-green-800 dark:text-green-200 leading-relaxed">
                   {getCommissionDescription()}
                 </p>
               </div>
@@ -1576,14 +1576,14 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
               {/* Komissiya input - faqat bosh shifokordan boshqa xodimlar uchun */}
               {selectedRole !== 'Bosh shifokor' && (
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">
+                  <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">
                     {getCommissionLabel()} *
                   </label>
                   <input
                     type="number"
                     value={commissionValue}
                     onChange={(e) => setCommissionValue(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
                     placeholder={getCommissionPlaceholder()}
                     required
                     min="0"
@@ -1597,14 +1597,14 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
 
               {/* Bosh shifokor uchun statsionar foizi */}
               {selectedRole === 'Bosh shifokor' && (
-                <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-5 border-2 border-orange-200 dark:border-orange-800">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="material-symbols-outlined text-orange-600 text-2xl">hotel</span>
+                <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-lg sm:rounded-xl p-5 border-2 border-orange-200 dark:border-orange-800">
+                  <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-3">
+                    <span className="material-symbols-outlined text-orange-600 text-xl sm:text-2xl">hotel</span>
                     <h4 className="font-black text-orange-900 dark:text-orange-100">Statsionar foizi</h4>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">
+                    <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">
                       Statsionardan tushadigan pul foizi (maksimal 50%)
                     </label>
                     <input
@@ -1614,14 +1614,14 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
                         const value = parseFloat(e.target.value) || 0;
                         setInpatientPercentage(Math.min(50, Math.max(0, value)));
                       }}
-                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+                      className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
                       placeholder="Masalan: 30 (statsionardan 30%)"
                       min="0"
                       max="50"
                       step="0.1"
                     />
                     <p className="text-xs text-orange-700 dark:text-orange-300 mt-2 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">info</span>
+                      <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">info</span>
                       Statsionardan tushadigan pulning foizi (maksimal 50%). Masalan: 30% belgilasangiz, statsionardan 1,000,000 so'm tushsa, 300,000 so'm maoshga qo'shiladi.
                     </p>
                   </div>
@@ -1629,48 +1629,48 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
               )}
 
               {/* Ish vaqti sozlamalari - barcha lavozimlar uchun */}
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-5 border-2 border-indigo-200 dark:border-indigo-800 space-y-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="material-symbols-outlined text-indigo-600 text-2xl">schedule</span>
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg sm:rounded-xl p-5 border-2 border-indigo-200 dark:border-indigo-800 space-y-3 sm:space-y-4">
+                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-3">
+                  <span className="material-symbols-outlined text-indigo-600 text-xl sm:text-2xl">schedule</span>
                   <h4 className="font-black text-indigo-900 dark:text-indigo-100">Ish vaqti sozlamalari</h4>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">
+                    <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">
                       Boshlanish vaqti *
                     </label>
                     <input
                       type="time"
                       value={workStartTime}
                       onChange={(e) => setWorkStartTime(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
+                      className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">
+                    <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">
                       Tugash vaqti *
                     </label>
                     <input
                       type="time"
                       value={workEndTime}
                       onChange={(e) => setWorkEndTime(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
+                      className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">
+                  <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">
                     Haftada necha kun ishlaydi *
                   </label>
                   <select
                     value={workDaysPerWeek}
                     onChange={(e) => setWorkDaysPerWeek(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all"
                     required
                   >
                     <option value="1">1 kun</option>
@@ -1684,15 +1684,15 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
                 </div>
 
                 {/* Oylik ish soatlari ko'rsatish */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-indigo-100 dark:border-indigo-700">
+                <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-indigo-100 dark:border-indigo-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-bold text-gray-600 dark:text-gray-300">Oylik ish soatlari</p>
+                      <p className="text-sm sm:text-sm sm:text-base font-bold text-gray-600 dark:text-gray-300">Oylik ish soatlari</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Avtomatik hisoblangan
                       </p>
                     </div>
-                    <p className="text-2xl font-black text-indigo-700 dark:text-indigo-300">
+                    <p className="text-xl sm:text-2xl font-black text-indigo-700 dark:text-indigo-300">
                       {monthlyHours} soat
                     </p>
                   </div>
@@ -1701,12 +1701,12 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
 
               {/* Soatlik stavka ko'rsatish - faqat fix maosh uchun */}
               {commissionType === 'fixed' && commissionValue && monthlyHours > 0 && (
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-5 border-2 border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="material-symbols-outlined text-blue-600 text-2xl">payments</span>
-                    <p className="text-sm font-bold text-blue-900 dark:text-blue-100">Soatlik stavka</p>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg sm:rounded-xl p-5 border-2 border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                    <span className="material-symbols-outlined text-blue-600 text-xl sm:text-2xl">payments</span>
+                    <p className="text-sm sm:text-sm sm:text-base font-bold text-blue-900 dark:text-blue-100">Soatlik stavka</p>
                   </div>
-                  <p className="text-3xl font-black text-blue-700 dark:text-blue-300">
+                  <p className="text-2xl sm:text-3xl font-black text-blue-700 dark:text-blue-300">
                     {new Intl.NumberFormat('uz-UZ').format(hourlyRate)} so'm/soat
                   </p>
                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
@@ -1718,27 +1718,27 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
           )}
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Amal qilish sanasi *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Amal qilish sanasi *</label>
             <DateInput
               value={effectiveFrom}
               onChange={(e) => setEffectiveFrom(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
               required
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 font-bold transition-all"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 font-bold transition-all"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-green-600 text-white rounded-xl hover:from-purple-700 hover:to-green-700 font-bold disabled:opacity-50 transition-all shadow-lg"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-green-600 text-white rounded-lg sm:rounded-xl hover:from-purple-700 hover:to-green-700 font-bold disabled:opacity-50 transition-all shadow-lg"
             >
               {loading ? 'Yuklanmoqda...' : editingSalary ? 'Yangilash' : 'Saqlash'}
             </button>
@@ -1788,10 +1788,10 @@ function BonusModal({ staff, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 sm:p-6 lg:p-8 max-w-sm sm:max-w-md w-full shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-black text-gray-900 dark:text-white">Bonus qo'shish</h3>
+          <h3 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">Bonus qo'shish</h3>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 dark:bg-gray-700 rounded-full transition-colors"
@@ -1802,11 +1802,11 @@ function BonusModal({ staff, onClose, onSuccess }) {
         
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Xodim *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Xodim *</label>
             <select
               value={selectedStaff}
               onChange={(e) => setSelectedStaff(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
               required
             >
               <option value="">Xodimni tanlang</option>
@@ -1819,11 +1819,11 @@ function BonusModal({ staff, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Bonus turi *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Bonus turi *</label>
             <select
               value={bonusType}
               onChange={(e) => setBonusType(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
               required
             >
               <option value="performance">Ish samaradorligi</option>
@@ -1834,12 +1834,12 @@ function BonusModal({ staff, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Miqdor (so'm) *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Miqdor (so'm) *</label>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
               placeholder="0"
               required
               min="0"
@@ -1847,11 +1847,11 @@ function BonusModal({ staff, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Sabab *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Sabab *</label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
               rows="3"
               placeholder="Bonus berilish sababi..."
               required
@@ -1859,27 +1859,27 @@ function BonusModal({ staff, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Sana *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Sana *</label>
             <DateInput
               value={bonusDate}
               onChange={(e) => setBonusDate(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
               required
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-300 font-bold transition-all"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-200 text-gray-700 dark:text-gray-200 rounded-lg sm:rounded-xl hover:bg-gray-300 font-bold transition-all"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 font-bold disabled:opacity-50 transition-all shadow-lg"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:from-green-700 hover:to-emerald-700 font-bold disabled:opacity-50 transition-all shadow-lg"
             >
               {loading ? 'Yuklanmoqda...' : 'Qo\'shish'}
             </button>
@@ -1929,10 +1929,10 @@ function PenaltyModal({ staff, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 sm:p-6 lg:p-8 max-w-sm sm:max-w-md w-full shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-black text-gray-900 dark:text-white">Jarima qo'shish</h3>
+          <h3 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">Jarima qo'shish</h3>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 dark:bg-gray-700 rounded-full transition-colors"
@@ -1943,11 +1943,11 @@ function PenaltyModal({ staff, onClose, onSuccess }) {
         
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Xodim *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Xodim *</label>
             <select
               value={selectedStaff}
               onChange={(e) => setSelectedStaff(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
               required
             >
               <option value="">Xodimni tanlang</option>
@@ -1960,11 +1960,11 @@ function PenaltyModal({ staff, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Jarima turi *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Jarima turi *</label>
             <select
               value={penaltyType}
               onChange={(e) => setPenaltyType(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
               required
             >
               <option value="late">Kechikish</option>
@@ -1975,12 +1975,12 @@ function PenaltyModal({ staff, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Miqdor (so'm) *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Miqdor (so'm) *</label>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
               placeholder="0"
               required
               min="0"
@@ -1988,11 +1988,11 @@ function PenaltyModal({ staff, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Sabab *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Sabab *</label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
               rows="3"
               placeholder="Jarima sababi..."
               required
@@ -2000,27 +2000,27 @@ function PenaltyModal({ staff, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Sana *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Sana *</label>
             <DateInput
               value={penaltyDate}
               onChange={(e) => setPenaltyDate(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
               required
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-300 font-bold transition-all"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-200 text-gray-700 dark:text-gray-200 rounded-lg sm:rounded-xl hover:bg-gray-300 font-bold transition-all"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl hover:from-red-700 hover:to-rose-700 font-bold disabled:opacity-50 transition-all shadow-lg"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg sm:rounded-xl hover:from-red-700 hover:to-rose-700 font-bold disabled:opacity-50 transition-all shadow-lg"
             >
               {loading ? 'Yuklanmoqda...' : 'Qo\'shish'}
             </button>
@@ -2061,10 +2061,10 @@ function PaymentModal({ payroll, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl p-4 sm:p-6 lg:p-8 max-w-sm sm:max-w-md w-full shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-black text-gray-900 dark:text-white">Maosh to'lash</h3>
+          <h3 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">Maosh to'lash</h3>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 dark:bg-gray-700 rounded-full transition-colors"
@@ -2073,21 +2073,21 @@ function PaymentModal({ payroll, onClose, onSuccess }) {
           </button>
         </div>
         
-        <div className="bg-gradient-to-br from-purple-50 to-green-50 rounded-2xl p-6 mb-6 border-2 border-purple-100">
-          <p className="font-bold text-gray-900 dark:text-white text-lg mb-2">{payroll.staff_name}</p>
+        <div className="bg-gradient-to-br from-purple-50 to-green-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 border-2 border-purple-100">
+          <p className="font-bold text-gray-900 dark:text-white text-base sm:text-lg mb-2">{payroll.staff_name}</p>
           <p className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">To'lanadigan summa</p>
-          <p className="text-3xl font-black text-purple-700">
+          <p className="text-2xl sm:text-3xl font-black text-purple-700">
             {new Intl.NumberFormat('uz-UZ').format(payroll.net_salary)} so'm
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">To'lov usuli *</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">To'lov usuli *</label>
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
               required
             >
               <option value="cash">Naqd pul</option>
@@ -2098,40 +2098,40 @@ function PaymentModal({ payroll, onClose, onSuccess }) {
 
           {paymentMethod !== 'cash' && (
             <div>
-              <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Reference raqami</label>
+              <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Reference raqami</label>
               <input
                 type="text"
                 value={referenceNumber}
                 onChange={(e) => setReferenceNumber(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
                 placeholder="Tranzaksiya raqami"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-200">Izoh</label>
+            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-gray-700 dark:text-gray-200">Izoh</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
               rows="3"
               placeholder="Qo'shimcha ma'lumot..."
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-300 font-bold transition-all"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-200 text-gray-700 dark:text-gray-200 rounded-lg sm:rounded-xl hover:bg-gray-300 font-bold transition-all"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-green-600 text-white rounded-xl hover:from-purple-700 hover:to-green-700 font-bold disabled:opacity-50 transition-all shadow-lg"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-green-600 text-white rounded-lg sm:rounded-xl hover:from-purple-700 hover:to-green-700 font-bold disabled:opacity-50 transition-all shadow-lg"
             >
               {loading ? 'Yuklanmoqda...' : 'To\'lash'}
             </button>

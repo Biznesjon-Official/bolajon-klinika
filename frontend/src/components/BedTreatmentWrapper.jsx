@@ -319,29 +319,29 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
     const config = typeConfig[type];
 
     return (
-      <div key={treatment.id} className={`${config.bg} ${config.border} rounded-2xl p-4 transition-all duration-300 hover:shadow-lg`}>
+      <div key={treatment.id} className={`${config.bg} ${config.border} rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-lg`}>
         {isCompleting ? (
           // Yakunlash formi
-          <div className="space-y-4 animate-fadeIn">
-            <div className="flex items-center gap-3 mb-3">
+          <div className="space-y-3 sm:space-y-4 animate-fadeIn">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3">
               <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
                 <span className="material-symbols-outlined text-white">check_circle</span>
               </div>
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white">Muolajani yakunlash</h4>
+              <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Muolajani yakunlash</h4>
             </div>
 
             {/* Quick note templates */}
             <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2 text-gray-700 dark:text-gray-300">
                 💬 Tez izoh tanlash
               </label>
-              <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2 sm:gap-3 mb-3">
                 {noteTemplates.slice(0, 4).map((template, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleNoteTemplateSelect(template)}
-                    className={`px-3 py-2 text-xs font-medium rounded-xl transition-all ${
+                    className={`px-3 py-2 sm:py-2.5 text-xs font-medium rounded-lg sm:rounded-xl transition-all ${
                       quickNoteTemplate === template.value
                         ? 'bg-green-500 text-white shadow-lg scale-105'
                         : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 border border-gray-200 dark:border-gray-700'
@@ -355,7 +355,7 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
 
             {/* Custom note */}
             <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2 text-gray-700 dark:text-gray-300">
                 📝 Maxsus izoh (ixtiyoriy)
               </label>
               <textarea
@@ -364,27 +364,27 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                   setTreatmentNotes(e.target.value);
                   setQuickNoteTemplate('');
                 }}
-                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-900 rounded-xl text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-900 rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
                 rows="3"
                 placeholder="Qo'shimcha izoh yozing..."
               />
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={() => {
                   setCompletingTreatment(null);
                   setTreatmentNotes('');
                   setQuickNoteTemplate('');
                 }}
-                className="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold transition-all"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold transition-all"
               >
                 ← Bekor qilish
               </button>
               <button
                 onClick={() => handleShowMedicineModal(treatment.id)}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:from-green-600 hover:to-emerald-700 font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
               >
                 <span className="material-symbols-outlined">check_circle</span>
                 Tasdiqlash
@@ -394,14 +394,14 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
         ) : (
           // Muolaja ma'lumotlari
           <div>
-            <div className="flex items-start gap-3 mb-3">
-              <div className={`w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center shadow-md ${config.border}`}>
-                <span className={`material-symbols-outlined text-2xl ${config.iconColor}`}>{config.icon}</span>
+            <div className="flex items-start gap-2 sm:gap-3 mb-3">
+              <div className={`w-12 h-12 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md ${config.border}`}>
+                <span className={`material-symbols-outlined text-xl sm:text-2xl ${config.iconColor}`}>{config.icon}</span>
               </div>
               <div className="flex-1">
-                <h5 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{treatment.medication_name}</h5>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <span className="material-symbols-outlined text-base">medication</span>
+                <h5 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">{treatment.medication_name}</h5>
+                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  <span className="material-symbols-outlined text-sm sm:text-base">medication</span>
                   <span>Doza: <strong>{treatment.dosage}</strong></span>
                 </div>
                 {/* Progress indicator */}
@@ -415,7 +415,7 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                         {Math.round(((treatment.completed_doses || 0) / treatment.total_doses) * 100)}%
                       </span>
                     </div>
-                    <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden sm:block">
                       <div 
                         className="h-full bg-gradient-to-r from-blue-500 to-cyan-600 transition-all duration-500"
                         style={{ width: `${((treatment.completed_doses || 0) / treatment.total_doses) * 100}%` }}
@@ -427,11 +427,11 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
             </div>
 
             {/* Details - ALWAYS show, not just when frequency_per_day exists */}
-            <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-3 mb-3 space-y-2">
+            <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg sm:rounded-xl p-3 mb-3 space-y-2 sm:space-y-2 sm:space-y-3">
               {/* Frequency and Duration */}
               {treatment.frequency_per_day && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="material-symbols-outlined text-base text-blue-600">schedule</span>
+                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base">
+                  <span className="material-symbols-outlined text-sm sm:text-base text-blue-600">schedule</span>
                   <span className="text-gray-700 dark:text-gray-300">
                     Kuniga <strong>{treatment.frequency_per_day} marta</strong>
                     {treatment.duration_days && <>, <strong>{treatment.duration_days} kun</strong> davomida</>}
@@ -441,13 +441,13 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
               
               {/* Schedule Times */}
               {treatment.schedule_times && treatment.schedule_times.length > 0 && (
-                <div className="flex items-start gap-2 text-sm">
-                  <span className="material-symbols-outlined text-base text-purple-600">alarm</span>
+                <div className="flex items-start gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base">
+                  <span className="material-symbols-outlined text-sm sm:text-base text-purple-600">alarm</span>
                   <div className="flex-1">
                     <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Qabul qilish vaqtlari:</div>
                     <div className="flex flex-wrap gap-1">
                       {treatment.schedule_times.map((time, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg text-xs font-semibold">
+                        <span key={idx} className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg sm:rounded-lg sm:rounded-xl text-xs font-semibold">
                           {time}
                         </span>
                       ))}
@@ -457,8 +457,8 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
               )}
               
               {/* Prescription Type Badge */}
-              <div className="flex items-center gap-2 text-sm">
-                <span className="material-symbols-outlined text-base text-amber-600">label</span>
+              <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base">
+                <span className="material-symbols-outlined text-sm sm:text-base text-amber-600">label</span>
                 <span className="text-gray-700 dark:text-gray-300">
                   Turi: <strong className={`
                     ${treatment.prescription_type === 'URGENT' ? 'text-red-600' : ''}
@@ -476,8 +476,8 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
               
               {/* Scheduled Date/Time */}
               {treatment.scheduled_time && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="material-symbols-outlined text-base text-green-600">event</span>
+                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base">
+                  <span className="material-symbols-outlined text-sm sm:text-base text-green-600">event</span>
                   <span className="text-gray-700 dark:text-gray-300">
                     Rejalashtirilgan: <strong>{new Date(treatment.scheduled_time).toLocaleString('uz-UZ', {
                       day: '2-digit',
@@ -492,8 +492,8 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
               
               {/* Nurse Assignment */}
               {treatment.nurse_id && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="material-symbols-outlined text-base text-teal-600">medical_services</span>
+                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base">
+                  <span className="material-symbols-outlined text-sm sm:text-base text-teal-600">medical_services</span>
                   <span className="text-gray-700 dark:text-gray-300">
                     Hamshira: <strong>
                       {treatment.nurse_id?.first_name} {treatment.nurse_id?.last_name}
@@ -505,29 +505,29 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
 
             {/* Instructions - Always visible, not just when expanded */}
             {treatment.instructions && (
-              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 mb-3 border border-amber-200 dark:border-amber-800">
-                <div className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-amber-600 text-base flex-shrink-0">info</span>
+              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg sm:rounded-xl p-3 mb-3 border border-amber-200 dark:border-amber-800">
+                <div className="flex items-start gap-2 sm:gap-2 sm:gap-3">
+                  <span className="material-symbols-outlined text-amber-600 text-sm sm:text-base flex-shrink-0">info</span>
                   <div className="flex-1">
                     <div className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1">Ko'rsatmalar:</div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{treatment.instructions}</p>
+                    <p className="text-sm sm:text-sm sm:text-base text-gray-700 dark:text-gray-300">{treatment.instructions}</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 sm:gap-2 sm:gap-3">
               <button
                 onClick={() => handleQuickComplete(treatment.id)}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:from-green-600 hover:to-emerald-700 font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
               >
                 <span className="material-symbols-outlined">bolt</span>
                 Tez yakunlash
               </button>
               <button
                 onClick={() => setCompletingTreatment(treatment.id)}
-                className="px-4 py-3 bg-white dark:bg-gray-800 border-2 border-green-500 text-green-600 dark:text-green-400 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 font-semibold transition-all flex items-center justify-center gap-2"
+                className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-white dark:bg-gray-800 border-2 border-green-500 text-green-600 dark:text-green-400 rounded-lg sm:rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 font-semibold transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
               >
                 <span className="material-symbols-outlined">edit_note</span>
                 Izoh bilan
@@ -542,23 +542,23 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
   // Render completed treatment card
   const renderCompletedTreatmentCard = (treatment) => {
     return (
-      <div key={treatment.id} className="bg-green-50 dark:bg-green-900/10 border-2 border-green-200 dark:border-green-800 rounded-xl p-4 opacity-90">
-        <div className="flex items-start gap-3 mb-2">
+      <div key={treatment.id} className="bg-green-50 dark:bg-green-900/10 border-2 border-green-200 dark:border-green-800 rounded-lg sm:rounded-xl p-3 sm:p-4 opacity-90">
+        <div className="flex items-start gap-2 sm:gap-3 mb-2">
           <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="material-symbols-outlined text-white text-xl">check</span>
+            <span className="material-symbols-outlined text-white text-lg sm:text-xl">check</span>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="font-bold text-gray-900 dark:text-white text-base">{treatment.medication_name}</p>
+            <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-1">
+              <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">{treatment.medication_name}</p>
               <span className="px-2 py-0.5 bg-green-600 text-white rounded-full text-xs font-bold">✓ Bajarildi</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Doza: <strong>{treatment.dosage}</strong></p>
+            <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-2">Doza: <strong>{treatment.dosage}</strong></p>
             
             {/* Completed details */}
             <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
               {treatment.completed_at && (
                 <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">schedule</span>
+                  <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">schedule</span>
                   <span>Bajarilgan vaqt: {new Date(treatment.completed_at).toLocaleString('uz-UZ', {
                     day: '2-digit',
                     month: '2-digit',
@@ -570,8 +570,8 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
               )}
               
               {treatment.completion_notes && (
-                <div className="flex items-start gap-1 mt-2 p-2 bg-white dark:bg-gray-800 rounded-lg">
-                  <span className="material-symbols-outlined text-sm">note</span>
+                <div className="flex items-start gap-1 mt-2 p-2 bg-white dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
+                  <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">note</span>
                   <span className="flex-1">{treatment.completion_notes}</span>
                 </div>
               )}
@@ -616,20 +616,20 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn" onClick={() => setShowModal(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-slideUp" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 animate-fadeIn" onClick={() => setShowModal(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-4 sm:p-6 max-w-3xl w-full max-h-[90vh] overflow-hidden sm:block flex flex-col animate-slideUp" onClick={(e) => e.stopPropagation()}>
             
             {/* Header with patient info and progress */}
             <div className="flex items-start justify-between mb-6 pb-4 border-b-2 border-gray-100 dark:border-gray-700">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg">
                     {patientName?.charAt(0) || 'P'}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{patientName}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                      <span className="material-symbols-outlined text-base">bed</span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{patientName}</h3>
+                    <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400 flex items-center gap-2 sm:gap-2 sm:gap-3">
+                      <span className="material-symbols-outlined text-sm sm:text-base">bed</span>
                       Xona {roomNumber}, Ko'rpa {bedNumber}
                     </p>
                   </div>
@@ -644,7 +644,7 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                       </span>
                       <span className="font-bold text-green-600">{completionPercentage}%</span>
                     </div>
-                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden sm:block">
                       <div 
                         className="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all duration-500 ease-out"
                         style={{ width: `${completionPercentage}%` }}
@@ -661,7 +661,7 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                   setTreatmentNotes('');
                   setQuickNoteTemplate('');
                 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors ml-4"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg sm:rounded-xl transition-colors ml-4"
               >
                 <span className="material-symbols-outlined text-gray-500">close</span>
               </button>
@@ -679,25 +679,25 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                   <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="material-symbols-outlined text-5xl text-gray-400">medication</span>
                   </div>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Muolajalar yo'q</p>
+                  <p className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">Muolajalar yo'q</p>
                   <p className="text-gray-500 dark:text-gray-400">Bu koykada hozircha muolajalar mavjud emas</p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   
                   {/* Urgent treatments */}
                   {groupedTreatments.urgent.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 rounded-full">
-                          <span className="material-symbols-outlined text-red-600 text-lg">emergency</span>
-                          <span className="text-sm font-bold text-red-700 dark:text-red-400">Shoshilinch</span>
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-3">
+                        <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 rounded-full">
+                          <span className="material-symbols-outlined text-red-600 text-base sm:text-lg">emergency</span>
+                          <span className="text-sm sm:text-sm sm:text-base font-bold text-red-700 dark:text-red-400">Shoshilinch</span>
                           <span className="px-2 py-0.5 bg-red-600 text-white rounded-full text-xs font-bold">
                             {groupedTreatments.urgent.length}
                           </span>
                         </div>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {groupedTreatments.urgent.map(treatment => renderTreatmentCard(treatment, 'urgent'))}
                       </div>
                     </div>
@@ -706,16 +706,16 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                   {/* Regular treatments */}
                   {groupedTreatments.regular.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                          <span className="material-symbols-outlined text-blue-600 text-lg">medication</span>
-                          <span className="text-sm font-bold text-blue-700 dark:text-blue-400">Oddiy muolajalar</span>
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-3">
+                        <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                          <span className="material-symbols-outlined text-blue-600 text-base sm:text-lg">medication</span>
+                          <span className="text-sm sm:text-sm sm:text-base font-bold text-blue-700 dark:text-blue-400">Oddiy muolajalar</span>
                           <span className="px-2 py-0.5 bg-blue-600 text-white rounded-full text-xs font-bold">
                             {groupedTreatments.regular.length}
                           </span>
                         </div>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {groupedTreatments.regular.map(treatment => renderTreatmentCard(treatment, 'regular'))}
                       </div>
                     </div>
@@ -724,16 +724,16 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                   {/* Chronic treatments */}
                   {groupedTreatments.chronic.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                          <span className="material-symbols-outlined text-purple-600 text-lg">calendar_month</span>
-                          <span className="text-sm font-bold text-purple-700 dark:text-purple-400">Surunkali</span>
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-3">
+                        <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                          <span className="material-symbols-outlined text-purple-600 text-base sm:text-lg">calendar_month</span>
+                          <span className="text-sm sm:text-sm sm:text-base font-bold text-purple-700 dark:text-purple-400">Surunkali</span>
                           <span className="px-2 py-0.5 bg-purple-600 text-white rounded-full text-xs font-bold">
                             {groupedTreatments.chronic.length}
                           </span>
                         </div>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {groupedTreatments.chronic.map(treatment => renderTreatmentCard(treatment, 'chronic'))}
                       </div>
                     </div>
@@ -742,16 +742,16 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                   {/* Completed treatments */}
                   {groupedTreatments.completed.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 rounded-full">
-                          <span className="material-symbols-outlined text-green-600 text-lg">check_circle</span>
-                          <span className="text-sm font-bold text-green-700 dark:text-green-400">Bajarilgan muolajalar</span>
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-3">
+                        <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 rounded-full">
+                          <span className="material-symbols-outlined text-green-600 text-base sm:text-lg">check_circle</span>
+                          <span className="text-sm sm:text-sm sm:text-base font-bold text-green-700 dark:text-green-400">Bajarilgan muolajalar</span>
                           <span className="px-2 py-0.5 bg-green-600 text-white rounded-full text-xs font-bold">
                             {groupedTreatments.completed.length}
                           </span>
                         </div>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {groupedTreatments.completed.map(treatment => renderCompletedTreatmentCard(treatment))}
                       </div>
                     </div>

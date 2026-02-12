@@ -243,7 +243,7 @@ const Expenses = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
@@ -253,20 +253,20 @@ const Expenses = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white">Xarajatlar</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Xarajatlar</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Klinika xarajatlarini boshqarish
           </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+          className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
         >
           <span className="material-symbols-outlined">add</span>
           Xarajat qo'shish
@@ -274,45 +274,45 @@ const Expenses = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">account_balance_wallet</span>
-          <p className="text-4xl font-black">{formatCurrency(stats.total_expense)}</p>
-          <p className="text-sm opacity-90 mt-1">Umumiy xarajat</p>
+      <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">account_balance_wallet</span>
+          <p className="text-3xl sm:text-4xl font-black">{formatCurrency(stats.total_expense)}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Umumiy xarajat</p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">calendar_month</span>
-          <p className="text-4xl font-black">{formatCurrency(stats.monthly_expense)}</p>
-          <p className="text-sm opacity-90 mt-1">Oylik xarajat</p>
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">calendar_month</span>
+          <p className="text-3xl sm:text-4xl font-black">{formatCurrency(stats.monthly_expense)}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Oylik xarajat</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">calendar_today</span>
-          <p className="text-4xl font-black">{formatCurrency(stats.yearly_expense)}</p>
-          <p className="text-sm opacity-90 mt-1">Yillik xarajat</p>
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">calendar_today</span>
+          <p className="text-3xl sm:text-4xl font-black">{formatCurrency(stats.yearly_expense)}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Yillik xarajat</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
             Oy
           </label>
           <input
             type="month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
       </div>
 
       {/* Expenses List */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800">
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800">
+          <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
             Xarajatlar ro'yxati ({expenses.length})
           </h2>
         </div>
@@ -331,54 +331,54 @@ const Expenses = () => {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">№</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Sana</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Sarlavha</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Kategoriya</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Summa</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">To'lov usuli</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Amallar</th>
+                  <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">№</th>
+                  <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Sana</th>
+                  <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Sarlavha</th>
+                  <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Kategoriya</th>
+                  <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Summa</th>
+                  <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">To'lov usuli</th>
+                  <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Amallar</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {expenses.map((expense, index) => (
                   <tr key={expense._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{index + 1}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white">{index + 1}</td>
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       {formatDate(expense.date)}
                     </td>
-                    <td className="px-4 py-3">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{expense.title}</p>
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+                      <p className="text-sm sm:text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{expense.title}</p>
                       {expense.description && (
                         <p className="text-xs text-gray-500 mt-1">{expense.description}</p>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
                       <span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded text-xs font-semibold">
                         {expense.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm font-bold text-red-600 dark:text-red-400">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base font-bold text-red-600 dark:text-red-400">
                       {formatCurrency(expense.amount)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       {expense.payment_method}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                         <button
                           onClick={() => handleOpenModal(expense)}
                           className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
                           title="Tahrirlash"
                         >
-                          <span className="material-symbols-outlined text-lg">edit</span>
+                          <span className="material-symbols-outlined text-base sm:text-lg">edit</span>
                         </button>
                         <button
                           onClick={() => handleDelete(expense)}
                           className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                           title="O'chirish"
                         >
-                          <span className="material-symbols-outlined text-lg">delete</span>
+                          <span className="material-symbols-outlined text-base sm:text-lg">delete</span>
                         </button>
                       </div>
                     </td>
@@ -396,30 +396,30 @@ const Expenses = () => {
         onClose={() => setShowExpenseModal(false)}
         title={editingExpense ? 'Xarajatni tahrirlash' : 'Yangi xarajat qo\'shish'}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Sarlavha <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={expenseForm.title}
               onChange={(e) => setExpenseForm({ ...expenseForm, title: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Masalan: Elektr energiyasi to'lovi"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Summa (so'm) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               value={expenseForm.amount}
               onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="0"
               min="0"
               required
@@ -427,42 +427,42 @@ const Expenses = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Sana va vaqt <span className="text-red-500">*</span>
             </label>
             <input
               type="datetime-local"
               value={expenseForm.date}
               onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Izoh
             </label>
             <textarea
               value={expenseForm.description}
               onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               rows="3"
               placeholder="Qo'shimcha ma'lumot..."
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={() => setShowExpenseModal(false)}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:opacity-90"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90"
             >
               {editingExpense ? 'Yangilash' : 'Qo\'shish'}
             </button>

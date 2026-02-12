@@ -77,7 +77,7 @@ const TelegramSetup = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
@@ -87,29 +87,29 @@ const TelegramSetup = () => {
   }
 
   return (
-    <div className="p-8 space-y-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-2xl sm:max-w-4xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black text-gray-900 dark:text-white">Telegram Bot O'rnatish</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Telegram Bot O'rnatish</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
           Telegram bot integratsiyasini sozlash va tekshirish
         </p>
       </div>
 
       {/* Status Card */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Status</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">Status</h2>
         
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Migration Status */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="flex items-center gap-3">
-              <span className={`material-symbols-outlined text-3xl ${status?.migrationComplete ? 'text-green-500' : 'text-yellow-500'}`}>
+          <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className={`material-symbols-outlined text-2xl sm:text-3xl ${status?.migrationComplete ? 'text-green-500' : 'text-yellow-500'}`}>
                 {status?.migrationComplete ? 'check_circle' : 'warning'}
               </span>
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white">Database Migratsiyasi</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   {status?.migrationComplete ? 'Bajarilgan' : 'Bajarilmagan'}
                 </p>
               </div>
@@ -118,7 +118,7 @@ const TelegramSetup = () => {
               <button
                 onClick={runMigration}
                 disabled={migrating}
-                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+                className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 disabled:opacity-50"
               >
                 {migrating ? 'Bajarilmoqda...' : 'Bajarish'}
               </button>
@@ -126,14 +126,14 @@ const TelegramSetup = () => {
           </div>
 
           {/* Columns Status */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="flex items-center gap-3">
-              <span className={`material-symbols-outlined text-3xl ${status?.hasColumns ? 'text-green-500' : 'text-red-500'}`}>
+          <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className={`material-symbols-outlined text-2xl sm:text-3xl ${status?.hasColumns ? 'text-green-500' : 'text-red-500'}`}>
                 {status?.hasColumns ? 'check_circle' : 'cancel'}
               </span>
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white">Telegram Ustunlari</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   {status?.hasColumns ? `${status.columns?.length || 0} ta ustun` : 'Yo\'q'}
                 </p>
               </div>
@@ -141,14 +141,14 @@ const TelegramSetup = () => {
           </div>
 
           {/* Table Status */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="flex items-center gap-3">
-              <span className={`material-symbols-outlined text-3xl ${status?.hasTable ? 'text-green-500' : 'text-red-500'}`}>
+          <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className={`material-symbols-outlined text-2xl sm:text-3xl ${status?.hasTable ? 'text-green-500' : 'text-red-500'}`}>
                 {status?.hasTable ? 'check_circle' : 'cancel'}
               </span>
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white">Telegram Notifications Jadvali</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   {status?.hasTable ? 'Mavjud' : 'Yo\'q'}
                 </p>
               </div>
@@ -159,27 +159,27 @@ const TelegramSetup = () => {
 
       {/* Statistics */}
       {status?.migrationComplete && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 border border-green-100 dark:border-green-800">
-            <div className="flex items-center gap-4">
-              <div className="size-12 bg-green-500 rounded-lg flex items-center justify-center text-white">
+        <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-green-100 dark:border-green-800">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="size-12 bg-green-500 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white">
                 <span className="material-symbols-outlined">people</span>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Botga ulangan bemorlar</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{status.connectedPatients}</p>
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Botga ulangan bemorlar</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{status.connectedPatients}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 border border-green-100 dark:border-green-800">
-            <div className="flex items-center gap-4">
-              <div className="size-12 bg-green-500 rounded-lg flex items-center justify-center text-white">
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-green-100 dark:border-green-800">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="size-12 bg-green-500 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white">
                 <span className="material-symbols-outlined">notifications</span>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Yuborilgan xabarnomalar</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{status.sentNotifications}</p>
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Yuborilgan xabarnomalar</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{status.sentNotifications}</p>
               </div>
             </div>
           </div>
@@ -187,29 +187,29 @@ const TelegramSetup = () => {
       )}
 
       {/* Instructions */}
-      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
-        <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg sm:rounded-xl p-4 sm:p-6">
+        <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2 sm:gap-2 sm:gap-3">
           <span className="material-symbols-outlined">info</span>
           Keyingi Qadamlar
         </h3>
-        <ol className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-          <li className="flex items-start gap-2">
+        <ol className="space-y-2 sm:space-y-2 sm:space-y-3 text-sm sm:text-sm sm:text-base text-gray-700 dark:text-gray-300">
+          <li className="flex items-start gap-2 sm:gap-2 sm:gap-3">
             <span className="font-bold">1.</span>
             <span>Database migratsiyasini bajaring (yuqoridagi tugma)</span>
           </li>
-          <li className="flex items-start gap-2">
+          <li className="flex items-start gap-2 sm:gap-2 sm:gap-3">
             <span className="font-bold">2.</span>
             <span>Bot papkasiga o'ting: <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">cd bot</code></span>
           </li>
-          <li className="flex items-start gap-2">
+          <li className="flex items-start gap-2 sm:gap-2 sm:gap-3">
             <span className="font-bold">3.</span>
             <span>Botni ishga tushiring: <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">npm start</code></span>
           </li>
-          <li className="flex items-start gap-2">
+          <li className="flex items-start gap-2 sm:gap-2 sm:gap-3">
             <span className="font-bold">4.</span>
             <span>Bemor panelidan "Telegram Bot" tugmasini bosing</span>
           </li>
-          <li className="flex items-start gap-2">
+          <li className="flex items-start gap-2 sm:gap-2 sm:gap-3">
             <span className="font-bold">5.</span>
             <span>Telegram'da botga /start yuboring</span>
           </li>
@@ -219,7 +219,7 @@ const TelegramSetup = () => {
       {/* Refresh Button */}
       <button
         onClick={checkStatus}
-        className="w-full px-4 py-3 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-700 flex items-center justify-center gap-2"
+        className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-700 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
       >
         <span className="material-symbols-outlined">refresh</span>
         Statusni Yangilash

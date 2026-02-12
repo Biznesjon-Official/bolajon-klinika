@@ -367,7 +367,7 @@ const QueueManagement = () => {
 
   if (loading && queue.length === 0) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
@@ -380,62 +380,62 @@ const QueueManagement = () => {
   if (isDoctor) {
     return (
       <>
-        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+        <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">{t('queue.myQueue')}</h1>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-2xl sm:text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">{t('queue.myQueue')}</h1>
+            <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
               {t('queue.todayPatients')}: {queue.length} {t('queue.patientsCount')}
             </p>
           </div>
           <button
             onClick={loadData}
-            className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
           >
-            <span className="material-symbols-outlined text-base">refresh</span>
+            <span className="material-symbols-outlined text-sm sm:text-base">refresh</span>
             {t('queue.refresh')}
           </button>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4 border border-yellow-100 dark:border-yellow-800">
-            <div className="flex items-center gap-3">
-              <div className="size-10 sm:size-12 bg-yellow-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
-                <span className="material-symbols-outlined text-xl sm:text-2xl">schedule</span>
+        <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-yellow-100 dark:border-yellow-800">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="size-10 sm:size-12 bg-yellow-500 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
+                <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl">schedule</span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('queue.waitingPatients')}</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{t('queue.waitingPatients')}</p>
+                <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   {queue.filter(q => q.status === 'WAITING').length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-100 dark:border-purple-800">
-            <div className="flex items-center gap-3">
-              <div className="size-10 sm:size-12 bg-purple-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
-                <span className="material-symbols-outlined text-xl sm:text-2xl">medical_services</span>
+          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-purple-100 dark:border-purple-800">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="size-10 sm:size-12 bg-purple-500 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
+                <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl">medical_services</span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('queue.inConsultation')}</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{t('queue.inConsultation')}</p>
+                <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   {queue.filter(q => q.status === 'IN_PROGRESS').length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-100 dark:border-green-800 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-3">
-              <div className="size-10 sm:size-12 bg-green-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
-                <span className="material-symbols-outlined text-xl sm:text-2xl">check_circle</span>
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-100 dark:border-green-800 sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="size-10 sm:size-12 bg-green-500 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
+                <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl">check_circle</span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('queue.completedToday')}</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{t('queue.completedToday')}</p>
+                <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   {queue.filter(q => q.status === 'COMPLETED').length}
                 </p>
               </div>
@@ -444,7 +444,7 @@ const QueueManagement = () => {
         </div>
 
         {/* Queue List */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden sm:block">
           {queue.length === 0 ? (
             <div className="p-12 text-center">
               <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
@@ -455,31 +455,31 @@ const QueueManagement = () => {
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {queue.map((patient) => (
-                <div key={patient.id} className="p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-                      <div className="size-12 sm:size-16 bg-primary/10 text-primary rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="text-xl sm:text-2xl font-black">{patient.queueNumber}</span>
+                <div key={patient.id} className="p-3 sm:p-4 sm:p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div className="flex flex-col lg:flex-col sm:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+                    <div className="flex items-start gap-2 sm:gap-3 sm:gap-3 sm:gap-4 min-w-0 flex-1">
+                      <div className="size-12 sm:size-16 bg-primary/10 text-primary rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                        <span className="text-xl sm:text-xl sm:text-2xl font-black">{patient.queueNumber}</span>
                       </div>
                       
                       <div className="min-w-0 flex-1">
-                        <p className="font-bold text-gray-900 dark:text-white text-base sm:text-lg break-words">
+                        <p className="font-bold text-gray-900 dark:text-white text-base sm:text-base sm:text-lg break-words">
                           {patient.patientName}
                         </p>
-                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">
+                        <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">
                           {patient.patientNumber} • {patient.patientPhone}
                         </p>
                         {patient.notes && (
-                          <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
+                          <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-500 mt-1 break-words">
                             <span className="font-semibold">{t('queue.notes')}:</span> {patient.notes}
                           </p>
                         )}
                       </div>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 lg:gap-4">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap ${getStatusColor(patient.status)}`}>
+                    <div className="flex flex-col sm:flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3 lg:gap-3 sm:gap-4">
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 flex-wrap">
+                        <span className={`px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold whitespace-nowrap ${getStatusColor(patient.status)}`}>
                           {getStatusText(patient.status)}
                         </span>
                         
@@ -490,13 +490,13 @@ const QueueManagement = () => {
                         )}
                       </div>
                       
-                      <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-2 sm:gap-3">
                         {patient.status === 'WAITING' && (
                           <button
                             onClick={() => handleCallPatient(patient.id)}
-                            className="px-3 sm:px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center justify-center gap-2"
+                            className="px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                           >
-                            <span className="material-symbols-outlined text-base">call</span>
+                            <span className="material-symbols-outlined text-sm sm:text-base">call</span>
                             {t('queue.call')}
                           </button>
                         )}
@@ -505,16 +505,16 @@ const QueueManagement = () => {
                           <>
                             <button
                               onClick={() => handleStartConsultation(patient)}
-                              className="px-3 sm:px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-600 flex items-center justify-center gap-2"
+                              className="px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-purple-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-purple-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                             >
-                              <span className="material-symbols-outlined text-base">medication</span>
+                              <span className="material-symbols-outlined text-sm sm:text-base">medication</span>
                               {t('queue.writePrescription')}
                             </button>
                             <button
                               onClick={() => handleCompleteAppointment(patient.id)}
-                              className="px-3 sm:px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center justify-center gap-2"
+                              className="px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                             >
-                              <span className="material-symbols-outlined text-base">check_circle</span>
+                              <span className="material-symbols-outlined text-sm sm:text-base">check_circle</span>
                               {t('queue.completeAppointment')}
                             </button>
                           </>
@@ -534,10 +534,10 @@ const QueueManagement = () => {
                             });
                             setShowQRModal(true);
                           }}
-                          className="px-3 sm:px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-semibold hover:bg-gray-600 flex items-center justify-center gap-2"
+                          className="px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-gray-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                           title="QR Kod"
                         >
-                          <span className="material-symbols-outlined text-base">qr_code</span>
+                          <span className="material-symbols-outlined text-sm sm:text-base">qr_code</span>
                         </button>
                       </div>
                     </div>
@@ -594,11 +594,11 @@ const QueueManagement = () => {
   // ADMIN/RECEPTION UCHUN TO'LIQ KO'RINISH
   return (
     <>
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white">Navbat boshqaruvi</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Navbat boshqaruvi</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Bugungi navbat: {stats.total} ta bemor
           </p>
@@ -606,7 +606,7 @@ const QueueManagement = () => {
         {!isDoctor && (
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-2"
+            className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
           >
             <span className="material-symbols-outlined">add</span>
             {t('queue.addToQueue')}
@@ -615,40 +615,40 @@ const QueueManagement = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border-l-4 border-yellow-500">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Kutmoqda</p>
-          <p className="text-3xl font-black text-yellow-700 dark:text-yellow-400">{stats.waiting}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 border-l-4 border-yellow-500">
+          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Kutmoqda</p>
+          <p className="text-2xl sm:text-3xl font-black text-yellow-700 dark:text-yellow-400">{stats.waiting}</p>
         </div>
-        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border-l-4 border-purple-500">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Qabulda</p>
-          <p className="text-3xl font-black text-purple-700 dark:text-purple-400">{stats.in_progress}</p>
+        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 border-l-4 border-purple-500">
+          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Qabulda</p>
+          <p className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-400">{stats.in_progress}</p>
         </div>
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border-l-4 border-green-500">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Yakunlandi</p>
-          <p className="text-3xl font-black text-green-700 dark:text-green-400">{stats.completed}</p>
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 border-l-4 border-green-500">
+          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Yakunlandi</p>
+          <p className="text-2xl sm:text-3xl font-black text-green-700 dark:text-green-400">{stats.completed}</p>
         </div>
-        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border-l-4 border-red-500">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Bekor qilindi</p>
-          <p className="text-3xl font-black text-red-700 dark:text-red-400">{stats.cancelled}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 border-l-4 border-red-500">
+          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Bekor qilindi</p>
+          <p className="text-2xl sm:text-3xl font-black text-red-700 dark:text-red-400">{stats.cancelled}</p>
         </div>
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border-l-4 border-green-500">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Jami</p>
-          <p className="text-3xl font-black text-green-700 dark:text-green-400">{stats.total}</p>
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 border-l-4 border-green-500">
+          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Jami</p>
+          <p className="text-2xl sm:text-3xl font-black text-green-700 dark:text-green-400">{stats.total}</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-        <div className="flex gap-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4">
+        <div className="flex gap-3 sm:gap-4">
           <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Status
             </label>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl"
             >
               <option value="all">{t('queue.allStatuses')}</option>
               <option value="WAITING">{t('queue.waitingStatus')}</option>
@@ -659,13 +659,13 @@ const QueueManagement = () => {
           </div>
           
           <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Shifokor
             </label>
             <select
               value={filterDoctor}
               onChange={(e) => setFilterDoctor(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl"
             >
               <option value="all">{t('queue.allDoctors')}</option>
               {doctors.map(doctor => (
@@ -679,7 +679,7 @@ const QueueManagement = () => {
       </div>
 
       {/* Queue List */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800">
         {filteredQueue.length === 0 ? (
           <div className="p-12 text-center">
             <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
@@ -690,33 +690,33 @@ const QueueManagement = () => {
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredQueue.map((item) => (
-              <div key={item.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+              <div key={item.id} className="p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="size-16 bg-primary/10 text-primary rounded-lg flex items-center justify-center">
-                      <span className="text-2xl font-black">{item.queueNumber}</span>
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="size-16 bg-primary/10 text-primary rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center">
+                      <span className="text-xl sm:text-2xl font-black">{item.queueNumber}</span>
                     </div>
                     
                     <div>
                       <p className="font-bold text-gray-900 dark:text-white">
                         {item.patientName}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                         {item.patientNumber} • {item.patientPhone}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-500">
                         Dr. {item.doctorName}
                       </p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     <div className="text-right">
-                      <p className="text-sm text-gray-500">Vaqt</p>
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-500">Vaqt</p>
                       <p className="font-semibold">{formatTime(item.appointmentTime)}</p>
                     </div>
                     
-                    <span className={`px-4 py-2 rounded-lg text-sm font-semibold ${getStatusColor(item.status)}`}>
+                    <span className={`px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold ${getStatusColor(item.status)}`}>
                       {getStatusText(item.status)}
                     </span>
                     
@@ -727,26 +727,26 @@ const QueueManagement = () => {
                     )}
                     
                     {/* Action Buttons */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 sm:gap-2 sm:gap-3">
                       {item.status === 'WAITING' && (
                         <>
                           {isDoctor && (
                             <button
                               onClick={() => handleCallPatient(item.id)}
-                              className="px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center gap-1"
+                              className="px-3 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center gap-1"
                               title="Bemorni chaqirish"
                             >
-                              <span className="material-symbols-outlined text-lg">call</span>
+                              <span className="material-symbols-outlined text-base sm:text-lg">call</span>
                               Chaqirish
                             </button>
                           )}
                           {!isDoctor && (
                             <button
                               onClick={() => handleCancelAppointment(item.id)}
-                              className="px-3 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600"
+                              className="px-3 py-2 sm:py-2.5 bg-red-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-red-600"
                               title="Bekor qilish"
                             >
-                              <span className="material-symbols-outlined text-lg">close</span>
+                              <span className="material-symbols-outlined text-base sm:text-lg">close</span>
                             </button>
                           )}
                         </>
@@ -759,18 +759,18 @@ const QueueManagement = () => {
                         <>
                           <button
                             onClick={() => handleStartConsultation(item)}
-                            className="px-3 py-2 bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-600 flex items-center gap-1"
+                            className="px-3 py-2 sm:py-2.5 bg-purple-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-purple-600 flex items-center gap-1"
                             title={t('queue.writePrescription')}
                           >
-                            <span className="material-symbols-outlined text-lg">medication</span>
+                            <span className="material-symbols-outlined text-base sm:text-lg">medication</span>
                             {t('queue.writePrescription')}
                           </button>
                           <button
                             onClick={() => handleCompleteAppointment(item.id)}
-                            className="px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center gap-1"
+                            className="px-3 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center gap-1"
                             title={t('queue.completeTitle')}
                           >
-                            <span className="material-symbols-outlined text-lg">check_circle</span>
+                            <span className="material-symbols-outlined text-base sm:text-lg">check_circle</span>
                             {t('queue.completeAppointment')}
                           </button>
                         </>
@@ -790,10 +790,10 @@ const QueueManagement = () => {
                           });
                           setShowQRModal(true);
                         }}
-                        className="px-3 py-2 bg-gray-500 text-white rounded-lg text-sm font-semibold hover:bg-gray-600 flex items-center gap-1"
+                        className="px-3 py-2 sm:py-2.5 bg-gray-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-gray-600 flex items-center gap-1"
                         title="QR Kod"
                       >
-                        <span className="material-symbols-outlined text-lg">qr_code</span>
+                        <span className="material-symbols-outlined text-base sm:text-lg">qr_code</span>
                       </button>
                     </div>
                   </div>
@@ -809,19 +809,19 @@ const QueueManagement = () => {
 
       {/* Add to Queue Modal */}
       <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); resetForm(); }}>
-        <form onSubmit={handleAddToQueue} className="space-y-4">
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white">{t('queue.addToQueue')}</h2>
+        <form onSubmit={handleAddToQueue} className="space-y-3 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{t('queue.addToQueue')}</h2>
           
           {/* Patient Selection */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Bemorni tanlang <span className="text-red-500">*</span>
             </label>
             <select
               required
               value={selectedPatient}
               onChange={(e) => setSelectedPatient(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Bemorni tanlang</option>
               {patients
@@ -843,14 +843,14 @@ const QueueManagement = () => {
 
           {/* Doctor Selection */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Shifokorni tanlang <span className="text-red-500">*</span>
             </label>
             <select
               required
               value={selectedDoctor}
               onChange={(e) => setSelectedDoctor(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Shifokorni tanlang</option>
               {doctors.map(doctor => (
@@ -864,14 +864,14 @@ const QueueManagement = () => {
 
           {/* Queue Type */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Navbat turi
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setQueueType('NORMAL')}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+                className={`flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
                   queueType === 'NORMAL'
                     ? 'bg-primary text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
@@ -882,7 +882,7 @@ const QueueManagement = () => {
               <button
                 type="button"
                 onClick={() => setQueueType('EMERGENCY')}
-                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+                className={`flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
                   queueType === 'EMERGENCY'
                     ? 'bg-red-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
@@ -895,30 +895,30 @@ const QueueManagement = () => {
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {t('queue.notes')}
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows="2"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               placeholder={t('queue.notesPlaceholder')}
             />
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={() => { setShowAddModal(false); resetForm(); }}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               {t('queue.cancel')}
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl font-semibold hover:opacity-90"
             >
               {t('queue.addToQueueButton')}
             </button>
@@ -975,17 +975,17 @@ const QueueManagement = () => {
           title="🏥 Muolajaga yuborish"
           size="md"
         >
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Bemor ma'lumotlari */}
             {nursePatient && (
-              <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 p-4 rounded-xl border border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-green-600 text-3xl">person</span>
+              <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="material-symbols-outlined text-green-600 text-2xl sm:text-3xl">person</span>
                   <div>
                     <p className="font-bold text-gray-900 dark:text-white">
                       {nursePatient.patientName || `${nursePatient.first_name} ${nursePatient.last_name}`}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       {nursePatient.patientNumber || nursePatient.patient_number}
                     </p>
                   </div>
@@ -995,13 +995,13 @@ const QueueManagement = () => {
 
             {/* Hamshirani tanlash */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Hamshirani tanlang *
               </label>
               <select
                 value={selectedNurse || ''}
                 onChange={(e) => setSelectedNurse(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               >
                 <option value="">Hamshirani tanlang</option>
@@ -1015,14 +1015,14 @@ const QueueManagement = () => {
 
             {/* Dori nomi */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Dori nomi *
               </label>
               <input
                 type="text"
                 value={nurseTaskData.medication_name}
                 onChange={(e) => setNurseTaskData({ ...nurseTaskData, medication_name: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Dori nomini kiriting"
                 required
               />
@@ -1030,21 +1030,21 @@ const QueueManagement = () => {
 
             {/* Doza */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Doza *
               </label>
               <input
                 type="text"
                 value={nurseTaskData.dosage}
                 onChange={(e) => setNurseTaskData({ ...nurseTaskData, dosage: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Masalan: 500mg"
                 required
               />
             </div>
 
             {/* Tugmalar */}
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-2 sm:gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => {
@@ -1053,14 +1053,14 @@ const QueueManagement = () => {
                   setNurseTaskData({ medication_name: '', dosage: '' });
                   setNursePatient(null);
                 }}
-                className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+                className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 Bekor qilish
               </button>
               <button
                 type="button"
                 onClick={handleAssignToNurse}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-red-600 flex items-center justify-center gap-2"
+                className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:from-orange-600 hover:to-red-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
               >
                 <span className="material-symbols-outlined">send</span>
                 Yuborish

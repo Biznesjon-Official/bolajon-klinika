@@ -156,13 +156,13 @@ const Invoices = () => {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black text-gray-900 dark:text-white">Hisob-fakturalar</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Hisob-fakturalar</h1>
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+          className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl bg-white dark:bg-gray-800"
         >
           <option value="all">Barchasi</option>
           <option value="pending">Kutilmoqda</option>
@@ -177,43 +177,43 @@ const Invoices = () => {
           <p className="text-gray-500">Yuklanmoqda...</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden sm:block">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Raqam</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Bemor</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Jami</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">To'langan</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Qarz</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Holat</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Sana</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Amallar</th>
+                <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Raqam</th>
+                <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Bemor</th>
+                <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Jami</th>
+                <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">To'langan</th>
+                <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Qarz</th>
+                <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Holat</th>
+                <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Sana</th>
+                <th className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Amallar</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {invoices.map((invoice) => (
                 <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-6 py-4 text-sm font-mono">{invoice.invoice_number}</td>
-                  <td className="px-6 py-4 text-sm">
+                  <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm sm:text-sm sm:text-base font-mono">{invoice.invoice_number}</td>
+                  <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm sm:text-sm sm:text-base">
                     <div>
                       <p className="font-semibold">{invoice.first_name} {invoice.last_name}</p>
                       <p className="text-gray-500 text-xs">{invoice.phone}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm font-semibold">{parseFloat(invoice.total_amount).toLocaleString()} so'm</td>
-                  <td className="px-6 py-4 text-sm text-green-600">{parseFloat(invoice.paid_amount).toLocaleString()} so'm</td>
-                  <td className="px-6 py-4 text-sm text-red-600">
+                  <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm sm:text-sm sm:text-base font-semibold">{parseFloat(invoice.total_amount).toLocaleString()} so'm</td>
+                  <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm sm:text-sm sm:text-base text-green-600">{parseFloat(invoice.paid_amount).toLocaleString()} so'm</td>
+                  <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm sm:text-sm sm:text-base text-red-600">
                     {(parseFloat(invoice.total_amount) - parseFloat(invoice.paid_amount)).toLocaleString()} so'm
                   </td>
-                  <td className="px-6 py-4">{getStatusBadge(invoice.payment_status)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                  <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4">{getStatusBadge(invoice.payment_status)}</td>
+                  <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-sm sm:text-sm sm:text-base text-gray-500">
                     {new Date(invoice.created_at).toLocaleDateString('uz-UZ')}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
                     <button
                       onClick={() => handleViewDetails(invoice.id)}
-                      className="text-primary hover:underline text-sm font-semibold"
+                      className="text-primary hover:underline text-sm sm:text-sm sm:text-base font-semibold"
                     >
                       Ko'rish
                     </button>
@@ -233,9 +233,9 @@ const Invoices = () => {
       {/* Invoice Details Modal */}
       {selectedInvoice && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl p-4 sm:p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold">Hisob-faktura tafsilotlari</h3>
+              <h3 className="text-xl sm:text-2xl font-bold">Hisob-faktura tafsilotlari</h3>
               <button
                 onClick={() => setSelectedInvoice(null)}
                 className="text-gray-500 hover:text-gray-700"
@@ -245,23 +245,23 @@ const Invoices = () => {
             </div>
 
             {/* Invoice Header */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Raqam</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Raqam</p>
                   <p className="font-mono font-semibold">{selectedInvoice.invoice_number}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Sana</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Sana</p>
                   <p className="font-semibold">{new Date(selectedInvoice.created_at).toLocaleString('uz-UZ')}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Bemor</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Bemor</p>
                   <p className="font-semibold">{selectedInvoice.first_name} {selectedInvoice.last_name}</p>
-                  <p className="text-sm text-gray-500">{selectedInvoice.phone}</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-500">{selectedInvoice.phone}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Holat</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Holat</p>
                   {getStatusBadge(selectedInvoice.payment_status)}
                 </div>
               </div>
@@ -273,19 +273,19 @@ const Invoices = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th className="px-4 py-2 text-left text-sm">Xizmat</th>
-                    <th className="px-4 py-2 text-right text-sm">Miqdor</th>
-                    <th className="px-4 py-2 text-right text-sm">Narx</th>
-                    <th className="px-4 py-2 text-right text-sm">Jami</th>
+                    <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-left text-sm sm:text-sm sm:text-base">Xizmat</th>
+                    <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-right text-sm sm:text-sm sm:text-base">Miqdor</th>
+                    <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-right text-sm sm:text-sm sm:text-base">Narx</th>
+                    <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-right text-sm sm:text-sm sm:text-base">Jami</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {selectedInvoice.items?.map((item) => (
                     <tr key={item.id}>
-                      <td className="px-4 py-2">{item.service_name}</td>
-                      <td className="px-4 py-2 text-right">{item.quantity}</td>
-                      <td className="px-4 py-2 text-right">{parseFloat(item.unit_price).toLocaleString()} so'm</td>
-                      <td className="px-4 py-2 text-right font-semibold">{parseFloat(item.total_price).toLocaleString()} so'm</td>
+                      <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5">{item.service_name}</td>
+                      <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-right">{item.quantity}</td>
+                      <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-right">{parseFloat(item.unit_price).toLocaleString()} so'm</td>
+                      <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 text-right font-semibold">{parseFloat(item.total_price).toLocaleString()} so'm</td>
                     </tr>
                   ))}
                 </tbody>
@@ -293,8 +293,8 @@ const Invoices = () => {
             </div>
 
             {/* Payment Summary */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
-              <div className="space-y-2">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 mb-6">
+              <div className="space-y-2 sm:space-y-2 sm:space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Jami summa:</span>
                   <span className="font-semibold">{parseFloat(selectedInvoice.total_amount).toLocaleString()} so'm</span>
@@ -303,7 +303,7 @@ const Invoices = () => {
                   <span className="text-gray-600 dark:text-gray-400">To'langan:</span>
                   <span className="font-semibold text-green-600">{parseFloat(selectedInvoice.paid_amount).toLocaleString()} so'm</span>
                 </div>
-                <div className="flex justify-between text-lg font-bold border-t border-gray-300 dark:border-gray-600 pt-2">
+                <div className="flex justify-between text-base sm:text-lg font-bold border-t border-gray-300 dark:border-gray-600 pt-2">
                   <span>Qarz:</span>
                   <span className="text-red-600">
                     {(parseFloat(selectedInvoice.total_amount) - parseFloat(selectedInvoice.paid_amount)).toLocaleString()} so'm
@@ -316,12 +316,12 @@ const Invoices = () => {
             {selectedInvoice.transactions && selectedInvoice.transactions.length > 0 && (
               <div className="mb-6">
                 <h4 className="font-bold mb-3">To'lovlar tarixi</h4>
-                <div className="space-y-2">
+                <div className="space-y-2 sm:space-y-2 sm:space-y-3">
                   {selectedInvoice.transactions.map((transaction) => (
-                    <div key={transaction.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div key={transaction.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
                       <div>
                         <p className="font-semibold">{parseFloat(transaction.amount).toLocaleString()} so'm</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm sm:text-sm sm:text-base text-gray-500">
                           {transaction.payment_method} • {new Date(transaction.created_at).toLocaleString('uz-UZ')}
                         </p>
                       </div>
@@ -333,11 +333,11 @@ const Invoices = () => {
             )}
 
             {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               {selectedInvoice.payment_status !== 'paid' && selectedInvoice.payment_status !== 'cancelled' && (
                 <button
                   onClick={() => setShowPaymentModal(true)}
-                  className="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-bold hover:opacity-90"
+                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-bold hover:opacity-90"
                 >
                   To'lov qo'shish
                 </button>
@@ -345,7 +345,7 @@ const Invoices = () => {
               {selectedInvoice.payment_status === 'paid' && (
                 <button
                   onClick={() => printInvoice(selectedInvoice)}
-                  className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-bold hover:opacity-90 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl font-bold hover:opacity-90 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                 >
                   <span className="material-symbols-outlined">print</span>
                   Chop etish
@@ -359,21 +359,21 @@ const Invoices = () => {
       {/* Payment Modal */}
       {showPaymentModal && selectedInvoice && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4">To'lov qo'shish</h3>
-            <div className="space-y-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl p-4 sm:p-6 max-w-sm sm:max-w-md w-full mx-4">
+            <h3 className="text-lg sm:text-xl font-bold mb-4">To'lov qo'shish</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-2">Qarz summasi</label>
-                <p className="text-2xl font-bold text-red-600">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Qarz summasi</label>
+                <p className="text-xl sm:text-2xl font-bold text-red-600">
                   {(parseFloat(selectedInvoice.total_amount) - parseFloat(selectedInvoice.paid_amount)).toLocaleString()} so'm
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">To'lov usuli</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">To'lov usuli</label>
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl bg-white dark:bg-gray-800"
                 >
                   <option value="cash">Naqd</option>
                   <option value="card">Karta</option>
@@ -381,29 +381,29 @@ const Invoices = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">To'lov summasi</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">To'lov summasi</label>
                 <input
                   type="number"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
                   placeholder="0"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl bg-white dark:bg-gray-800"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 sm:gap-2 sm:gap-3">
                 <button
                   onClick={() => {
                     setShowPaymentModal(false);
                     setPaymentAmount('');
                   }}
-                  className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600"
+                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
                   Bekor qilish
                 </button>
                 <button
                   onClick={handleAddPayment}
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
+                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 disabled:opacity-50"
                 >
                   {loading ? 'Yuklanmoqda...' : 'Tasdiqlash'}
                 </button>

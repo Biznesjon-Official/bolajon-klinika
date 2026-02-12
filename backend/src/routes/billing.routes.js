@@ -268,11 +268,22 @@ router.post('/invoices',
       let totalAmount = 0;
       const invoiceItems = [];
 
+      console.log('=== CREATE INVOICE DEBUG ===');
+      console.log('Items received:', JSON.stringify(items, null, 2));
+
+      // List all services for debugging
+      const allServices = await Service.find({ is_active: true }).select('_id name price').limit(20);
+      console.log('Available services in DB:', allServices.map(s => ({ id: s._id.toString(), name: s.name, price: s.price })));
+
       for (const item of items) {
+        console.log(`Searching for service with ID: ${item.service_id}`);
+        
         const service = await Service.findOne({ 
           _id: item.service_id, 
           is_active: true 
         });
+
+        console.log(`Service found:`, service ? `${service.name} (${service._id})` : 'NOT FOUND');
 
         if (!service) {
           await session.abortTransaction();
@@ -857,22 +868,35 @@ router.post('/services',
     try {
       const { name, category, price, description, is_active } = req.body;
       
-      if (!name || !price) {
+      console.log('=== CREATE SERVICE DEBUG ===');
+      console.log('Request body:', req.body);
+      
+      if (!name) {
         return res.status(400).json({
           success: false,
-          message: 'Xizmat nomi va narxi majburiy'
+          message: 'Xizmat nomi majburiy'
+        });
+      }
+      
+      // Price can be 0 or any number
+      if (price === undefined || price === null || price === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Xizmat narxi majburiy (0 bo\'lishi mumkin)'
         });
       }
       
       const service = new Service({
         name,
         category: category || 'Umumiy',
-        price: parseFloat(price),
+        price: parseFloat(price) || 0,
         description: description || '',
         is_active: is_active !== undefined ? is_active : true
       });
       
       await service.save();
+      
+      console.log('Service created:', service);
       
       res.status(201).json({
         success: true,
@@ -895,6 +919,10 @@ router.put('/services/:id',
     try {
       const { name, category, price, description, is_active } = req.body;
       
+      console.log('=== UPDATE SERVICE DEBUG ===');
+      console.log('Service ID:', req.params.id);
+      console.log('Request body:', req.body);
+      
       const service = await Service.findById(req.params.id);
       
       if (!service) {
@@ -906,11 +934,13 @@ router.put('/services/:id',
       
       if (name) service.name = name;
       if (category) service.category = category;
-      if (price) service.price = parseFloat(price);
+      if (price !== undefined && price !== null && price !== '') service.price = parseFloat(price) || 0;
       if (description !== undefined) service.description = description;
       if (is_active !== undefined) service.is_active = is_active;
       
       await service.save();
+      
+      console.log('Service updated:', service);
       
       res.json({
         success: true,
@@ -940,9 +970,8 @@ router.delete('/services/:id',
         });
       }
       
-      // Soft delete - set is_active to false
-      service.is_active = false;
-      await service.save();
+      // Hard delete - completely remove from database
+      await Service.findByIdAndDelete(req.params.id);
       
       res.json({
         success: true,

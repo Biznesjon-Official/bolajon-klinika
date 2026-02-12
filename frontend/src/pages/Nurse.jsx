@@ -6,26 +6,26 @@ const Nurse = () => {
   ];
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-3xl font-black text-gray-900 dark:text-white">Nurse Treatment Panel</h1>
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Nurse Treatment Panel</h1>
       
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-        <h2 className="text-xl font-bold mb-6">Today's Schedule</h2>
-        <div className="space-y-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold mb-6">Today's Schedule</h2>
+        <div className="space-y-3 sm:space-y-4">
           {treatments.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div key={item.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
               <div className="flex-1">
                 <p className="font-semibold text-gray-900 dark:text-white">{item.patient}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Room {item.room} • {item.treatment}</p>
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Room {item.room} • {item.treatment}</p>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-semibold">{item.time}</span>
+              <div className="flex items-center gap-3 sm:gap-4">
+                <span className="text-sm sm:text-sm sm:text-base font-semibold">{item.time}</span>
                 {item.status === 'completed' ? (
                   <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-bold">
                     ✓ Completed
                   </span>
                 ) : (
-                  <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold">
+                  <button className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold">
                     Mark Complete
                   </button>
                 )}

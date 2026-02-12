@@ -31,6 +31,24 @@ export default function LabResultView() {
     window.print();
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      // Brauzerning print to PDF funksiyasidan foydalanish
+      toast.success('PDF yaratish uchun chop etish oynasida "PDF sifatida saqlash" ni tanlang', { 
+        duration: 5000,
+        id: 'pdf-instruction' 
+      });
+      
+      // Chop etish oynasini ochish
+      setTimeout(() => {
+        window.print();
+      }, 500);
+    } catch (error) {
+      console.error('PDF download error:', error);
+      toast.error('Xatolik yuz berdi', { id: 'pdf-download' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -43,10 +61,10 @@ export default function LabResultView() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-xl text-gray-600 dark:text-gray-400">Natija topilmadi</p>
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400">Natija topilmadi</p>
           <button
             onClick={() => navigate('/laboratory')}
-            className="mt-4 px-6 py-2 bg-primary text-white rounded-lg"
+            className="mt-4 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl"
           >
             Orqaga
           </button>
@@ -100,43 +118,60 @@ export default function LabResultView() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Print tugmalari - faqat ekranda ko'rinadi */}
-      <div className="no-print sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+      <div className="no-print sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 sm:p-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <button
-            onClick={() => navigate('/laboratory')}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2"
+            onClick={() => {
+              console.log('Back button clicked');
+              // Try multiple navigation methods
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate('/lab');
+              }
+            }}
+            className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2 sm:gap-2 sm:gap-3"
           >
             <span className="material-symbols-outlined">arrow_back</span>
             Орқага
           </button>
-          <button
-            onClick={handlePrint}
-            className="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
-          >
-            <span className="material-symbols-outlined">print</span>
-            Чоп этиш
-          </button>
+          <div className="flex gap-2 sm:gap-3">
+            <button
+              onClick={handleDownloadPDF}
+              className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-blue-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-blue-600 flex items-center gap-2 sm:gap-2 sm:gap-3"
+            >
+              <span className="material-symbols-outlined">download</span>
+              PDF юклаб олиш
+            </button>
+            <button
+              onClick={handlePrint}
+              className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
+            >
+              <span className="material-symbols-outlined">print</span>
+              Чоп этиш
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Natija - A4 format */}
-      <div className="max-w-5xl mx-auto p-8 print:p-0">
-        <div className="bg-white print:shadow-none shadow-lg rounded-lg print:rounded-none p-8 print:p-12">
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 print:p-0">
+        <div id="lab-result-content" className="bg-white print:shadow-none shadow-lg rounded-lg sm:rounded-lg sm:rounded-xl print:rounded-none p-4 sm:p-6 lg:p-8 print:p-12">
           {/* Header */}
           <div className="flex items-start justify-between mb-8 pb-6 border-b-2 border-gray-300">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <img 
                 src={logoImage}
                 alt="Bolajon Med Klinikasi Logo" 
-                className="w-20 h-20 object-contain rounded-lg"
+                className="w-20 h-20 object-contain rounded-lg sm:rounded-lg sm:rounded-xl"
               />
               <div>
-                <h1 className="text-2xl font-black text-gray-900">Bolajon Med Klinikasi</h1>
-                <p className="text-sm text-gray-600">Диагностика ва даволаш маркази</p>
-                <p className="text-sm text-gray-600">052- рақамли тиббий хужжат шакли</p>
+                <h1 className="text-xl sm:text-2xl font-black text-gray-900">Bolajon Med Klinikasi</h1>
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600">Диагностика ва даволаш маркази</p>
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600">052- рақамли тиббий хужжат шакли</p>
               </div>
             </div>
-            <div className="text-right text-sm text-gray-600">
+            <div className="text-right text-sm sm:text-sm sm:text-base text-gray-600">
               <p className="font-semibold">Ўзбекистон Республикаси</p>
               <p>Соғлиқни сақлаш вазирининг</p>
               <p>2020 йил 31 декабрдаги №363-сонли</p>
@@ -145,7 +180,7 @@ export default function LabResultView() {
           </div>
 
           {/* Title */}
-          <h2 className="text-3xl font-black text-center text-green-600 mb-8">
+          <h2 className="text-2xl sm:text-3xl font-black text-center text-green-600 mb-8">
             {isBiochemistry ? 'БИОХИМИК ТАҲЛИЛ' : 
              isBloodTest ? 'УМУМИЙ ҚОН ТАҲЛИЛИ' : 
              isVitaminD ? 'АНАЛИЗ КРОВИ НА ВИТАМИН D' :
@@ -161,7 +196,7 @@ export default function LabResultView() {
           </h2>
           
           {isCoagulogram && (
-            <p className="text-center text-lg font-bold mb-6">(Humaclot JUNIOR)</p>
+            <p className="text-center text-base sm:text-lg font-bold mb-6">(Humaclot JUNIOR)</p>
           )}
           
           {isProcalcitonin && (
@@ -174,7 +209,7 @@ export default function LabResultView() {
 
           {/* Patient Info */}
           {!isCoagulogram ? (
-            <div className="grid grid-cols-3 gap-4 mb-8 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8 text-sm sm:text-sm sm:text-base">
               <div>
                 <span className="text-gray-600">Сана:</span>
                 <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[120px]">
@@ -195,7 +230,7 @@ export default function LabResultView() {
               </div>
             </div>
           ) : (
-            <div className="mb-8 text-sm">
+            <div className="mb-8 text-sm sm:text-sm sm:text-base">
               <div className="mb-3">
                 <span className="text-gray-600">Сана:</span>
                 <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[200px]">
@@ -206,8 +241,8 @@ export default function LabResultView() {
           )}
 
           <div className="mb-8">
-            <span className="text-gray-600 text-sm">{isCoagulogram ? 'ИФО:' : 'Фамилияси, Исми:'}</span>
-            <span className="ml-2 font-bold text-lg border-b-2 border-gray-400 inline-block min-w-[400px]">
+            <span className="text-gray-600 text-sm sm:text-sm sm:text-base">{isCoagulogram ? 'ИФО:' : 'Фамилияси, Исми:'}</span>
+            <span className="ml-2 font-bold text-base sm:text-lg border-b-2 border-gray-400 inline-block min-w-[400px]">
               {result.patient_name}
             </span>
           </div>
@@ -215,13 +250,13 @@ export default function LabResultView() {
           {isCoagulogram && (
             <>
               <div className="mb-4">
-                <span className="text-gray-600 text-sm">Туғилган йили:</span>
+                <span className="text-gray-600 text-sm sm:text-sm sm:text-base">Туғилган йили:</span>
                 <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[200px]">
                   {result.patient_birth_year || '—'}
                 </span>
               </div>
               <div className="mb-8">
-                <span className="text-gray-600 text-sm">Манзил:</span>
+                <span className="text-gray-600 text-sm sm:text-sm sm:text-base">Манзил:</span>
                 <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[400px]">
                   {result.patient_address || '—'}
                 </span>
@@ -235,21 +270,21 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-red-600">№</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-red-600">ТАҲЛИЛ НОМИ</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-red-600">НАТИЖА</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-red-600">МЕ'ЁР</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-red-600">ЎЛЧОВ БИРЛИГИ</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-red-600">№</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-red-600">ТАҲЛИЛ НОМИ</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">НАТИЖА</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">МЕ'ЁР</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">ЎЛЧОВ БИРЛИГИ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 py-3 font-semibold">{index + 1}.</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold">{param.unit}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-semibold">{index + 1}.</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-bold">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">{param.unit}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -260,19 +295,19 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-3 py-3 text-center font-bold text-red-600">Показатель</th>
-                    <th className="border-2 border-gray-800 px-3 py-3 text-center font-bold text-red-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-3 py-3 text-center font-bold text-red-600">Норма<br/>Erkak | Ayol</th>
-                    <th className="border-2 border-gray-800 px-3 py-3 text-center font-bold text-red-600">Единица<br/>измерения</th>
+                    <th className="border-2 border-gray-800 px-3 py-2 sm:py-3 text-center font-bold text-red-600">Показатель</th>
+                    <th className="border-2 border-gray-800 px-3 py-2 sm:py-3 text-center font-bold text-red-600">Результат</th>
+                    <th className="border-2 border-gray-800 px-3 py-2 sm:py-3 text-center font-bold text-red-600">Норма<br/>Erkak | Ayol</th>
+                    <th className="border-2 border-gray-800 px-3 py-2 sm:py-3 text-center font-bold text-red-600">Единица<br/>измерения</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-3 py-2 font-bold text-sm whitespace-pre-line">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-3 py-2 text-center font-semibold">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-3 py-2 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
-                      <td className="border-2 border-gray-800 px-3 py-2 text-center text-blue-600 font-semibold">{param.unit}</td>
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 font-bold text-sm sm:text-sm sm:text-base whitespace-pre-line">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-semibold">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
+                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.unit}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -284,17 +319,17 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-yellow-600">Наименивование анализа</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-yellow-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-yellow-600">Норма</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-yellow-600">Наименивование анализа</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-yellow-600">Результат</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-yellow-600">Норма</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className="bg-white">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-sm text-blue-600 font-semibold">
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-blue-600 font-semibold">
                         <div className="space-y-1">
                           <p>Выраженный дефицит-<span className="font-bold">0,1-9нг/мл</span></p>
                           <p>Достоточный уровень-<span className="font-bold">30-100нг/мл</span></p>
@@ -313,17 +348,17 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Наименивование анализа</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Норма(ОП)</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Наименивование анализа</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Результат</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Норма(ОП)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className="bg-white">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold italic">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold italic">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -334,14 +369,14 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-green-600" colSpan="2">ФИЗИК-КИМЁВИЙ ХОССАСИ</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-green-600" colSpan="2">ФИЗИК-КИМЁВИЙ ХОССАСИ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.slice(0, 5).map((param, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 py-3 font-bold w-1/2">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold">{param.value || '—'} {param.unit}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-bold w-1/2">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold">{param.value || '—'} {param.unit}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -350,14 +385,14 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-green-600" colSpan="2">МИКРОСКОПИЯ</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-green-600" colSpan="2">МИКРОСКОПИЯ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.slice(5).map((param, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 py-3 font-bold w-1/2">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold">{param.value || '—'} {param.unit}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-bold w-1/2">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold">{param.value || '—'} {param.unit}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -368,19 +403,19 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-orange-600">Наименивование анализа</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-orange-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-orange-600">Норма</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-orange-600">Единица измерения</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-orange-600">Наименивование анализа</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-orange-600">Результат</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-orange-600">Норма</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-orange-600">Единица измерения</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold">{param.unit}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">{param.unit}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -392,17 +427,17 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-red-600">Наименивование анализа</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-red-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-red-600">Норма</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">Наименивование анализа</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">Результат</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">Норма</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold whitespace-pre-line text-sm">{param.normal_range}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold whitespace-pre-line text-sm sm:text-sm sm:text-base">{param.normal_range}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -411,25 +446,25 @@ export default function LabResultView() {
           ) : isCoagulogram && result.test_results ? (
             <div>
               {/* 2 ta jadval yonma-yon */}
-              <div className="grid grid-cols-2 gap-8 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-8">
                 {/* Birinchi jadval */}
                 <div>
                   <table className="w-full border-2 border-gray-800">
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="border-2 border-gray-800 px-3 py-2 text-center font-bold text-sm">Таҳлил номи</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 text-center font-bold text-sm">Натижа</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 text-center font-bold text-sm">Норма</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 text-center font-bold text-sm">Ўлчов бирлиги</th>
+                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Таҳлил номи</th>
+                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Натижа</th>
+                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Норма</th>
+                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Ўлчов бирлиги</th>
                       </tr>
                     </thead>
                     <tbody>
                       {result.test_results.map((param, index) => (
                         <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border-2 border-gray-800 px-3 py-2 text-center font-bold">{param.parameter_name}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 text-center font-semibold">{param.value || '—'}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 text-center text-blue-600 font-semibold">{param.normal_range}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 text-center text-blue-600 font-semibold">{param.unit}</td>
+                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold">{param.parameter_name}</td>
+                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-semibold">{param.value || '—'}</td>
+                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.normal_range}</td>
+                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.unit}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -441,19 +476,19 @@ export default function LabResultView() {
                   <table className="w-full border-2 border-gray-800">
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="border-2 border-gray-800 px-3 py-2 text-center font-bold text-sm">Таҳлил номи</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 text-center font-bold text-sm">Натижа</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 text-center font-bold text-sm">Норма</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 text-center font-bold text-sm">Ўлчов бирлиги</th>
+                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Таҳлил номи</th>
+                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Натижа</th>
+                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Норма</th>
+                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Ўлчов бирлиги</th>
                       </tr>
                     </thead>
                     <tbody>
                       {result.test_results.map((param, index) => (
                         <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border-2 border-gray-800 px-3 py-2 text-center font-bold">{param.parameter_name}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 text-center font-semibold">{param.value || '—'}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 text-center text-blue-600 font-semibold">{param.normal_range}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 text-center text-blue-600 font-semibold">{param.unit}</td>
+                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold">{param.parameter_name}</td>
+                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-semibold">{param.value || '—'}</td>
+                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.normal_range}</td>
+                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.unit}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -466,17 +501,17 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold">Показатель</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold">Норма</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">Показатель</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">Результат</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">Норма</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left text-blue-600 font-semibold whitespace-pre-line text-sm">{param.normal_range}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-blue-600 font-semibold whitespace-pre-line text-sm sm:text-sm sm:text-base">{param.normal_range}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -487,17 +522,17 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Наименивание анализа</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Норма</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Наименивание анализа</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Результат</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Норма</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className="bg-white">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold">{param.normal_range}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">{param.normal_range}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -508,26 +543,26 @@ export default function LabResultView() {
               <table className="w-full border-2 border-gray-800 mb-8">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Наименивание анализа</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-purple-600">Норма</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Наименивание анализа</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Результат</th>
+                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Норма</th>
                   </tr>
                 </thead>
                 <tbody>
                   {result.test_results.map((param, index) => (
                     <tr key={index} className="bg-white">
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold">{param.normal_range}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">{param.parameter_name}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
+                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">{param.normal_range}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-300">
-              <h3 className="font-bold text-lg mb-4">Натижа:</h3>
-              <div className="whitespace-pre-wrap font-mono text-sm">
+            <div className="mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg sm:rounded-lg sm:rounded-xl border border-gray-300">
+              <h3 className="font-bold text-base sm:text-lg mb-4">Натижа:</h3>
+              <div className="whitespace-pre-wrap font-mono text-sm sm:text-sm sm:text-base">
                 {result.test_results?.[0]?.value || result.result_text || 'Натижа киритилмаган'}
               </div>
             </div>
@@ -535,9 +570,9 @@ export default function LabResultView() {
 
           {/* Notes */}
           {result.notes && (
-            <div className="mb-8 p-4 bg-yellow-50 rounded-lg border border-yellow-300">
+            <div className="mb-8 p-3 sm:p-4 bg-yellow-50 rounded-lg sm:rounded-lg sm:rounded-xl border border-yellow-300">
               <h3 className="font-bold mb-2">Изоҳлар:</h3>
-              <p className="text-sm">{result.notes}</p>
+              <p className="text-sm sm:text-sm sm:text-base">{result.notes}</p>
             </div>
           )}
 
@@ -545,14 +580,14 @@ export default function LabResultView() {
           <div className="mt-12 pt-6 border-t-2 border-gray-300">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-sm text-gray-600 mb-2">Лаборант:</p>
-                <p className="font-semibold text-lg border-b-2 border-gray-400 inline-block min-w-[250px] pb-1">
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 mb-2">Лаборант:</p>
+                <p className="font-semibold text-base sm:text-lg border-b-2 border-gray-400 inline-block min-w-[250px] pb-1">
                   {result.laborant_name || '___________________'}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600">Натижа тасдиқланди:</p>
-                <p className="text-sm font-semibold">
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600">Натижа тасдиқланди:</p>
+                <p className="text-sm sm:text-sm sm:text-base font-semibold">
                   {result.approved_at ? new Date(result.approved_at).toLocaleString('uz-UZ') : 'Тасдиқланмаган'}
                 </p>
               </div>

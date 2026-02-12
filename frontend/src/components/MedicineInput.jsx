@@ -68,10 +68,10 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 sm:space-y-2 sm:space-y-3">
       {/* Medicine Selection */}
       <div className="relative">
-        <label className="block text-sm font-semibold mb-1">
+        <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">
           💊 Dori nomi (2-qavat dorixonasi)
         </label>
         <input
@@ -83,21 +83,21 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
           }}
           onFocus={() => setShowDropdown(true)}
           placeholder="Dori qidirish..."
-          className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-800"
+          className="w-full px-3 py-2 sm:py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-blue-500 dark:bg-gray-800"
         />
         
         {/* Dropdown */}
         {showDropdown && filteredMedicines.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl shadow-lg max-h-60 overflow-y-auto">
             {filteredMedicines.map((medicine) => (
               <div
                 key={medicine.id}
                 onClick={() => handleSelectMedicine(medicine)}
-                className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                className="px-3 py-2 sm:py-2.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-b-0"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-sm">{medicine.name}</p>
+                    <p className="font-semibold text-sm sm:text-sm sm:text-base">{medicine.name}</p>
                     {medicine.generic_name && (
                       <p className="text-xs text-gray-500">({medicine.generic_name})</p>
                     )}
@@ -117,18 +117,18 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
         )}
         
         {showDropdown && filteredMedicines.length === 0 && searchTerm && (
-          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3 text-center">
-            <p className="text-sm text-gray-500">Dori topilmadi</p>
+          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl shadow-lg p-3 text-center">
+            <p className="text-sm sm:text-sm sm:text-base text-gray-500">Dori topilmadi</p>
           </div>
         )}
       </div>
 
       {/* Selected Medicine Info */}
       {selectedMedicine && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg sm:rounded-lg sm:rounded-xl border-2 border-blue-200 dark:border-blue-700">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <p className="font-bold text-sm">{selectedMedicine.name}</p>
+              <p className="font-bold text-sm sm:text-sm sm:text-base">{selectedMedicine.name}</p>
               {selectedMedicine.generic_name && (
                 <p className="text-xs text-gray-600">({selectedMedicine.generic_name})</p>
               )}
@@ -142,11 +142,11 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
               }}
               className="p-1 hover:bg-red-100 dark:hover:bg-red-900/20 rounded text-red-600"
             >
-              <span className="material-symbols-outlined text-sm">close</span>
+              <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">close</span>
             </button>
           </div>
           
-          <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2 sm:gap-3 text-xs">
             <div>
               <p className="text-gray-600 dark:text-gray-400">Mavjud:</p>
               <p className="font-semibold text-green-600">{selectedMedicine.total_stock || selectedMedicine.quantity || 0} {selectedMedicine.unit}</p>
@@ -162,14 +162,14 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
       {/* Quantity Input */}
       {selectedMedicine && (
         <div>
-          <label className="block text-sm font-semibold mb-1">
+          <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">
             📦 Miqdori
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => handleQuantityChange(Math.max(1, quantity - 1))}
-              className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+              className="px-3 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               <span className="material-symbols-outlined">remove</span>
             </button>
@@ -179,16 +179,16 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
               max={selectedMedicine.total_stock || selectedMedicine.quantity || 999}
               value={quantity}
               onChange={(e) => handleQuantityChange(e.target.value)}
-              className="flex-1 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-center font-bold dark:bg-gray-800"
+              className="flex-1 px-3 py-2 sm:py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl text-center font-bold dark:bg-gray-800"
             />
             <button
               type="button"
               onClick={() => handleQuantityChange(Math.min(selectedMedicine.total_stock || selectedMedicine.quantity || 999, quantity + 1))}
-              className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+              className="px-3 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               <span className="material-symbols-outlined">add</span>
             </button>
-            <span className="text-sm font-semibold">{selectedMedicine.unit}</span>
+            <span className="text-sm sm:text-sm sm:text-base font-semibold">{selectedMedicine.unit}</span>
           </div>
           {quantity > (selectedMedicine.total_stock || selectedMedicine.quantity || 0) && (
             <p className="text-xs text-red-600 mt-1">

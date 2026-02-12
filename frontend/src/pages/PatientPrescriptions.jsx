@@ -62,7 +62,7 @@ const PatientPrescriptions = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
@@ -72,11 +72,11 @@ const PatientPrescriptions = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
             Bemor retseptlari
           </h1>
           {patient && (
@@ -87,15 +87,15 @@ const PatientPrescriptions = () => {
         </div>
         <button
           onClick={loadData}
-          className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90"
+          className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90"
         >
-          <span className="material-symbols-outlined text-base mr-2 align-middle">refresh</span>
+          <span className="material-symbols-outlined text-sm sm:text-base mr-2 align-middle">refresh</span>
           Yangilash
         </button>
       </div>
 
       {/* Prescriptions List */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800">
         {prescriptions.length === 0 ? (
           <div className="p-12 text-center">
             <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
@@ -108,15 +108,15 @@ const PatientPrescriptions = () => {
             {prescriptions.map((prescription) => (
               <div
                 key={prescription.id}
-                className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTypeColor(prescription.prescription_type)}`}>
                         {getTypeText(prescription.prescription_type)}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm sm:text-sm sm:text-base text-gray-500">
                         {new Date(prescription.created_at).toLocaleDateString('uz-UZ', {
                           year: 'numeric',
                           month: 'long',
@@ -127,9 +127,9 @@ const PatientPrescriptions = () => {
                       </span>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 sm:space-y-2 sm:space-y-3">
                       <div>
-                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                           Tashxis:
                         </span>
                         <p className="text-gray-900 dark:text-white mt-1">
@@ -138,7 +138,7 @@ const PatientPrescriptions = () => {
                       </div>
 
                       <div>
-                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                           Shifokor:
                         </span>
                         <p className="text-gray-600 dark:text-gray-400">
@@ -148,12 +148,12 @@ const PatientPrescriptions = () => {
 
                       {prescription.medications && prescription.medications.length > 0 && (
                         <div>
-                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                             Dorilar: {prescription.medications.length} ta
                           </span>
                           <div className="mt-2 space-y-1">
                             {prescription.medications.slice(0, 3).map((med, index) => (
-                              <div key={index} className="flex items-center gap-2 text-sm">
+                              <div key={index} className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base">
                                 {med.is_urgent && (
                                   <span className="size-2 bg-red-500 rounded-full"></span>
                                 )}
@@ -163,7 +163,7 @@ const PatientPrescriptions = () => {
                               </div>
                             ))}
                             {prescription.medications.length > 3 && (
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm sm:text-sm sm:text-base text-gray-500">
                                 va yana {prescription.medications.length - 3} ta...
                               </p>
                             )}
@@ -173,10 +173,10 @@ const PatientPrescriptions = () => {
 
                       {prescription.notes && (
                         <div>
-                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                             Izoh:
                           </span>
-                          <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-sm sm:text-base">
                             {prescription.notes}
                           </p>
                         </div>
@@ -184,12 +184,12 @@ const PatientPrescriptions = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 sm:gap-2 sm:gap-3">
                     <button
                       onClick={() => viewPrescription(prescription.id)}
-                      className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-2"
+                      className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
                     >
-                      <span className="material-symbols-outlined text-base">visibility</span>
+                      <span className="material-symbols-outlined text-sm sm:text-base">visibility</span>
                       Batafsil
                     </button>
                     <button
@@ -199,10 +199,10 @@ const PatientPrescriptions = () => {
                           patient
                         );
                       }}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 flex items-center gap-2"
+                      className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-700 flex items-center gap-2 sm:gap-2 sm:gap-3"
                       title="Chekni chiqarish"
                     >
-                      <span className="material-symbols-outlined text-base">print</span>
+                      <span className="material-symbols-outlined text-sm sm:text-base">print</span>
                       Chek
                     </button>
                   </div>
@@ -215,10 +215,10 @@ const PatientPrescriptions = () => {
 
       {/* Detail Modal */}
       {showDetailModal && selectedPrescription && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
                 Retsept detallari
               </h2>
               <button
@@ -229,21 +229,21 @@ const PatientPrescriptions = () => {
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Patient Info */}
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl">
                 <p className="font-semibold text-gray-900 dark:text-white">
                   {selectedPrescription.patient_first_name} {selectedPrescription.patient_last_name}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   {selectedPrescription.patient_number}
                 </p>
               </div>
 
               {/* Prescription Info */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                     Sana
                   </span>
                   <p className="text-gray-900 dark:text-white">
@@ -257,7 +257,7 @@ const PatientPrescriptions = () => {
                   </p>
                 </div>
                 <div>
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                     Shifokor
                   </span>
                   <p className="text-gray-900 dark:text-white">
@@ -268,7 +268,7 @@ const PatientPrescriptions = () => {
 
               {/* Diagnosis */}
               <div>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                   Tashxis
                 </span>
                 <p className="text-gray-900 dark:text-white mt-1">
@@ -278,21 +278,21 @@ const PatientPrescriptions = () => {
 
               {/* Medications */}
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4">
                   Dorilar ro'yxati
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {selectedPrescription.medications?.map((med, index) => (
                     <div
                       key={med.id}
-                      className={`p-4 rounded-lg ${
+                      className={`p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl ${
                         med.is_urgent
                           ? 'bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500'
                           : 'bg-gray-50 dark:bg-gray-800'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                           <span className="font-semibold text-gray-900 dark:text-white">
                             {index + 1}. {med.medication_name}
                           </span>
@@ -307,7 +307,7 @@ const PatientPrescriptions = () => {
                       {/* Shoshilinch retseptda faqat dori nomi, oddiyda to'liq ma'lumotlar */}
                       {selectedPrescription.prescription_type === 'REGULAR' && (
                         <>
-                          <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base">
                             {med.dosage && (
                               <div>
                                 <span className="text-gray-600 dark:text-gray-400">Dozasi:</span>
@@ -339,7 +339,7 @@ const PatientPrescriptions = () => {
                               <span className="text-xs text-gray-600 dark:text-gray-400">
                                 Ko'rsatmalar:
                               </span>
-                              <p className="text-sm text-gray-900 dark:text-white mt-1">
+                              <p className="text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white mt-1">
                                 {med.instructions}
                               </p>
                             </div>
@@ -348,7 +348,7 @@ const PatientPrescriptions = () => {
                       )}
 
                       {selectedPrescription.prescription_type === 'URGENT' && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                        <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 italic">
                           Shoshilinch retsept - batafsil ma'lumotlar shifokor tomonidan og'zaki beriladi
                         </p>
                       )}
@@ -360,7 +360,7 @@ const PatientPrescriptions = () => {
               {/* Notes */}
               {selectedPrescription.notes && (
                 <div>
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                     Qo'shimcha izohlar
                   </span>
                   <p className="text-gray-900 dark:text-white mt-1">
@@ -370,7 +370,7 @@ const PatientPrescriptions = () => {
               )}
             </div>
 
-            <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex gap-3">
+            <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 flex gap-2 sm:gap-3">
               <button
                 onClick={() => {
                   prescriptionService.printPrescriptionReceipt(
@@ -378,14 +378,14 @@ const PatientPrescriptions = () => {
                     patient
                   );
                 }}
-                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
+                className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-xl font-semibold hover:bg-green-700 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
               >
                 <span className="material-symbols-outlined">print</span>
                 Chekni chiqarish
               </button>
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+                className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 Yopish
               </button>

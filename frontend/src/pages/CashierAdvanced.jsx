@@ -70,6 +70,58 @@ const CashierAdvanced = () => {
     house_number: ''
   });
   
+  // Load saved form data from localStorage
+  useEffect(() => {
+    const savedPatientData = localStorage.getItem('patientFormHistory');
+    if (savedPatientData) {
+      try {
+        const history = JSON.parse(savedPatientData);
+        // Don't auto-fill, just keep history for autocomplete
+      } catch (error) {
+        console.error('Error loading patient form history:', error);
+      }
+    }
+  }, []);
+  
+  // Save form data to localStorage when patient is created
+  const savePatientFormHistory = (formData) => {
+    try {
+      const history = JSON.parse(localStorage.getItem('patientFormHistory') || '[]');
+      
+      // Add new entry
+      const newEntry = {
+        ...formData,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Keep only last 50 entries
+      const updatedHistory = [newEntry, ...history].slice(0, 50);
+      
+      localStorage.setItem('patientFormHistory', JSON.stringify(updatedHistory));
+    } catch (error) {
+      console.error('Error saving patient form history:', error);
+    }
+  };
+  
+  // Get autocomplete suggestions
+  const getAutocompleteSuggestions = (field, value) => {
+    try {
+      const history = JSON.parse(localStorage.getItem('patientFormHistory') || '[]');
+      
+      if (!value || value.length < 2) return [];
+      
+      const suggestions = history
+        .map(entry => entry[field])
+        .filter(item => item && item.toLowerCase().includes(value.toLowerCase()))
+        .filter((item, index, self) => self.indexOf(item) === index) // Remove duplicates
+        .slice(0, 10);
+      
+      return suggestions;
+    } catch (error) {
+      return [];
+    }
+  };
+  
   // Payment Modal State
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -110,15 +162,14 @@ const CashierAdvanced = () => {
     loadStats(); // Statistikani yuklash
     loadOnDutyDoctors(); // Dejur shifokorlarni yuklash
     loadAllDoctors(); // Barcha shifokorlarni yuklash
+    
+    // Clear any cached service data
+    setInvoiceItems([]);
   }, []);
 
-  useEffect(() => {
-    if (patientSearch.length >= 2) {
-      searchPatients();
-    } else {
-      setSearchResults([]); // Qidiruv bo'sh bo'lsa, barcha bemorlarni ko'rsatish
-    }
-  }, [patientSearch]);
+  // Remove the useEffect that was causing slow typing
+  // Patients are already loaded in loadAllPatients()
+  // Filtering happens in the datalist automatically
 
   const loadData = async () => {
     try {
@@ -145,14 +196,17 @@ const CashierAdvanced = () => {
 
   const loadServices = async () => {
     try {
+      console.log('Loading services...');
       const servicesData = await servicesService.getServices();
+      console.log('Services loaded:', servicesData);
+      
       if (servicesData.success) {
-        // Faqat faol xizmatlarni ko'rsatish
-        const activeServices = servicesData.data.filter(s => s.is_active !== false);
-        setServices(activeServices);
+        // Barcha xizmatlarni ko'rsatish (o'chirilganlar database'dan butunlay o'chiriladi)
+        setServices(servicesData.data);
       }
     } catch (error) {
       console.error('Load services error:', error);
+      showAlert('Xizmatlarni yuklashda xatolik', 'error', 'Xatolik');
     }
   };
 
@@ -313,6 +367,10 @@ const CashierAdvanced = () => {
       const response = await patientService.createPatient(patientForm);
       if (response.success) {
         showAlert('Bemor muvaffaqiyatli qo\'shildi!', 'success', 'Muvaffaqiyat');
+        
+        // Save form data to history
+        savePatientFormHistory(patientForm);
+        
         setShowPatientModal(false);
         setPatientForm({
           first_name: '',
@@ -336,7 +394,22 @@ const CashierAdvanced = () => {
   };
 
   const addServiceToInvoice = (service) => {
+    console.log('=== ADD SERVICE DEBUG ===');
+    console.log('Service object:', service);
+    console.log('Service ID (_id):', service._id);
+    console.log('Service ID (id):', service.id);
+    
     const serviceId = service._id || service.id;
+    console.log('Selected service ID:', serviceId);
+    
+    // Check if service exists in current services list
+    const serviceExists = services.find(s => (s._id || s.id) === serviceId);
+    if (!serviceExists) {
+      console.error('Service not found in services list!');
+      showAlert('Bu xizmat topilmadi. Iltimos, sahifani yangilang.', 'error', 'Xatolik');
+      return;
+    }
+    
     const existingItem = invoiceItems.find(item => item.service_id === serviceId);
     
     if (existingItem) {
@@ -385,6 +458,13 @@ const CashierAdvanced = () => {
       return;
     }
 
+    // Dejur shifokorga biriktirsa, navbatga qo'shmaslik
+    if (doctorSelectionMode === 'onduty') {
+      showAlert('Dejur shifokor tanlandi. Hisob-faktura yaratishda shifokor avtomatik biriktiriladi.', 'success', 'Muvaffaqiyatli');
+      setShowDoctorModal(false);
+      return;
+    }
+
     try {
       const patient = selectedPatient.patient || selectedPatient;
       
@@ -400,7 +480,6 @@ const CashierAdvanced = () => {
       if (response.success) {
         showAlert('Bemor navbatga qo\'shildi!', 'success', 'Muvaffaqiyatli');
         setShowDoctorModal(false);
-        setSelectedDoctor(null);
         setDoctorSelectionMode('');
       }
     } catch (error) {
@@ -425,6 +504,12 @@ const CashierAdvanced = () => {
       return;
     }
 
+    // Shifokor biriktirish yoki navbatga qo'shish majburiy
+    if (!selectedDoctor) {
+      showAlert('Iltimos, shifokor biriktiring yoki navbatga qo\'shing', 'warning', 'Ogohlantirish');
+      return;
+    }
+
     try {
       // selectedPatient ichida patient obyekti bor
       const patient = selectedPatient.patient || selectedPatient;
@@ -434,11 +519,44 @@ const CashierAdvanced = () => {
         return;
       }
 
+      console.log('=== INVOICE ITEMS DEBUG ===');
+      console.log('Invoice items:', invoiceItems);
+      console.log('Available services:', services.map(s => ({ id: s._id || s.id, name: s.name })));
+
+      // Validate all services exist
+      const validItems = [];
+      const invalidItems = [];
+      
+      for (const item of invoiceItems) {
+        const serviceExists = services.find(s => (s._id || s.id) === item.service_id);
+        if (serviceExists) {
+          validItems.push(item);
+        } else {
+          invalidItems.push(item);
+          console.error('Invalid service:', item);
+        }
+      }
+      
+      if (invalidItems.length > 0) {
+        showAlert(
+          `${invalidItems.length} ta eski xizmat topilmadi va o'chirildi. Iltimos, qaytadan xizmat tanlang.`,
+          'warning',
+          'Ogohlantirish'
+        );
+        setInvoiceItems(validItems);
+        return;
+      }
+
       // Faqat kerakli maydonlarni yuborish
-      const items = invoiceItems.map(item => ({
-        service_id: item.service_id,
-        quantity: item.quantity
-      }));
+      const items = validItems.map(item => {
+        console.log('Processing item:', item);
+        return {
+          service_id: item.service_id,
+          quantity: item.quantity
+        };
+      });
+
+      console.log('Items to send:', items);
 
       const invoiceData = {
         patient_id: patient.id,
@@ -449,10 +567,10 @@ const CashierAdvanced = () => {
         notes: notes || ''
       };
 
-      // Agar shifokor tanlangan bo'lsa, qo'shish (ixtiyoriy)
-      if (selectedDoctor) {
-        invoiceData.doctor_id = selectedDoctor;
-      }
+      // Shifokor majburiy
+      invoiceData.doctor_id = selectedDoctor;
+
+      console.log('Invoice data to send:', invoiceData);
 
       const response = await billingService.createInvoice(invoiceData);
 
@@ -766,6 +884,8 @@ const CashierAdvanced = () => {
         const response = await servicesService.createService(data);
         if (response.success) {
           showAlert('Xizmat muvaffaqiyatli qo\'shildi!', 'success', 'Muvaffaqiyatli');
+          // Save to history
+          saveServiceFormHistory(serviceForm);
         }
       }
 
@@ -784,6 +904,42 @@ const CashierAdvanced = () => {
     } catch (error) {
       console.error('Service submit error:', error);
       showAlert('Xatolik yuz berdi: ' + (error.response?.data?.message || error.message), 'error', 'Xatolik');
+    }
+  };
+  
+  // Save service form history
+  const saveServiceFormHistory = (formData) => {
+    try {
+      const history = JSON.parse(localStorage.getItem('serviceFormHistory') || '[]');
+      
+      const newEntry = {
+        ...formData,
+        timestamp: new Date().toISOString()
+      };
+      
+      const updatedHistory = [newEntry, ...history].slice(0, 50);
+      localStorage.setItem('serviceFormHistory', JSON.stringify(updatedHistory));
+    } catch (error) {
+      console.error('Error saving service form history:', error);
+    }
+  };
+  
+  // Get service autocomplete suggestions
+  const getServiceAutocompleteSuggestions = (field, value) => {
+    try {
+      const history = JSON.parse(localStorage.getItem('serviceFormHistory') || '[]');
+      
+      if (!value || value.length < 2) return [];
+      
+      const suggestions = history
+        .map(entry => entry[field])
+        .filter(item => item && item.toLowerCase().includes(value.toLowerCase()))
+        .filter((item, index, self) => self.indexOf(item) === index)
+        .slice(0, 10);
+      
+      return suggestions;
+    } catch (error) {
+      return [];
     }
   };
 
@@ -827,7 +983,7 @@ const CashierAdvanced = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
@@ -837,19 +993,19 @@ const CashierAdvanced = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black text-gray-900 dark:text-white">Kassa</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Kassa</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
           Hisob-fakturalar va to'lovlarni boshqarish
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800">
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-4 px-6">
+          <div className="flex gap-3 sm:gap-4 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8">
             {[
               { id: 'new-invoice', label: 'Yangi hisob-faktura', icon: 'add_circle' },
               { id: 'invoices', label: 'Hisob-fakturalar', icon: 'receipt_long' },
@@ -859,107 +1015,91 @@ const CashierAdvanced = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-4 border-b-2 transition-colors ${
+                className={`flex items-center gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-primary text-primary font-semibold'
                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
-                <span className="material-symbols-outlined text-lg">{tab.icon}</span>
+                <span className="material-symbols-outlined text-base sm:text-lg">{tab.icon}</span>
                 {tab.label}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* New Invoice Tab */}
           {activeTab === 'new-invoice' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Left: Patient & Services */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                 {/* Patient Search */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                       Bemorni tanlang
                     </label>
                     <button
                       onClick={() => setShowPatientModal(true)}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition-all"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm sm:text-sm sm:text-base rounded-lg sm:rounded-lg sm:rounded-xl hover:opacity-90 transition-all"
                     >
-                      <span className="material-symbols-outlined text-base">add</span>
+                      <span className="material-symbols-outlined text-sm sm:text-base">add</span>
                       Yangi bemor
                     </button>
                   </div>
                   
-                  {/* Search input for filtering */}
+                  {/* Searchable select with datalist */}
                   <input
-                    type="text"
+                    list="patients-list"
                     value={patientSearch}
                     onChange={(e) => {
                       const newValue = e.target.value;
-                      const now = Date.now();
-                      
-                      // Agar oxirgi scan'dan 500ms o'tmagan bo'lsa, ignore qilish (duplicate scan)
-                      if (now - lastScanTimeRef.current < 500) {
-                        console.log('Duplicate scan detected (too fast), ignoring...');
-                        return;
-                      }
-                      
-                      // Oxirgi scan vaqtini yangilash
-                      lastScanTimeRef.current = now;
                       setPatientSearch(newValue);
-                    }}
-                    placeholder="Bemor nomini yozing..."
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mb-2"
-                  />
-                  
-                  <select
-                    value={selectedPatient?.id || selectedPatient?._id || ''}
-                    onChange={async (e) => {
-                      if (e.target.value) {
-                        try {
-                          const response = await api.get(`/patients/${e.target.value}`);
-                          if (response.data.success) {
-                            const patientData = response.data.data;
-                            setSelectedPatient(patientData);
-                          }
-                        } catch (error) {
-                          console.error('Error loading patient:', error);
-                          showAlert('Bemorni yuklashda xatolik', 'error', 'Xatolik');
-                        }
-                      } else {
+                      
+                      // Find and select patient if exact match (without API call)
+                      const matchedPatient = searchResults.find(p => {
+                        const fullName = `${p.first_name} ${p.last_name} - ${p.phone}`;
+                        return fullName === newValue;
+                      });
+                      
+                      if (matchedPatient) {
+                        // Only load full patient data when selected
+                        api.get(`/patients/${matchedPatient.id || matchedPatient._id}`)
+                          .then(response => {
+                            if (response.data.success) {
+                              setSelectedPatient(response.data.data);
+                            }
+                          })
+                          .catch(error => {
+                            console.error('Error loading patient:', error);
+                          });
+                      } else if (!newValue) {
                         setSelectedPatient(null);
                       }
                     }}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="">Bemorni tanlang...</option>
-                    {searchResults
-                      .filter(patient => {
-                        if (!patientSearch) return true;
-                        const fullName = `${patient.first_name} ${patient.last_name}`.toLowerCase();
-                        const phone = patient.phone || '';
-                        const search = patientSearch.toLowerCase();
-                        return fullName.includes(search) || phone.includes(search);
-                      })
-                      .map(patient => (
-                        <option key={patient.id || patient._id} value={patient.id || patient._id}>
-                          {patient.first_name} {patient.last_name} - {patient.phone}
-                        </option>
-                      ))
-                    }
-                  </select>
+                    placeholder="Bemorni qidiring yoki tanlang..."
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                    autoComplete="off"
+                  />
+                  
+                  <datalist id="patients-list">
+                    {searchResults.map(patient => (
+                      <option 
+                        key={patient.id || patient._id} 
+                        value={`${patient.first_name} ${patient.last_name} - ${patient.phone}`}
+                      />
+                    ))}
+                  </datalist>
                   
                   {selectedPatient && (
-                    <div className="mt-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="mt-3 p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl">
                       <div className="flex items-center justify-between mb-2">
                         <div>
                           <p className="font-semibold text-gray-900 dark:text-white">
                             {selectedPatient.patient?.first_name || selectedPatient.first_name} {selectedPatient.patient?.last_name || selectedPatient.last_name}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                             {selectedPatient.patient?.patient_number || selectedPatient.patient_number} • Balans: {formatCurrency((selectedPatient.patient?.current_balance || selectedPatient.current_balance) || 0)}
                           </p>
                         </div>
@@ -986,11 +1126,11 @@ const CashierAdvanced = () => {
                         
                         if (daysDiff === 0) {
                           return (
-                            <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                              <div className="flex items-center gap-2">
+                            <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl border border-green-200 dark:border-green-800">
+                              <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                                 <span className="material-symbols-outlined text-green-600 dark:text-green-400">local_offer</span>
                                 <div>
-                                  <p className="text-sm font-semibold text-green-900 dark:text-green-100">
+                                  <p className="text-sm sm:text-sm sm:text-base font-semibold text-green-900 dark:text-green-100">
                                     🎉 Bugungi qayta qabul: 100% (BEPUL)
                                   </p>
                                   <p className="text-xs text-green-700 dark:text-green-300">
@@ -1002,11 +1142,11 @@ const CashierAdvanced = () => {
                           );
                         } else if (daysDiff >= 1 && daysDiff <= 3) {
                           return (
-                            <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                              <div className="flex items-center gap-2">
+                            <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg sm:rounded-lg sm:rounded-xl border border-blue-200 dark:border-blue-800">
+                              <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                                 <span className="material-symbols-outlined text-blue-600 dark:text-blue-400">local_offer</span>
                                 <div>
-                                  <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                                  <p className="text-sm sm:text-sm sm:text-base font-semibold text-blue-900 dark:text-blue-100">
                                     🎉 Qayta qabul chegirmasi: 100% (BEPUL)
                                   </p>
                                   <p className="text-xs text-blue-700 dark:text-blue-300">
@@ -1018,11 +1158,11 @@ const CashierAdvanced = () => {
                           );
                         } else if (daysDiff >= 4 && daysDiff <= 7) {
                           return (
-                            <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                              <div className="flex items-center gap-2">
+                            <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg sm:rounded-lg sm:rounded-xl border border-yellow-200 dark:border-yellow-800">
+                              <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                                 <span className="material-symbols-outlined text-yellow-600 dark:text-yellow-400">local_offer</span>
                                 <div>
-                                  <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-100">
+                                  <p className="text-sm sm:text-sm sm:text-base font-semibold text-yellow-900 dark:text-yellow-100">
                                     🎁 Qayta qabul chegirmasi: 50%
                                   </p>
                                   <p className="text-xs text-yellow-700 dark:text-yellow-300">
@@ -1034,7 +1174,7 @@ const CashierAdvanced = () => {
                           );
                         } else if (daysDiff >= 8) {
                           return (
-                            <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
                               <p className="text-xs text-gray-600 dark:text-gray-400">
                                 Oxirgi qabul: {daysDiff} kun oldin ({lastVisit.toLocaleDateString('uz-UZ')})
                               </p>
@@ -1049,19 +1189,19 @@ const CashierAdvanced = () => {
 
                 {/* Services List by Category */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Xizmatlar
                   </label>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                  <div className="space-y-2 sm:space-y-2 sm:space-y-3 max-h-96 overflow-y-auto">
                     {Object.entries(groupServicesByCategory()).map(([category, categoryServices]) => (
-                      <div key={category} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                      <div key={category} className="border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl overflow-hidden sm:block">
                         {/* Category Header */}
                         <button
                           onClick={() => toggleCategory(category)}
                           className="w-full p-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between transition-colors"
                         >
                           <span className="font-semibold text-gray-900 dark:text-white">{category}</span>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                             <span className="text-xs text-gray-500 dark:text-gray-400">
                               {categoryServices.length} ta xizmat
                             </span>
@@ -1073,15 +1213,15 @@ const CashierAdvanced = () => {
                         
                         {/* Category Services */}
                         {expandedCategories[category] && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-2 bg-white dark:bg-gray-900">
+                          <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2 sm:gap-3 p-2 bg-white dark:bg-gray-900">
                             {categoryServices.map(service => (
                               <button
                                 key={service._id || service.id}
                                 onClick={() => addServiceToInvoice(service)}
                                 disabled={!selectedPatient}
-                                className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                <p className="font-semibold text-gray-900 dark:text-white text-sm">{service.name}</p>
+                                <p className="font-semibold text-gray-900 dark:text-white text-sm sm:text-sm sm:text-base">{service.name}</p>
                                 <p className="text-primary font-bold mt-1">{formatCurrency(service.price)}</p>
                               </button>
                             ))}
@@ -1094,77 +1234,129 @@ const CashierAdvanced = () => {
 
                 {/* Doctor Selection Buttons */}
                 {invoiceItems.length > 0 && selectedPatient && (
-                  <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Shifokor biriktirish
+                  <div className="space-y-2 sm:space-y-3">
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
+                      Shifokor biriktirish <span className="text-red-500">*</span>
                     </label>
                     
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() => openDoctorModal('onduty')}
-                        className="px-4 py-3 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center justify-center gap-2"
-                      >
-                        <span className="material-symbols-outlined">medical_services</span>
-                        Dejur shifokor
-                      </button>
-                      
-                      <button
-                        onClick={() => openDoctorModal('queue')}
-                        className="px-4 py-3 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 flex items-center justify-center gap-2"
-                      >
-                        <span className="material-symbols-outlined">queue</span>
-                        Navbatga qo'shish
-                      </button>
-                    </div>
-                    
-                    {onDutyDoctors.length > 0 && (
-                      <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">info</span>
-                        Bugun {onDutyDoctors.length} ta shifokor navbatda
-                      </p>
+                    {selectedDoctor ? (
+                      <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl border border-green-200 dark:border-green-800">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                            <span className="material-symbols-outlined text-green-600">check_circle</span>
+                            <div>
+                              <p className="font-semibold text-green-900 dark:text-green-100">
+                                Shifokor tanlandi
+                              </p>
+                              <p className="text-xs text-green-700 dark:text-green-300">
+                                {doctorSelectionMode === 'onduty' ? 'Dejur shifokor' : 'Navbatga qo\'shildi'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedDoctor(null);
+                              setDoctorSelectionMode('');
+                            }}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <span className="material-symbols-outlined">close</span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                          <button
+                            onClick={() => openDoctorModal('onduty')}
+                            className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
+                          >
+                            <span className="material-symbols-outlined">medical_services</span>
+                            Dejur shifokor
+                          </button>
+                          
+                          <button
+                            onClick={() => openDoctorModal('queue')}
+                            className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-blue-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-blue-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
+                          >
+                            <span className="material-symbols-outlined">queue</span>
+                            Navbatga qo'shish
+                          </button>
+                        </div>
+                        
+                        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg sm:rounded-lg sm:rounded-xl border border-yellow-200 dark:border-yellow-800">
+                          <p className="text-xs text-yellow-800 dark:text-yellow-200 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">warning</span>
+                            Hisob-faktura yaratish uchun shifokor biriktirish yoki navbatga qo'shish majburiy
+                          </p>
+                        </div>
+                        
+                        {onDutyDoctors.length > 0 && (
+                          <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">info</span>
+                            Bugun {onDutyDoctors.length} ta shifokor navbatda
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
               </div>
 
               {/* Right: Invoice Summary */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 h-fit sticky top-6">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-4">Hisob-faktura</h3>
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-4 sm:p-6 h-fit sticky top-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-gray-900 dark:text-white">Hisob-faktura</h3>
+                  {invoiceItems.length > 0 && (
+                    <button
+                      onClick={() => {
+                        setInvoiceItems([]);
+                        setDiscount(0);
+                        setNotes('');
+                      }}
+                      className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1"
+                      title="Hammasini tozalash"
+                    >
+                      <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">delete_sweep</span>
+                      Tozalash
+                    </button>
+                  )}
+                </div>
                 
                 {invoiceItems.length === 0 ? (
-                  <div className="text-center py-8">
-                    <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-700 mb-2">
+                  <div className="text-center py-4 sm:py-6 lg:py-8">
+                    <span className="material-symbols-outlined text-3xl sm:text-4xl text-gray-300 dark:text-gray-700 mb-2">
                       shopping_cart
                     </span>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Xizmatlar tanlanmagan</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-sm sm:text-base">Xizmatlar tanlanmagan</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {invoiceItems.map(item => (
-                      <div key={item.service_id} className="flex items-center justify-between gap-2">
+                      <div key={item.service_id} className="flex items-center justify-between gap-2 sm:gap-2 sm:gap-3">
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.description}</p>
+                          <p className="text-sm sm:text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{item.description}</p>
                           <p className="text-xs text-gray-500">{formatCurrency(item.unit_price)} × {item.quantity}</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                           <button
                             onClick={() => updateItemQuantity(item.service_id, item.quantity - 1)}
                             className="size-6 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600"
                           >
-                            <span className="material-symbols-outlined text-sm">remove</span>
+                            <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">remove</span>
                           </button>
-                          <span className="text-sm font-semibold w-8 text-center">{item.quantity}</span>
+                          <span className="text-sm sm:text-sm sm:text-base font-semibold w-8 text-center">{item.quantity}</span>
                           <button
                             onClick={() => updateItemQuantity(item.service_id, item.quantity + 1)}
                             className="size-6 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600"
                           >
-                            <span className="material-symbols-outlined text-sm">add</span>
+                            <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">add</span>
                           </button>
                           <button
                             onClick={() => removeServiceFromInvoice(item.service_id)}
                             className="text-red-600 hover:text-red-700"
                           >
-                            <span className="material-symbols-outlined text-sm">delete</span>
+                            <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">delete</span>
                           </button>
                         </div>
                       </div>
@@ -1172,19 +1364,33 @@ const CashierAdvanced = () => {
                   </div>
                 )}
 
-                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                  <div className="flex justify-between text-sm">
+                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2 sm:space-y-2 sm:space-y-3">
+                  <div className="flex justify-between text-sm sm:text-sm sm:text-base">
                     <span className="text-gray-600 dark:text-gray-400">Jami:</span>
                     <span className="font-semibold">{formatCurrency(calculateSubtotal())}</span>
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600 dark:text-gray-400">Chegirma:</label>
+                  <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                    <label className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Chegirma:</label>
                     <input
                       type="number"
-                      value={discount}
+                      value={discount || ''}
                       onChange={(e) => {
-                        const value = parseFloat(e.target.value) || 0;
+                        const inputValue = e.target.value;
+                        
+                        // Agar input bo'sh bo'lsa, 0 qo'yish
+                        if (inputValue === '' || inputValue === null || inputValue === undefined) {
+                          setDiscount(0);
+                          return;
+                        }
+                        
+                        const value = parseFloat(inputValue);
+                        
+                        // Agar son bo'lmasa, ignore qilish
+                        if (isNaN(value)) {
+                          return;
+                        }
+                        
                         const subtotal = calculateSubtotal();
                         const maxDiscount = subtotal * 0.20; // 20% chegirma
                         
@@ -1200,8 +1406,21 @@ const CashierAdvanced = () => {
                         
                         setDiscount(value);
                       }}
-                      className="flex-1 px-3 py-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded text-sm"
+                      onFocus={(e) => {
+                        // Focus bo'lganda 0 ni olib tashlash
+                        if (discount === 0) {
+                          e.target.value = '';
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // Blur bo'lganda bo'sh bo'lsa 0 qo'yish
+                        if (e.target.value === '') {
+                          setDiscount(0);
+                        }
+                      }}
+                      className="flex-1 px-3 py-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded text-sm sm:text-sm sm:text-base"
                       placeholder="0"
+                      min="0"
                     />
                   </div>
                   
@@ -1213,7 +1432,7 @@ const CashierAdvanced = () => {
                       const maxDiscount = subtotal * 0.20;
                       return (
                         <div className="text-xs text-orange-600 dark:text-orange-400 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-sm">info</span>
+                          <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">info</span>
                           Maksimal chegirma: 20% ({formatCurrency(maxDiscount)})
                         </div>
                       );
@@ -1221,7 +1440,7 @@ const CashierAdvanced = () => {
                     return null;
                   })()}
                   
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-between text-base sm:text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
                     <span>To'lov:</span>
                     <span className="text-primary">{formatCurrency(calculateTotal())}</span>
                   </div>
@@ -1233,14 +1452,14 @@ const CashierAdvanced = () => {
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Izohlar..."
                     rows="2"
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded text-sm"
+                    className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded text-sm sm:text-sm sm:text-base"
                   />
                 </div>
 
                 <button
                   onClick={handleCreateInvoice}
-                  disabled={!selectedPatient || invoiceItems.length === 0}
-                  className="w-full mt-4 px-4 py-3 bg-primary text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  disabled={!selectedPatient || invoiceItems.length === 0 || !selectedDoctor}
+                  className="w-full mt-4 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                 >
                   <span className="material-symbols-outlined">check_circle</span>
                   Hisob-faktura yaratish
@@ -1251,7 +1470,7 @@ const CashierAdvanced = () => {
 
           {/* Invoices Tab */}
           {activeTab === 'invoices' && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {invoices.length === 0 ? (
                 <div className="text-center py-12">
                   <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
@@ -1260,12 +1479,12 @@ const CashierAdvanced = () => {
                   <p className="text-gray-500 dark:text-gray-400">Hisob-fakturalar yo'q</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {invoices.map(invoice => (
-                    <div key={invoice.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <div key={invoice.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3">
                             <p className="font-bold text-primary">{invoice.invoice_number}</p>
                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                               invoice.payment_status === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
@@ -1276,39 +1495,39 @@ const CashierAdvanced = () => {
                                invoice.payment_status === 'partial' ? 'Qisman' : 'To\'lanmagan'}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
                             {invoice.first_name} {invoice.last_name} • {invoice.patient_number}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">{formatDate(invoice.created_at)}</p>
                         </div>
                         
                         <div className="text-right">
-                          <p className="text-lg font-bold text-gray-900 dark:text-white">
+                          <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                             {formatCurrency(invoice.total_amount)}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                             To'langan: {formatCurrency(invoice.paid_amount)}
                           </p>
                           {invoice.payment_status !== 'paid' && (
-                            <p className="text-sm text-red-600 font-semibold">
+                            <p className="text-sm sm:text-sm sm:text-base text-red-600 font-semibold">
                               Qoldi: {formatCurrency(invoice.total_amount - invoice.paid_amount)}
                             </p>
                           )}
                         </div>
                         
-                        <div className="flex gap-2 ml-4">
+                        <div className="flex gap-2 sm:gap-2 sm:gap-3 ml-4">
                           <button
                             onClick={() => printInvoice(invoice)}
-                            className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center gap-1"
+                            className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center gap-1"
                             title="Chop etish"
                           >
-                            <span className="material-symbols-outlined text-lg">print</span>
+                            <span className="material-symbols-outlined text-base sm:text-lg">print</span>
                             Chop
                           </button>
                           {invoice.payment_status !== 'paid' && (
                             <button
                               onClick={() => openPaymentModal(invoice)}
-                              className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90"
+                              className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90"
                             >
                               To'lov
                             </button>
@@ -1316,7 +1535,7 @@ const CashierAdvanced = () => {
                           {invoice.payment_status === 'paid' && (
                             <button
                               onClick={() => generateInvoiceQR(invoice)}
-                              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm font-semibold hover:bg-gray-300 dark:hover:bg-gray-600"
+                              className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-gray-300 dark:hover:bg-gray-600"
                               title="QR kod"
                             >
                               <span className="material-symbols-outlined">qr_code</span>
@@ -1333,7 +1552,7 @@ const CashierAdvanced = () => {
 
           {/* Transactions Tab */}
           {activeTab === 'transactions' && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {recentTransactions.length === 0 ? (
                 <div className="text-center py-12">
                   <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
@@ -1342,12 +1561,12 @@ const CashierAdvanced = () => {
                   <p className="text-gray-500 dark:text-gray-400">Tranzaksiyalar yo'q</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {recentTransactions.map(transaction => (
-                    <div key={transaction.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <div key={transaction.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={`size-12 rounded-lg flex items-center justify-center ${
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className={`size-12 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center ${
                             transaction.payment_method === 'CASH' ? 'bg-green-100 text-green-600' :
                             transaction.payment_method === 'CARD' ? 'bg-green-100 text-green-600' :
                             'bg-purple-100 text-purple-600'
@@ -1361,14 +1580,14 @@ const CashierAdvanced = () => {
                             <p className="font-semibold text-gray-900 dark:text-white">
                               {transaction.first_name} {transaction.last_name}
                             </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                               {transaction.invoice_number} • {transaction.payment_method}
                             </p>
                             <p className="text-xs text-gray-500">{formatDate(transaction.created_at)}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xl font-bold text-green-600">
+                          <p className="text-lg sm:text-xl font-bold text-green-600">
                             +{formatCurrency(transaction.amount)}
                           </p>
                         </div>
@@ -1382,8 +1601,8 @@ const CashierAdvanced = () => {
 
           {/* Services Tab */}
           {activeTab === 'services' && (
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                 <div className="flex-1">
                   <p className="text-gray-600 dark:text-gray-400">
                     Jami: {getFilteredServices().length} ta xizmat
@@ -1392,7 +1611,7 @@ const CashierAdvanced = () => {
                 
                 <button
                   onClick={() => openServiceModal()}
-                  className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-2"
+                  className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
                 >
                   <span className="material-symbols-outlined">add</span>
                   Xizmat qo'shish
@@ -1400,20 +1619,20 @@ const CashierAdvanced = () => {
               </div>
 
               {/* Filter and Search */}
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-3">
                 <div className="flex-1">
                   <input
                     type="text"
                     value={serviceSearch}
                     onChange={(e) => setServiceSearch(e.target.value)}
                     placeholder="Xizmat qidirish..."
-                    className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <select
                   value={serviceFilter}
                   onChange={(e) => setServiceFilter(e.target.value)}
-                  className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="all">Barcha kategoriyalar</option>
                   <option value="Shifokor ko'rigi">Shifokor ko'rigi</option>
@@ -1434,52 +1653,44 @@ const CashierAdvanced = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {getFilteredServices().map(service => (
-                    <div key={service._id || service.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <div key={service._id || service.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
                           <h3 className="font-bold text-gray-900 dark:text-white">{service.name}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{service.category}</p>
                         </div>
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                          service.is_active 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                            : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                        }`}>
-                          {service.is_active ? 'Faol' : 'Nofaol'}
-                        </span>
                       </div>
                       
-                      <p className="text-2xl font-black text-primary mb-2">
+                      <p className="text-xl sm:text-2xl font-black text-primary mb-2">
                         {formatCurrency(service.price)}
                       </p>
                       
                       {service.duration_minutes && (
-                        <p className="text-sm text-gray-500 mb-2">
-                          <span className="material-symbols-outlined text-sm align-middle">schedule</span>
+                        <p className="text-sm sm:text-sm sm:text-base text-gray-500 mb-2">
+                          <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base align-middle">schedule</span>
                           {' '}{service.duration_minutes} daqiqa
                         </p>
                       )}
                       
                       {service.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                        <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                           {service.description}
                         </p>
                       )}
                       
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 sm:gap-2 sm:gap-3">
                         <button
                           onClick={() => openServiceModal(service)}
-                          className="flex-1 px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600"
+                          className="flex-1 px-3 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600"
                         >
                           Tahrirlash
                         </button>
                         <button
                           onClick={() => handleDeleteService(service._id || service.id)}
-                          className="px-3 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600"
+                          className="px-3 py-2 sm:py-2.5 bg-red-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-red-600"
                         >
-                          <span className="material-symbols-outlined text-lg">delete</span>
+                          <span className="material-symbols-outlined text-base sm:text-lg">delete</span>
                         </button>
                       </div>
                     </div>
@@ -1493,33 +1704,39 @@ const CashierAdvanced = () => {
 
       {/* Service Modal */}
       <Modal isOpen={showServiceModal} onClose={() => setShowServiceModal(false)}>
-        <form onSubmit={handleServiceSubmit} className="space-y-4">
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white">
+        <form onSubmit={handleServiceSubmit} className="space-y-3 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
             {editingService ? 'Xizmatni tahrirlash' : 'Yangi xizmat qo\'shish'}
           </h2>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Xizmat nomi <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={serviceForm.name}
               onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+              list="service-name-suggestions"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Masalan: Qon tahlili"
               required
             />
+            <datalist id="service-name-suggestions">
+              {getServiceAutocompleteSuggestions('name').map((suggestion, index) => (
+                <option key={index} value={suggestion} />
+              ))}
+            </datalist>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Kategoriya <span className="text-red-500">*</span>
             </label>
             <select
               value={serviceForm.category}
               onChange={(e) => setServiceForm({ ...serviceForm, category: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               required
             >
               <option value="">Kategoriya tanlang</option>
@@ -1531,16 +1748,21 @@ const CashierAdvanced = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Narx (so'm) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
-                value={serviceForm.price}
+                value={serviceForm.price || ''}
                 onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                onFocus={(e) => {
+                  if (serviceForm.price === '0' || serviceForm.price === 0 || serviceForm.price === '') {
+                    e.target.value = '';
+                  }
+                }}
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="0"
                 min="0"
                 required
@@ -1548,14 +1770,19 @@ const CashierAdvanced = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Davomiyligi (daqiqa)
               </label>
               <input
                 type="number"
-                value={serviceForm.duration_minutes}
+                value={serviceForm.duration_minutes || ''}
                 onChange={(e) => setServiceForm({ ...serviceForm, duration_minutes: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                onFocus={(e) => {
+                  if (serviceForm.duration_minutes === '0' || serviceForm.duration_minutes === 0 || serviceForm.duration_minutes === '') {
+                    e.target.value = '';
+                  }
+                }}
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="0"
                 min="0"
               />
@@ -1563,19 +1790,25 @@ const CashierAdvanced = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Tavsif
             </label>
             <textarea
               value={serviceForm.description}
               onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
               rows="3"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+              list="service-description-suggestions"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Xizmat haqida qisqacha ma'lumot..."
             />
+            <datalist id="service-description-suggestions">
+              {getServiceAutocompleteSuggestions('description').map((suggestion, index) => (
+                <option key={index} value={suggestion} />
+              ))}
+            </datalist>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
             <input
               type="checkbox"
               id="is_active"
@@ -1583,22 +1816,22 @@ const CashierAdvanced = () => {
               onChange={(e) => setServiceForm({ ...serviceForm, is_active: e.target.checked })}
               className="size-4 text-primary focus:ring-primary rounded"
             />
-            <label htmlFor="is_active" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <label htmlFor="is_active" className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
               Faol xizmat
             </label>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={() => setShowServiceModal(false)}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl font-semibold hover:opacity-90"
             >
               {editingService ? 'Saqlash' : 'Qo\'shish'}
             </button>
@@ -1608,43 +1841,49 @@ const CashierAdvanced = () => {
 
       {/* Payment Modal */}
       <Modal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)}>
-        <div className="space-y-4">
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white">To'lov qabul qilish</h2>
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">To'lov qabul qilish</h2>
           
           {selectedInvoice && (
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Hisob-faktura</p>
+            <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Hisob-faktura</p>
               <p className="font-bold text-gray-900 dark:text-white">{selectedInvoice.invoice_number}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
                 Jami: {formatCurrency(selectedInvoice.total_amount)}
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 To'langan: {formatCurrency(selectedInvoice.paid_amount)}
               </p>
-              <p className="text-lg font-bold text-red-600 mt-1">
+              <p className="text-base sm:text-lg font-bold text-red-600 mt-1">
                 Qoldi: {formatCurrency(selectedInvoice.total_amount - selectedInvoice.paid_amount)}
               </p>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               To'lov summasi <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
-              value={paymentAmount}
+              value={paymentAmount || ''}
               onChange={(e) => setPaymentAmount(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+              onFocus={(e) => {
+                if (paymentAmount === '0' || paymentAmount === 0) {
+                  e.target.value = '';
+                }
+              }}
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="0"
+              min="0"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               To'lov usuli <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-2 sm:gap-3">
               {[
                 { value: 'cash', label: 'Naqd', icon: 'payments' },
                 { value: 'card', label: 'Karta', icon: 'credit_card' },
@@ -1653,13 +1892,13 @@ const CashierAdvanced = () => {
                 <button
                   key={method.value}
                   onClick={() => setPaymentMethod(method.value)}
-                  className={`p-3 rounded-lg border-2 transition-all ${
+                  className={`p-3 rounded-lg sm:rounded-lg sm:rounded-xl border-2 transition-all ${
                     paymentMethod === method.value
                       ? 'border-primary bg-primary/10'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-2xl">{method.icon}</span>
+                  <span className="material-symbols-outlined text-xl sm:text-2xl">{method.icon}</span>
                   <p className="text-xs font-semibold mt-1">{method.label}</p>
                 </button>
               ))}
@@ -1668,29 +1907,29 @@ const CashierAdvanced = () => {
 
           {(paymentMethod === 'CARD' || paymentMethod === 'TRANSFER' || paymentMethod === 'ONLINE') && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Tranzaksiya ID
               </label>
               <input
                 type="text"
                 value={transactionId}
                 onChange={(e) => setTransactionId(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Tranzaksiya ID ni kiriting"
               />
             </div>
           )}
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               onClick={() => setShowPaymentModal(false)}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               Bekor qilish
             </button>
             <button
               onClick={handleProcessPayment}
-              className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl font-semibold hover:opacity-90"
             >
               To'lovni qabul qilish
             </button>
@@ -1700,8 +1939,8 @@ const CashierAdvanced = () => {
 
       {/* QR Code Modal */}
       <Modal isOpen={showQRModal} onClose={() => setShowQRModal(false)} size="sm">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white">Hisob-faktura QR</h2>
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">Hisob-faktura QR</h2>
           {selectedInvoice && (
             <>
               <p className="text-gray-600 dark:text-gray-400">{selectedInvoice.invoice_number}</p>
@@ -1710,7 +1949,7 @@ const CashierAdvanced = () => {
                   <img src={qrCodeUrl} alt="QR Code" className="size-64" />
                 </div>
               )}
-              <p className="text-sm text-gray-500">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-500">
                 Summa: {formatCurrency(selectedInvoice.total_amount)}
               </p>
               <button
@@ -1720,7 +1959,7 @@ const CashierAdvanced = () => {
                   link.href = qrCodeUrl;
                   link.click();
                 }}
-                className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90"
+                className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90"
               >
                 Yuklab olish
               </button>
@@ -1767,68 +2006,82 @@ const CashierAdvanced = () => {
         }}
         title="Yangi bemor qo'shish"
       >
-        <form onSubmit={handleCreatePatient} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleCreatePatient} className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Ism *
               </label>
               <input
                 type="text"
+                list="first-name-suggestions"
                 value={patientForm.first_name}
                 onChange={(e) => setPatientForm({ ...patientForm, first_name: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Ism"
+                autoComplete="off"
               />
+              <datalist id="first-name-suggestions">
+                {getAutocompleteSuggestions('first_name', patientForm.first_name).map((suggestion, index) => (
+                  <option key={index} value={suggestion} />
+                ))}
+              </datalist>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Familiya *
               </label>
               <input
                 type="text"
+                list="last-name-suggestions"
                 value={patientForm.last_name}
                 onChange={(e) => setPatientForm({ ...patientForm, last_name: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Familiya"
+                autoComplete="off"
               />
+              <datalist id="last-name-suggestions">
+                {getAutocompleteSuggestions('last_name', patientForm.last_name).map((suggestion, index) => (
+                  <option key={index} value={suggestion} />
+                ))}
+              </datalist>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Telefon *
             </label>
             <PhoneInput
               value={patientForm.phone}
               onChange={(e) => setPatientForm({ ...patientForm, phone: e.target.value })}
               required
-              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="+998 90 123 45 67"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Tug'ilgan yili
               </label>
               <YearInput
                 value={patientForm.date_of_birth}
                 onChange={(e) => setPatientForm({ ...patientForm, date_of_birth: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Jinsi
               </label>
               <select
                 value={patientForm.gender}
                 onChange={(e) => setPatientForm({ ...patientForm, gender: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="male">Erkak</option>
                 <option value="female">Ayol</option>
@@ -1836,34 +2089,46 @@ const CashierAdvanced = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Manzil
               </label>
               <textarea
                 value={patientForm.address}
                 onChange={(e) => setPatientForm({ ...patientForm, address: e.target.value })}
                 rows="2"
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                list="address-suggestions"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Manzil"
               />
+              <datalist id="address-suggestions">
+                {getAutocompleteSuggestions('address').map((suggestion, index) => (
+                  <option key={index} value={suggestion} />
+                ))}
+              </datalist>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Uy raqami
               </label>
               <input
                 type="text"
                 value={patientForm.house_number}
                 onChange={(e) => setPatientForm({ ...patientForm, house_number: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                list="house-number-suggestions"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Uy raqami"
               />
+              <datalist id="house-number-suggestions">
+                {getAutocompleteSuggestions('house_number').map((suggestion, index) => (
+                  <option key={index} value={suggestion} />
+                ))}
+              </datalist>
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={() => {
@@ -1878,13 +2143,13 @@ const CashierAdvanced = () => {
                   house_number: ''
                 });
               }}
-              className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-all"
+              className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:opacity-90 transition-all"
             >
               Saqlash
             </button>
@@ -1902,8 +2167,8 @@ const CashierAdvanced = () => {
         }}
         title={doctorSelectionMode === 'onduty' ? 'Dejur shifokor tanlash' : 'Navbatga qo\'shish'}
       >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="space-y-3 sm:space-y-4">
+          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
             {doctorSelectionMode === 'onduty' 
               ? 'Bugun navbatdagi shifokorlardan birini tanlang'
               : 'Barcha shifokorlardan birini tanlang va navbatga qo\'shing'
@@ -1911,7 +2176,7 @@ const CashierAdvanced = () => {
           </p>
 
           {doctorSelectionMode === 'onduty' && onDutyDoctors.length === 0 && (
-            <div className="text-center py-8">
+            <div className="text-center py-4 sm:py-6 lg:py-8">
               <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
                 medical_services
               </span>
@@ -1920,7 +2185,7 @@ const CashierAdvanced = () => {
           )}
 
           {doctorSelectionMode === 'queue' && allDoctors.length === 0 && (
-            <div className="text-center py-8">
+            <div className="text-center py-4 sm:py-6 lg:py-8">
               <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
                 person
               </span>
@@ -1928,18 +2193,18 @@ const CashierAdvanced = () => {
             </div>
           )}
 
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2 sm:space-y-2 sm:space-y-3 max-h-96 overflow-y-auto">
             {doctorSelectionMode === 'onduty' && onDutyDoctors.map(shift => (
               <button
                 key={shift._id}
                 onClick={() => setSelectedDoctor(shift.doctor_id?._id || shift.doctor_id?.id)}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl border-2 text-left transition-all ${
                   selectedDoctor === (shift.doctor_id?._id || shift.doctor_id?.id)
                     ? 'border-primary bg-primary/10'
                     : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="size-12 bg-primary/20 rounded-full flex items-center justify-center">
                     <span className="material-symbols-outlined text-primary">person</span>
                   </div>
@@ -1948,7 +2213,7 @@ const CashierAdvanced = () => {
                       {shift.doctor_id?.first_name} {shift.doctor_id?.last_name}
                     </p>
                     {shift.doctor_id?.specialization && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                         {shift.doctor_id.specialization}
                       </p>
                     )}
@@ -1967,13 +2232,13 @@ const CashierAdvanced = () => {
               <button
                 key={doctor._id || doctor.id}
                 onClick={() => setSelectedDoctor(doctor._id || doctor.id)}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                className={`w-full p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl border-2 text-left transition-all ${
                   selectedDoctor === (doctor._id || doctor.id)
                     ? 'border-primary bg-primary/10'
                     : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="size-12 bg-primary/20 rounded-full flex items-center justify-center">
                     <span className="material-symbols-outlined text-primary">person</span>
                   </div>
@@ -1982,7 +2247,7 @@ const CashierAdvanced = () => {
                       {doctor.first_name} {doctor.last_name}
                     </p>
                     {doctor.specialization && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                         {doctor.specialization}
                       </p>
                     )}
@@ -1995,23 +2260,23 @@ const CashierAdvanced = () => {
             ))}
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={() => {
                 setShowDoctorModal(false);
                 setSelectedDoctor(null);
                 setDoctorSelectionMode('');
               }}
-              className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+              className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               Bekor qilish
             </button>
             <button
               onClick={handleAddToQueue}
               disabled={!selectedDoctor}
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Navbatga qo'shish
+              {doctorSelectionMode === 'onduty' ? 'Biriktirish' : 'Navbatga qo\'shish'}
             </button>
           </div>
         </div>

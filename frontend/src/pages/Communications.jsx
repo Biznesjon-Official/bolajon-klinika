@@ -114,20 +114,20 @@ export default function Communications() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
       
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
-          <span className="material-symbols-outlined text-3xl sm:text-4xl flex-shrink-0">chat</span>
+      <div className="flex flex-col sm:flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+        <h1 className="text-2xl sm:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
+          <span className="material-symbols-outlined text-3xl sm:text-3xl sm:text-4xl flex-shrink-0">chat</span>
           <span className="break-words">{t('communications.pageTitle')}</span>
         </h1>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm overflow-hidden sm:block">
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-1 sm:gap-2 px-3 sm:px-6 overflow-x-auto">
+          <div className="flex gap-1 sm:gap-2 sm:gap-2 sm:gap-3 px-3 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 overflow-x-auto">
             {[
               { id: 'send', label: t('communications.sendTab'), icon: 'send' },
               { id: 'history', label: t('communications.historyTab'), icon: 'history' },
@@ -136,30 +136,30 @@ export default function Communications() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-2 sm:px-3 py-2.5 sm:py-3 border-b-2 transition-colors whitespace-nowrap text-xs sm:text-sm ${
+                className={`flex items-center gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5.5 sm:py-2 sm:py-3 border-b-2 transition-colors whitespace-nowrap text-xs sm:text-sm sm:text-sm sm:text-base ${
                   activeTab === tab.id
                     ? 'border-primary text-primary font-semibold'
                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900'
                 }`}
               >
-                <span className="material-symbols-outlined text-base sm:text-lg flex-shrink-0">{tab.icon}</span>
+                <span className="material-symbols-outlined text-base sm:text-base sm:text-lg flex-shrink-0">{tab.icon}</span>
                 <span>{tab.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        <div className="p-4 sm:p-6">
+        <div className="p-3 sm:p-4 sm:p-4 sm:p-6">
           {/* XABAR YUBORISH */}
           {activeTab === 'send' && (
-            <div className="max-w-2xl mx-auto">
-              <div className="space-y-4 sm:space-y-6">
-                <h2 className="text-lg sm:text-xl font-bold">{t('communications.newMessage')}</h2>
+            <div className="max-w-xl sm:max-w-2xl mx-auto">
+              <div className="space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
+                <h2 className="text-lg sm:text-lg sm:text-xl font-bold">{t('communications.newMessage')}</h2>
                 
-                <form onSubmit={handleSendMessage} className="space-y-4">
+                <form onSubmit={handleSendMessage} className="space-y-3 sm:space-y-4">
                   {/* Qabul qiluvchi */}
                   <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       {t('communications.patientId')}
                     </label>
                     <input
@@ -167,7 +167,7 @@ export default function Communications() {
                       required
                       value={formData.patient_id}
                       onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white text-sm sm:text-sm sm:text-base"
                       placeholder={t('communications.patientIdPlaceholder')}
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -177,7 +177,7 @@ export default function Communications() {
 
                   {/* Xabar */}
                   <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       {t('communications.messageText')}
                     </label>
                     <textarea
@@ -185,7 +185,7 @@ export default function Communications() {
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       rows="6"
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white resize-none text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white resize-none text-sm sm:text-sm sm:text-base"
                       placeholder={t('communications.messageTextPlaceholder')}
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -195,7 +195,7 @@ export default function Communications() {
 
                   <button
                     type="submit"
-                    className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-semibold transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-primary/90 font-semibold transition-colors flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base"
                   >
                     <span className="material-symbols-outlined flex-shrink-0">send</span>
                     <span>{t('communications.sendMessage')}</span>
@@ -207,27 +207,27 @@ export default function Communications() {
 
           {/* TARIX */}
           {activeTab === 'history' && (
-            <div className="space-y-4 sm:space-y-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <h2 className="text-lg sm:text-xl font-bold">{t('communications.messagesHistory')}</h2>
+            <div className="space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
+              <div className="flex flex-col sm:flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+                <h2 className="text-lg sm:text-lg sm:text-xl font-bold">{t('communications.messagesHistory')}</h2>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {logs.length === 0 ? (
-                  <div className="text-center py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                  <div className="text-center py-4 sm:py-6 lg:py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl">
                     <span className="material-symbols-outlined text-5xl sm:text-6xl text-gray-300 mb-4">history</span>
-                    <p className="text-sm sm:text-base text-gray-500">{t('communications.noMessages')}</p>
+                    <p className="text-sm sm:text-sm sm:text-base text-gray-500">{t('communications.noMessages')}</p>
                   </div>
                 ) : (
                   logs.map((log) => (
-                    <div key={log.id} className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-2">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <span className="material-symbols-outlined text-xl sm:text-2xl text-gray-600 flex-shrink-0">
+                    <div key={log.id} className="p-3 sm:p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden sm:block">
+                      <div className="flex flex-col sm:flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3 mb-2">
+                        <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3 min-w-0 flex-1">
+                          <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl text-gray-600 flex-shrink-0">
                             {getChannelIcon(log.channel)}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white break-words">{log.recipient_name}</p>
+                            <p className="font-semibold text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white break-words">{log.recipient_name}</p>
                             <p className="text-xs text-gray-500 break-words">{log.recipient_phone}</p>
                           </div>
                         </div>
@@ -245,7 +245,7 @@ export default function Communications() {
                           </p>
                         </div>
                       </div>
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 break-words">{log.content}</p>
+                      <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2 break-words">{log.content}</p>
                     </div>
                   ))
                 )}
@@ -255,38 +255,38 @@ export default function Communications() {
 
           {/* STATISTIKA */}
           {activeTab === 'stats' && (
-            <div className="space-y-4 sm:space-y-6">
-              <h2 className="text-lg sm:text-xl font-bold">{t('communications.todayStats')}</h2>
+            <div className="space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
+              <h2 className="text-lg sm:text-lg sm:text-xl font-bold">{t('communications.todayStats')}</h2>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white">
-                  <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2 flex-shrink-0">message</span>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.total || 0}</p>
-                  <p className="text-xs sm:text-sm opacity-90 mt-1">{t('communications.totalMessages')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white">
+                  <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2 flex-shrink-0">message</span>
+                  <p className="text-2xl sm:text-2xl sm:text-3xl font-bold">{stats.total || 0}</p>
+                  <p className="text-xs sm:text-sm sm:text-sm sm:text-base opacity-90 mt-1">{t('communications.totalMessages')}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white">
-                  <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2 flex-shrink-0">sms</span>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.sms_count || 0}</p>
-                  <p className="text-xs sm:text-sm opacity-90 mt-1">{t('communications.sms')}</p>
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white">
+                  <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2 flex-shrink-0">sms</span>
+                  <p className="text-2xl sm:text-2xl sm:text-3xl font-bold">{stats.sms_count || 0}</p>
+                  <p className="text-xs sm:text-sm sm:text-sm sm:text-base opacity-90 mt-1">{t('communications.sms')}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white">
-                  <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2 flex-shrink-0">send</span>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.telegram_count || 0}</p>
-                  <p className="text-xs sm:text-sm opacity-90 mt-1">{t('communications.telegram')}</p>
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white">
+                  <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2 flex-shrink-0">send</span>
+                  <p className="text-2xl sm:text-2xl sm:text-3xl font-bold">{stats.telegram_count || 0}</p>
+                  <p className="text-xs sm:text-sm sm:text-sm sm:text-base opacity-90 mt-1">{t('communications.telegram')}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white">
-                  <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2 flex-shrink-0">check_circle</span>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.sent_count || 0}</p>
-                  <p className="text-xs sm:text-sm opacity-90 mt-1">{t('communications.sentCount')}</p>
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white">
+                  <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2 flex-shrink-0">check_circle</span>
+                  <p className="text-2xl sm:text-2xl sm:text-3xl font-bold">{stats.sent_count || 0}</p>
+                  <p className="text-xs sm:text-sm sm:text-sm sm:text-base opacity-90 mt-1">{t('communications.sentCount')}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 sm:p-6 text-white sm:col-span-2 lg:col-span-1">
-                  <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2 flex-shrink-0">error</span>
-                  <p className="text-2xl sm:text-3xl font-bold">{stats.failed_count || 0}</p>
-                  <p className="text-xs sm:text-sm opacity-90 mt-1">{t('communications.error')}</p>
+                <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white sm:col-span-2 lg:col-span-1">
+                  <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2 flex-shrink-0">error</span>
+                  <p className="text-2xl sm:text-2xl sm:text-3xl font-bold">{stats.failed_count || 0}</p>
+                  <p className="text-xs sm:text-sm sm:text-sm sm:text-base opacity-90 mt-1">{t('communications.error')}</p>
                 </div>
               </div>
             </div>

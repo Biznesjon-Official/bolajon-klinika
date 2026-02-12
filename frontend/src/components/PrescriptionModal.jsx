@@ -149,17 +149,17 @@ const PrescriptionModal = ({
       title={t('queue.writePrescription')}
       size="xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
         {/* Patient Info */}
         {patient && (
-          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 sm:p-4 border border-green-100 dark:border-green-800 overflow-hidden">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span className="material-symbols-outlined text-green-600 text-2xl sm:text-3xl flex-shrink-0">person</span>
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-xl p-3 sm:p-3 sm:p-4 border border-green-100 dark:border-green-800 overflow-hidden sm:block">
+            <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
+              <span className="material-symbols-outlined text-green-600 text-2xl sm:text-2xl sm:text-3xl flex-shrink-0">person</span>
               <div className="min-w-0 flex-1">
-                <p className="font-bold text-sm sm:text-base text-gray-900 dark:text-white break-words">
+                <p className="font-bold text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white break-words">
                   {patient.patientName || `${patient.first_name} ${patient.last_name}`}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">
+                <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">
                   {patient.patientNumber || patient.patient_number} • {patient.patientPhone || patient.phone}
                 </p>
               </div>
@@ -169,7 +169,7 @@ const PrescriptionModal = ({
 
         {/* Diagnosis */}
         <div>
-          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
             {t('common.diagnosis')} <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -177,21 +177,21 @@ const PrescriptionModal = ({
             value={diagnosis}
             onChange={(e) => setDiagnosis(e.target.value)}
             rows="3"
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm sm:text-base"
+            className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm sm:text-sm sm:text-base"
             placeholder={t('common.diagnosisPlaceholder')}
           />
         </div>
 
         {/* Prescription Type */}
         <div>
-          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
             {t('common.prescriptionType')}
           </label>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => setPrescriptionType('REGULAR')}
-              className={`px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              className={`px-2 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold transition-all ${
                 prescriptionType === 'REGULAR'
                   ? 'bg-primary text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
@@ -202,7 +202,7 @@ const PrescriptionModal = ({
             <button
               type="button"
               onClick={() => setPrescriptionType('URGENT')}
-              className={`px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              className={`px-2 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold transition-all ${
                 prescriptionType === 'URGENT'
                   ? 'bg-orange-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
@@ -213,7 +213,7 @@ const PrescriptionModal = ({
             <button
               type="button"
               onClick={() => setPrescriptionType('CHRONIC')}
-              className={`px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              className={`px-2 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold transition-all ${
                 prescriptionType === 'CHRONIC'
                   ? 'bg-purple-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
@@ -226,51 +226,51 @@ const PrescriptionModal = ({
 
         {/* Medications */}
         <div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
-            <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 sm:gap-3 sm:gap-0 mb-3">
+            <label className="text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
               {t('common.medications')} <span className="text-red-500">*</span>
             </label>
             <button
               type="button"
               onClick={addMedication}
-              className="w-full sm:w-auto px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-green-600 flex items-center justify-center gap-1"
+              className="w-full sm:w-auto px-3 py-1.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center justify-center gap-1"
             >
-              <span className="material-symbols-outlined text-base">add</span>
+              <span className="material-symbols-outlined text-sm sm:text-base">add</span>
               {t('common.addMedication')}
             </button>
           </div>
 
           {medications.length === 0 ? (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 sm:p-8 text-center border-2 border-dashed border-gray-300 dark:border-gray-700">
-              <span className="material-symbols-outlined text-3xl sm:text-4xl text-gray-400 mb-2">medication</span>
-              <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">{t('common.noMedications')}</p>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 sm:p-4 sm:p-6 lg:p-8 text-center border-2 border-dashed border-gray-300 dark:border-gray-700">
+              <span className="material-symbols-outlined text-3xl sm:text-3xl sm:text-4xl text-gray-400 mb-2">medication</span>
+              <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">{t('common.noMedications')}</p>
               <button
                 type="button"
                 onClick={addMedication}
-                className="mt-3 px-4 py-2 bg-primary text-white rounded-lg text-xs sm:text-sm font-semibold hover:opacity-90"
+                className="mt-3 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90"
               >
                 {t('common.addFirstMedication')}
               </button>
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3 sm:space-y-3 sm:space-y-4">
               {medications.map((med, index) => (
-                <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700">
+                <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-3 sm:p-4 border border-gray-200 dark:border-gray-700">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{t('common.medications')} #{index + 1}</span>
+                    <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{t('common.medications')} #{index + 1}</span>
                     <button
                       type="button"
                       onClick={() => removeMedication(index)}
-                      className="p-1 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-600"
+                      className="p-1 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg sm:rounded-lg sm:rounded-xl text-red-600"
                     >
-                      <span className="material-symbols-outlined text-lg">delete</span>
+                      <span className="material-symbols-outlined text-base sm:text-lg">delete</span>
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
                     {/* Dori nomi - oddiy input */}
                     <div className="sm:col-span-2">
-                      <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         💊 Dori nomi
                       </label>
                       <input
@@ -279,7 +279,7 @@ const PrescriptionModal = ({
                         value={med.medication_name}
                         onChange={(e) => updateMedication(index, 'medication_name', e.target.value)}
                         placeholder="Dori nomini kiriting..."
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-xs sm:text-sm"
+                        className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-xs sm:text-sm sm:text-sm sm:text-base"
                       />
                     </div>
                     <div className={prescriptionType === 'URGENT' ? 'sm:col-span-2' : ''}>
@@ -289,7 +289,7 @@ const PrescriptionModal = ({
                         value={med.dosage}
                         onChange={(e) => updateMedication(index, 'dosage', e.target.value)}
                         placeholder={t('common.dosagePlaceholder')}
-                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs sm:text-sm"
+                        className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base"
                       />
                     </div>
                     
@@ -297,8 +297,8 @@ const PrescriptionModal = ({
                     {prescriptionType !== 'URGENT' && (
                       <>
                         {/* Frequency per day */}
-                        <div className="sm:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700">
-                          <label className="block text-sm font-bold mb-2 text-blue-900 dark:text-blue-100">
+                        <div className="sm:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg sm:rounded-lg sm:rounded-xl border-2 border-blue-200 dark:border-blue-700">
+                          <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-blue-900 dark:text-blue-100">
                             📊 Kuniga necha marta qabul qilish kerak? *
                           </label>
                           <input
@@ -321,7 +321,7 @@ const PrescriptionModal = ({
                                 updateMedication(index, 'schedule_times', []);
                               }
                             }}
-                            className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg text-base sm:text-lg font-bold"
+                            className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-blue-300 rounded-lg sm:rounded-lg sm:rounded-xl text-base sm:text-base sm:text-lg font-bold"
                             placeholder="Masalan: 3"
                           />
                           <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
@@ -331,11 +331,11 @@ const PrescriptionModal = ({
                         
                         {/* Schedule times */}
                         {med.frequency_per_day > 0 && (
-                          <div className="sm:col-span-2 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border-2 border-purple-200 dark:border-purple-700">
-                            <label className="block text-sm font-bold mb-3 text-purple-900 dark:text-purple-100">
+                          <div className="sm:col-span-2 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg sm:rounded-lg sm:rounded-xl border-2 border-purple-200 dark:border-purple-700">
+                            <label className="block text-sm sm:text-sm sm:text-base font-bold mb-3 text-purple-900 dark:text-purple-100">
                               🕐 Qabul qilish vaqtlari
                             </label>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                               {Array.from({ length: med.frequency_per_day }).map((_, timeIndex) => (
                                 <div key={timeIndex} className="flex flex-col gap-1">
                                   <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
@@ -388,7 +388,7 @@ const PrescriptionModal = ({
                                         }
                                       }
                                     }}
-                                    className="w-full px-2 sm:px-3 py-2 border-2 border-purple-300 rounded-lg font-bold text-sm sm:text-base text-center focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="w-full px-2 sm:px-3 py-2 sm:py-2.5 border-2 border-purple-300 rounded-lg sm:rounded-lg sm:rounded-xl font-bold text-sm sm:text-sm sm:text-base text-center focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                                   />
                                 </div>
                               ))}
@@ -401,7 +401,7 @@ const PrescriptionModal = ({
                         
                         {/* Duration */}
                         <div className="sm:col-span-2">
-                          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                          <label className="block text-sm sm:text-sm sm:text-base font-medium mb-1 text-gray-700 dark:text-gray-300">
                             📅 Davomiyligi (kunlar)
                           </label>
                           <input
@@ -410,7 +410,7 @@ const PrescriptionModal = ({
                             value={med.duration_days || ''}
                             onChange={(e) => updateMedication(index, 'duration_days', e.target.value ? parseInt(e.target.value) : null)}
                             placeholder="Masalan: 7"
-                            className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs sm:text-sm"
+                            className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base"
                           />
                           <p className="text-xs text-gray-500 mt-1">
                             Necha kun davomida qabul qilish kerak
@@ -418,8 +418,8 @@ const PrescriptionModal = ({
                         </div>
                         
                         {/* Nurse assignment per medication */}
-                        <div className="sm:col-span-2 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border-2 border-green-300 dark:border-green-700">
-                          <label className="block text-sm font-bold mb-2 text-green-900 dark:text-green-100 flex items-center gap-2">
+                        <div className="sm:col-span-2 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg sm:rounded-lg sm:rounded-xl border-2 border-green-300 dark:border-green-700">
+                          <label className="block text-sm sm:text-sm sm:text-base font-bold mb-2 text-green-900 dark:text-green-100 flex items-center gap-2 sm:gap-2 sm:gap-3">
                             <span className="material-symbols-outlined text-green-600">person</span>
                             👩‍⚕️ Hamshirani tanlang (ixtiyoriy)
                           </label>
@@ -440,7 +440,7 @@ const PrescriptionModal = ({
                                 }
                               }
                             }}
-                            className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-green-300 rounded-lg bg-white dark:bg-gray-800 font-medium text-xs sm:text-sm"
+                            className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 border-2 border-green-300 rounded-lg sm:rounded-lg sm:rounded-xl bg-white dark:bg-gray-800 font-medium text-xs sm:text-sm sm:text-sm sm:text-base"
                           >
                             <option value="">Hamshira tanlanmagan</option>
                             {nurses.map((nurse) => (
@@ -456,7 +456,7 @@ const PrescriptionModal = ({
                         
                         {/* Instructions */}
                         <div className="sm:col-span-2">
-                          <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                          <label className="block text-sm sm:text-sm sm:text-base font-medium mb-1 text-gray-700 dark:text-gray-300">
                             📝 Qo'shimcha ko'rsatmalar
                           </label>
                           <textarea
@@ -464,20 +464,20 @@ const PrescriptionModal = ({
                             onChange={(e) => updateMedication(index, 'instructions', e.target.value)}
                             placeholder="Qo'shimcha ko'rsatmalar..."
                             rows="2"
-                            className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs sm:text-sm resize-none"
+                            className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base resize-none"
                           />
                         </div>
                         
                         {/* Urgent checkbox */}
                         <div className="sm:col-span-2">
-                          <label className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer">
+                          <label className="flex items-center gap-2 sm:gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl cursor-pointer">
                             <input
                               type="checkbox"
                               checked={med.is_urgent}
                               onChange={(e) => updateMedication(index, 'is_urgent', e.target.checked)}
                               className="size-4"
                             />
-                            <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">{t('common.urgentMedication')}</span>
+                            <span className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-700 dark:text-gray-300">{t('common.urgentMedication')}</span>
                           </label>
                         </div>
                       </>
@@ -491,28 +491,28 @@ const PrescriptionModal = ({
 
         {/* Notes */}
         <div>
-          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
             {t('common.additionalNotes')}
           </label>
           <textarea
             value={prescriptionNotes}
             onChange={(e) => setPrescriptionNotes(e.target.value)}
             rows="2"
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-xs sm:text-sm"
+            className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-xs sm:text-sm sm:text-sm sm:text-base"
             placeholder={t('common.additionalNotesPlaceholder')}
           />
         </div>
 
         {/* Urgent nurse assignment */}
         {prescriptionType === 'URGENT' && isDoctor && (
-          <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 p-4 sm:p-6 rounded-xl border-2 border-orange-300 dark:border-orange-700">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="material-symbols-outlined text-2xl sm:text-3xl text-orange-600">emergency</span>
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Muolajaga yuborish</h3>
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 p-3 sm:p-4 sm:p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 border-orange-300 dark:border-orange-700">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4">
+              <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl text-orange-600">emergency</span>
+              <h3 className="text-base sm:text-base sm:text-lg font-bold text-gray-900 dark:text-white">Muolajaga yuborish</h3>
             </div>
             
             <div className="mb-4">
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Hamshirani tanlang *
               </label>
               <select
@@ -542,7 +542,7 @@ const PrescriptionModal = ({
                     }
                   }
                 }}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs sm:text-sm"
+                className="w-full px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs sm:text-sm sm:text-sm sm:text-base"
               >
                 <option value="">Hamshirani tanlang</option>
                 {nurses.map((nurse) => (
@@ -553,35 +553,35 @@ const PrescriptionModal = ({
               </select>
             </div>
 
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 italic">
+            <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 italic">
               💡 Shoshilinch retsept saqlangandan keyin avtomatik hamshiraga topshiriq yuboriladi
             </p>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
+        <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3 pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+            className="w-full sm:w-auto px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5.5 sm:py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             {t('common.cancel')}
           </button>
           <button
             type="button"
             onClick={(e) => handleSubmit(e, false)}
-            className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
+            className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5.5 sm:py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-700 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
           >
-            <span className="material-symbols-outlined text-lg sm:text-xl">save</span>
+            <span className="material-symbols-outlined text-lg sm:text-lg sm:text-xl">save</span>
             {t('common.saveOnly')}
           </button>
           <button
             type="button"
             onClick={(e) => handleSubmit(e, true)}
-            className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
+            className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5.5 sm:py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-700 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
           >
-            <span className="material-symbols-outlined text-lg sm:text-xl">print</span>
+            <span className="material-symbols-outlined text-lg sm:text-lg sm:text-xl">print</span>
             {t('common.saveAndPrint')}
           </button>
         </div>

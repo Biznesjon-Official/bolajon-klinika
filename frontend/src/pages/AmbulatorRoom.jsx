@@ -486,10 +486,9 @@ export default function AmbulatorRoom() {
           try {
             // bed.admission_id mavjud bo'lsa, to'g'ridan-to'g'ri discharge qilish
             if (bed.admission_id) {
-              const dischargeNotes = prompt('Chiqarish izohi (ixtiyoriy):') || '';
               const dischargeResult = await ambulatorInpatientService.dischargePatient(bed.admission_id, {
                 discharge_type: 'normal',
-                discharge_notes: dischargeNotes
+                discharge_notes: ''
               });
               
               if (dischargeResult.success) {
@@ -536,15 +535,6 @@ export default function AmbulatorRoom() {
         return;
       }
       
-      // Admission ma'lumotlarini so'rash
-      const admissionReason = prompt('Yotqizish sababi:');
-      if (!admissionReason || admissionReason.trim() === '') {
-        toast.error('Yotqizish sababi kiritilmadi');
-        return;
-      }
-      
-      const diagnosis = prompt('Tashxis (ixtiyoriy):');
-      
       // selectedBed is now the actual bed object with room_id and bed_number
       let roomId, bedNumber;
       
@@ -563,14 +553,20 @@ export default function AmbulatorRoom() {
         bedNumber = 1;
       }
       
+      console.log('=== ADMISSION DATA DEBUG ===');
+      console.log('selectedBed:', selectedBed);
+      console.log('roomId:', roomId);
+      console.log('bedNumber:', bedNumber);
+      console.log('patientId:', patientId);
+      
       // Admission yaratish
       const admissionData = {
         patient_id: patientId,
         room_id: roomId,
-        bed_number: bedNumber,
-        diagnosis: diagnosis ? diagnosis.trim() : admissionReason.trim(),
-        notes: admissionReason.trim()
+        bed_number: bedNumber
       };
+      
+      console.log('Sending admission data:', admissionData);
       
       const result = await ambulatorInpatientService.createAdmission(admissionData);
       
@@ -622,19 +618,19 @@ export default function AmbulatorRoom() {
   const currentFloorBeds = visualMap.floors[selectedFloor] || [];
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
       
       {/* SUCCESS BANNER */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-8 text-white shadow-2xl">
+      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white shadow-2xl">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <span className="material-symbols-outlined text-6xl">check_circle</span>
             <div>
-              <h1 className="text-4xl font-black">
+              <h1 className="text-3xl sm:text-4xl font-black">
                 AMBULATOR XONA TIZIMI ISHLAYAPTI!
               </h1>
-              <p className="text-xl mt-2">Vaqt: {new Date().toLocaleString('uz-UZ')}</p>
+              <p className="text-lg sm:text-xl mt-2">Vaqt: {new Date().toLocaleString('uz-UZ')}</p>
             </div>
           </div>
           
@@ -642,14 +638,14 @@ export default function AmbulatorRoom() {
           <button
             type="button"
             onClick={toggleAudio}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-lg ${
+            className={`flex items-center gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-bold transition-all shadow-lg ${
               audioEnabled 
                 ? 'bg-white text-green-600 hover:bg-green-50' 
                 : 'bg-white/20 text-white hover:bg-white/30'
             }`}
             title={audioEnabled ? 'Ovozni o\'chirish' : 'Ovozni yoqish'}
           >
-            <span className="material-symbols-outlined text-2xl">
+            <span className="material-symbols-outlined text-xl sm:text-2xl">
               {audioEnabled ? 'volume_up' : 'volume_off'}
             </span>
             <span>
@@ -657,87 +653,87 @@ export default function AmbulatorRoom() {
             </span>
           </button>
         </div>
-        <div className="grid grid-cols-4 gap-4 mt-6">
-          <div className="bg-white/20 rounded-lg p-4">
-            <p className="text-sm opacity-90">Jami xonalar</p>
-            <p className="text-3xl font-bold">{stats.total_rooms || 0}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mt-6">
+          <div className="bg-white/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
+            <p className="text-sm sm:text-sm sm:text-base opacity-90">Jami xonalar</p>
+            <p className="text-2xl sm:text-3xl font-bold">{stats.total_rooms || 0}</p>
           </div>
-          <div className="bg-white/20 rounded-lg p-4">
-            <p className="text-sm opacity-90">Bo'sh</p>
-            <p className="text-3xl font-bold">{stats.available_rooms || 0}</p>
+          <div className="bg-white/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
+            <p className="text-sm sm:text-sm sm:text-base opacity-90">Bo'sh</p>
+            <p className="text-2xl sm:text-3xl font-bold">{stats.available_rooms || 0}</p>
           </div>
-          <div className="bg-white/20 rounded-lg p-4">
-            <p className="text-sm opacity-90">Band</p>
-            <p className="text-3xl font-bold">{stats.occupied_rooms || 0}</p>
+          <div className="bg-white/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
+            <p className="text-sm sm:text-sm sm:text-base opacity-90">Band</p>
+            <p className="text-2xl sm:text-3xl font-bold">{stats.occupied_rooms || 0}</p>
           </div>
-          <div className="bg-white/20 rounded-lg p-4">
-            <p className="text-sm opacity-90">Tozalanmoqda</p>
-            <p className="text-3xl font-bold">{stats.maintenance_rooms || 0}</p>
+          <div className="bg-white/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
+            <p className="text-sm sm:text-sm sm:text-base opacity-90">Tozalanmoqda</p>
+            <p className="text-2xl sm:text-3xl font-bold">{stats.maintenance_rooms || 0}</p>
           </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">hotel</span>
-          <p className="text-4xl font-black">{stats.active_admissions || 0}</p>
-          <p className="text-sm opacity-90 mt-1">Faol bemorlar</p>
+      <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">hotel</span>
+          <p className="text-3xl sm:text-4xl font-black">{stats.active_admissions || 0}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Faol bemorlar</p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">bed</span>
-          <p className="text-4xl font-black">{stats.total_beds || 0}</p>
-          <p className="text-sm opacity-90 mt-1">Jami koykalar</p>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">bed</span>
+          <p className="text-3xl sm:text-4xl font-black">{stats.total_beds || 0}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Jami koykalar</p>
         </div>
 
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">check_circle</span>
-          <p className="text-4xl font-black">{stats.available_beds || 0}</p>
-          <p className="text-sm opacity-90 mt-1">Bo'sh koykalar</p>
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">check_circle</span>
+          <p className="text-3xl sm:text-4xl font-black">{stats.available_beds || 0}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Bo'sh koykalar</p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">person</span>
-          <p className="text-4xl font-black">{stats.occupied_beds || 0}</p>
-          <p className="text-sm opacity-90 mt-1">Band koykalar</p>
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">person</span>
+          <p className="text-3xl sm:text-4xl font-black">{stats.occupied_beds || 0}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Band koykalar</p>
         </div>
       </div>
 
       {/* Floor Selector - OLIB TASHLANDI, endi barcha qavatlar ko'rinadi */}
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm">
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-4 px-6">
+          <div className="flex gap-3 sm:gap-4 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8">
             {[
               { id: 'map', label: 'Koykalar Xaritasi', icon: 'map' }
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-4 border-b-2 transition-colors ${
+                className={`flex items-center gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-primary text-primary font-semibold'
                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900'
                 }`}
               >
-                <span className="material-symbols-outlined text-lg">{tab.icon}</span>
+                <span className="material-symbols-outlined text-base sm:text-lg">{tab.icon}</span>
                 {tab.label}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {activeTab === 'map' && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold">Xonalar: {rooms.length} ta</h3>
+                <h3 className="text-xl sm:text-2xl font-bold">Xonalar: {rooms.length} ta</h3>
                 {!isReadOnly && rooms.length > 0 && (
                   <button
                     onClick={() => setShowRoomModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                    className="flex items-center gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-primary/90 transition-colors"
                   >
                     <span className="material-symbols-outlined">add</span>
                     Xona qo'shish
@@ -745,36 +741,36 @@ export default function AmbulatorRoom() {
                 )}
               </div>
               {rooms.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl">
                   <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">meeting_room</span>
                   <p className="text-gray-500">Bu qavatda xonalar yo'q</p>
                   {!isReadOnly && (
                     <button
                       onClick={() => setShowRoomModal(true)}
-                      className="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                      className="mt-4 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-primary/90"
                     >
                       Xona qo'shish
                     </button>
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {rooms.map((room) => (
                     <div
                       key={room.id}
-                      className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:shadow-lg transition-all"
+                      className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all"
                     >
                       {/* Xona rasmi va tugmalar */}
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                            <span className="material-symbols-outlined text-4xl text-white">meeting_room</span>
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center">
+                            <span className="material-symbols-outlined text-3xl sm:text-4xl text-white">meeting_room</span>
                           </div>
                           <div>
-                            <h4 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <h4 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                               Xona {room.room_number}
                             </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                               {room.room_type === 'standard' ? 'Standart' : 
                                room.room_type === 'vip' ? 'VIP' : 
                                room.room_type === 'icu' ? 'Reanimatsiya' : room.room_type}
@@ -783,17 +779,17 @@ export default function AmbulatorRoom() {
                         </div>
                         
                         {!isReadOnly && (
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 sm:gap-2 sm:gap-3">
                             <button
                               onClick={() => handleEditRoom(room)}
-                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl transition-colors"
                               title="Tahrirlash"
                             >
                               <span className="material-symbols-outlined">edit</span>
                             </button>
                             <button
                               onClick={() => handleDeleteRoom(room.id, room.room_number)}
-                              className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg sm:rounded-lg sm:rounded-xl transition-colors"
                               title="O'chirish"
                             >
                               <span className="material-symbols-outlined">delete</span>
@@ -803,9 +799,9 @@ export default function AmbulatorRoom() {
                       </div>
 
                       {/* Koykalar */}
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          <p className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">
                             Koykalar:
                           </p>
                           {room.beds && room.beds.length > 2 && (
@@ -815,7 +811,7 @@ export default function AmbulatorRoom() {
                           )}
                         </div>
                         {room.beds && room.beds.length > 0 ? (
-                          <div className={`space-y-3 ${
+                          <div className={`space-y-2 sm:space-y-3 ${
                             room.beds.length > 2 
                               ? 'max-h-[200px] overflow-y-auto beds-scroll-container pr-2' 
                               : ''
@@ -859,7 +855,7 @@ export default function AmbulatorRoom() {
                                 playAlarmSound={playAlarmSound}
                               >
                                 <div
-                                  className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                                  className={`flex items-center justify-between p-3 rounded-lg sm:rounded-lg sm:rounded-xl border-2 transition-all ${
                                     frontendStatus === 'available'
                                       ? 'bg-green-50 border-green-500 dark:bg-green-900/20'
                                       : frontendStatus === 'occupied'
@@ -869,8 +865,8 @@ export default function AmbulatorRoom() {
                                       : 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20'
                                   }`}
                                 >
-                                  <div className="flex items-center gap-3">
-                                    <span className="material-symbols-outlined text-2xl">
+                                  <div className="flex items-center gap-2 sm:gap-3">
+                                    <span className="material-symbols-outlined text-xl sm:text-2xl">
                                       {frontendStatus === 'available' ? 'bed' : 
                                        frontendStatus === 'occupied' ? 'hotel' : 
                                        frontendStatus === 'cleaning' ? 'cleaning_services' : 'bed'}
@@ -902,7 +898,7 @@ export default function AmbulatorRoom() {
                                   {!isReadOnly && (
                                     <button
                                       onClick={() => handleBedStatusToggle(bed, bed.bed_status || bed.status)}
-                                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                                      className={`px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold transition-colors ${
                                         frontendStatus === 'available'
                                           ? 'bg-red-500 text-white hover:bg-red-600'
                                           : 'bg-green-500 text-white hover:bg-green-600'
@@ -917,13 +913,13 @@ export default function AmbulatorRoom() {
                           })}
                           </div>
                         ) : (
-                          <p className="text-sm text-gray-500">Koykalar yo'q</p>
+                          <p className="text-sm sm:text-sm sm:text-base text-gray-500">Koykalar yo'q</p>
                         )}
                       </div>
 
                       {/* Narx */}
                       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                           Soatlik narx: <span className="font-bold text-green-600 dark:text-green-400">
                             BEPUL ✓
                           </span>
@@ -940,11 +936,11 @@ export default function AmbulatorRoom() {
 
       {/* Xona qo'shish modali */}
       {showRoomModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="material-symbols-outlined text-3xl">meeting_room</span>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-2 sm:gap-3">
+                <span className="material-symbols-outlined text-2xl sm:text-3xl">meeting_room</span>
                 {editingRoom ? 'Xonani tahrirlash' : 'Yangi xona qo\'shish'}
               </h3>
               <button
@@ -961,13 +957,13 @@ export default function AmbulatorRoom() {
                 }}
                 className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               >
-                <span className="material-symbols-outlined text-3xl">close</span>
+                <span className="material-symbols-outlined text-2xl sm:text-3xl">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleCreateRoom} className="space-y-4">
+            <form onSubmit={handleCreateRoom} className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Xona raqami
                 </label>
                 <input
@@ -975,19 +971,19 @@ export default function AmbulatorRoom() {
                   required
                   value={roomForm.room_number}
                   onChange={(e) => setRoomForm({ ...roomForm, room_number: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
                   placeholder="101"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Xona turi
                 </label>
                 <select
                   value={roomForm.room_type}
                   onChange={(e) => setRoomForm({ ...roomForm, room_type: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
                 >
                   <option value="standard">Standart</option>
                   <option value="vip">VIP</option>
@@ -996,7 +992,7 @@ export default function AmbulatorRoom() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Soatlik narx (BEPUL) (so'm)
                 </label>
                 <input
@@ -1004,7 +1000,7 @@ export default function AmbulatorRoom() {
                   required
                   value={roomForm.hourly_rate}
                   onChange={(e) => setRoomForm({ ...roomForm, hourly_rate: parseInt(e.target.value) })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
                   placeholder="0"
                   step="10000"
                 />
@@ -1012,7 +1008,7 @@ export default function AmbulatorRoom() {
 
               {!editingRoom && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Koykalar soni
                   </label>
                   <input
@@ -1027,15 +1023,15 @@ export default function AmbulatorRoom() {
                         setRoomForm({ ...roomForm, bed_count: value });
                       }
                     }}
-                    className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
+                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
                     placeholder="2"
                   />
                   <p className="text-xs text-gray-500 mt-1">1 dan 10 gacha koyka qo'shishingiz mumkin</p>
                 </div>
               )}
 
-              <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-lg p-4">
-                <p className="text-sm text-green-800 dark:text-green-300 flex items-center gap-2">
+              <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
+                <p className="text-sm sm:text-sm sm:text-base text-green-800 dark:text-green-300 flex items-center gap-2 sm:gap-2 sm:gap-3">
                   <span className="material-symbols-outlined">info</span>
                   {editingRoom 
                     ? 'Xona ma\'lumotlarini yangilang'
@@ -1043,7 +1039,7 @@ export default function AmbulatorRoom() {
                 </p>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-2 sm:gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -1057,13 +1053,13 @@ export default function AmbulatorRoom() {
                       bed_count: 2
                     });
                   }}
-                  className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold transition-colors"
+                  className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold transition-colors"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700 font-semibold transition-colors flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                 >
                   <span className="material-symbols-outlined">{editingRoom ? 'save' : 'add'}</span>
                   {editingRoom ? 'Saqlash' : 'Yaratish'}
@@ -1076,12 +1072,12 @@ export default function AmbulatorRoom() {
 
       {/* Bemor tanlash modali */}
       {showPatientModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl max-w-xl sm:max-w-2xl w-full max-h-[80vh] flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="material-symbols-outlined text-3xl">person_search</span>
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-2 sm:gap-3">
+                <span className="material-symbols-outlined text-2xl sm:text-3xl">person_search</span>
                 Bemor tanlang
               </h3>
               <button
@@ -1092,12 +1088,12 @@ export default function AmbulatorRoom() {
                 }}
                 className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
               >
-                <span className="material-symbols-outlined text-3xl">close</span>
+                <span className="material-symbols-outlined text-2xl sm:text-3xl">close</span>
               </button>
             </div>
 
             {/* Search */}
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                   search
@@ -1107,60 +1103,60 @@ export default function AmbulatorRoom() {
                   value={patientSearch}
                   onChange={(e) => handlePatientSearch(e.target.value)}
                   placeholder="Bemor ismi yoki raqamini kiriting..."
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
+                  className="w-full pl-12 pr-4 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
                   autoFocus
                 />
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2">
                 {filteredPatients.length} ta bemor topildi
               </p>
             </div>
 
             {/* Patients List */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               {filteredPatients.length === 0 ? (
                 <div className="text-center py-12">
                   <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">person_off</span>
                   <p className="text-gray-500">Bemorlar topilmadi</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {filteredPatients.map((patient) => (
                     <button
                       key={patient.id}
                       onClick={() => handlePatientSelect(patient.id)}
-                      className="w-full p-4 bg-gray-50 dark:bg-gray-900 hover:bg-green-50 dark:hover:bg-green-900/20 border-2 border-gray-200 dark:border-gray-700 hover:border-green-500 rounded-xl transition-all text-left group"
+                      className="w-full p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 hover:bg-green-50 dark:hover:bg-green-900/20 border-2 border-gray-200 dark:border-gray-700 hover:border-green-500 rounded-lg sm:rounded-xl transition-all text-left group"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg">
                             {patient.first_name.charAt(0)}{patient.last_name.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">
+                            <p className="font-bold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">
                               {patient.first_name} {patient.last_name}
                             </p>
-                            <div className="flex items-center gap-4 mt-1">
-                              <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                                <span className="material-symbols-outlined text-sm">badge</span>
+                            <div className="flex items-center gap-3 sm:gap-4 mt-1">
+                              <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                                <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">badge</span>
                                 {patient.patient_number}
                               </span>
                               {patient.phone && (
-                                <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                                  <span className="material-symbols-outlined text-sm">phone</span>
+                                <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">phone</span>
                                   {patient.phone}
                                 </span>
                               )}
                               {patient.birth_date && (
-                                <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                                  <span className="material-symbols-outlined text-sm">cake</span>
+                                <span className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">cake</span>
                                   {new Date(patient.birth_date).toLocaleDateString('uz-UZ')}
                                 </span>
                               )}
                             </div>
                           </div>
                         </div>
-                        <span className="material-symbols-outlined text-2xl text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400">
+                        <span className="material-symbols-outlined text-xl sm:text-2xl text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400">
                           arrow_forward
                         </span>
                       </div>
@@ -1171,14 +1167,14 @@ export default function AmbulatorRoom() {
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => {
                   setShowPatientModal(false);
                   setSelectedBed(null);
                   setPatientSearch('');
                 }}
-                className="w-full px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold transition-colors"
+                className="w-full px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold transition-colors"
               >
                 Bekor qilish
               </button>
@@ -1201,55 +1197,55 @@ export default function AmbulatorRoom() {
 
       {/* Treatment Notification Modal */}
       {showTreatmentModal && treatmentNotification && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full animate-bounce-in">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl max-w-sm sm:max-w-md w-full animate-bounce-in">
             {/* Header */}
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6 rounded-t-2xl text-white">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center animate-pulse shadow-lg">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4 sm:p-6 rounded-t-2xl text-white">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-16 h-16 bg-white rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center animate-pulse shadow-lg">
                   <img src="/logo.svg" alt="Logo" className="w-12 h-12" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black">⏰ MUOLAJA VAQTI!</h2>
-                  <p className="text-sm opacity-90">Darhol yordam bering</p>
+                  <h2 className="text-xl sm:text-2xl font-black">⏰ MUOLAJA VAQTI!</h2>
+                  <p className="text-sm sm:text-sm sm:text-base opacity-90">Darhol yordam bering</p>
                 </div>
               </div>
             </div>
 
             {/* Body */}
-            <div className="p-6 space-y-4">
-              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border-2 border-orange-200 dark:border-orange-800">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="material-symbols-outlined text-3xl text-orange-600">person</span>
+            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-orange-200 dark:border-orange-800">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                  <span className="material-symbols-outlined text-2xl sm:text-3xl text-orange-600">person</span>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Bemor</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">{treatmentNotification.patientName}</p>
+                    <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Bemor</p>
+                    <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{treatmentNotification.patientName}</p>
                   </div>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Bemor №: {treatmentNotification.patientNumber}
                 </div>
               </div>
 
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border-2 border-blue-200 dark:border-blue-800">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="material-symbols-outlined text-3xl text-blue-600">medication</span>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <span className="material-symbols-outlined text-2xl sm:text-3xl text-blue-600">medication</span>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Dori</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">{treatmentNotification.medicationName}</p>
+                    <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Dori</p>
+                    <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{treatmentNotification.medicationName}</p>
                   </div>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Doza: {treatmentNotification.dosage}
                 </div>
               </div>
 
-              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-3xl text-purple-600">schedule</span>
+              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-purple-200 dark:border-purple-800">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="material-symbols-outlined text-2xl sm:text-3xl text-purple-600">schedule</span>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Vaqt</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Vaqt</p>
+                    <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                       {new Date(treatmentNotification.scheduledTime).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -1258,7 +1254,7 @@ export default function AmbulatorRoom() {
             </div>
 
             {/* Footer */}
-            <div className="p-6 bg-gray-50 dark:bg-gray-900 rounded-b-2xl flex gap-3">
+            <div className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 rounded-b-2xl flex gap-2 sm:gap-3">
               <button
                 onClick={() => {
                   setShowTreatmentModal(false);
@@ -1269,7 +1265,7 @@ export default function AmbulatorRoom() {
                     audioRef.current.currentTime = 0;
                   }
                 }}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg"
+                className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl font-bold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg"
               >
                 ✅ Tushundim
               </button>

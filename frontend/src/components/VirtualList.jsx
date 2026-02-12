@@ -93,7 +93,7 @@ export function VirtualTable({
         <thead className="sticky top-0 bg-white dark:bg-gray-800 z-10">
           <tr>
             {columns.map((col, i) => (
-              <th key={i} className="px-4 py-3 text-left text-sm font-semibold">
+              <th key={i} className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-sm sm:text-sm sm:text-base font-semibold">
                 {col.header}
               </th>
             ))}
@@ -103,7 +103,7 @@ export function VirtualTable({
           {visibleRows.map((row, rowIndex) => (
             <tr key={visibleStart + rowIndex} style={{ height: rowHeight }}>
               {columns.map((col, colIndex) => (
-                <td key={colIndex} className="px-4 py-3 text-sm">
+                <td key={colIndex} className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base">
                   {col.render ? col.render(row) : row[col.field]}
                 </td>
               ))}

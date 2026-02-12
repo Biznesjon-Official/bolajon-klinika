@@ -141,23 +141,23 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-fadeIn" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-slideUp" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-3 sm:p-4 animate-fadeIn" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-4 sm:p-6 max-w-2xl sm:max-w-4xl w-full max-h-[90vh] overflow-hidden sm:block flex flex-col animate-slideUp" onClick={(e) => e.stopPropagation()}>
         
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-gray-100 dark:border-gray-700">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="material-symbols-outlined text-3xl text-blue-600">medication</span>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-2 sm:gap-3">
+              <span className="material-symbols-outlined text-2xl sm:text-3xl text-blue-600">medication</span>
               Qaysi dorilardan foydalandingiz?
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
               Muolajada ishlatilgan dorilarni tanlang va miqdorini kiriting
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg sm:rounded-xl transition-colors"
           >
             <span className="material-symbols-outlined text-gray-500">close</span>
           </button>
@@ -171,24 +171,24 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
               <p className="text-gray-600 dark:text-gray-400 font-medium">Dorilar yuklanmoqda...</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {selectedMedicines.map((selectedMed, index) => (
-                <div key={index} className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-4 animate-slideDown">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0">
+                <div key={index} className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 animate-slideDown">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0">
                       {index + 1}
                     </div>
                     
-                    <div className="flex-1 space-y-3">
+                    <div className="flex-1 space-y-2 sm:space-y-3">
                       {/* Dori tanlash */}
                       <div>
-                        <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                        <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2 text-gray-700 dark:text-gray-300">
                           💊 Dori nomi
                         </label>
                         <select
                           value={selectedMed.medicine_id}
                           onChange={(e) => handleMedicineSelect(index, e.target.value)}
-                          className="w-full px-4 py-3 border-2 border-blue-300 dark:border-blue-600 dark:bg-gray-900 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all font-medium"
+                          className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-blue-300 dark:border-blue-600 dark:bg-gray-900 rounded-lg sm:rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all font-medium"
                         >
                           <option value="">Dori tanlang...</option>
                           {medicines.length === 0 ? (
@@ -208,7 +208,7 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
                         </select>
                         {medicines.length === 0 && !loading && (
                           <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                            <span className="material-symbols-outlined text-sm">info</span>
+                            <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">info</span>
                             2-qavatdagi dorixonada dorilar mavjud emas yoki yuklanmadi
                           </p>
                         )}
@@ -216,17 +216,17 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
 
                       {/* Miqdor va ma'lumotlar */}
                       {selectedMed.medicine_id && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                           {/* Miqdor */}
                           <div>
-                            <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                            <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2 text-gray-700 dark:text-gray-300">
                               📦 Miqdori
                             </label>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                               <button
                                 type="button"
                                 onClick={() => handleQuantityChange(index, Math.max(1, selectedMed.quantity - 1))}
-                                className="w-10 h-10 bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all flex items-center justify-center"
+                                className="w-10 h-10 bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all flex items-center justify-center"
                               >
                                 <span className="material-symbols-outlined text-blue-600">remove</span>
                               </button>
@@ -236,38 +236,38 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
                                 max={selectedMed.available}
                                 value={selectedMed.quantity}
                                 onChange={(e) => handleQuantityChange(index, e.target.value)}
-                                className="flex-1 px-4 py-2 border-2 border-blue-300 dark:border-blue-600 dark:bg-gray-900 rounded-xl text-center font-bold text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border-2 border-blue-300 dark:border-blue-600 dark:bg-gray-900 rounded-lg sm:rounded-xl text-center font-bold text-base sm:text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                               />
                               <button
                                 type="button"
                                 onClick={() => handleQuantityChange(index, Math.min(selectedMed.available, selectedMed.quantity + 1))}
-                                className="w-10 h-10 bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all flex items-center justify-center"
+                                className="w-10 h-10 bg-white dark:bg-gray-800 border-2 border-blue-300 dark:border-blue-600 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all flex items-center justify-center"
                               >
                                 <span className="material-symbols-outlined text-blue-600">add</span>
                               </button>
-                              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[60px]">
+                              <span className="text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 min-w-[60px]">
                                 {selectedMed.unit}
                               </span>
                             </div>
                             {selectedMed.quantity > selectedMed.available && (
                               <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                                <span className="material-symbols-outlined text-sm">warning</span>
+                                <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">warning</span>
                                 Yetarli dori yo'q! Mavjud: {selectedMed.available} {selectedMed.unit}
                               </p>
                             )}
                           </div>
 
                           {/* Ma'lumotlar */}
-                          <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-3 space-y-2">
-                            <div className="flex items-center justify-between text-sm">
+                          <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg sm:rounded-xl p-3 space-y-2 sm:space-y-2 sm:space-y-3">
+                            <div className="flex items-center justify-between text-sm sm:text-sm sm:text-base">
                               <span className="text-gray-600 dark:text-gray-400">Mavjud:</span>
                               <span className="font-semibold text-green-600">{selectedMed.available} {selectedMed.unit}</span>
                             </div>
-                            <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center justify-between text-sm sm:text-sm sm:text-base">
                               <span className="text-gray-600 dark:text-gray-400">Narx:</span>
                               <span className="font-semibold">{selectedMed.unit_price?.toLocaleString()} so'm</span>
                             </div>
-                            <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center justify-between text-sm sm:text-sm sm:text-base pt-2 border-t border-gray-200 dark:border-gray-700">
                               <span className="text-gray-600 dark:text-gray-400">Jami:</span>
                               <span className="font-bold text-blue-600">{(selectedMed.quantity * selectedMed.unit_price).toLocaleString()} so'm</span>
                             </div>
@@ -280,7 +280,7 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
                     {selectedMedicines.length > 1 && (
                       <button
                         onClick={() => handleRemoveMedicineRow(index)}
-                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg sm:rounded-lg sm:rounded-xl transition-all"
                       >
                         <span className="material-symbols-outlined">delete</span>
                       </button>
@@ -292,9 +292,9 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
               {/* Dori qo'shish tugmasi */}
               <button
                 onClick={handleAddMedicineRow}
-                className="w-full px-4 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:from-green-600 hover:to-emerald-700 font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl sm:rounded-2xl hover:from-green-600 hover:to-emerald-700 font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
               >
-                <span className="material-symbols-outlined text-2xl">add_circle</span>
+                <span className="material-symbols-outlined text-xl sm:text-2xl">add_circle</span>
                 Dori qo'shish
               </button>
             </div>
@@ -305,27 +305,27 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
         <div className="border-t-2 border-gray-100 dark:border-gray-700 pt-4">
           {/* Total amount */}
           {selectedMedicines.some(m => m.medicine_id) && (
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-4 mb-4">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Jami summa:</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Jami summa:</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                     {selectedMedicines.filter(m => m.medicine_id).length} ta dori tanlandi
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-blue-600">{getTotalAmount().toLocaleString()}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">so'm</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-blue-600">{getTotalAmount().toLocaleString()}</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">so'm</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Action buttons */}
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={handleNoMedicines}
-              className="flex-1 px-6 py-4 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold transition-all flex items-center justify-center gap-2"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
             >
               <span className="material-symbols-outlined">block</span>
               Foydalanmadim
@@ -333,12 +333,12 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
             <button
               onClick={handleConfirm}
               disabled={!selectedMedicines.some(m => m.medicine_id)}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl hover:from-green-600 hover:to-emerald-700 font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
             >
               <span className="material-symbols-outlined">check_circle</span>
               Tasdiqlash
               {selectedMedicines.filter(m => m.medicine_id).length > 0 && (
-                <span className="px-2 py-1 bg-white/20 rounded-full text-sm">
+                <span className="px-2 py-1 bg-white/20 rounded-full text-sm sm:text-sm sm:text-base">
                   {selectedMedicines.filter(m => m.medicine_id).length}
                 </span>
               )}

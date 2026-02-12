@@ -138,7 +138,7 @@ const PatientEdit = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
@@ -149,25 +149,25 @@ const PatientEdit = () => {
 
   return (
     <>
-    <div className="p-4 sm:p-6 lg:p-8">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <button
             onClick={() => navigate(`/patients/${id}`)}
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
+            className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
           >
             <span className="material-symbols-outlined">arrow_back</span>
             Orqaga
           </button>
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+            <h1 className="text-2xl sm:text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
               Bemorni tahrirlash
             </h1>
             {patientData && (
               <button
                 onClick={() => setShowQRModal(true)}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center gap-2"
+                className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center gap-2 sm:gap-2 sm:gap-3"
               >
                 <span className="material-symbols-outlined">qr_code</span>
                 QR Kod
@@ -177,102 +177,102 @@ const PatientEdit = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 space-y-4 sm:space-y-6">
           {errors.load && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg sm:rounded-lg sm:rounded-xl">
               <p className="text-red-700 dark:text-red-400">{errors.load}</p>
             </div>
           )}
 
           {errors.submit && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg sm:rounded-lg sm:rounded-xl">
               <p className="text-red-700 dark:text-red-400">{errors.submit}</p>
             </div>
           )}
 
           {/* Asosiy ma'lumotlar */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Asosiy ma'lumotlar</h3>
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Asosiy ma'lumotlar</h3>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Ism <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.first_name}
                   onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                  className={`w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border ${
+                  className={`w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border ${
                     errors.first_name ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                  } rounded-xl focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary`}
                   placeholder="Ism"
                 />
                 {errors.first_name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.first_name}</p>
+                  <p className="mt-1 text-sm sm:text-sm sm:text-base text-red-500">{errors.first_name}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Familiya <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.last_name}
                   onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                  className={`w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border ${
+                  className={`w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border ${
                     errors.last_name ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                  } rounded-xl focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary`}
                   placeholder="Familiya"
                 />
                 {errors.last_name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.last_name}</p>
+                  <p className="mt-1 text-sm sm:text-sm sm:text-base text-red-500">{errors.last_name}</p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Telefon <span className="text-red-500">*</span>
                 </label>
                 <PhoneInput
                   value={formData.phone}
                   onChange={handlePhoneChange}
-                  className={`w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border ${
+                  className={`w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border ${
                     errors.phone ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                  } rounded-xl focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary`}
                   placeholder="+998 90 123 45 67"
                 />
                 {errors.phone && (
-                  <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+                  <p className="mt-1 text-sm sm:text-sm sm:text-base text-red-500">{errors.phone}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Tug'ilgan sana <span className="text-red-500">*</span>
                 </label>
                 <DateInput
                   value={formData.birth_date}
                   onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                  className={`w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border ${
+                  className={`w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border ${
                     errors.birth_date ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-                  } rounded-xl focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary`}
                 />
                 {errors.birth_date && (
-                  <p className="mt-1 text-sm text-red-500">{errors.birth_date}</p>
+                  <p className="mt-1 text-sm sm:text-sm sm:text-base text-red-500">{errors.birth_date}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Jinsi <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+              <div className="flex gap-3 sm:gap-4">
+                <label className="flex items-center gap-2 sm:gap-2 sm:gap-3 cursor-pointer">
                   <input
                     type="radio"
                     name="gender"
@@ -283,7 +283,7 @@ const PatientEdit = () => {
                   />
                   <span className="text-gray-700 dark:text-gray-300">Erkak</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 sm:gap-2 sm:gap-3 cursor-pointer">
                   <input
                     type="radio"
                     name="gender"
@@ -299,11 +299,11 @@ const PatientEdit = () => {
           </div>
 
           {/* Qo'shimcha ma'lumotlar */}
-          <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Qo'shimcha ma'lumotlar</h3>
+          <div className="space-y-3 sm:space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Qo'shimcha ma'lumotlar</h3>
             
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 PINFL (14 raqam)
               </label>
               <input
@@ -313,7 +313,7 @@ const PatientEdit = () => {
                   const value = e.target.value.replace(/\D/g, '').slice(0, 14);
                   setFormData({ ...formData, pinfl: value });
                 }}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="12345678901234"
                 maxLength="14"
               />
@@ -323,32 +323,32 @@ const PatientEdit = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Manzil
               </label>
               <textarea
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 rows="3"
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Yashash manzili"
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex gap-2 sm:gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={() => navigate(`/patients/${id}`)}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
               disabled={saving}
             >
               Bekor qilish
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90 disabled:opacity-50"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl font-semibold hover:opacity-90 disabled:opacity-50"
               disabled={saving}
             >
               {saving ? 'Saqlanmoqda...' : 'Saqlash'}

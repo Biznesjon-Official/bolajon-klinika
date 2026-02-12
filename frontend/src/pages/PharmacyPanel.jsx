@@ -236,30 +236,30 @@ export default function PharmacyPanel() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pb-6">
       <Toaster position="top-right" />
       
-      <div className="p-6 space-y-4 max-w-7xl mx-auto">
+      <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 max-w-7xl mx-auto">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-600 to-teal-600 rounded-3xl p-8 text-white shadow-xl">
+        <div className="bg-gradient-to-r from-green-600 to-teal-600 rounded-3xl p-4 sm:p-6 lg:p-8 text-white shadow-xl">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-white/20 p-4 rounded-2xl">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-white/20 p-3 sm:p-4 rounded-xl sm:rounded-2xl">
                 <span className="material-symbols-outlined text-6xl">medication</span>
               </div>
               <div className="flex-1">
-                <h1 className="text-4xl font-black">DORILAR SHKAFI</h1>
-                <p className="text-xl opacity-90">
+                <h1 className="text-3xl sm:text-4xl font-black">DORILAR SHKAFI</h1>
+                <p className="text-lg sm:text-xl opacity-90">
                   {user?.staffProfile?.first_name || user?.username || 'Foydalanuvchi'}
                 </p>
               </div>
             </div>
             
             {/* Qavat tanlash */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 sm:gap-2 sm:gap-3">
               {[1, 2, 3].map(floor => (
                 <button
                   key={floor}
                   onClick={() => setSelectedFloor(floor)}
-                  className={`px-6 py-3 rounded-xl font-bold text-lg transition-all ${
+                  className={`px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-bold text-base sm:text-lg transition-all ${
                     selectedFloor === floor
                       ? 'bg-white text-green-600 shadow-lg scale-105'
                       : 'bg-white/20 text-white hover:bg-white/30'
@@ -273,9 +273,9 @@ export default function PharmacyPanel() {
         </div>
         
         {/* Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden sm:block">
           <div className="border-b">
-            <div className="flex px-4">
+            <div className="flex px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8">
               {[
                 { id: 'medicines', label: 'Dorilar', icon: 'medication' },
                 { id: 'out-of-stock', label: 'Tugagan dorilar', icon: 'remove_shopping_cart' },
@@ -287,7 +287,7 @@ export default function PharmacyPanel() {
                 <button 
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-4 font-semibold border-b-2 transition-all ${
+                  className={`flex items-center gap-2 sm:gap-2 sm:gap-3 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 font-semibold border-b-2 transition-all ${
                     activeTab === tab.id 
                       ? 'border-green-600 text-green-600 bg-green-50' 
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:bg-gray-700'
@@ -300,11 +300,11 @@ export default function PharmacyPanel() {
             </div>
           </div>
           
-          <div className="p-6 min-h-[400px]">
+          <div className="p-4 sm:p-6 min-h-[400px]">
             {/* Dorilar Tab */}
             {activeTab === 'medicines' && (
-              <div className="space-y-4">
-                <div className="flex gap-3">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex gap-2 sm:gap-3">
                   <div className="relative flex-1">
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                     <input 
@@ -313,19 +313,19 @@ export default function PharmacyPanel() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && loadData()}
                       placeholder="Dori qidirish..."
-                      className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-600"
+                      className="w-full pl-10 pr-4 py-2 sm:py-3 border rounded-lg sm:rounded-lg sm:rounded-xl focus:ring-2 focus:ring-green-600"
                     />
                   </div>
                   <button 
                     onClick={() => loadData()}
-                    className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700"
+                    className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-green-700"
                   >
                     Qidirish
                   </button>
                   {canManagePharmacy && (
                     <button 
                       onClick={() => setShowAddMedicineModal(true)}
-                      className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 flex items-center gap-2"
+                      className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-green-700 flex items-center gap-2 sm:gap-2 sm:gap-3"
                     >
                       <span className="material-symbols-outlined">add</span>
                       Yangi dori
@@ -343,16 +343,16 @@ export default function PharmacyPanel() {
                     <p className="text-gray-500 dark:text-gray-400 mt-4">Dorilar topilmadi</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {medicines.map(medicine => {
                       const expiryStatus = getExpiryStatus(medicine.expiry_date);
                       
                       return (
-                        <div key={medicine.id} className="bg-white dark:bg-gray-800 border dark:border-gray-700-2 rounded-xl p-5 hover:shadow-lg transition-shadow">
+                        <div key={medicine.id} className="bg-white dark:bg-gray-800 border dark:border-gray-700-2 rounded-lg sm:rounded-xl p-5 hover:shadow-lg transition-shadow">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
-                              <h3 className="text-lg font-bold">{medicine.name}</h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">{medicine.category}</p>
+                              <h3 className="text-base sm:text-lg font-bold">{medicine.name}</h3>
+                              <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400 capitalize">{medicine.category}</p>
                             </div>
                             <span className={`px-3 py-1 rounded text-xs font-bold ${
                               parseFloat(medicine.quantity || medicine.stock_quantity || 0) > 0 
@@ -365,9 +365,9 @@ export default function PharmacyPanel() {
                           
                           {/* Yaroqlilik muddati */}
                           {medicine.expiry_date && (
-                            <div className={`mb-3 p-2 rounded-lg border-2 ${expiryStatus.badge}`}>
-                              <div className="flex items-center gap-2">
-                                <span className="material-symbols-outlined text-sm">schedule</span>
+                            <div className={`mb-3 p-2 rounded-lg sm:rounded-lg sm:rounded-xl border-2 ${expiryStatus.badge}`}>
+                              <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                                <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">schedule</span>
                                 <div className="flex-1">
                                   <p className="text-xs font-semibold">Yaroqlilik muddati</p>
                                   <p className="text-xs">{expiryStatus.text}</p>
@@ -377,14 +377,14 @@ export default function PharmacyPanel() {
                             </div>
                           )}
                           
-                          <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-sm">payments</span>
+                          <div className="space-y-2 sm:space-y-2 sm:space-y-3 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                            <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                              <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">payments</span>
                               <span>{(medicine.unit_price || medicine.price_per_unit || 0).toLocaleString()} so'm</span>
                             </div>
                             {medicine.floor && (
-                              <div className="flex items-center gap-2">
-                                <span className="material-symbols-outlined text-sm">layers</span>
+                              <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                                <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">layers</span>
                                 <span>{medicine.floor}-qavat</span>
                               </div>
                             )}
@@ -394,9 +394,9 @@ export default function PharmacyPanel() {
                           {canManagePharmacy && parseFloat(medicine.quantity || 0) > 0 && (
                             <button
                               onClick={() => handleOpenDispenseModal(medicine)}
-                              className="mt-3 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 text-sm font-semibold"
+                              className="mt-3 w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base font-semibold"
                             >
-                              <span className="material-symbols-outlined text-lg">remove_circle</span>
+                              <span className="material-symbols-outlined text-base sm:text-lg">remove_circle</span>
                               Bemorga berish
                             </button>
                           )}
@@ -410,7 +410,7 @@ export default function PharmacyPanel() {
             
             {/* Tugagan dorilar Tab */}
             {activeTab === 'out-of-stock' && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {loading ? (
                   <div className="text-center py-12">
                     <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -419,42 +419,42 @@ export default function PharmacyPanel() {
                   <div className="text-center py-12">
                     <span className="material-symbols-outlined text-6xl text-gray-300">check_circle</span>
                     <p className="text-gray-500 dark:text-gray-400 mt-4">Tugagan dorilar yo'q</p>
-                    <p className="text-sm text-gray-400 mt-2">Barcha dorilar zaxirada mavjud</p>
+                    <p className="text-sm sm:text-sm sm:text-base text-gray-400 mt-2">Barcha dorilar zaxirada mavjud</p>
                   </div>
                 ) : (
                   <div>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                      <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-red-600 text-2xl">warning</span>
+                    <div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="material-symbols-outlined text-red-600 text-xl sm:text-2xl">warning</span>
                         <div>
                           <p className="font-bold text-red-800">Diqqat! {outOfStockMedicines.length} ta dori tugagan</p>
-                          <p className="text-sm text-red-600">Ushbu dorilarni zaxiraga qo'shish kerak</p>
+                          <p className="text-sm sm:text-sm sm:text-base text-red-600">Ushbu dorilarni zaxiraga qo'shish kerak</p>
                         </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       {outOfStockMedicines.map(medicine => (
-                        <div key={medicine.id} className="bg-white dark:bg-gray-800 border dark:border-gray-700-2 border-red-200 rounded-xl p-5 hover:shadow-lg transition-shadow">
+                        <div key={medicine.id} className="bg-white dark:bg-gray-800 border dark:border-gray-700-2 border-red-200 rounded-lg sm:rounded-xl p-5 hover:shadow-lg transition-shadow">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
-                              <h3 className="text-lg font-bold">{medicine.name}</h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">{medicine.generic_name || '-'}</p>
+                              <h3 className="text-base sm:text-lg font-bold">{medicine.name}</h3>
+                              <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">{medicine.generic_name || '-'}</p>
                             </div>
                             <span className="px-3 py-1 rounded text-xs font-bold bg-red-100 text-red-700">
                               {medicine.quantity || medicine.stock_quantity || 0}
                             </span>
                           </div>
-                          <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-sm">category</span>
+                          <div className="space-y-2 sm:space-y-2 sm:space-y-3 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                            <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                              <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">category</span>
                               <span>{medicine.category}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-sm text-red-600">remove_shopping_cart</span>
+                            <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                              <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base text-red-600">remove_shopping_cart</span>
                               <span className="text-red-600 font-semibold">Kam qolgan</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-sm">warning</span>
+                            <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                              <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">warning</span>
                               <span className="text-orange-600 text-xs">Min: {medicine.reorder_level || medicine.min_stock_level || 0}</span>
                             </div>
                           </div>
@@ -468,7 +468,7 @@ export default function PharmacyPanel() {
             
             {/* Buyurtmalar Tab */}
             {activeTab === 'requests' && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex justify-end">
                   {canManagePharmacy && (
                     <button 
@@ -480,7 +480,7 @@ export default function PharmacyPanel() {
                         }
                         setShowAddRequestModal(true);
                       }}
-                      className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 flex items-center gap-2"
+                      className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-green-700 flex items-center gap-2 sm:gap-2 sm:gap-3"
                     >
                       <span className="material-symbols-outlined">add_shopping_cart</span>
                       Buyurtma berish
@@ -497,25 +497,25 @@ export default function PharmacyPanel() {
                     <table className="w-full">
                       <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                          <th className="px-4 py-3 text-left font-semibold">Dori</th>
-                          <th className="px-4 py-3 text-right font-semibold">Miqdor</th>
-                          <th className="px-4 py-3 text-left font-semibold">Dorixona</th>
-                          <th className="px-4 py-3 text-left font-semibold">So'ragan</th>
-                          <th className="px-4 py-3 text-left font-semibold">Holat</th>
-                          <th className="px-4 py-3 text-left font-semibold">Sana</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">Dori</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-right font-semibold">Miqdor</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">Dorixona</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">So'ragan</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">Holat</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">Sana</th>
                           {canManagePharmacy && (
-                            <th className="px-4 py-3 text-center font-semibold">Amallar</th>
+                            <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold">Amallar</th>
                           )}
                         </tr>
                       </thead>
                       <tbody className="divide-y">
                         {requests.map(item => (
                           <tr key={item.id} className="hover:bg-gray-50 dark:bg-gray-700">
-                            <td className="px-4 py-3 font-medium">{item.medicine_name}</td>
-                            <td className="px-4 py-3 text-right font-semibold">{item.quantity}</td>
-                            <td className="px-4 py-3">{item.supplier_name || '-'}</td>
-                            <td className="px-4 py-3">{item.requested_by_name || '-'}</td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-medium">{item.medicine_name}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-right font-semibold">{item.quantity}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">{item.supplier_name || '-'}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">{item.requested_by_name || '-'}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
                               <span className={`px-2 py-1 rounded text-xs font-bold ${
                                 item.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                                 item.status === 'approved' ? 'bg-green-100 text-green-700' :
@@ -529,10 +529,10 @@ export default function PharmacyPanel() {
                                  item.status === 'dispensed' ? 'Berilgan' : 'Rad etilgan'}
                               </span>
                             </td>
-                            <td className="px-4 py-3">{formatDate(item.created_at)}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">{formatDate(item.created_at)}</td>
                             {canManagePharmacy && (
-                              <td className="px-4 py-3">
-                                <div className="flex gap-2 justify-center">
+                              <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+                                <div className="flex gap-2 sm:gap-2 sm:gap-3 justify-center">
                                   {item.status === 'pending' && (
                                     <>
                                       <button
@@ -547,7 +547,7 @@ export default function PharmacyPanel() {
                                           });
                                           setShowEditRequestModal(true);
                                         }}
-                                        className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm font-semibold"
+                                        className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm sm:text-sm sm:text-base font-semibold"
                                       >
                                         Tahrirlash
                                       </button>
@@ -560,7 +560,7 @@ export default function PharmacyPanel() {
                                           });
                                           setShowAcceptRequestModal(true);
                                         }}
-                                        className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm font-semibold"
+                                        className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm sm:text-sm sm:text-base font-semibold"
                                       >
                                         Qabul qilish
                                       </button>
@@ -578,7 +578,7 @@ export default function PharmacyPanel() {
                                         }
                                       }
                                     }}
-                                    className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm font-semibold"
+                                    className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm sm:text-sm sm:text-base font-semibold"
                                   >
                                     O'chirish
                                   </button>
@@ -596,12 +596,12 @@ export default function PharmacyPanel() {
             
             {/* Dorixonalar Tab */}
             {activeTab === 'suppliers' && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex justify-end">
                   {canManagePharmacy && (
                     <button 
                       onClick={() => setShowAddSupplierModal(true)}
-                      className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 flex items-center gap-2"
+                      className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-green-700 flex items-center gap-2 sm:gap-2 sm:gap-3"
                     >
                       <span className="material-symbols-outlined">add_business</span>
                       Dorixona qo'shish
@@ -619,13 +619,13 @@ export default function PharmacyPanel() {
                     <p className="text-gray-500 dark:text-gray-400 mt-4">Dorixonalar topilmadi</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {suppliers.map(supplier => (
-                      <div key={supplier.id} className="bg-white dark:bg-gray-800 border dark:border-gray-700-2 rounded-xl p-5 hover:shadow-lg transition-shadow">
+                      <div key={supplier.id} className="bg-white dark:bg-gray-800 border dark:border-gray-700-2 rounded-lg sm:rounded-xl p-5 hover:shadow-lg transition-shadow">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <h3 className="text-lg font-bold">{supplier.name}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{supplier.contact_person}</p>
+                            <h3 className="text-base sm:text-lg font-bold">{supplier.name}</h3>
+                            <p className="text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">{supplier.contact_person}</p>
                           </div>
                           <span className={`px-3 py-1 rounded text-xs font-bold ${
                             supplier.is_active 
@@ -635,13 +635,13 @@ export default function PharmacyPanel() {
                             {supplier.is_active ? 'Faol' : 'Nofaol'}
                           </span>
                         </div>
-                        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-sm">phone</span>
+                        <div className="space-y-2 sm:space-y-2 sm:space-y-3 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                            <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">phone</span>
                             <span>{supplier.phone || '-'}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-sm">location_on</span>
+                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                            <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">location_on</span>
                             <span>{supplier.address || '-'}</span>
                           </div>
                         </div>
@@ -654,31 +654,31 @@ export default function PharmacyPanel() {
             
             {/* Chiqim Tab */}
             {activeTab === 'dispensing' && (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {loading ? (
                   <div className="text-center py-12">
                     <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm sm:text-sm sm:text-base">
                       <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                          <th className="px-4 py-3 text-left font-semibold">Dori</th>
-                          <th className="px-4 py-3 text-right font-semibold">Miqdor</th>
-                          <th className="px-4 py-3 text-left font-semibold">Bemor</th>
-                          <th className="px-4 py-3 text-left font-semibold">Bergan</th>
-                          <th className="px-4 py-3 text-left font-semibold">Sana</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">Dori</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-right font-semibold">Miqdor</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">Bemor</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">Bergan</th>
+                          <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-semibold">Sana</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y">
                         {dispensing.map(item => (
                           <tr key={item.id} className="hover:bg-gray-50 dark:bg-gray-700">
-                            <td className="px-4 py-3 font-medium">{item.medicine_name}</td>
-                            <td className="px-4 py-3 text-right">{item.quantity} {item.unit}</td>
-                            <td className="px-4 py-3">{item.patient_name || '-'}</td>
-                            <td className="px-4 py-3">{item.dispensed_by_name}</td>
-                            <td className="px-4 py-3">{formatDate(item.dispensed_at)}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-medium">{item.medicine_name}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-right">{item.quantity} {item.unit}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">{item.patient_name || '-'}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">{item.dispensed_by_name}</td>
+                            <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">{formatDate(item.dispensed_at)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -698,26 +698,26 @@ export default function PharmacyPanel() {
       
       {/* Yangi dori qo'shish modali */}
       {showAddMedicineModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-2xl font-bold mb-4">Yangi dori qo'shish</h3>
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-sm sm:max-w-md w-full">
+            <h3 className="text-xl sm:text-2xl font-bold mb-4">Yangi dori qo'shish</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-1">Dori nomi *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Dori nomi *</label>
                 <input 
                   type="text"
                   value={newMedicine.name}
                   onChange={(e) => setNewMedicine({...newMedicine, name: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-700 dark:border-gray-600"
                   placeholder="Masalan: Paracetamol 500mg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Kategoriya *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Kategoriya *</label>
                 <select 
                   value={newMedicine.category}
                   onChange={(e) => setNewMedicine({...newMedicine, category: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-700 dark:border-gray-600"
                 >
                   <option value="tablet">Tabletka</option>
                   <option value="syrup">Sirop</option>
@@ -728,45 +728,45 @@ export default function PharmacyPanel() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Birlik narxi (so'm) *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Birlik narxi (so'm) *</label>
                 <input 
                   type="number"
                   value={newMedicine.unit_price || ''}
                   onChange={(e) => setNewMedicine({...newMedicine, unit_price: parseFloat(e.target.value) || 0})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-700 dark:border-gray-600"
                   placeholder="0"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Miqdor *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Miqdor *</label>
                 <input 
                   type="number"
                   value={newMedicine.quantity || ''}
                   onChange={(e) => setNewMedicine({...newMedicine, quantity: parseInt(e.target.value) || 0})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-700 dark:border-gray-600"
                   placeholder="0"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Minimal zaxira</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Minimal zaxira</label>
                 <input 
                   type="number"
                   value={newMedicine.reorder_level || ''}
                   onChange={(e) => setNewMedicine({...newMedicine, reorder_level: parseInt(e.target.value) || 10})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-700 dark:border-gray-600"
                   placeholder="10"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Yaroqlilik muddati *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Yaroqlilik muddati *</label>
                 <DateInput 
                   value={newMedicine.expiry_date}
                   onChange={(e) => setNewMedicine({...newMedicine, expiry_date: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-700 dark:border-gray-600"
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 sm:gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowAddMedicineModal(false);
@@ -779,7 +779,7 @@ export default function PharmacyPanel() {
                     expiry_date: ''
                   });
                 }}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-gray-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50 dark:bg-gray-700"
               >
                 Bekor qilish
               </button>
@@ -809,7 +809,7 @@ export default function PharmacyPanel() {
                     toast.error('Xatolik yuz berdi');
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700"
               >
                 Saqlash
               </button>
@@ -820,26 +820,26 @@ export default function PharmacyPanel() {
       
       {/* Buyurtma berish modali */}
       {showAddRequestModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-2xl font-bold mb-4">Buyurtma berish</h3>
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-sm sm:max-w-md w-full">
+            <h3 className="text-xl sm:text-2xl font-bold mb-4">Buyurtma berish</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-1">Dori nomi *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Dori nomi *</label>
                 <input 
                   type="text"
                   value={newRequest.medicine_name}
                   onChange={(e) => setNewRequest({...newRequest, medicine_name: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   placeholder="Dori nomini kiriting..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Dorixona *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Dorixona *</label>
                 <select 
                   value={newRequest.supplier_id}
                   onChange={(e) => setNewRequest({...newRequest, supplier_id: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                 >
                   <option value="">Dorixonani tanlang</option>
                   {suppliers.map(supplier => (
@@ -848,21 +848,21 @@ export default function PharmacyPanel() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Miqdor *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Miqdor *</label>
                 <input 
                   type="number"
                   value={newRequest.quantity || ''}
                   onChange={(e) => setNewRequest({...newRequest, quantity: parseInt(e.target.value) || 1})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   min="1"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Muhimlik darajasi</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Muhimlik darajasi</label>
                 <select 
                   value={newRequest.urgency}
                   onChange={(e) => setNewRequest({...newRequest, urgency: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                 >
                   <option value="low">Past</option>
                   <option value="normal">O'rtacha</option>
@@ -871,20 +871,20 @@ export default function PharmacyPanel() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Izoh</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Izoh</label>
                 <textarea 
                   value={newRequest.notes}
                   onChange={(e) => setNewRequest({...newRequest, notes: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   rows="3"
                   placeholder="Qo'shimcha ma'lumot..."
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 sm:gap-3 mt-6">
               <button 
                 onClick={() => setShowAddRequestModal(false)}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-gray-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50 dark:bg-gray-700"
               >
                 Bekor qilish
               </button>
@@ -900,7 +900,7 @@ export default function PharmacyPanel() {
                     toast.error('Xatolik yuz berdi');
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700"
               >
                 Yuborish
               </button>
@@ -911,54 +911,54 @@ export default function PharmacyPanel() {
       
       {/* Dorixona qo'shish modali */}
       {showAddSupplierModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-2xl font-bold mb-4">Dorixona qo'shish</h3>
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-sm sm:max-w-md w-full">
+            <h3 className="text-xl sm:text-2xl font-bold mb-4">Dorixona qo'shish</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-1">Dorixona nomi *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Dorixona nomi *</label>
                 <input 
                   type="text"
                   value={newSupplier.name}
                   onChange={(e) => setNewSupplier({...newSupplier, name: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   placeholder="Masalan: Farmatsiya №1"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Mas'ul shaxs</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Mas'ul shaxs</label>
                 <input 
                   type="text"
                   value={newSupplier.contact_person}
                   onChange={(e) => setNewSupplier({...newSupplier, contact_person: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   placeholder="Ism familiya"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Telefon</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Telefon</label>
                 <PhoneInput 
                   value={newSupplier.phone}
                   onChange={(e) => setNewSupplier({...newSupplier, phone: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   placeholder="+998 90 123 45 67"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Manzil</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Manzil</label>
                 <textarea 
                   value={newSupplier.address}
                   onChange={(e) => setNewSupplier({...newSupplier, address: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   rows="2"
                   placeholder="To'liq manzil..."
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 sm:gap-3 mt-6">
               <button 
                 onClick={() => setShowAddSupplierModal(false)}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-gray-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50 dark:bg-gray-700"
               >
                 Bekor qilish
               </button>
@@ -974,7 +974,7 @@ export default function PharmacyPanel() {
                     toast.error('Xatolik yuz berdi');
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700"
               >
                 Saqlash
               </button>
@@ -985,26 +985,26 @@ export default function PharmacyPanel() {
       
       {/* Buyurtmani tahrirlash modali */}
       {showEditRequestModal && editingRequest && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-2xl font-bold mb-4">Buyurtmani tahrirlash</h3>
-            <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-sm sm:max-w-md w-full">
+            <h3 className="text-xl sm:text-2xl font-bold mb-4">Buyurtmani tahrirlash</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-1">Dori nomi *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Dori nomi *</label>
                 <input 
                   type="text"
                   value={newRequest.medicine_name}
                   onChange={(e) => setNewRequest({...newRequest, medicine_name: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   placeholder="Dori nomini kiriting..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Dorixona *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Dorixona *</label>
                 <select 
                   value={newRequest.supplier_id}
                   onChange={(e) => setNewRequest({...newRequest, supplier_id: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                 >
                   <option value="">Dorixonani tanlang</option>
                   {suppliers.map(supplier => (
@@ -1013,21 +1013,21 @@ export default function PharmacyPanel() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Miqdor *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Miqdor *</label>
                 <input 
                   type="number"
                   value={newRequest.quantity || ''}
                   onChange={(e) => setNewRequest({...newRequest, quantity: parseInt(e.target.value) || 1})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   min="1"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Muhimlik darajasi</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Muhimlik darajasi</label>
                 <select 
                   value={newRequest.urgency}
                   onChange={(e) => setNewRequest({...newRequest, urgency: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                 >
                   <option value="low">Past</option>
                   <option value="normal">O'rtacha</option>
@@ -1036,23 +1036,23 @@ export default function PharmacyPanel() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Izoh</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Izoh</label>
                 <textarea 
                   value={newRequest.notes}
                   onChange={(e) => setNewRequest({...newRequest, notes: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl"
                   rows="3"
                   placeholder="Qo'shimcha ma'lumot..."
                 />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 sm:gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowEditRequestModal(false);
                   setEditingRequest(null);
                 }}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-gray-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50 dark:bg-gray-700"
               >
                 Bekor qilish
               </button>
@@ -1069,7 +1069,7 @@ export default function PharmacyPanel() {
                     toast.error('Xatolik yuz berdi');
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700"
               >
                 Saqlash
               </button>
@@ -1080,49 +1080,49 @@ export default function PharmacyPanel() {
       
       {/* Buyurtmani qabul qilish modali */}
       {showAcceptRequestModal && acceptingRequest && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-2xl font-bold mb-4">Buyurtmani qabul qilish</h3>
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-4">
-              <p className="text-sm text-green-800 dark:text-green-200">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-sm sm:max-w-md w-full">
+            <h3 className="text-xl sm:text-2xl font-bold mb-4">Buyurtmani qabul qilish</h3>
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4">
+              <p className="text-sm sm:text-sm sm:text-base text-green-800 dark:text-green-200">
                 <strong>Dori:</strong> {acceptingRequest.medicine_name}<br/>
                 <strong>Miqdor:</strong> {acceptingRequest.quantity}<br/>
                 <strong>Dorixona:</strong> {acceptingRequest.supplier_name || '-'}
               </p>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-1">Yaroqlilik muddati *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Yaroqlilik muddati *</label>
                 <DateInput 
                   value={acceptData.expiry_date}
                   onChange={(e) => setAcceptData({...acceptData, expiry_date: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-700 dark:border-gray-600"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1">Sotilish narxi (so'm) *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-1">Sotilish narxi (so'm) *</label>
                 <input 
                   type="number"
                   value={acceptData.unit_price || ''}
                   onChange={(e) => setAcceptData({...acceptData, unit_price: parseFloat(e.target.value) || 0})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                  className="w-full px-3 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-700 dark:border-gray-600"
                   min="0"
                   placeholder="0"
                 />
               </div>
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
-                <p className="text-sm text-green-800 dark:text-green-200">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3">
+                <p className="text-sm sm:text-sm sm:text-base text-green-800 dark:text-green-200">
                   <strong>Jami qiymat:</strong> {((acceptData.unit_price || 0) * acceptingRequest.quantity).toLocaleString()} so'm
                 </p>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 sm:gap-3 mt-6">
               <button 
                 onClick={() => {
                   setShowAcceptRequestModal(false);
                   setAcceptingRequest(null);
                 }}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600"
               >
                 Bekor qilish
               </button>
@@ -1143,7 +1143,7 @@ export default function PharmacyPanel() {
                     toast.error('Xatolik yuz berdi');
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700"
               >
                 Qabul qilish
               </button>
@@ -1154,10 +1154,10 @@ export default function PharmacyPanel() {
       
       {/* Dispense Modal - Dori ishlatish */}
       {showDispenseModal && selectedMedicine && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold">Dori berish</h3>
+              <h3 className="text-xl sm:text-2xl font-bold">Dori berish</h3>
               <button
                 onClick={() => setShowDispenseModal(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -1166,20 +1166,20 @@ export default function PharmacyPanel() {
               </button>
             </div>
 
-            <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <p className="font-semibold text-lg">{selectedMedicine.name}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="mb-4 p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl">
+              <p className="font-semibold text-base sm:text-lg">{selectedMedicine.name}</p>
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Mavjud: {selectedMedicine.quantity} {selectedMedicine.unit || 'dona'}
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Narx: {(selectedMedicine.unit_price || 0).toLocaleString()} so'm
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Bemor tanlash */}
               <div>
-                <label className="block text-sm font-semibold mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">
                   Bemor <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -1188,7 +1188,7 @@ export default function PharmacyPanel() {
                     console.log('Selected patient ID:', e.target.value);
                     setDispenseData({ ...dispenseData, patient_id: e.target.value });
                   }}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-600"
                   required
                 >
                   <option value="">Bemorni tanlang...</option>
@@ -1207,14 +1207,14 @@ export default function PharmacyPanel() {
 
               {/* Miqdor */}
               <div>
-                <label className="block text-sm font-semibold mb-2">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">
                   Miqdor <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   value={dispenseData.quantity}
                   onChange={(e) => setDispenseData({ ...dispenseData, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-600"
                   min="1"
                   max={selectedMedicine.quantity}
                   required
@@ -1223,19 +1223,19 @@ export default function PharmacyPanel() {
 
               {/* Izoh */}
               <div>
-                <label className="block text-sm font-semibold mb-2">Izoh</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Izoh</label>
                 <textarea
                   value={dispenseData.notes}
                   onChange={(e) => setDispenseData({ ...dispenseData, notes: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-green-600"
                   rows="3"
                   placeholder="Qo'shimcha izoh..."
                 />
               </div>
 
               {/* Jami narx */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3">
+                <p className="text-sm sm:text-sm sm:text-base text-blue-800 dark:text-blue-200">
                   <strong>Jami narx:</strong> {((selectedMedicine.unit_price || 0) * dispenseData.quantity).toLocaleString()} so'm
                 </p>
                 <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
@@ -1244,16 +1244,16 @@ export default function PharmacyPanel() {
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 sm:gap-3 mt-6">
               <button
                 onClick={() => setShowDispenseModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600"
               >
                 Bekor qilish
               </button>
               <button
                 onClick={handleDispenseMedicine}
-                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+                className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700 font-semibold"
               >
                 Berish
               </button>

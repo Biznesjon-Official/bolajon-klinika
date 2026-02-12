@@ -264,7 +264,7 @@ const LabPharmacy = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
@@ -274,20 +274,20 @@ const LabPharmacy = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white">Lab Reaktivlari</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Lab Reaktivlari</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Laboratoriya reaktivlarini boshqarish
           </p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+          className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
         >
           <span className="material-symbols-outlined">add</span>
           Reaktiv qo'shish
@@ -295,10 +295,10 @@ const LabPharmacy = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Qidiruv
             </label>
             <input
@@ -306,18 +306,18 @@ const LabPharmacy = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Nomi yoki ishlab chiqarilgan joyi..."
-              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Status
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">Barchasi</option>
               <option value="active">Faol</option>
@@ -330,45 +330,45 @@ const LabPharmacy = () => {
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">check_circle</span>
-          <p className="text-3xl font-black">{stats.active}</p>
-          <p className="text-sm opacity-90 mt-1">Faol reaktivlar</p>
+      <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">check_circle</span>
+          <p className="text-2xl sm:text-3xl font-black">{stats.active}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Faol reaktivlar</p>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">warning</span>
-          <p className="text-3xl font-black">{stats.expiringSoon}</p>
-          <p className="text-sm opacity-90 mt-1">Kam qolgan</p>
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">warning</span>
+          <p className="text-2xl sm:text-3xl font-black">{stats.expiringSoon}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Kam qolgan</p>
         </div>
 
-        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">event_busy</span>
-          <p className="text-3xl font-black">{stats.expired}</p>
-          <p className="text-sm opacity-90 mt-1">Muddati o'tgan</p>
+        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">event_busy</span>
+          <p className="text-2xl sm:text-3xl font-black">{stats.expired}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Muddati o'tgan</p>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl p-6 text-white">
-          <span className="material-symbols-outlined text-3xl mb-2">inventory_2</span>
-          <p className="text-3xl font-black">{reagents.length}</p>
-          <p className="text-sm opacity-90 mt-1">Jami reaktivlar</p>
+        <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white">
+          <span className="material-symbols-outlined text-2xl sm:text-3xl mb-2">inventory_2</span>
+          <p className="text-2xl sm:text-3xl font-black">{reagents.length}</p>
+          <p className="text-sm sm:text-sm sm:text-base opacity-90 mt-1">Jami reaktivlar</p>
         </div>
       </div>
 
       {/* Reagents Table */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden sm:block">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Nomi</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Ishlab chiqarilgan joyi</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Qolgan/Jami</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Bitta testga</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Yaroqlilik</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Amallar</th>
+                <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Nomi</th>
+                <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Ishlab chiqarilgan joyi</th>
+                <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Qolgan/Jami</th>
+                <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Bitta testga</th>
+                <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Yaroqlilik</th>
+                <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Status</th>
+                <th className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Amallar</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -378,14 +378,14 @@ const LabPharmacy = () => {
                   
                   return (
                   <tr key={reagent._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="px-4 py-3">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
                       <p className="font-semibold text-gray-900 dark:text-white">{reagent.name}</p>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       {reagent.country_of_origin || '-'}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                         <span className="font-semibold text-gray-900 dark:text-white">{reagent.remaining_tests}</span>
                         <span className="text-gray-500 dark:text-gray-400">/</span>
                         <span className="text-gray-600 dark:text-gray-400">{reagent.total_tests}</span>
@@ -400,13 +400,13 @@ const LabPharmacy = () => {
                         ></div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-primary">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base font-semibold text-primary">
                       {formatCurrency(reagent.price_per_test)}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className={`p-2 rounded-lg border-2 ${expiryStatus.class}`}>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="material-symbols-outlined text-sm">schedule</span>
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+                      <div className={`p-2 rounded-lg sm:rounded-lg sm:rounded-xl border-2 ${expiryStatus.class}`}>
+                        <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-1">
+                          <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">schedule</span>
                           <p className="text-xs font-semibold">{formatDate(reagent.expiry_date)}</p>
                         </div>
                         <p className="text-xs">{expiryStatus.text}</p>
@@ -420,26 +420,26 @@ const LabPharmacy = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadge(reagent.status).class}`}>
                         {getStatusBadge(reagent.status).text}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                    <td className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
+                      <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
                         <button
                           onClick={() => handleOpenModal(reagent)}
                           className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
                           title="Tahrirlash"
                         >
-                          <span className="material-symbols-outlined text-lg">edit</span>
+                          <span className="material-symbols-outlined text-base sm:text-lg">edit</span>
                         </button>
                         <button
                           onClick={() => handleDelete(reagent)}
                           className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                           title="O'chirish"
                         >
-                          <span className="material-symbols-outlined text-lg">delete</span>
+                          <span className="material-symbols-outlined text-base sm:text-lg">delete</span>
                         </button>
                       </div>
                     </td>
@@ -448,7 +448,7 @@ const LabPharmacy = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="7" className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 text-center text-gray-500 dark:text-gray-400">
                     Reaktivlar topilmadi
                   </td>
                 </tr>
@@ -464,44 +464,44 @@ const LabPharmacy = () => {
         onClose={() => setShowReagentModal(false)}
         title={editingReagent ? 'Reaktivni tahrirlash' : 'Yangi reaktiv qo\'shish'}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Nomi <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={reagentForm.name}
               onChange={(e) => setReagentForm({ ...reagentForm, name: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Masalan: Glyukoza test reagenti"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Ishlab chiqarilgan joyi
             </label>
             <input
               type="text"
               value={reagentForm.country_of_origin}
               onChange={(e) => setReagentForm({ ...reagentForm, country_of_origin: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Mamlakat nomi"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Nechta bemorga yetadi <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={reagentForm.total_tests}
                 onChange={(e) => setReagentForm({ ...reagentForm, total_tests: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="100"
                 min="1"
                 required
@@ -509,14 +509,14 @@ const LabPharmacy = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Umumiy narx (so'm) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={reagentForm.total_price}
                 onChange={(e) => setReagentForm({ ...reagentForm, total_price: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="500000"
                 min="0"
                 required
@@ -525,49 +525,49 @@ const LabPharmacy = () => {
           </div>
 
           {reagentForm.total_tests && reagentForm.total_price && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg sm:rounded-lg sm:rounded-xl">
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Bitta bemorga: <span className="font-bold text-primary">{formatCurrency(calculatePricePerTest())}</span>
               </p>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Yaroqlilik muddati <span className="text-red-500">*</span>
             </label>
             <DateInput
               value={reagentForm.expiry_date}
               onChange={(e) => setReagentForm({ ...reagentForm, expiry_date: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Izoh
             </label>
             <textarea
               value={reagentForm.notes}
               onChange={(e) => setReagentForm({ ...reagentForm, notes: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
               rows="3"
               placeholder="Qo'shimcha ma'lumot..."
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-2 sm:gap-3 pt-4">
             <button
               type="button"
               onClick={() => setShowReagentModal(false)}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:opacity-90"
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90"
             >
               {editingReagent ? 'Yangilash' : 'Qo\'shish'}
             </button>
