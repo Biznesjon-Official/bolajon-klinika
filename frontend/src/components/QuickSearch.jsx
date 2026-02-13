@@ -89,18 +89,18 @@ export default function QuickSearch() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 bg-black/50 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-xl sm:max-w-2xl overflow-hidden sm:block animate-slideDown">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-slideDown">
         {/* Search Input */}
-        <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
-          <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl sm:text-2xl">search</span>
+        <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-700">
+          <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-2xl">search</span>
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Qidirish... (Ctrl+K)"
-            className="flex-1 bg-transparent text-base sm:text-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none"
+            className="flex-1 bg-transparent text-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none"
             autoFocus
           />
           <kbd className="hidden sm:block px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">ESC</kbd>
@@ -109,8 +109,8 @@ export default function QuickSearch() {
         {/* Results */}
         <div className="max-h-96 overflow-y-auto">
           {results.length === 0 ? (
-            <div className="p-4 sm:p-6 lg:p-8 text-center text-gray-500 dark:text-gray-400">
-              <span className="material-symbols-outlined text-3xl sm:text-4xl mb-2">search_off</span>
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <span className="material-symbols-outlined text-4xl mb-2">search_off</span>
               <p>Hech narsa topilmadi</p>
             </div>
           ) : (
@@ -119,20 +119,20 @@ export default function QuickSearch() {
                 <button
                   key={action.id}
                   onClick={() => handleSelect(action)}
-                  className={`w-full flex items-center gap-3 sm:gap-4 p-3 rounded-lg sm:rounded-lg sm:rounded-xl transition-all ${
+                  className={`w-full flex items-center gap-4 p-3 rounded-lg transition-all ${
                     index === selectedIndex
                       ? 'bg-primary text-white'
                       : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <span className={`material-symbols-outlined text-xl sm:text-2xl ${
+                  <span className={`material-symbols-outlined text-2xl ${
                     index === selectedIndex ? 'text-white' : 'text-gray-400 dark:text-gray-500'
                   }`}>
                     {action.icon}
                   </span>
                   <div className="flex-1 text-left">
                     <p className="font-semibold">{action.title}</p>
-                    <p className={`text-sm sm:text-sm sm:text-base ${
+                    <p className={`text-sm ${
                       index === selectedIndex ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'
                     }`}>
                       {action.path}
@@ -149,7 +149,7 @@ export default function QuickSearch() {
 
         {/* Footer */}
         <div className="flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded">↑</kbd>
               <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 rounded">↓</kbd>

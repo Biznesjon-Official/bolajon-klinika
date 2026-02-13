@@ -8,14 +8,13 @@ const Modal = ({
   title, 
   children, 
   size = 'md',
-  showClose = true,
-  closeOnBackdrop = true 
+  showClose = true 
 }) => {
   const { t } = useTranslation();
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden sm:block';
+      document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -39,78 +38,57 @@ const Modal = ({
   }
 
   const sizeClasses = {
-    xs: 'max-w-xs sm:max-w-sm',
-    sm: 'max-w-sm sm:max-w-sm sm:max-w-md',
-    md: 'max-w-sm sm:max-w-md sm:max-w-md sm:max-w-lg',
-    lg: 'max-w-md sm:max-w-lg sm:max-w-xl sm:max-w-2xl',
-    xl: 'max-w-xl sm:max-w-2xl sm:max-w-2xl sm:max-w-4xl',
-    '2xl': 'max-w-2xl sm:max-w-4xl sm:max-w-4xl sm:max-w-6xl',
-    full: 'max-w-full sm:max-w-7xl'
-  };
-
-  const handleBackdropClick = () => {
-    if (closeOnBackdrop) {
-      onClose();
-    }
+    xs: 'max-w-sm',
+    sm: 'max-w-md',
+    md: 'max-w-lg',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl',
+    full: 'max-w-7xl'
   };
 
   const modalContent = (
     <div 
-      className="modal-backdrop fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-3 sm:p-4"
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={title ? "modal-title" : undefined}
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 modal-backdrop"
+      style={{ zIndex: 9999 }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-hidden sm:block="true"></div>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
-      {/* Modal Content - Slide up on mobile, scale on desktop */}
+      {/* Modal Content */}
       <div 
-        className={`
-          modal-content
-          relative bg-white dark:bg-gray-900 
-          w-full ${sizeClasses[size]} 
-          max-h-[95vh] sm:max-h-[90vh] 
-          flex flex-col
-          rounded-t-2xl sm:rounded-xl sm:rounded-2xl
-          shadow-2xl
-          animate-slideUp sm:animate-scaleIn
-        `}
+        className={`relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[95vh] sm:max-h-[90vh] flex flex-col modal-content`}
         onClick={(e) => e.stopPropagation()}
+        style={{ zIndex: 10000 }}
       >
         {/* Header */}
         {(title || showClose) && (
-          <div className="flex items-center justify-between px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 sm:py-3 sm:py-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+          <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-800">
             {title && (
-              <h2 
-                id="modal-title"
-                className="text-lg sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate pr-2"
-              >
+              <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white truncate pr-2">
                 {title}
               </h2>
             )}
             {showClose && (
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl transition-colors ml-auto flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-primary"
-                aria-label={t('common.close') || 'Close'}
-                type="button"
+                className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors ml-auto flex-shrink-0"
+                aria-label={t('common.close')}
               >
-                <span className="material-symbols-outlined text-gray-500 dark:text-gray-400 text-xl sm:text-xl sm:text-2xl">close</span>
+                <span className="material-symbols-outlined text-gray-500 text-xl sm:text-2xl">close</span>
               </button>
             )}
           </div>
         )}
 
-        {/* Body - Scrollable */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sm:py-4 sm:py-6 custom-scrollbar">
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-3 sm:py-4">
           {children}
         </div>
       </div>
     </div>
   );
 
+  // Use Portal to render modal at document.body level
   return createPortal(modalContent, document.body);
 };
 

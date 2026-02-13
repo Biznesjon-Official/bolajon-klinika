@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 const AlertModal = ({ isOpen, onClose, title, message, type = 'info' }) => {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden sm:block';
+      document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -60,25 +60,25 @@ const AlertModal = ({ isOpen, onClose, title, message, type = 'info' }) => {
 
   const modalContent = (
     <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
       <div 
-        className="relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md"
+        className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={`${config.bgColor} border-l-4 ${config.borderColor} rounded-t-2xl p-4 sm:p-6`}>
-          <div className="flex items-center gap-3 sm:gap-4">
+        <div className={`${config.bgColor} border-l-4 ${config.borderColor} rounded-t-2xl p-6`}>
+          <div className="flex items-center gap-4">
             <div className={`size-12 rounded-full ${config.bgColor} flex items-center justify-center`}>
-              <span className={`material-symbols-outlined text-2xl sm:text-3xl ${config.iconColor}`}>
+              <span className={`material-symbols-outlined text-3xl ${config.iconColor}`}>
                 {config.icon}
               </span>
             </div>
             <div className="flex-1">
               {title && (
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
                   {title}
                 </h3>
               )}
@@ -89,10 +89,10 @@ const AlertModal = ({ isOpen, onClose, title, message, type = 'info' }) => {
           </div>
         </div>
 
-        <div className="p-4 sm:p-6">
+        <div className="p-6">
           <button
             onClick={onClose}
-            className={`w-full px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 ${config.buttonColor} text-white rounded-lg sm:rounded-xl font-semibold transition-colors`}
+            className={`w-full px-6 py-3 ${config.buttonColor} text-white rounded-xl font-semibold transition-colors`}
           >
             OK
           </button>

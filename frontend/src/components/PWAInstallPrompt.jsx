@@ -97,28 +97,28 @@ const PWAInstallPrompt = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 animate-slide-up">
-      <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
-        <div className="flex items-start gap-2 sm:gap-3">
-          <div className="flex-shrink-0 text-2xl sm:text-3xl">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 text-3xl">
             📱
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm sm:text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-1">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
               Ilovani o'rnating
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
               Bolajon Med ilovasini qurilmangizga o'rnating va offline rejimda ham foydalaning
             </p>
-            <div className="flex gap-2 sm:gap-2 sm:gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={handleInstallClick}
-                className="flex-1 px-3 py-2 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm sm:text-sm sm:text-base font-medium rounded-lg sm:rounded-lg sm:rounded-xl transition-colors"
+                className="flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 O'rnatish
               </button>
               <button
                 onClick={handleDismiss}
-                className="px-3 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm sm:text-sm sm:text-base font-medium rounded-lg sm:rounded-lg sm:rounded-xl transition-colors"
+                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors"
               >
                 Keyinroq
               </button>

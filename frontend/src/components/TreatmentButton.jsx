@@ -147,19 +147,19 @@ export default function TreatmentButton({ patientId, patientName, roomNumber, be
     <>
       <button
         onClick={loadTreatments}
-        className="mt-2 w-full px-3 py-1.5 bg-blue-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-blue-600 text-xs font-semibold flex items-center justify-center gap-1"
+        className="mt-2 w-full px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs font-semibold flex items-center justify-center gap-1"
       >
-        <span className="material-symbols-outlined text-sm sm:text-sm sm:text-base">medication</span>
+        <span className="material-symbols-outlined text-sm">medication</span>
         Muolajani qilish
       </button>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-xl sm:max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg sm:text-xl font-bold">{patientName} - Muolajalar</h3>
-                <p className="text-sm sm:text-sm sm:text-base text-gray-500">Xona {roomNumber}, Ko'rpa {bedNumber}</p>
+                <h3 className="text-xl font-bold">{patientName} - Muolajalar</h3>
+                <p className="text-sm text-gray-500">Xona {roomNumber}, Ko'rpa {bedNumber}</p>
               </div>
               <button
                 onClick={() => {
@@ -167,53 +167,53 @@ export default function TreatmentButton({ patientId, patientName, roomNumber, be
                   setCompletingTreatment(null);
                   setTreatmentNotes('');
                 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
 
             {loading ? (
-              <div className="text-center py-4 sm:py-6 lg:py-8">
+              <div className="text-center py-8">
                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
               </div>
             ) : treatments.length === 0 ? (
-              <div className="text-center py-4 sm:py-6 lg:py-8">
+              <div className="text-center py-8">
                 <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">medication</span>
                 <p className="text-gray-600 dark:text-gray-400">Bu koykada muolajalar yo'q</p>
               </div>
             ) : (
-              <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-3">
                 {treatments.map(treatment => (
-                  <div key={treatment.id} className="border dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
+                  <div key={treatment.id} className="border dark:border-gray-700 rounded-lg p-4">
                     {completingTreatment === treatment.id ? (
                       // Muolajani yakunlash formi
-                      <div className="space-y-2 sm:space-y-3">
+                      <div className="space-y-3">
                         <h4 className="font-bold">Muolajani yakunlash</h4>
                         <div>
-                          <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Izoh (ixtiyoriy)</label>
+                          <label className="block text-sm font-semibold mb-2">Izoh (ixtiyoriy)</label>
                           <textarea
                             value={treatmentNotes}
                             onChange={(e) => setTreatmentNotes(e.target.value)}
-                            className="w-full px-3 py-2 sm:py-2.5 border dark:border-gray-700 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base"
+                            className="w-full px-3 py-2 border dark:border-gray-700 dark:bg-gray-900 rounded-lg text-sm"
                             rows="3"
                             placeholder="Izoh yozing..."
                           />
                         </div>
-                        <div className="flex gap-2 sm:gap-2 sm:gap-3">
+                        <div className="flex gap-2">
                           <button
                             onClick={() => {
                               setCompletingTreatment(null);
                               setTreatmentNotes('');
                             }}
-                            className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm sm:text-sm sm:text-base"
+                            className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
                           >
                             Bekor qilish
                           </button>
                           <button
                             onClick={() => handleCompleteTreatment(treatment.id)}
-                            className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-600 text-sm sm:text-sm sm:text-base"
+                            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm"
                           >
                             ✓ Tasdiqlash
                           </button>
@@ -224,7 +224,7 @@ export default function TreatmentButton({ patientId, patientName, roomNumber, be
                       <>
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-1">
+                            <div className="flex items-center gap-2 mb-1">
                               <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                                 treatment.prescription_type === 'URGENT' 
                                   ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400'
@@ -238,10 +238,10 @@ export default function TreatmentButton({ patientId, patientName, roomNumber, be
                               </span>
                             </div>
                             <p className="font-semibold">{treatment.medication_name}</p>
-                            <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Doza: {treatment.dosage}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Doza: {treatment.dosage}</p>
                             
                             {treatment.frequency_per_day && (
-                              <div className="mt-2 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg sm:rounded-lg sm:rounded-xl">
+                              <div className="mt-2 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">
                                 <p className="text-xs">
                                   📅 Kuniga {treatment.frequency_per_day} marta
                                   {treatment.duration_days && `, ${treatment.duration_days} kun`}
@@ -268,7 +268,7 @@ export default function TreatmentButton({ patientId, patientName, roomNumber, be
                         {treatment.status === 'pending' && (
                           <button
                             onClick={() => setCompletingTreatment(treatment.id)}
-                            className="mt-3 w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-600 font-semibold text-sm sm:text-sm sm:text-base"
+                            className="mt-3 w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold text-sm"
                           >
                             ✓ Muolajani yakunlash
                           </button>

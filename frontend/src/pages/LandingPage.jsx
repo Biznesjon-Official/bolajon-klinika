@@ -8,7 +8,7 @@ import AIChatbot from '../components/AIChatbot';
 const LandingPage = () => {
   return (
     <div className="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white min-h-screen">
-      <div className="relative flex flex-col w-full overflow-x-hidden sm:block">
+      <div className="relative flex flex-col w-full overflow-x-hidden">
         <Header />
         <main className="flex-1">
           <Hero />

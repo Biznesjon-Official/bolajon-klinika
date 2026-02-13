@@ -98,7 +98,7 @@ const YearInput = ({ value, onChange, className = '', required = false, ...props
         {...props}
       />
       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-        <span className="material-symbols-outlined text-lg sm:text-xl">calendar_today</span>
+        <span className="material-symbols-outlined text-xl">calendar_today</span>
       </div>
     </div>
   );

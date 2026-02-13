@@ -41,27 +41,27 @@ export default function PatientQRModal({ patient, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
             Bemor QR Kodi
           </h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            <span className="material-symbols-outlined text-xl sm:text-2xl">close</span>
+            <span className="material-symbols-outlined text-2xl">close</span>
           </button>
         </div>
 
-        <div className="text-center space-y-3 sm:space-y-4">
+        <div className="text-center space-y-4">
           {/* Patient Info */}
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4">
-            <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+            <p className="text-lg font-bold text-gray-900 dark:text-white">
               {patient.first_name} {patient.last_name}
             </p>
-            <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Bemor raqami: {qrData}
             </p>
             {patient.access_code && (
@@ -69,7 +69,7 @@ export default function PatientQRModal({ patient, onClose }) {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                   Telegram bot uchun maxsus kod:
                 </p>
-                <p className="text-xl sm:text-2xl font-bold text-primary tracking-wider">
+                <p className="text-2xl font-bold text-primary tracking-wider">
                   {patient.access_code}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -78,14 +78,14 @@ export default function PatientQRModal({ patient, onClose }) {
               </div>
             )}
             {patient.phone && (
-              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                 {patient.phone}
               </p>
             )}
           </div>
 
           {/* QR Code */}
-          <div ref={qrRef} className="flex justify-center bg-white p-4 sm:p-6 rounded-lg sm:rounded-xl">
+          <div ref={qrRef} className="flex justify-center bg-white p-6 rounded-xl">
             <QRCodeSVG
               value={String(qrData)}
               size={256}
@@ -97,17 +97,17 @@ export default function PatientQRModal({ patient, onClose }) {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2 sm:gap-3">
+          <div className="flex gap-3">
             <button
               onClick={handleDownload}
-              className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700 font-semibold flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
+              className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold flex items-center justify-center gap-2"
             >
               <span className="material-symbols-outlined">download</span>
               Yuklab olish
             </button>
             <button
               onClick={handlePrint}
-              className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-primary/90 font-semibold flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
+              className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-semibold flex items-center justify-center gap-2"
             >
               <span className="material-symbols-outlined">print</span>
               Chop etish
@@ -115,7 +115,7 @@ export default function PatientQRModal({ patient, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold"
           >
             Yopish
           </button>
