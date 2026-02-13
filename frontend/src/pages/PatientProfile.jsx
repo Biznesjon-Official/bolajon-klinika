@@ -255,11 +255,33 @@ const PatientProfile = () => {
                 </p>
               </div>
               <div className="text-center sm:text-left">
-                <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">Balans</p>
+                <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">
+                  {(() => {
+                    // Balansni invoice'lardan hisoblash
+                    const totalDebt = invoices.reduce((sum, inv) => {
+                      const debt = (inv.total_amount || 0) - (inv.paid_amount || 0);
+                      return sum + debt;
+                    }, 0);
+                    return totalDebt > 0 ? 'Qarz' : 'Balans';
+                  })()}
+                </p>
                 <p className={`font-bold text-sm sm:text-sm sm:text-base ${
-                  (patient.current_balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                  (() => {
+                    const totalDebt = invoices.reduce((sum, inv) => {
+                      const debt = (inv.total_amount || 0) - (inv.paid_amount || 0);
+                      return sum + debt;
+                    }, 0);
+                    return totalDebt > 0 ? 'text-red-600' : 'text-green-600';
+                  })()
                 }`}>
-                  {(patient.current_balance || 0) >= 0 ? '+' : ''}{(patient.current_balance || 0).toLocaleString()} so'm
+                  {(() => {
+                    const totalDebt = invoices.reduce((sum, inv) => {
+                      const debt = (inv.total_amount || 0) - (inv.paid_amount || 0);
+                      return sum + debt;
+                    }, 0);
+                    if (totalDebt === 0) return '0 so\'m';
+                    return `${totalDebt > 0 ? '-' : '+'}${Math.abs(totalDebt).toLocaleString()} so'm`;
+                  })()}
                 </p>
               </div>
             </div>
@@ -299,51 +321,202 @@ const PatientProfile = () => {
         <div className="p-3 sm:p-4 sm:p-4 sm:p-6">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
-                <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="size-10 sm:size-12 bg-orange-500 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                      <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl">medication</span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Retseptlar</p>
-                      <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{prescriptions.length}</p>
-                    </div>
-                  </div>
-                </div>
+            <div className="space-y-4">
+              <h3 className="font-bold text-gray-900 dark:text-white text-lg">Bemor faoliyati tarixi</h3>
+              
+              {(() => {
+                // Barcha faoliyatlarni birlashtirib, vaqt bo'yicha tartiblash
+                const activities = [];
                 
-                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="size-10 sm:size-12 bg-purple-500 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                      <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl">biotech</span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Tahlillar</p>
-                      <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{labResults.length}</p>
-                    </div>
-                  </div>
-                </div>
+                // Invoices
+                invoices.forEach(inv => {
+                  activities.push({
+                    type: 'invoice',
+                    date: new Date(inv.created_at),
+                    data: inv
+                  });
+                });
                 
-                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="size-10 sm:size-12 bg-green-500 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                      <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl">receipt_long</span>
+                // Admissions
+                admissions.forEach(adm => {
+                  activities.push({
+                    type: 'admission',
+                    date: new Date(adm.admission_date),
+                    data: adm
+                  });
+                  if (adm.discharge_date) {
+                    activities.push({
+                      type: 'discharge',
+                      date: new Date(adm.discharge_date),
+                      data: adm
+                    });
+                  }
+                });
+                
+                // Prescriptions
+                prescriptions.forEach(presc => {
+                  activities.push({
+                    type: 'prescription',
+                    date: new Date(presc.created_at),
+                    data: presc
+                  });
+                });
+                
+                // Lab Results
+                labResults.forEach(lab => {
+                  activities.push({
+                    type: 'lab',
+                    date: new Date(lab.createdAt || lab.created_at),
+                    data: lab
+                  });
+                });
+                
+                // Vaqt bo'yicha tartiblash (yangi birinchi)
+                activities.sort((a, b) => b.date - a.date);
+                
+                if (activities.length === 0) {
+                  return (
+                    <div className="text-center py-12">
+                      <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
+                        history
+                      </span>
+                      <p className="text-gray-500 dark:text-gray-400">Faoliyat tarixi yo'q</p>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Hisob-fakturalar</p>
-                      <p className="text-xl sm:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{invoices.length}</p>
+                  );
+                }
+                
+                return (
+                  <div className="relative">
+                    {/* Timeline line */}
+                    <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+                    
+                    <div className="space-y-4">
+                      {activities.map((activity, index) => (
+                        <div key={index} className="relative pl-14">
+                          {/* Timeline dot */}
+                          <div className={`absolute left-4 top-2 w-4 h-4 rounded-full border-4 ${
+                            activity.type === 'invoice' ? 'bg-green-500 border-green-200' :
+                            activity.type === 'admission' ? 'bg-blue-500 border-blue-200' :
+                            activity.type === 'discharge' ? 'bg-purple-500 border-purple-200' :
+                            activity.type === 'prescription' ? 'bg-orange-500 border-orange-200' :
+                            'bg-pink-500 border-pink-200'
+                          }`}></div>
+                          
+                          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className={`material-symbols-outlined ${
+                                  activity.type === 'invoice' ? 'text-green-600' :
+                                  activity.type === 'admission' ? 'text-blue-600' :
+                                  activity.type === 'discharge' ? 'text-purple-600' :
+                                  activity.type === 'prescription' ? 'text-orange-600' :
+                                  'text-pink-600'
+                                }`}>
+                                  {activity.type === 'invoice' ? 'receipt' :
+                                   activity.type === 'admission' ? 'login' :
+                                   activity.type === 'discharge' ? 'logout' :
+                                   activity.type === 'prescription' ? 'medication' :
+                                   'biotech'}
+                                </span>
+                                <span className="font-semibold text-gray-900 dark:text-white">
+                                  {activity.type === 'invoice' ? 'To\'lov' :
+                                   activity.type === 'admission' ? 'Yotqizildi' :
+                                   activity.type === 'discharge' ? 'Chiqarildi' :
+                                   activity.type === 'prescription' ? 'Retsept' :
+                                   'Tahlil'}
+                                </span>
+                              </div>
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {activity.date.toLocaleString('uz-UZ', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            
+                            {/* Activity details */}
+                            {activity.type === 'invoice' && (
+                              <div className="text-sm">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-medium">Summa:</span> {activity.data.total_amount.toLocaleString()} so'm
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-medium">To'langan:</span> {activity.data.paid_amount.toLocaleString()} so'm
+                                </p>
+                                {activity.data.services && activity.data.services.length > 0 && (
+                                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                                    {activity.data.services.map(s => s.service_name).join(', ')}
+                                  </p>
+                                )}
+                                {activity.data.items && activity.data.items.length > 0 && (
+                                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                                    {activity.data.items.map(i => i.description).join(', ')}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            
+                            {activity.type === 'admission' && (
+                              <div className="text-sm">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-medium">Xona:</span> {activity.data.room_number}, Ko'rpa: {activity.data.bed_number}
+                                </p>
+                                {activity.data.diagnosis && (
+                                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                                    <span className="font-medium">Tashxis:</span> {activity.data.diagnosis}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            
+                            {activity.type === 'discharge' && (
+                              <div className="text-sm">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-medium">Xona:</span> {activity.data.room_number}, Ko'rpa: {activity.data.bed_number}
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                  Yotish muddati: {Math.ceil((new Date(activity.data.discharge_date) - new Date(activity.data.admission_date)) / (1000 * 60 * 60 * 24))} kun
+                                </p>
+                              </div>
+                            )}
+                            
+                            {activity.type === 'prescription' && (
+                              <div className="text-sm">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-medium">Shifokor:</span> Dr. {activity.data.doctor_first_name} {activity.data.doctor_last_name}
+                                </p>
+                                {activity.data.diagnosis && (
+                                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                                    <span className="font-medium">Tashxis:</span> {activity.data.diagnosis}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            
+                            {activity.type === 'lab' && (
+                              <div className="text-sm">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-medium">Tahlil:</span> {activity.data.test_name}
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                  <span className="font-medium">Holat:</span> {
+                                    activity.data.status === 'completed' ? 'Tayyor' :
+                                    activity.data.status === 'pending' ? 'Kutilmoqda' :
+                                    'Jarayonda'
+                                  }
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {patient.address && (
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm sm:text-sm sm:text-base">Manzil</h3>
-                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">{patient.address}</p>
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
 
@@ -745,11 +918,32 @@ const PatientProfile = () => {
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4">
                 <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-sm sm:text-base">Moliyaviy ma'lumotlar</h3>
                 <div className="text-left sm:text-right">
-                  <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">Joriy balans</p>
+                  <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">
+                    {(() => {
+                      const totalDebt = invoices.reduce((sum, inv) => {
+                        const debt = (inv.total_amount || 0) - (inv.paid_amount || 0);
+                        return sum + debt;
+                      }, 0);
+                      return totalDebt > 0 ? 'Joriy qarz' : 'Joriy balans';
+                    })()}
+                  </p>
                   <p className={`text-xl sm:text-xl sm:text-2xl font-bold ${
-                    (patient.current_balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                    (() => {
+                      const totalDebt = invoices.reduce((sum, inv) => {
+                        const debt = (inv.total_amount || 0) - (inv.paid_amount || 0);
+                        return sum + debt;
+                      }, 0);
+                      return totalDebt > 0 ? 'text-red-600' : 'text-gray-900 dark:text-white';
+                    })()
                   }`}>
-                    {(patient.current_balance || 0) >= 0 ? '+' : ''}{(patient.current_balance || 0).toLocaleString()} so'm
+                    {(() => {
+                      const totalDebt = invoices.reduce((sum, inv) => {
+                        const debt = (inv.total_amount || 0) - (inv.paid_amount || 0);
+                        return sum + debt;
+                      }, 0);
+                      if (totalDebt === 0) return '0 so\'m';
+                      return `${totalDebt > 0 ? '-' : '+'}${Math.abs(totalDebt).toLocaleString()} so'm`;
+                    })()}
                   </p>
                 </div>
               </div>
@@ -763,55 +957,90 @@ const PatientProfile = () => {
                 </div>
               ) : (
                 <div className="space-y-3 sm:space-y-4">
-                  {invoices.map((invoice) => (
-                    <div key={invoice.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-2">
-                            <p className="font-semibold text-gray-900 dark:text-white">
-                              {invoice.invoice_number || `INV-${invoice.id.slice(0, 8)}`}
+                  {invoices.map((invoice) => {
+                    // Xizmat nomlarini olish
+                    const getServiceNames = () => {
+                      const names = [];
+                      
+                      // Services array'dan
+                      if (invoice.services && Array.isArray(invoice.services) && invoice.services.length > 0) {
+                        names.push(...invoice.services.map(s => s.service_name || s.description).filter(Boolean));
+                      }
+                      
+                      // Items array'dan
+                      if (invoice.items && Array.isArray(invoice.items) && invoice.items.length > 0) {
+                        names.push(...invoice.items.map(i => i.description || i.service_name).filter(Boolean));
+                      }
+                      
+                      // Metadata'dan (mutaxasis uchun)
+                      if (invoice.metadata && invoice.metadata.specialist_type) {
+                        names.push(`${invoice.metadata.specialist_type} - ${invoice.metadata.doctor_name || 'Mutaxasis'}`);
+                      }
+                      
+                      // Notes'dan
+                      if (names.length === 0 && invoice.notes) {
+                        return invoice.notes;
+                      }
+                      
+                      // Agar hech narsa topilmasa, umumiy tavsif
+                      if (names.length === 0) {
+                        // Invoice raqamidan xizmat turini aniqlashga harakat qilish
+                        if (invoice.total_amount === 200000) {
+                          return 'Koyka to\'lovi';
+                        } else if (invoice.total_amount === 400000) {
+                          return 'Konsultatsiya';
+                        } else if (invoice.total_amount === 90000) {
+                          return 'Tahlil';
+                        }
+                        return 'Tibbiy xizmat';
+                      }
+                      
+                      return names.join(', ');
+                    };
+                    
+                    return (
+                      <div key={invoice.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1 min-w-0 pr-3">
+                            <div className="flex items-start gap-2 sm:gap-2 sm:gap-3 mb-2">
+                              <p className="font-semibold text-gray-900 dark:text-white break-words flex-1">
+                                {getServiceNames()}
+                              </p>
+                              <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 ${
+                                invoice.payment_status === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
+                                invoice.payment_status === 'partial' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                                'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                              }`}>
+                                {invoice.payment_status === 'paid' ? 'To\'langan' :
+                                 invoice.payment_status === 'partial' ? 'Qisman' :
+                                 'To\'lanmagan'}
+                              </span>
+                            </div>
+                            
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Sana: {formatDate(invoice.created_at)}
                             </p>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              invoice.payment_status === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
-                              invoice.payment_status === 'partial' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                              'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                            }`}>
-                              {invoice.payment_status === 'paid' ? 'To\'langan' :
-                               invoice.payment_status === 'partial' ? 'Qisman' :
-                               'To\'lanmagan'}
-                            </span>
                           </div>
                           
-                          <div className="space-y-1 text-sm sm:text-sm sm:text-base">
-                            <p className="text-gray-600 dark:text-gray-400">
-                              <span className="font-medium">Sana:</span> {formatDate(invoice.created_at)}
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-bold text-base sm:text-lg text-gray-900 dark:text-white whitespace-nowrap">
+                              {(invoice.total_amount || 0).toLocaleString()} so'm
                             </p>
-                            {invoice.description && (
-                              <p className="text-gray-600 dark:text-gray-400">
-                                <span className="font-medium">Tavsif:</span> {invoice.description}
+                            {invoice.paid_amount > 0 && invoice.payment_status !== 'paid' && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                To'langan: {(invoice.paid_amount || 0).toLocaleString()} so'm
+                              </p>
+                            )}
+                            {invoice.payment_status !== 'paid' && (
+                              <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-semibold">
+                                Qarz: {((invoice.total_amount || 0) - (invoice.paid_amount || 0)).toLocaleString()} so'm
                               </p>
                             )}
                           </div>
                         </div>
-                        
-                        <div className="text-right">
-                          <p className="font-bold text-base sm:text-lg text-gray-900 dark:text-white">
-                            {(invoice.total_amount || 0).toLocaleString()} so'm
-                          </p>
-                          {invoice.paid_amount > 0 && invoice.payment_status !== 'paid' && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              To'langan: {(invoice.paid_amount || 0).toLocaleString()} so'm
-                            </p>
-                          )}
-                          {invoice.payment_status !== 'paid' && (
-                            <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                              Qarz: {((invoice.total_amount || 0) - (invoice.paid_amount || 0)).toLocaleString()} so'm
-                            </p>
-                          )}
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

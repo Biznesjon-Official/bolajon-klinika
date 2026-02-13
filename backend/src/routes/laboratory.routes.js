@@ -526,6 +526,14 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'laborant', 'r
     const invoice = await Invoice.create([{
       patient_id,
       invoice_number: invoiceNumber,
+      items: [{
+        item_type: 'laboratory',
+        description: `Laboratoriya: ${test.name}`,
+        quantity: 1,
+        unit_price: test.price,
+        total_price: test.price,
+        notes: order.order_number
+      }],
       total_amount: test.price,
       paid_amount: 0,
       discount_amount: 0,
@@ -1022,6 +1030,14 @@ router.post('/orders/:id/results', authenticate, authorize('laborant', 'admin'),
           const invoice = await Invoice.create({
             patient_id: patientId,
             invoice_number: invoiceNumber,
+            items: [{
+              item_type: 'reagent',
+              description: `Lab reaktiv: ${reagent.name}`,
+              quantity: 1,
+              unit_price: reagent.price_per_test,
+              total_price: reagent.price_per_test,
+              notes: `${existingOrder.test_name} uchun`
+            }],
             total_amount: reagent.price_per_test,
             paid_amount: 0,
             discount_amount: 0,

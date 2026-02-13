@@ -571,9 +571,25 @@ router.get('/invoices/:id',
       }
       
       // Get invoice items
-      const items = await BillingItem.find({ billing_id: req.params.id })
-        .sort({ created_at: 1 })
-        .lean();
+      // Avval invoice.items array'ini tekshirish
+      let items = invoice.items || [];
+      
+      // Agar invoice.items bo'sh bo'lsa, BillingItem'dan olish (eski invoice'lar uchun)
+      if (items.length === 0) {
+        const billingItems = await BillingItem.find({ billing_id: req.params.id })
+          .sort({ created_at: 1 })
+          .lean();
+        
+        // BillingItem'larni invoice.items formatiga o'tkazish
+        items = billingItems.map(bi => ({
+          item_type: bi.service_type || 'service',
+          description: bi.service_name || bi.description,
+          quantity: bi.quantity || 1,
+          unit_price: bi.unit_price,
+          total_price: bi.total_price,
+          notes: bi.notes
+        }));
+      }
       
       // Get transactions
       const transactions = await Transaction.find({ billing_id: req.params.id })

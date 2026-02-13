@@ -23,13 +23,6 @@ router.post('/create',
         });
       }
 
-      if (!taskType || !priority) {
-        return res.status(400).json({
-          success: false,
-          message: 'Turi va muhimlik majburiy'
-        });
-      }
-
       // Check if assigned staff exists
       const staff = await Staff.findById(assignedTo);
       if (!staff) {
@@ -42,8 +35,8 @@ router.post('/create',
       const task = await Task.create({
         title,
         description,
-        task_type: taskType,
-        priority,
+        task_type: taskType || 'Umumiy',
+        priority: priority || 'medium',
         assigned_to: assignedTo,
         created_by: req.user.id,
         due_date: dueDate || null,
@@ -158,7 +151,7 @@ router.get('/my-tasks',
     try {
       const tasks = await Task.find({
         assigned_to: req.user.id,
-        status: { $in: ['pending', 'in_progress', 'completed'] }
+        status: { $in: ['pending', 'in_progress', 'completed', 'verified'] }
       })
         .populate('created_by', 'first_name last_name username')
         .sort({ created_at: -1 })
@@ -178,7 +171,9 @@ router.get('/my-tasks',
         location_details: task.location_details,
         started_at: task.started_at,
         completed_at: task.completed_at,
+        verified_at: task.verified_at,
         completion_notes: task.completion_notes,
+        verification_notes: task.verification_notes,
         rejection_reason: task.rejection_reason,
         created_at: task.created_at
       }));

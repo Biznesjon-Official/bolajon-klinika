@@ -238,11 +238,25 @@ router.get('/:id',
         };
       }));
       
-      // Get invoices
+      // Get invoices with full details
       const invoices = await Invoice.find({ patient_id: patient._id })
         .sort({ created_at: -1 })
         .limit(10)
         .lean();
+      
+      // Format invoices to include all fields
+      const formattedInvoices = invoices.map(inv => ({
+        id: inv._id,
+        invoice_number: inv.invoice_number,
+        total_amount: inv.total_amount,
+        paid_amount: inv.paid_amount,
+        payment_status: inv.payment_status || inv.status,
+        created_at: inv.created_at,
+        services: inv.services || [],
+        items: inv.items || [],
+        metadata: inv.metadata || {},
+        notes: inv.notes
+      }));
       
       // Get prescriptions
       const prescriptions = await Prescription.find({ patient_id: patient._id })
@@ -292,15 +306,7 @@ router.get('/:id',
         data: {
           patient: formattedPatient,
           admissions: formattedAdmissions,
-          invoices: invoices.map(inv => ({
-            id: inv._id,
-            invoice_number: inv.invoice_number,
-            total_amount: inv.total_amount,
-            paid_amount: inv.paid_amount,
-            payment_status: inv.payment_status,
-            description: inv.description,
-            created_at: inv.created_at
-          })),
+          invoices: formattedInvoices,
           prescriptions: prescriptions.map(presc => ({
             id: presc._id,
             diagnosis: presc.diagnosis,

@@ -43,8 +43,8 @@ export default function TaskManagement() {
       setLoading(true);
       
       const filters = activeTab === 'active' 
-        ? { status: ['pending', 'in_progress', 'completed'].join(',') }
-        : { status: ['verified', 'cancelled'].join(',') };
+        ? { status: ['pending', 'in_progress', 'completed', 'verified'].join(',') }
+        : { status: ['cancelled'].join(',') };
 
       const [tasksResponse, staffResponse] = await Promise.all([
         taskService.getAllTasks(),
@@ -55,7 +55,7 @@ export default function TaskManagement() {
         // Filter based on tab
         const filteredTasks = tasksResponse.data.filter(task => {
           if (activeTab === 'active') {
-            return ['pending', 'in_progress', 'completed'].includes(task.status);
+            return ['pending', 'in_progress', 'completed', 'verified'].includes(task.status);
           } else {
             return ['verified', 'cancelled'].includes(task.status);
           }
@@ -379,6 +379,12 @@ export default function TaskManagement() {
                                 <p className="text-green-800 dark:text-green-400">{task.completion_notes}</p>
                               </div>
                             )}
+                            {task.verification_notes && (
+                              <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-sm sm:text-sm sm:text-base">
+                                <p className="font-semibold text-blue-900 dark:text-blue-300">Admin izohi:</p>
+                                <p className="text-blue-800 dark:text-blue-400">{task.verification_notes}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -461,14 +467,13 @@ export default function TaskManagement() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Turi *</label>
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Turi (ixtiyoriy)</label>
                 <input
                   type="text"
                   value={formData.taskType}
                   onChange={(e) => setFormData({ ...formData, taskType: e.target.value })}
                   className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-800 dark:border-gray-700"
                   placeholder="Masalan: Tozalash, Ta'mirlash..."
-                  required
                 />
               </div>
 

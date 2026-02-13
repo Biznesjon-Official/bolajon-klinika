@@ -661,7 +661,30 @@ const CashierAdvanced = () => {
       }
 
       const invoiceData = response.data;
-      const items = invoiceData.items || [];
+      // Items array'ini olish - avval items, keyin services, keyin bo'sh array
+      let items = invoiceData.items || [];
+      
+      // Agar items bo'sh bo'lsa, services array'ini ishlatish
+      if (items.length === 0 && invoiceData.services && invoiceData.services.length > 0) {
+        items = invoiceData.services.map(s => ({
+          service_name: s.service_name,
+          description: s.service_name,
+          quantity: s.quantity || 1,
+          unit_price: s.price,
+          total_price: (s.quantity || 1) * s.price
+        }));
+      }
+      
+      // Agar hali ham bo'sh bo'lsa va metadata bor bo'lsa (mutaxasis uchun)
+      if (items.length === 0 && invoiceData.metadata && invoiceData.metadata.specialist_type) {
+        items = [{
+          service_name: `${invoiceData.metadata.specialist_type} - ${invoiceData.metadata.doctor_name || 'Mutaxasis'}`,
+          description: `${invoiceData.metadata.specialist_type} - ${invoiceData.metadata.doctor_name || 'Mutaxasis'}`,
+          quantity: 1,
+          unit_price: invoiceData.total_amount,
+          total_price: invoiceData.total_amount
+        }];
+      }
 
       // Create print window
       const printWindow = window.open('', '_blank');

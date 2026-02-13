@@ -490,29 +490,44 @@ export default function Inpatient() {
       }
       
       // Bo'shatish - admission'ni discharge qilish
+      console.log('=== DISCHARGE BED ===');
+      console.log('Bed:', bed);
+      console.log('Admission ID:', bed.admission_id);
+      
       showConfirm(
         'Bemorni chiqarishni tasdiqlaysizmi?',
         async () => {
           try {
+            console.log('Discharge confirmed');
             // bed.admission_id mavjud bo'lsa, to'g'ridan-to'g'ri discharge qilish
             if (bed.admission_id) {
+              console.log('Discharging admission:', bed.admission_id);
               const dischargeResult = await inpatientRoomService.dischargePatient(bed.admission_id, {
                 discharge_type: 'normal',
                 discharge_notes: ''
               });
               
+              console.log('Discharge result:', dischargeResult);
+              
               if (dischargeResult.success) {
                 toast.success('Bemor chiqarildi');
-                loadData();
+                await loadData();
                 return;
               } else {
                 toast.error('Chiqarishda xatolik: ' + (dischargeResult.message || 'Noma\'lum xatolik'));
               }
             } else {
-              // Admission topilmasa, faqat koyka statusini o'zgartirish
-              console.log('No admission found, just freeing bed');
+              // Admission topilmasa, sahifani to'liq yangilash
+              console.log('No admission found, reloading page');
               toast.success('Koyka bo\'shatildi');
-              loadData();
+              
+              // Ma'lumotlarni qayta yuklash
+              await loadData();
+              
+              // Agar hali ham o'zgarmasa, sahifani to'liq yangilash
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
             }
           } catch (dischargeError) {
             console.error('Discharge error:', dischargeError);

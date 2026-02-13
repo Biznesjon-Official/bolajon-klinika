@@ -453,6 +453,25 @@ router.post('/admissions', authenticate, async (req, res, next) => {
     const Admission = (await import('../models/Admission.js')).default;
     const Bed = (await import('../models/Bed.js')).default;
     
+    // Check if patient already has an active admission
+    const existingAdmission = await Admission.findOne({
+      patient_id,
+      status: 'active'
+    });
+    
+    if (existingAdmission) {
+      console.log('❌ Patient already admitted:', existingAdmission);
+      return res.status(400).json({
+        success: false,
+        message: 'Bu bemor allaqachon yotqizilgan. Avval chiqarib, keyin qayta yotqizing.',
+        existing_admission: {
+          room_id: existingAdmission.room_id,
+          bed_number: existingAdmission.bed_number,
+          admission_date: existingAdmission.admission_date
+        }
+      });
+    }
+    
     // Check if room exists
     const room = await AmbulatorRoom.findById(room_id);
     if (!room) {
@@ -654,10 +673,11 @@ router.post('/admissions/:id/discharge', authenticate, async (req, res, next) =>
         patient_id: admission.patient_id,
         admission_id: admission._id,
         items: [{
+          item_type: 'bed_charge',
           description: `Koyka to'lovi - Xona ${admission.room_id}, Koyka ${admission.bed_number}`,
           quantity: totalDays,
           unit_price: bedDailyPrice,
-          total: totalBedCharges
+          total_price: totalBedCharges
         }],
         subtotal: totalBedCharges,
         tax: 0,

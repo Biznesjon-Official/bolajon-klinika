@@ -40,6 +40,7 @@ const StaffManagementAdvanced = () => {
   const [showStaffModal, setShowStaffModal] = useState(false);
   const [currentStep, setCurrentStep] = useState(1); // Stepper uchun
   const [editingStaff, setEditingStaff] = useState(null);
+  const [showPassword, setShowPassword] = useState(false); // Parolni ko'rish/yashirish
   const [staffForm, setStaffForm] = useState({
     username: '',
     password: '',
@@ -538,13 +539,24 @@ const StaffManagementAdvanced = () => {
                       Parol <span className="text-red-500">*</span>
                     </span>
                   </label>
-                  <input
-                    type="password"
-                    value={staffForm.password}
-                    onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })}
-                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={staffForm.password}
+                      onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })}
+                      className="w-full px-3 py-2 sm:py-2.5 pr-10 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-xl">
+                        {showPassword ? 'visibility_off' : 'visibility'}
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
 

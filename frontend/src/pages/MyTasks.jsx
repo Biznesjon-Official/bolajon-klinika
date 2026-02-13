@@ -520,6 +520,12 @@ export default function MyTasks() {
                                 <p className="text-green-800 dark:text-green-400">{task.completion_notes}</p>
                               </div>
                             )}
+                            {task.verification_notes && (
+                              <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-sm sm:text-sm sm:text-base">
+                                <p className="font-semibold text-blue-900 dark:text-blue-300">Admin izohi:</p>
+                                <p className="text-blue-800 dark:text-blue-400">{task.verification_notes}</p>
+                              </div>
+                            )}
                             {task.rejection_reason && (
                               <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-900/20 rounded text-sm sm:text-sm sm:text-base">
                                 <p className="font-semibold text-orange-900 dark:text-orange-300">Qaytarilish sababi:</p>
