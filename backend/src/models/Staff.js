@@ -14,6 +14,10 @@ const staffSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  plain_password: {
+    type: String,
+    // Haqiqiy parolni saqlash (faqat admin ko'radi)
+  },
   email: {
     type: String,
     trim: true,

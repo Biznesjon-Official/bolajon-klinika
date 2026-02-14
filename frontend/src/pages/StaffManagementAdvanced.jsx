@@ -115,8 +115,8 @@ const StaffManagementAdvanced = () => {
     if (staffMember) {
       setEditingStaff(staffMember);
       setStaffForm({
-        username: '',
-        password: '',
+        username: staffMember.username || '',
+        password: staffMember.password || '',
         email: staffMember.email || '',
         role_id: staffMember.role_id || '',
         first_name: staffMember.first_name || '',
@@ -226,7 +226,16 @@ const StaffManagementAdvanced = () => {
         const response = await staffService.createStaff(data);
         
         if (response.success) {
-          showAlert('Xodim muvaffaqiyatli qo\'shildi!', 'success', 'Muvaffaqiyatli');
+          // Login va parolni ko'rsatish
+          const loginInfo = `
+Xodim muvaffaqiyatli qo'shildi!
+
+Login: ${staffForm.username}
+Parol: ${staffForm.password}
+
+Iltimos, bu ma'lumotlarni saqlang!
+          `;
+          showAlert(loginInfo, 'success', 'Muvaffaqiyatli');
           setShowStaffModal(false);
           loadData();
         }
@@ -395,6 +404,21 @@ const StaffManagementAdvanced = () => {
                       <p className="text-sm sm:text-sm sm:text-base text-gray-500">
                         {member.phone} • {member.email}
                       </p>
+                      {/* Login va parol */}
+                      {member.username && (
+                        <div className="mt-2 flex items-center gap-3 text-sm">
+                          <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 rounded">
+                            <span className="material-symbols-outlined text-sm text-blue-600">person</span>
+                            <span className="font-mono font-semibold text-blue-700 dark:text-blue-300">{member.username}</span>
+                          </div>
+                          {member.password && (
+                            <div className="flex items-center gap-1 px-2 py-1 bg-purple-50 dark:bg-purple-900/20 rounded">
+                              <span className="material-symbols-outlined text-sm text-purple-600">key</span>
+                              <span className="font-mono font-semibold text-purple-700 dark:text-purple-300">{member.password}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {member.license_number && (
                         <p className="text-xs text-gray-500">
                           Litsenziya: {member.license_number}

@@ -398,12 +398,26 @@ router.get('/admissions', authenticate, async (req, res, next) => {
     console.log('=== GET ADMISSIONS (MongoDB) ===');
     
     const Admission = (await import('../models/Admission.js')).default;
+    const AmbulatorRoom = (await import('../models/AmbulatorRoom.js')).default;
     
-    const admissions = await Admission.find({ status: 'active' })
+    // Faqat inpatient department xonalarini topish
+    const inpatientRooms = await AmbulatorRoom.find({ department: 'inpatient' }).select('_id').lean();
+    const inpatientRoomIds = inpatientRooms.map(room => room._id);
+    
+    console.log('Inpatient room IDs:', inpatientRoomIds);
+    
+    // Faqat statsionar (inpatient) xonalardagi active bemorlarni olish
+    const admissions = await Admission.find({ 
+      status: 'active',
+      admission_type: 'inpatient',
+      room_id: { $in: inpatientRoomIds }
+    })
       .populate('patient_id', 'patient_number first_name last_name phone')
-      .populate('room_id', 'room_number room_name')
+      .populate('room_id', 'room_number room_name department')
       .sort({ admission_date: -1 })
       .lean();
+    
+    console.log(`Found ${admissions.length} inpatient admissions`);
     
     const formattedAdmissions = admissions.map(adm => ({
       id: adm._id,
@@ -415,10 +429,12 @@ router.get('/admissions', authenticate, async (req, res, next) => {
       room_id: adm.room_id?._id,
       room_number: adm.room_id?.room_number,
       room_name: adm.room_id?.room_name,
+      room_department: adm.room_id?.department,
       bed_number: adm.bed_number,
       admission_date: adm.admission_date,
       discharge_date: adm.discharge_date,
       status: adm.status,
+      admission_type: adm.admission_type,
       diagnosis: adm.diagnosis,
       notes: adm.notes
     }));

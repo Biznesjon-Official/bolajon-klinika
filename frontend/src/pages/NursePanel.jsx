@@ -5,6 +5,7 @@ import doctorNurseService from '../services/doctorNurseService';
 import communicationService from '../services/communicationService';
 import patientService from '../services/patientService';
 import pharmacyService from '../services/pharmacyService';
+import api from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
@@ -64,15 +65,27 @@ export default function NursePanel() {
   
   const loadPatients = async () => {
     try {
-      console.log('=== LOADING PATIENTS ===');
-      const response = await patientService.getPatients();
-      console.log('Patients response:', response);
-      if (response.success) {
-        console.log('Patients data:', response.data);
-        setPatients(response.data || []);
+      console.log('=== LOADING INPATIENT PATIENTS ===');
+      // Faqat statsionarda yotgan bemorlarni yuklash
+      const response = await api.get('/ambulator-inpatient/admissions');
+      console.log('Inpatient admissions response:', response);
+      if (response.data.success) {
+        // Admission ma'lumotlaridan bemor ma'lumotlarini formatlash
+        const inpatientList = response.data.data.map(admission => ({
+          _id: admission.patient_id,
+          id: admission.patient_id,
+          first_name: admission.first_name,
+          last_name: admission.last_name,
+          patient_number: admission.patient_number,
+          room_number: admission.room_number,
+          admission_id: admission.id
+        }));
+        console.log('Inpatient patients:', inpatientList);
+        setPatients(inpatientList);
       }
     } catch (error) {
-      console.error('Load patients error:', error);
+      console.error('Load inpatient patients error:', error);
+      toast.error('Statsionar bemorlarni yuklashda xatolik');
     }
   };
 
@@ -940,7 +953,7 @@ export default function NursePanel() {
                   <option value="">Bemorni tanlang...</option>
                   {patients.map(patient => (
                     <option key={patient.id || patient._id} value={patient.id || patient._id}>
-                      {patient.first_name} {patient.last_name} - {patient.patient_number}
+                      {patient.first_name} {patient.last_name} - {patient.patient_number}{patient.room_number ? ` (Xona: ${patient.room_number})` : ''}
                     </option>
                   ))}
                 </select>

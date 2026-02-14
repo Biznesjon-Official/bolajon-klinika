@@ -286,3 +286,42 @@ transition-all duration-300
 **Tayyorlagan:** AI Assistant  
 **Sana:** 2026-02-13  
 **Versiya:** 1.0
+
+
+### 2. Laboratoriya Buyurtmasi Yaratilmaydi (Kassa)
+**Muammo:** Kassa sahifasida laboratoriya xizmati uchun hisob-faktura yaratilganda, laborant tanlangan bo'lsa ham, laboratoriya buyurtmasi yaratilmaydi. "Hisob-faktura muvaffaqiyatli yaratildi" deydi, lekin laborant paneliga buyurtma kelmaydi.
+
+**Sabab:**
+Backend'da `/laboratory/orders` POST endpoint'i faqat `'admin', 'doctor', 'receptionist'` rollariga ruxsat beradi. Kassa xodimi (`'cashier'` roli) laboratoriya buyurtmasi yarata olmaydi.
+
+**Xato:**
+```javascript
+// laboratory.routes.js - line 348
+router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist'), createOrderLimiter, async (req, res, next) => {
+  // Kassa xodimi bu endpoint'ga kirish huquqiga ega emas!
+});
+```
+
+**Yechim:**
+```javascript
+// laboratory.routes.js - line 348
+// ✅ 'cashier' roli qo'shildi
+router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist', 'cashier'), createOrderLimiter, async (req, res, next) => {
+  // Endi kassa xodimi ham laboratoriya buyurtmasi yarata oladi
+});
+```
+
+**Natija:**
+- Kassa xodimi laboratoriya xizmati uchun hisob-faktura yaratganda, avtomatik ravishda laboratoriya buyurtmasi ham yaratiladi
+- Laborant login qilganda, o'ziga biriktirilgan buyurtmalarni ko'radi
+- Namuna olish va natija kiritish to'g'ri ishlaydi
+
+**Test:**
+1. Kassa sahifasiga kiring (cashier roli bilan)
+2. Bemorni tanlang
+3. Laboratoriya xizmatini qo'shing (masalan, "Qon tahlili")
+4. Laborantni tanlang
+5. "Hisob-faktura yaratish" tugmasini bosing
+6. ✅ Hisob-faktura va laboratoriya buyurtmasi yaratiladi
+7. Laborant login qilganda, buyurtma ko'rinadi
+

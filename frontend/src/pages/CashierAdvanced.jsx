@@ -25,6 +25,8 @@ const CashierAdvanced = () => {
     pending_payments: 0
   });
   const [invoices, setInvoices] = useState([]);
+  const [groupedInvoices, setGroupedInvoices] = useState([]); // Bemor bo'yicha guruhlangan invoicelar
+  const [expandedPatients, setExpandedPatients] = useState({}); // Ochilgan bemorlar
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [services, setServices] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
@@ -355,9 +357,39 @@ const CashierAdvanced = () => {
 
   const loadInvoices = async () => {
     try {
-      const invoicesData = await billingService.getInvoices({ limit: 20 });
+      const invoicesData = await billingService.getInvoices({ limit: 100 }); // Ko'proq invoice yuklash
       if (invoicesData.success) {
         setInvoices(invoicesData.data);
+        
+        // Invoicelarni bemor bo'yicha guruhlash (faqat to'lanmaganlar)
+        const unpaidInvoices = invoicesData.data.filter(inv => inv.payment_status !== 'paid');
+        const grouped = {};
+        
+        unpaidInvoices.forEach(invoice => {
+          const patientKey = invoice.patient_id || `${invoice.first_name}_${invoice.last_name}`;
+          if (!grouped[patientKey]) {
+            grouped[patientKey] = {
+              patient_id: invoice.patient_id,
+              patient_number: invoice.patient_number,
+              first_name: invoice.first_name,
+              last_name: invoice.last_name,
+              invoices: [],
+              total_amount: 0,
+              paid_amount: 0,
+              remaining_amount: 0
+            };
+          }
+          grouped[patientKey].invoices.push(invoice);
+          grouped[patientKey].total_amount += invoice.total_amount || 0;
+          grouped[patientKey].paid_amount += invoice.paid_amount || 0;
+          grouped[patientKey].remaining_amount += (invoice.total_amount - invoice.paid_amount) || 0;
+        });
+        
+        // Object'ni array'ga aylantirish
+        const groupedArray = Object.values(grouped);
+        setGroupedInvoices(groupedArray);
+        
+        console.log('Grouped invoices by patient:', groupedArray);
       }
     } catch (error) {
       console.error('Load invoices error:', error);
@@ -1746,78 +1778,158 @@ const CashierAdvanced = () => {
                 </div>
               ) : (
                 <div className="space-y-2 sm:space-y-3">
-                  {invoices.map(invoice => {
-                    // Xizmatlar nomini olish
-                    const serviceNames = invoice.items?.map(item => item.description || item.service_name).join(', ') || 'Xizmatlar';
-                    const shortServiceName = serviceNames.length > 60 ? serviceNames.substring(0, 60) + '...' : serviceNames;
+                  {(() => {
+                    // Invoicelarni bemor bo'yicha guruhlash
+                    const grouped = {};
                     
-                    return (
-                    <div key={invoice.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <p className="font-bold text-lg text-gray-900 dark:text-white">{shortServiceName}</p>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              invoice.payment_status === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
-                              invoice.payment_status === 'partial' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                              'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                            }`}>
-                              {invoice.payment_status === 'paid' ? 'To\'langan' : 
-                               invoice.payment_status === 'partial' ? 'Qisman' : 'To\'lanmagan'}
-                            </span>
-                          </div>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
-                            {invoice.first_name} {invoice.last_name} • {invoice.patient_number}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {invoice.invoice_number} • {formatDate(invoice.created_at)}
-                          </p>
-                        </div>
-                        
-                        <div className="text-right">
-                          <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
-                            {formatCurrency(invoice.total_amount)}
-                          </p>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                            To'langan: {formatCurrency(invoice.paid_amount)}
-                          </p>
-                          {invoice.payment_status !== 'paid' && (
-                            <p className="text-sm sm:text-sm sm:text-base text-red-600 font-semibold">
-                              Qoldi: {formatCurrency(invoice.total_amount - invoice.paid_amount)}
-                            </p>
-                          )}
-                        </div>
-                        
-                        <div className="flex gap-2 sm:gap-2 sm:gap-3 ml-4">
+                    invoices.forEach(invoice => {
+                      const patientKey = `${invoice.first_name}_${invoice.last_name}_${invoice.patient_number}`;
+                      
+                      if (!grouped[patientKey]) {
+                        grouped[patientKey] = {
+                          patient_name: `${invoice.first_name} ${invoice.last_name}`,
+                          patient_number: invoice.patient_number,
+                          invoices: [],
+                          total_amount: 0,
+                          paid_amount: 0,
+                          remaining_amount: 0
+                        };
+                      }
+                      
+                      grouped[patientKey].invoices.push(invoice);
+                      grouped[patientKey].total_amount += invoice.total_amount || 0;
+                      grouped[patientKey].paid_amount += invoice.paid_amount || 0;
+                      grouped[patientKey].remaining_amount += (invoice.total_amount - invoice.paid_amount) || 0;
+                    });
+                    
+                    const groupedArray = Object.values(grouped);
+                    
+                    return groupedArray.map((patientGroup, index) => {
+                      const isExpanded = expandedPatients[index];
+                      
+                      return (
+                        <div key={index} className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+                          {/* Patient Card Header - Clickable */}
                           <button
-                            onClick={() => printInvoice(invoice)}
-                            className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center gap-1"
-                            title="Chop etish"
+                            onClick={() => setExpandedPatients(prev => ({ ...prev, [index]: !prev[index] }))}
+                            className="w-full p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                           >
-                            <span className="material-symbols-outlined text-base sm:text-lg">print</span>
-                            Chop
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 text-left">
+                                <div className="flex items-center gap-3">
+                                  <span className="material-symbols-outlined text-2xl text-primary">person</span>
+                                  <div>
+                                    <p className="font-bold text-lg text-gray-900 dark:text-white">
+                                      {patientGroup.patient_name}
+                                    </p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                      {patientGroup.patient_number} • {patientGroup.invoices.length} ta xizmat
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="text-right mr-4">
+                                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                                  Jami: {formatCurrency(patientGroup.total_amount)}
+                                </p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  To'langan: {formatCurrency(patientGroup.paid_amount)}
+                                </p>
+                                {patientGroup.remaining_amount > 0 && (
+                                  <p className="text-sm text-red-600 font-semibold">
+                                    Qoldi: {formatCurrency(patientGroup.remaining_amount)}
+                                  </p>
+                                )}
+                              </div>
+                              
+                              <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
+                                {isExpanded ? 'expand_less' : 'expand_more'}
+                              </span>
+                            </div>
                           </button>
-                          {invoice.payment_status !== 'paid' && (
-                            <button
-                              onClick={() => openPaymentModal(invoice)}
-                              className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90"
-                            >
-                              To'lov
-                            </button>
-                          )}
-                          {invoice.payment_status === 'paid' && (
-                            <button
-                              onClick={() => generateInvoiceQR(invoice)}
-                              className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-gray-300 dark:hover:bg-gray-600"
-                              title="QR kod"
-                            >
-                              <span className="material-symbols-outlined">qr_code</span>
-                            </button>
+                          
+                          {/* Expanded Invoice List */}
+                          {isExpanded && (
+                            <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                              <div className="p-4 space-y-3">
+                                {patientGroup.invoices.map(invoice => {
+                                  // Xizmatlar nomini olish
+                                  const serviceNames = invoice.items?.map(item => item.description || item.service_name).join(', ') || 'Xizmatlar';
+                                  const shortServiceName = serviceNames.length > 60 ? serviceNames.substring(0, 60) + '...' : serviceNames;
+                                  
+                                  return (
+                                    <div key={invoice.id} className="bg-white dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-2">
+                                            <p className="font-semibold text-gray-900 dark:text-white">{shortServiceName}</p>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                              invoice.payment_status === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
+                                              invoice.payment_status === 'partial' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                                              'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                            }`}>
+                                              {invoice.payment_status === 'paid' ? 'To\'langan' : 
+                                               invoice.payment_status === 'partial' ? 'Qisman' : 'To\'lanmagan'}
+                                            </span>
+                                          </div>
+                                          <p className="text-xs text-gray-500 mt-1">
+                                            {invoice.invoice_number} • {formatDate(invoice.created_at)}
+                                          </p>
+                                        </div>
+                                        
+                                        <div className="text-right mr-3">
+                                          <p className="text-base font-bold text-gray-900 dark:text-white">
+                                            {formatCurrency(invoice.total_amount)}
+                                          </p>
+                                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                                            To'langan: {formatCurrency(invoice.paid_amount)}
+                                          </p>
+                                          {invoice.payment_status !== 'paid' && (
+                                            <p className="text-xs text-red-600 font-semibold">
+                                              Qoldi: {formatCurrency(invoice.total_amount - invoice.paid_amount)}
+                                            </p>
+                                          )}
+                                        </div>
+                                        
+                                        <div className="flex gap-2">
+                                          <button
+                                            onClick={() => printInvoice(invoice)}
+                                            className="px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 flex items-center gap-1"
+                                            title="Chop etish"
+                                          >
+                                            <span className="material-symbols-outlined text-base">print</span>
+                                            Chop
+                                          </button>
+                                          {invoice.payment_status !== 'paid' && (
+                                            <button
+                                              onClick={() => openPaymentModal(invoice)}
+                                              className="px-3 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90"
+                                            >
+                                              To'lov
+                                            </button>
+                                          )}
+                                          {invoice.payment_status === 'paid' && (
+                                            <button
+                                              onClick={() => generateInvoiceQR(invoice)}
+                                              className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm font-semibold hover:bg-gray-300 dark:hover:bg-gray-600"
+                                              title="QR kod"
+                                            >
+                                              <span className="material-symbols-outlined">qr_code</span>
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           )}
                         </div>
-                      </div>
-                    </div>
-                  )})}
+                      );
+                    });
+                  })()}
                 </div>
               )}
             </div>

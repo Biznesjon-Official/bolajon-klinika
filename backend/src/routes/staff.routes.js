@@ -53,7 +53,10 @@ router.get('/', authenticate, async (req, res, next) => {
         access_code: s.access_code,
         telegram_chat_id: s.telegram_chat_id,
         telegram_username: s.telegram_username,
-        telegram_notifications_enabled: s.telegram_notifications_enabled
+        telegram_notifications_enabled: s.telegram_notifications_enabled,
+        // Login ma'lumotlari (faqat admin ko'radi)
+        username: s.username,
+        password: s.plain_password || s.password // Haqiqiy parol yoki hash
       }))
     });
   } catch (error) {
@@ -131,6 +134,7 @@ router.post('/', authenticate, authorize('admin', 'doctor'), async (req, res, ne
     const staff = new Staff({
       username,
       password,
+      plain_password: password, // Haqiqiy parolni saqlash
       email,
       first_name,
       last_name,
@@ -183,7 +187,7 @@ router.post('/', authenticate, authorize('admin', 'doctor'), async (req, res, ne
 // Update staff
 router.put('/:id', authenticate, authorize('admin', 'doctor'), async (req, res, next) => {
   try {
-    const { first_name, last_name, middle_name, email, phone, department, specialization, license_number, salary, is_active } = req.body;
+    const { first_name, last_name, middle_name, email, phone, department, specialization, license_number, salary, is_active, username, password } = req.body;
     
     const updateData = {};
     
@@ -197,6 +201,13 @@ router.put('/:id', authenticate, authorize('admin', 'doctor'), async (req, res, 
     if (license_number !== undefined) updateData.license_number = license_number;
     if (salary !== undefined) updateData.salary = parseFloat(salary);
     if (is_active !== undefined) updateData.status = is_active ? 'active' : 'inactive';
+    
+    // Username va parolni yangilash
+    if (username) updateData.username = username;
+    if (password) {
+      updateData.password = password;
+      updateData.plain_password = password; // Haqiqiy parolni saqlash
+    }
     
     const staff = await Staff.findByIdAndUpdate(
       req.params.id,

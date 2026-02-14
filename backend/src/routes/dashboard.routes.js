@@ -34,9 +34,12 @@ router.get('/stats', authenticate, async (req, res) => {
     // Jami bemorlar
     const totalPatients = await Patient.countDocuments({ status: 'active' });
     
-    // Jami xodimlar (StaffSalary collection'dan - maosh belgilangan xodimlar)
+    // Jami xodimlar (Staff collection'dan - barcha xodimlar)
+    const totalStaff = await Staff.countDocuments({ status: 'active' });
+    
+    // Maosh oluvchilar (StaffSalary collection'dan)
     const staffSalaries = await StaffSalary.find().lean();
-    const totalStaff = staffSalaries.length;
+    const staffWithSalary = staffSalaries.length;
     
     // Bugungi yangi bemorlar
     const todayPatients = await Patient.countDocuments({

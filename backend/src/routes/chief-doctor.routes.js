@@ -387,7 +387,7 @@ router.delete('/on-duty-schedule/:id', authenticate, authorize('chief_doctor', '
  * Get available doctors for on-duty assignment
  * GET /api/v1/chief-doctor/available-doctors
  */
-router.get('/available-doctors', authenticate, authorize('chief_doctor', 'admin'), async (req, res) => {
+router.get('/available-doctors', authenticate, authorize('chief_doctor', 'admin', 'Administrator'), async (req, res) => {
   try {
     const doctors = await Staff.find({
       role: 'doctor',

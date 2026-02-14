@@ -190,7 +190,7 @@ const Dashboard = () => {
           title="Jami xodimlar"
           value={stats.totalStaff?.toLocaleString() || '0'}
           icon="badge"
-          subtitle="Maosh oluvchilar soni"
+          subtitle="Barcha faol xodimlar"
           color="primary"
         />
         <StatCard

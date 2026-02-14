@@ -6,8 +6,42 @@ import LabTest from '../models/LabTest.js';
 import Patient from '../models/Patient.js';
 import Staff from '../models/Staff.js';
 import mongoose from 'mongoose';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
+
+// Configure multer for PDF uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../../uploads/lab-pdfs');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'lab-result-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Faqat PDF fayl yuklash mumkin'));
+    }
+  }
+});
 
 // Rate limiter for lab order creation (prevent abuse)
 const createOrderLimiter = rateLimit({
@@ -365,8 +399,18 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
     // Calculate patient age and birth year if date_of_birth exists
     let patientAge = null;
     let patientBirthYear = null;
+    
+    console.log('=== PATIENT AGE CALCULATION ===');
+    console.log('Patient ID:', order.patient_id?._id);
+    console.log('Patient name:', order.patient_id?.first_name, order.patient_id?.last_name);
+    console.log('Date of birth:', order.patient_id?.date_of_birth);
+    console.log('Date of birth type:', typeof order.patient_id?.date_of_birth);
+    
     if (order.patient_id?.date_of_birth) {
       const birthDate = new Date(order.patient_id.date_of_birth);
+      console.log('Birth date object:', birthDate);
+      console.log('Birth date valid:', !isNaN(birthDate.getTime()));
+      
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
@@ -375,6 +419,11 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
       }
       patientAge = age;
       patientBirthYear = birthDate.getFullYear();
+      
+      console.log('Calculated age:', patientAge);
+      console.log('Birth year:', patientBirthYear);
+    } else {
+      console.log('Date of birth not found!');
     }
     
     res.json({
@@ -406,7 +455,7 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
 });
 
 // Create lab order
-router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist'), createOrderLimiter, async (req, res, next) => {
+router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist', 'cashier'), createOrderLimiter, async (req, res, next) => {
   const session = await mongoose.startSession();
   
   try {
@@ -1135,6 +1184,239 @@ router.get('/laborant/history', authenticate, authorize('laborant', 'admin'), as
   } catch (error) {
     console.error('Get laborant history error:', error);
     next(error);
+  }
+});
+
+// Parse PDF result sheet
+router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'PDF fayl yuklanmadi'
+      });
+    }
+
+    const filePath = req.file.path;
+    
+    console.log('=== PDF PARSING START (pdfjs-dist) ===');
+    console.log('File path:', filePath);
+    console.log('File size:', req.file.size);
+    
+    // Import pdfjs-dist
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    
+    // Read PDF file
+    const dataBuffer = fs.readFileSync(filePath);
+    
+    // Load PDF document
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(dataBuffer),
+      useSystemFonts: true
+    });
+    
+    const pdfDocument = await loadingTask.promise;
+    console.log('PDF loaded, pages:', pdfDocument.numPages);
+    
+    let allText = '';
+    const tableData = [];
+    
+    // Extract text from all pages
+    for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+      const page = await pdfDocument.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      
+      console.log(`Page ${pageNum} items:`, textContent.items.length);
+      
+      // Group text items by Y position (rows)
+      const rows = {};
+      
+      textContent.items.forEach(item => {
+        const y = Math.round(item.transform[5]); // Y position
+        const text = item.str.trim();
+        
+        if (!text) return;
+        
+        if (!rows[y]) {
+          rows[y] = [];
+        }
+        
+        rows[y].push({
+          x: item.transform[4], // X position
+          text: text
+        });
+      });
+      
+      // Sort rows by Y position (top to bottom)
+      const sortedYPositions = Object.keys(rows).map(Number).sort((a, b) => b - a);
+      
+      console.log(`Page ${pageNum} rows:`, sortedYPositions.length);
+      
+      // Process each row
+      sortedYPositions.forEach(y => {
+        // Sort items in row by X position (left to right)
+        const rowItems = rows[y].sort((a, b) => a.x - b.x);
+        const rowText = rowItems.map(item => item.text).join(' ');
+        allText += rowText + '\n';
+        
+        console.log('Row:', rowText);
+      });
+    }
+    
+    console.log('=== EXTRACTED TEXT ===');
+    console.log('Total text length:', allText.length);
+    console.log('Text preview:', allText.substring(0, 500));
+    
+    // Parse table from extracted text
+    const lines = allText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    console.log('Total lines:', lines.length);
+    console.log('First 30 lines:', lines.slice(0, 30));
+    
+    let testName = '';
+    let inTable = false;
+    
+    // Find test name
+    for (let i = 0; i < Math.min(10, lines.length); i++) {
+      const line = lines[i];
+      if (line.toLowerCase().includes('анализ') || 
+          line.toLowerCase().includes('analysis') ||
+          line.toLowerCase().includes('torch') ||
+          line.toLowerCase().includes('торч')) {
+        testName = line;
+        break;
+      }
+    }
+    
+    // Parse table rows
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const lowerLine = line.toLowerCase();
+      
+      // Detect table start
+      if (lowerLine.includes('наименование') || 
+          lowerLine.includes('результат') ||
+          lowerLine.includes('норма')) {
+        inTable = true;
+        console.log('Table header found at line', i, ':', line);
+        continue;
+      }
+      
+      // Skip non-table lines
+      if (!inTable) continue;
+      
+      // Skip empty lines
+      if (line.length < 3) continue;
+      
+      // Skip lines that are just headers or labels
+      if (lowerLine.includes('врач') || 
+          lowerLine.includes('дата') ||
+          lowerLine.includes('год') ||
+          lowerLine.includes('ф.и.о')) {
+        continue;
+      }
+      
+      // Try to parse table row
+      // Format: "ЦМВ-Цитомегаловирус IgG 0-0.460 ОП"
+      // or: "ЦМВ-Цитомегаловирус IgG   0-0.460   ОП"
+      
+      // Check if line contains IgG, IgM, or other test markers
+      if (line.includes('IgG') || line.includes('IgM') || line.includes('IgA')) {
+        // Extract parameter name (everything before the numbers)
+        const match = line.match(/^(.+?)\s+([\d.,\-–]+.*?)$/);
+        
+        if (match) {
+          const parameter = match[1].trim();
+          const rest = match[2].trim();
+          
+          // Split rest into unit and normal range
+          const parts = rest.split(/\s+/);
+          let normalRange = '';
+          let unit = '';
+          
+          // Find range pattern (contains numbers and dash)
+          for (let j = 0; j < parts.length; j++) {
+            if (/[\d.,]+[\-–][\d.,]+/.test(parts[j]) || /^[\d.,]+$/.test(parts[j])) {
+              normalRange = parts[j];
+              // Next parts might be unit
+              if (j + 1 < parts.length) {
+                unit = parts.slice(j + 1).join(' ');
+              }
+              break;
+            }
+          }
+          
+          // If no range found, try different pattern
+          if (!normalRange) {
+            // Maybe format is: "parameter range unit"
+            if (parts.length >= 2) {
+              normalRange = parts[0];
+              unit = parts.slice(1).join(' ');
+            }
+          }
+          
+          console.log('Parsed row:', { parameter, normalRange, unit });
+          
+          tableData.push({
+            parameter: parameter,
+            value: '',
+            unit: unit,
+            normalRange: normalRange
+          });
+        }
+      }
+    }
+    
+    console.log('=== PARSED TABLE DATA ===');
+    console.log('Table data count:', tableData.length);
+    console.log('Table data:', JSON.stringify(tableData, null, 2));
+    
+    // If no table data found, provide empty template
+    if (tableData.length === 0) {
+      console.log('No table data found, using template');
+      tableData.push(
+        { parameter: 'Parametr 1', value: '', unit: '', normalRange: '' },
+        { parameter: 'Parametr 2', value: '', unit: '', normalRange: '' },
+        { parameter: 'Parametr 3', value: '', unit: '', normalRange: '' }
+      );
+    }
+
+    const response = {
+      success: true,
+      message: `PDF muvaffaqiyatli tahlil qilindi (${tableData.length} parametr topildi)`,
+      data: {
+        filename: req.file.filename,
+        originalname: req.file.originalname,
+        size: req.file.size,
+        path: filePath,
+        test_name: testName,
+        description: 'PDF natija varaqasi',
+        table_data: tableData
+      }
+    };
+
+    console.log('=== RESPONSE ===');
+    console.log(JSON.stringify(response, null, 2));
+
+    res.json(response);
+  } catch (error) {
+    console.error('=== PDF PARSE ERROR ===');
+    console.error('Error:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Clean up uploaded file on error
+    if (req.file && req.file.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        console.error('Error deleting file:', unlinkError);
+      }
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'PDF ni tahlil qilishda xatolik: ' + error.message
+    });
   }
 });
 

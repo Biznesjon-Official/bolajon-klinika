@@ -559,11 +559,57 @@ export default function LabResultView() {
                 </tbody>
               </table>
             </div>
+          ) : result.test_results && result.test_results.length > 0 ? (
+            /* Xizmat qo'shganda kiritilgan parametrlar jadvali */
+            <div className="overflow-x-auto">
+              <table className="w-full border-2 border-gray-800 mb-8">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border-2 border-gray-800 px-3 py-3 text-center font-bold text-gray-900" style={{ width: '60px' }}>
+                      №
+                    </th>
+                    <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-gray-900">
+                      ТАҲЛИЛ НОМИ
+                    </th>
+                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-gray-900" style={{ width: '200px' }}>
+                      НАТИЖА
+                    </th>
+                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-blue-600" style={{ width: '150px' }}>
+                      МЕ'ЁР
+                    </th>
+                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-blue-600" style={{ width: '150px' }}>
+                      ЎЛЧОВ БИРЛИГИ
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.test_results.map((param, index) => (
+                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <td className="border-2 border-gray-800 px-3 py-3 text-center font-semibold">
+                        {index + 1}.
+                      </td>
+                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold uppercase">
+                        {param.parameter_name}
+                      </td>
+                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">
+                        {param.value || '—'}
+                      </td>
+                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold">
+                        {param.normal_range || '—'}
+                      </td>
+                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold">
+                        {param.unit || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <div className="mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg sm:rounded-lg sm:rounded-xl border border-gray-300">
               <h3 className="font-bold text-base sm:text-lg mb-4">Натижа:</h3>
               <div className="whitespace-pre-wrap font-mono text-sm sm:text-sm sm:text-base">
-                {result.test_results?.[0]?.value || result.result_text || 'Натижа киритилмаган'}
+                {result.result_text || 'Натижа киритилмаган'}
               </div>
             </div>
           )}

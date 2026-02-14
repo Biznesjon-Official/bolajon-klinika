@@ -22,6 +22,8 @@ export default function LaborantPanel() {
     test_results: [],
     notes: ''
   });
+  const [testParams, setTestParams] = useState([]); // Xizmat parametrlari
+  const [loadingTestParams, setLoadingTestParams] = useState(false);
   const [tableRows, setTableRows] = useState([
     ['', ''],
     ['', ''],
@@ -301,6 +303,39 @@ export default function LaborantPanel() {
     setTroponinResult('');
     setResultForm({ test_results: [], notes: '' });
     setShowResultModal(true);
+    
+    // Xizmat parametrlarini yuklash
+    loadTestParameters(order);
+  };
+  
+  // Xizmat parametrlarini yuklash
+  const loadTestParameters = async (order) => {
+    if (!order || !order.test_id) {
+      setTestParams([]);
+      return;
+    }
+    
+    try {
+      setLoadingTestParams(true);
+      const response = await laboratoryService.getTestById(order.test_id);
+      
+      if (response.success && response.data && response.data.test_parameters) {
+        const params = response.data.test_parameters.map(p => ({
+          name: p.name || p.parameter,
+          value: '',
+          unit: p.unit || '',
+          normalRange: p.normal_range || p.normalRange || ''
+        }));
+        setTestParams(params);
+      } else {
+        setTestParams([]);
+      }
+    } catch (error) {
+      console.error('Error loading test parameters:', error);
+      setTestParams([]);
+    } finally {
+      setLoadingTestParams(false);
+    }
   };
 
   const addTableRow = () => {
@@ -558,6 +593,23 @@ export default function LaborantPanel() {
           normal_range: 'negative',
           is_normal: null
         }];
+      } else if (testParams.length > 0) {
+        // Xizmat qo'shganda kiritilgan parametrlar uchun
+        const hasValues = testParams.some(p => p.value.trim() !== '');
+        if (!hasValues) {
+          toast.error('Kamida bitta parametr qiymatini kiriting');
+          return;
+        }
+        
+        test_results = testParams
+          .filter(p => p.value.trim() !== '')
+          .map(p => ({
+            parameter_name: p.name,
+            value: p.value,
+            unit: p.unit,
+            normal_range: p.normalRange,
+            is_normal: null
+          }));
       } else {
         // Oddiy tahlillar uchun
         const tableText = tableRows
@@ -1649,6 +1701,76 @@ export default function LaborantPanel() {
                             </td>
                             <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">negative</td>
                           </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : testParams.length > 0 ? (
+                  /* Xizmat qo'shganda kiritilgan parametrlar jadvali */
+                  <div>
+                    <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-blue-600">description</span>
+                        <p className="text-sm text-blue-900 dark:text-blue-100 font-semibold">
+                          Xizmat yaratishda qo'shilgan parametrlar jadvali
+                        </p>
+                      </div>
+                      <p className="text-xs text-blue-700 dark:text-blue-300 mt-1 ml-7">
+                        {testParams.length} ta parametr topildi
+                      </p>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border-2 border-gray-300 dark:border-gray-700">
+                        <thead>
+                          <tr className="bg-gray-50 dark:bg-gray-800">
+                            <th className="border border-gray-300 dark:border-gray-700 px-3 py-3 text-center text-sm font-bold text-gray-900 dark:text-white" style={{ width: '60px' }}>
+                              №
+                            </th>
+                            <th className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-left text-sm font-bold text-gray-900 dark:text-white">
+                              ТАҲЛИЛ НОМИ
+                            </th>
+                            <th className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white" style={{ width: '200px' }}>
+                              НАТИЖА
+                            </th>
+                            <th className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm font-bold text-blue-600 dark:text-blue-400" style={{ width: '150px' }}>
+                              МЕ'ЁР
+                            </th>
+                            <th className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm font-bold text-blue-600 dark:text-blue-400" style={{ width: '150px' }}>
+                              ЎЛЧОВ БИРЛИГИ
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {testParams.map((param, index) => (
+                            <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-3 text-center text-sm text-gray-900 dark:text-white font-semibold">
+                                {index + 1}.
+                              </td>
+                              <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-left text-sm font-bold text-gray-900 dark:text-white uppercase">
+                                {param.name}
+                              </td>
+                              <td className="border border-gray-300 dark:border-gray-700 px-2 py-2">
+                                <input
+                                  type="text"
+                                  value={param.value}
+                                  onChange={(e) => {
+                                    const newParams = [...testParams];
+                                    newParams[index].value = e.target.value;
+                                    setTestParams(newParams);
+                                  }}
+                                  className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-sm"
+                                  placeholder="Қиймат"
+                                />
+                              </td>
+                              <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm text-blue-600 dark:text-blue-400 font-semibold">
+                                {param.normalRange}
+                              </td>
+                              <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm text-blue-600 dark:text-blue-400 font-semibold">
+                                {param.unit}
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
