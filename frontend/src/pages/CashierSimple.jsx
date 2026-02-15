@@ -84,3 +84,4 @@ const CashierSimple = () => {
 };
 
 export default CashierSimple;
+

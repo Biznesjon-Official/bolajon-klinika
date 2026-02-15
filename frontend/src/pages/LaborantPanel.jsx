@@ -708,7 +708,7 @@ export default function LaborantPanel() {
   }
 
   return (
-    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
 
       {/* Header */}
@@ -1864,3 +1864,4 @@ export default function LaborantPanel() {
     </div>
   );
 }
+

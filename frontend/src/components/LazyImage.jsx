@@ -229,3 +229,4 @@ export const LazyBackgroundImage = ({
 };
 
 export default LazyImage;
+

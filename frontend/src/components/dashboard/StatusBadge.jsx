@@ -15,3 +15,4 @@ const StatusBadge = ({ status, text }) => {
 };
 
 export default StatusBadge;
+

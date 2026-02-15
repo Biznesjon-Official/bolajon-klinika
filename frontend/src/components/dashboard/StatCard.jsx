@@ -34,3 +34,4 @@ const StatCard = ({ title, value, icon, trend, trendValue, subtitle, color = 'pr
 };
 
 export default StatCard;
+

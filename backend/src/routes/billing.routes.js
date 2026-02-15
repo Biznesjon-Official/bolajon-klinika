@@ -1027,3 +1027,51 @@ router.delete('/services/:id',
 );
 
 export default router;
+
+
+/**
+ * Get unpaid invoices for a patient
+ * GET /api/v1/invoices/patient/:patientId/unpaid
+ */
+router.get('/invoices/patient/:patientId/unpaid',
+  authenticate,
+  async (req, res) => {
+    try {
+      const { patientId } = req.params;
+      
+      console.log('=== GET UNPAID INVOICES ===');
+      console.log('Patient ID:', patientId);
+      console.log('Request from:', req.user?.username || req.user?.email);
+      
+      const unpaidInvoices = await Invoice.find({
+        patient_id: patientId,
+        payment_status: { $in: ['pending', 'partial'] }
+      })
+        .select('invoice_number total_amount paid_amount discount_amount payment_status created_at')
+        .sort({ created_at: -1 })
+        .lean();
+      
+      console.log('Found unpaid invoices:', unpaidInvoices.length);
+      
+      if (unpaidInvoices.length > 0) {
+        console.log('Unpaid invoices details:');
+        unpaidInvoices.forEach(inv => {
+          const unpaid = inv.total_amount - inv.paid_amount;
+          console.log(`  - ${inv.invoice_number}: ${unpaid} so'm (Total: ${inv.total_amount}, Paid: ${inv.paid_amount})`);
+        });
+      }
+      
+      res.json({
+        success: true,
+        data: unpaidInvoices
+      });
+    } catch (error) {
+      console.error('Get unpaid invoices error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'To\'lanmagan hisob-fakturalarni olishda xatolik',
+        error: error.message
+      });
+    }
+  }
+);

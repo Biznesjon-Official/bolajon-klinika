@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // DD/MM/YYYY formatida sana inputi
 const DateInput = ({ value, onChange, className = '', required = false, ...props }) => {
   const [displayValue, setDisplayValue] = useState('');
+  const [showNativePicker, setShowNativePicker] = useState(false);
+  const dateInputRef = useRef(null);
 
   // YYYY-MM-DD formatini DD/MM/YYYY ga o'zgartirish
   useEffect(() => {
@@ -104,6 +106,29 @@ const DateInput = ({ value, onChange, className = '', required = false, ...props
     }
   };
 
+  // Native date picker dan sana tanlash
+  const handleNativeDateChange = (e) => {
+    const selectedDate = e.target.value; // YYYY-MM-DD format
+    if (selectedDate && onChange) {
+      onChange({
+        ...e,
+        target: {
+          ...e.target,
+          value: selectedDate,
+          name: props.name || ''
+        }
+      });
+    }
+    setShowNativePicker(false);
+  };
+
+  // Kalendar iconkasiga bosilganda native picker ochish
+  const handleCalendarClick = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker();
+    }
+  };
+
   return (
     <div className="relative w-full">
       <input
@@ -119,11 +144,29 @@ const DateInput = ({ value, onChange, className = '', required = false, ...props
         autoComplete="off"
         {...props}
       />
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+      
+      {/* Yashirin native date picker */}
+      <input
+        ref={dateInputRef}
+        type="date"
+        value={value || ''}
+        onChange={handleNativeDateChange}
+        className="absolute opacity-0 pointer-events-none"
+        tabIndex={-1}
+      />
+      
+      {/* Kalendar iconkasi - bosilganda native picker ochiladi */}
+      <button
+        type="button"
+        onClick={handleCalendarClick}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors cursor-pointer"
+        tabIndex={-1}
+      >
         <span className="material-symbols-outlined text-xl">calendar_today</span>
-      </div>
+      </button>
     </div>
   );
 };
 
 export default DateInput;
+

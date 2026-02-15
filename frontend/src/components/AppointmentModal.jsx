@@ -168,3 +168,4 @@ const AppointmentModal = ({ isOpen, onClose, selectedDoctor = null }) => {
 };
 
 export default AppointmentModal;
+

@@ -551,7 +551,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                     type="text"
                     value={staffForm.username}
                     onChange={(e) => setStaffForm({ ...staffForm, username: e.target.value })}
-                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                    className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="username"
                   />
                 </div>
@@ -594,7 +594,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                 <select
                   value={staffForm.role_id}
                   onChange={(e) => setStaffForm({ ...staffForm, role_id: e.target.value })}
-                  className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                 >
                   <option value="">Lavozimni tanlang</option>
                   {roles.map(role => (
@@ -624,7 +624,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                     type="text"
                     value={staffForm.first_name}
                     onChange={(e) => setStaffForm({ ...staffForm, first_name: e.target.value })}
-                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                    className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="Ism"
                     required
                   />
@@ -638,7 +638,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                     type="text"
                     value={staffForm.last_name}
                     onChange={(e) => setStaffForm({ ...staffForm, last_name: e.target.value })}
-                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                    className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="Familiya"
                     required
                   />
@@ -652,7 +652,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                     type="text"
                     value={staffForm.middle_name}
                     onChange={(e) => setStaffForm({ ...staffForm, middle_name: e.target.value })}
-                    className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                    className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                     placeholder="Otasining ismi"
                   />
                 </div>
@@ -668,7 +668,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                 <PhoneInput
                   value={staffForm.phone}
                   onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })}
-                  className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                   placeholder="+998 XX XXX XX XX"
                   required
                 />
@@ -705,7 +705,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                         type="text"
                         value={staffForm.specialization}
                         onChange={(e) => setStaffForm({ ...staffForm, specialization: e.target.value })}
-                        className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                        className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                         placeholder={roleName === 'doctor' ? 'Masalan: Kardiolog' : roleName === 'nurse' ? 'Masalan: Operatsion hamshira' : roleName === 'laborant' ? 'Masalan: Klinik laborant' : 'Mutaxassislik'}
                         required={roleName === 'doctor'}
                       />
@@ -722,7 +722,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                         type="text"
                         value={staffForm.license_number}
                         onChange={(e) => setStaffForm({ ...staffForm, license_number: e.target.value })}
-                        className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                        className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                         placeholder="LIC-12345"
                         required={roleName === 'doctor'}
                       />
@@ -741,7 +741,7 @@ Iltimos, bu ma'lumotlarni saqlang!
                 <DateInput
                   value={staffForm.hire_date}
                   onChange={(e) => setStaffForm({ ...staffForm, hire_date: e.target.value })}
-                  className="w-full px-3 py-2 sm:py-2.5.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                  className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                   required
                 />
               </div>
@@ -754,7 +754,7 @@ Iltimos, bu ma'lumotlarni saqlang!
             <button
               type="button"
               onClick={() => setShowStaffModal(false)}
-              className="px-5 py-2 sm:py-2.5.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base"
+              className="px-5 py-2 sm:py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2 sm:gap-2 sm:gap-3 text-sm sm:text-sm sm:text-base"
             >
               <span className="material-symbols-outlined text-sm sm:text-base">close</span>
               Bekor qilish
@@ -765,7 +765,7 @@ Iltimos, bu ma'lumotlarni saqlang!
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className="px-5 py-2 sm:py-2.5.5 bg-gray-500 text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-600 transition-all flex items-center gap-2 sm:gap-2 sm:gap-3 shadow-lg hover:shadow-xl text-sm sm:text-sm sm:text-base"
+                className="px-5 py-2 sm:py-2.5 bg-gray-500 text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-600 transition-all flex items-center gap-2 sm:gap-2 sm:gap-3 shadow-lg hover:shadow-xl text-sm sm:text-sm sm:text-base"
               >
                 <span className="material-symbols-outlined text-sm sm:text-base">arrow_back</span>
                 Orqaga
@@ -777,7 +777,7 @@ Iltimos, bu ma'lumotlarni saqlang!
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="flex-1 px-5 py-2 sm:py-2.5.5 bg-gradient-to-r from-primary to-green-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 shadow-lg text-sm sm:text-sm sm:text-base"
+                className="flex-1 px-5 py-2 sm:py-2.5 bg-gradient-to-r from-primary to-green-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 shadow-lg text-sm sm:text-sm sm:text-base"
               >
                 Keyingi
                 <span className="material-symbols-outlined text-sm sm:text-base">arrow_forward</span>
@@ -788,7 +788,7 @@ Iltimos, bu ma'lumotlarni saqlang!
             {(editingStaff || currentStep === 3) && (
               <button
                 type="submit"
-                className="flex-1 px-5 py-2 sm:py-2.5.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 shadow-lg text-sm sm:text-sm sm:text-base"
+                className="flex-1 px-5 py-2 sm:py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2 sm:gap-2 sm:gap-3 shadow-lg text-sm sm:text-sm sm:text-base"
               >
                 <span className="material-symbols-outlined text-sm sm:text-base">
                   {editingStaff ? 'save' : 'check_circle'}
@@ -825,3 +825,4 @@ Iltimos, bu ma'lumotlarni saqlang!
 };
 
 export default StaffManagementAdvanced;
+

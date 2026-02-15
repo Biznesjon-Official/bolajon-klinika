@@ -94,17 +94,17 @@ export default function PatientPortal() {
       
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 lg:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 sm:py-3 sm:py-4">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-2 sm:py-3">
           <div className="flex items-center justify-between gap-2 sm:gap-2 sm:gap-3">
             <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center text-white flex-shrink-0">
                 <span className="material-symbols-outlined text-xl sm:text-xl sm:text-2xl">person</span>
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-base sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
                   Xush kelibsiz, {user?.first_name}!
                 </h1>
-                <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-400">Bemor paneli</p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Bemor paneli</p>
               </div>
             </div>
             <button
@@ -118,7 +118,7 @@ export default function PatientPortal() {
       </header>
 
       {/* Content */}
-      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 lg:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4 sm:py-4 sm:py-6 lg:py-8">
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-8">
         {activeTab === 'dashboard' && <DashboardTab data={dashboardData} />}
         {activeTab === 'profile' && <ProfileTab data={profile} onUpdate={loadData} />}
         {activeTab === 'appointments' && <AppointmentsTab data={appointments} />}
@@ -164,8 +164,8 @@ function DashboardTab({ data }) {
               <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-xl sm:text-xl sm:text-2xl">calendar_month</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Keyingi qabul</p>
-              <p className="text-lg sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Keyingi qabul</p>
+              <p className="text-lg sm:text-lg font-bold text-gray-900 dark:text-white truncate">
                 {data.next_appointment ? 'Navbatda' : 'Yo\'q'}
               </p>
             </div>
@@ -178,8 +178,8 @@ function DashboardTab({ data }) {
               <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-xl sm:text-xl sm:text-2xl">medication</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Retseptlar</p>
-              <p className="text-lg sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{data.prescriptions_count}</p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Retseptlar</p>
+              <p className="text-lg sm:text-lg font-bold text-gray-900 dark:text-white">{data.prescriptions_count}</p>
             </div>
           </div>
         </div>
@@ -190,8 +190,8 @@ function DashboardTab({ data }) {
               <span className="material-symbols-outlined text-orange-600 dark:text-orange-400 text-xl sm:text-xl sm:text-2xl">notifications</span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Bildirishnomalar</p>
-              <p className="text-lg sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{data.unread_notifications}</p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Bildirishnomalar</p>
+              <p className="text-lg sm:text-lg font-bold text-gray-900 dark:text-white">{data.unread_notifications}</p>
             </div>
           </div>
         </div>
@@ -459,7 +459,7 @@ function PrescriptionsTab({ data }) {
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
               {prescription.prescription_type && (
                 <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
-                  <span className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 whitespace-nowrap">Retsept turi:</span>
+                  <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Retsept turi:</span>
                   <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                     prescription.prescription_type === 'URGENT' 
                       ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' 
@@ -472,7 +472,7 @@ function PrescriptionsTab({ data }) {
               
               {prescription.status && (
                 <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
-                  <span className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 whitespace-nowrap">Status:</span>
+                  <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Status:</span>
                   <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                     prescription.status === 'ACTIVE' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
                     prescription.status === 'completed' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' :
@@ -487,7 +487,7 @@ function PrescriptionsTab({ data }) {
               
               {prescription.queue_number && (
                 <div className="flex items-center gap-2 sm:gap-2 sm:gap-3">
-                  <span className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 whitespace-nowrap">Navbat:</span>
+                  <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Navbat:</span>
                   <span className="font-semibold text-gray-900 dark:text-white whitespace-nowrap">#{prescription.queue_number}</span>
                 </div>
               )}
@@ -961,7 +961,7 @@ function NotificationsTab({ data, onUpdate }) {
         <div className="flex flex-wrap gap-2 sm:gap-2 sm:gap-3">
           <button
             onClick={() => setFilter('all')}
-            className={`px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold transition-all whitespace-nowrap ${
+            className={`px-3 sm:px-4 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
               filter === 'all'
                 ? 'bg-primary text-white'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -971,7 +971,7 @@ function NotificationsTab({ data, onUpdate }) {
           </button>
           <button
             onClick={() => setFilter('admin')}
-            className={`px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold transition-all whitespace-nowrap ${
+            className={`px-3 sm:px-4 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
               filter === 'admin'
                 ? 'bg-red-600 text-white'
                 : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30'
@@ -981,7 +981,7 @@ function NotificationsTab({ data, onUpdate }) {
           </button>
           <button
             onClick={() => setFilter('doctor')}
-            className={`px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm sm:text-sm sm:text-base font-semibold transition-all whitespace-nowrap ${
+            className={`px-3 sm:px-4 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
               filter === 'doctor'
                 ? 'bg-green-600 text-white'
                 : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
@@ -1011,3 +1011,5 @@ function NotificationsTab({ data, onUpdate }) {
     </div>
   );
 }
+
+

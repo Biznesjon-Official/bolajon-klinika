@@ -1276,3 +1276,4 @@ export default function AmbulatorRoom() {
     </div>
   );
 }
+

@@ -149,7 +149,7 @@ const PatientEdit = () => {
 
   return (
     <>
-    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -370,3 +370,4 @@ const PatientEdit = () => {
 };
 
 export default PatientEdit;
+

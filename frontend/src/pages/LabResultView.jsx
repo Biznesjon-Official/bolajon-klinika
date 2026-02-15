@@ -664,3 +664,4 @@ export default function LabResultView() {
     </div>
   );
 }
+

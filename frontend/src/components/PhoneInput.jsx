@@ -47,3 +47,4 @@ const PhoneInput = ({ value, onChange, className = '', placeholder = '+998 XX XX
 };
 
 export default PhoneInput;
+

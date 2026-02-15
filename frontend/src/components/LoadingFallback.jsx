@@ -46,3 +46,4 @@ export function TableSkeleton({ rows = 5 }) {
     </div>
   );
 }
+

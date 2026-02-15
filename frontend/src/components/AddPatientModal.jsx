@@ -387,3 +387,4 @@ const AddPatientModal = ({ isOpen, onClose, onSuccess }) => {
 };
 
 export default AddPatientModal;
+

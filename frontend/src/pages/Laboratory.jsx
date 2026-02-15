@@ -136,6 +136,52 @@ export default function Laboratory() {
   const handleEnterResult = async (order) => {
     console.log('=== HANDLE ENTER RESULT ===');
     console.log('Order:', order);
+    console.log('Patient ID:', order.patient_id);
+    
+    // Avval to'lovni tekshirish
+    if (order.patient_id) {
+      console.log('Checking payment status for patient:', order.patient_id);
+      
+      try {
+        const response = await fetch(`http://localhost:5001/api/v1/billing/invoices/patient/${order.patient_id}/unpaid`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        console.log('Payment check response status:', response.status);
+        
+        if (response.ok) {
+          const invoiceData = await response.json();
+          console.log('Invoice data:', invoiceData);
+          
+          if (invoiceData.success && invoiceData.data && invoiceData.data.length > 0) {
+            // To'lanmagan hisob-fakturalar bor
+            const totalUnpaid = invoiceData.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
+            
+            console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
+            
+            toast.error(
+              `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor! Iltimos, avval to'lovni amalga oshiring.`,
+              { duration: 5000 }
+            );
+            return; // To'xtatamiz
+          } else {
+            console.log('✅ No unpaid invoices');
+          }
+        } else {
+          console.log('⚠️ Payment check failed with status:', response.status);
+        }
+      } catch (invoiceError) {
+        console.error('❌ Invoice check error:', invoiceError);
+        toast.error('To\'lov holatini tekshirishda xatolik yuz berdi');
+        return; // Xatolik bo'lsa ham to'xtatamiz
+      }
+    } else {
+      console.log('⚠️ No patient_id in order');
+    }
+    
+    console.log('✅ Opening result modal');
     setSelectedOrder(order);
     setShowResultModal(true);
   };
@@ -189,7 +235,7 @@ export default function Laboratory() {
   console.log('isReception:', isReception);
 
   return (
-    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
       
       {/* Header */}
@@ -430,4 +476,5 @@ export default function Laboratory() {
     </div>
   );
 }
+
 

@@ -141,12 +141,12 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4 sm:p-4 sm:p-6 overflow-hidden sm:block">
+    <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4 sm:p-4 overflow-hidden sm:block">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg sm:text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Laboratoriya xizmatlari</h3>
         <button
           onClick={handleAdd}
-          className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
+          className="px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2"
         >
           <span className="material-symbols-outlined">add</span>
           Xizmat qo'shish
@@ -161,7 +161,7 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
           {tests.map((test) => (
-            <div key={test.id} className="border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 overflow-hidden sm:block">
+            <div key={test.id} className="border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 overflow-hidden sm:block">
               <div className="flex items-start justify-between mb-2">
                 <h4 className="font-bold text-gray-900 dark:text-white break-words flex-1">{test.test_name}</h4>
                 <div className="flex gap-1">
@@ -179,12 +179,12 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
                   </button>
                 </div>
               </div>
-              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">{test.test_code}</p>
+              <p className="text-sm sm:text-sm text-gray-600 dark:text-gray-400 break-words">{test.test_code}</p>
               <p className="text-base sm:text-lg font-semibold text-primary mt-2">
                 {test.price?.toLocaleString() || 0} so'm
               </p>
               {test.description && (
-                <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2 break-words">{test.description}</p>
+                <p className="text-sm sm:text-sm text-gray-600 dark:text-gray-400 mt-2 break-words">{test.description}</p>
               )}
             </div>
           ))}
@@ -208,54 +208,54 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
 
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Xizmat nomi *</label>
+                  <label className="block text-sm sm:text-sm font-semibold mb-2">Xizmat nomi *</label>
                   <input
                     type="text"
                     value={formData.test_name}
                     onChange={(e) => setFormData({ ...formData, test_name: e.target.value })}
-                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg dark:bg-gray-900 dark:border-gray-700"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Narxi (so'm) *</label>
+                  <label className="block text-sm sm:text-sm font-semibold mb-2">Narxi (so'm) *</label>
                   <input
                     type="number"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg dark:bg-gray-900 dark:border-gray-700"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Tavsif</label>
+                  <label className="block text-sm sm:text-sm font-semibold mb-2">Tavsif</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg dark:bg-gray-900 dark:border-gray-700"
                     rows="3"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Tayyorlanish vaqti (soat)</label>
+                  <label className="block text-sm sm:text-sm font-semibold mb-2">Tayyorlanish vaqti (soat)</label>
                   <input
                     type="number"
                     value={formData.turnaround_time}
                     onChange={(e) => setFormData({ ...formData, turnaround_time: e.target.value })}
-                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg dark:bg-gray-900 dark:border-gray-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Kategoriya</label>
+                  <label className="block text-sm sm:text-sm font-semibold mb-2">Kategoriya</label>
                   <input
                     type="text"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl dark:bg-gray-900 dark:border-gray-700"
+                    className="w-full px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg dark:bg-gray-900 dark:border-gray-700"
                     placeholder="Masalan: Biokimyo, Gematologiya"
                   />
                 </div>
@@ -263,11 +263,11 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
                 {!editingTest && (
                   <>
                     <div>
-                      <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">
+                      <label className="block text-sm sm:text-sm font-semibold mb-2">
                         Natija varaqasi (PDF)
                         <span className="text-gray-500 text-xs ml-2">(Ixtiyoriy)</span>
                       </label>
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl p-4 text-center">
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-lg p-4 text-center">
                         <input
                           type="file"
                           accept=".pdf"
@@ -422,13 +422,13 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border border-gray-300 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50"
+                    className="flex-1 px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border border-gray-300 rounded-lg sm:rounded-lg hover:bg-gray-50"
                   >
                     Bekor qilish
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:opacity-90"
+                    className="flex-1 px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg hover:opacity-90"
                   >
                     {editingTest ? 'Yangilash' : 'Qo\'shish'}
                   </button>
@@ -441,3 +441,4 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
     </div>
   );
 }
+

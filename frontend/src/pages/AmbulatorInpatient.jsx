@@ -349,7 +349,7 @@ export default function AmbulatorInpatient() {
   // Hamshira uchun faqat ko'rish rejimi
   if (isReadOnly) {
     return (
-      <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8">
+      <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8">
         <Toaster position="top-right" />
         
         <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-xl mb-6">
@@ -431,3 +431,4 @@ export default function AmbulatorInpatient() {
   // Admin va boshqalar uchun to'liq funksional interfeys
   return null;
 }
+

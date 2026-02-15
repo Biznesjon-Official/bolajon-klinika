@@ -20,9 +20,8 @@ const PrescriptionModal = ({
   const [prescriptionNotes, setPrescriptionNotes] = useState('');
   const [medications, setMedications] = useState([]);
   
-  // Nurse assignment
+  // Nurses list (for reference only, not for selection)
   const [nurses, setNurses] = useState([]);
-  const [selectedNurse, setSelectedNurse] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -49,7 +48,6 @@ const PrescriptionModal = ({
     setPrescriptionType('REGULAR');
     setPrescriptionNotes('');
     setMedications([]);
-    setSelectedNurse(null);
   };
 
   const addMedication = () => {
@@ -71,8 +69,7 @@ const PrescriptionModal = ({
         schedule_times: ['09:00', '21:00'], // Default vaqtlar
         duration_days: 3, // Default: 3 kun
         instructions: '',
-        is_urgent: false,
-        nurse_id: ''
+        is_urgent: false
       }]);
     }
   };
@@ -103,7 +100,7 @@ const PrescriptionModal = ({
         prescription_type: prescriptionType,
         medications,
         notes: prescriptionNotes,
-        nurse_id: selectedNurse || null
+        nurse_id: null // Barcha hamshiralarga ko'rinadi
       };
       
       const patientData = {
@@ -417,43 +414,6 @@ const PrescriptionModal = ({
                           </p>
                         </div>
                         
-                        {/* Nurse assignment per medication */}
-                        <div className="sm:col-span-2 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border-2 border-green-300 dark:border-green-700">
-                          <label className="block text-sm font-bold mb-2 text-green-900 dark:text-green-100 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-green-600">person</span>
-                            👩‍⚕️ Hamshirani tanlang (ixtiyoriy)
-                          </label>
-                          <select
-                            value={med.nurse_id || ''}
-                            onChange={async (e) => {
-                              updateMedication(index, 'nurse_id', e.target.value);
-                            }}
-                            onFocus={async () => {
-                              if (!nurses.length) {
-                                try {
-                                  const response = await doctorNurseService.getActiveNurses();
-                                  if (response.success) {
-                                    setNurses(response.data);
-                                  }
-                                } catch (error) {
-                                  console.error('Load nurses error:', error);
-                                }
-                              }
-                            }}
-                            className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-green-300 rounded-lg bg-white dark:bg-gray-800 font-medium text-xs sm:text-sm"
-                          >
-                            <option value="">Hamshira tanlanmagan</option>
-                            {nurses.map((nurse) => (
-                              <option key={nurse._id || nurse.id} value={nurse._id || nurse.id}>
-                                👩‍⚕️ {nurse.full_name || `${nurse.first_name} ${nurse.last_name}`}
-                              </option>
-                            ))}
-                          </select>
-                          <p className="text-xs text-green-700 dark:text-green-300 mt-2">
-                            💡 Bu dori uchun mas'ul hamshira - muolajalarni bajaradi
-                          </p>
-                        </div>
-                        
                         {/* Instructions */}
                         <div className="sm:col-span-2">
                           <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
@@ -511,50 +471,8 @@ const PrescriptionModal = ({
               <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Muolajaga yuborish</h3>
             </div>
             
-            <div className="mb-4">
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Hamshirani tanlang *
-              </label>
-              <select
-                value={selectedNurse || ''}
-                onChange={async (e) => {
-                  setSelectedNurse(e.target.value);
-                  if (!nurses.length) {
-                    try {
-                      const response = await doctorNurseService.getActiveNurses();
-                      if (response.success) {
-                        setNurses(response.data);
-                      }
-                    } catch (error) {
-                      console.error('Load nurses error:', error);
-                    }
-                  }
-                }}
-                onFocus={async () => {
-                  if (!nurses.length) {
-                    try {
-                      const response = await doctorNurseService.getActiveNurses();
-                      if (response.success) {
-                        setNurses(response.data);
-                      }
-                    } catch (error) {
-                      console.error('Load nurses error:', error);
-                    }
-                  }
-                }}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs sm:text-sm"
-              >
-                <option value="">Hamshirani tanlang</option>
-                {nurses.map((nurse) => (
-                  <option key={nurse._id || nurse.id} value={nurse._id || nurse.id}>
-                    {nurse.full_name || `${nurse.first_name} ${nurse.last_name}`} - {nurse.specialization || 'Hamshira'}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 italic">
-              💡 Shoshilinch retsept saqlangandan keyin avtomatik hamshiraga topshiriq yuboriladi
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 italic bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+              💡 Shoshilinch retsept saqlangandan keyin barcha hamshiralarga ko'rinadi
             </p>
           </div>
         )}
@@ -591,3 +509,4 @@ const PrescriptionModal = ({
 };
 
 export default PrescriptionModal;
+

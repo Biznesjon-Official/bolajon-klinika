@@ -197,6 +197,33 @@ const DoctorPanel = () => {
 
   const handleCallPatient = async (queueId) => {
     try {
+      // Avval bemorning to'lov holatini tekshirish
+      const queueItem = myQueue.find(q => q.id === queueId);
+      if (!queueItem) {
+        showAlert('Bemor topilmadi', 'error', t('common.error'));
+        return;
+      }
+
+      // To'lov holatini tekshirish
+      try {
+        const invoiceResponse = await api.get(`/billing/invoices/patient/${queueItem.patient_id}/unpaid`);
+        
+        if (invoiceResponse.data.success && invoiceResponse.data.data && invoiceResponse.data.data.length > 0) {
+          // To'lanmagan hisob-fakturalar bor
+          const totalUnpaid = invoiceResponse.data.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
+          
+          showAlert(
+            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nIltimos, avval to'lovni amalga oshiring.`,
+            'error',
+            'To\'lov kerak'
+          );
+          return;
+        }
+      } catch (invoiceError) {
+        console.error('Invoice check error:', invoiceError);
+        // Xatolik bo'lsa ham davom etamiz
+      }
+
       await queueService.callPatient(queueId);
       showAlert(t('doctorPanel.patientCalled'), 'success', t('common.success'));
       loadMyQueue();
@@ -485,7 +512,7 @@ const DoctorPanel = () => {
 
   if (loading) {
     return (
-      <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
+      <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8 flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="size-12 sm:size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{t('doctorPanel.loading')}</p>
@@ -495,7 +522,7 @@ const DoctorPanel = () => {
   }
 
   return (
-    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
       <Toaster position="top-right" />
       
       {/* Header */}
@@ -1440,3 +1467,4 @@ const DoctorPanel = () => {
 };
 
 export default DoctorPanel;
+

@@ -436,3 +436,4 @@ const MasseurPanel = () => {
 };
 
 export default MasseurPanel;
+

@@ -603,3 +603,4 @@ const LabPharmacy = () => {
 };
 
 export default LabPharmacy;
+

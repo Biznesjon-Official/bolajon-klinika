@@ -177,7 +177,7 @@ const PatientProfile = () => {
   const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim();
 
   return (
-    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
+    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         <button
@@ -1281,3 +1281,4 @@ const PatientProfile = () => {
 };
 
 export default PatientProfile;
+

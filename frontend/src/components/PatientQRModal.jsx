@@ -124,3 +124,4 @@ export default function PatientQRModal({ patient, onClose }) {
     </div>
   );
 }
+

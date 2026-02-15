@@ -133,7 +133,7 @@ export default function SanitarPanel() {
       <div className="p-3 sm:p-3 sm:p-4 lg:p-4 sm:p-6 space-y-3 sm:space-y-4 max-w-7xl mx-auto">
 
         {/* Header - Responsive */}
-        <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl sm:rounded-2xl sm:rounded-3xl p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 text-white shadow-xl">
+        <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl sm:rounded-2xl sm:rounded-3xl p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8 text-white shadow-xl">
           <div className="flex items-center gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
             <div className="bg-white/20 p-2 sm:p-3 lg:p-3 sm:p-4 rounded-lg sm:rounded-xl sm:rounded-xl sm:rounded-2xl">
               <span className="material-symbols-outlined text-3xl sm:text-3xl sm:text-4xl lg:text-6xl">cleaning_services</span>
@@ -559,3 +559,4 @@ export default function SanitarPanel() {
     </div>
   );
 }
+

@@ -27,6 +27,7 @@ const CashierAdvanced = () => {
   const [invoices, setInvoices] = useState([]);
   const [groupedInvoices, setGroupedInvoices] = useState([]); // Bemor bo'yicha guruhlangan invoicelar
   const [expandedPatients, setExpandedPatients] = useState({}); // Ochilgan bemorlar
+  const [invoicePatientFilter, setInvoicePatientFilter] = useState(''); // Hisob-fakturalar bo'limida bemor qidirish
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [services, setServices] = useState([]);
   const [expandedCategories, setExpandedCategories] = useState({});
@@ -1283,38 +1284,54 @@ const CashierAdvanced = () => {
                   </div>
                   
                   {/* Searchable select with datalist */}
-                  <input
-                    list="patients-list"
-                    value={patientSearch}
-                    onChange={(e) => {
-                      const newValue = e.target.value;
-                      setPatientSearch(newValue);
-                      
-                      // Find and select patient if exact match (without API call)
-                      const matchedPatient = searchResults.find(p => {
-                        const fullName = `${p.first_name} ${p.last_name} - ${p.phone}`;
-                        return fullName === newValue;
-                      });
-                      
-                      if (matchedPatient) {
-                        // Only load full patient data when selected
-                        api.get(`/patients/${matchedPatient.id || matchedPatient._id}`)
-                          .then(response => {
-                            if (response.data.success) {
-                              setSelectedPatient(response.data.data);
-                            }
-                          })
-                          .catch(error => {
-                            console.error('Error loading patient:', error);
-                          });
-                      } else if (!newValue) {
-                        setSelectedPatient(null);
-                      }
-                    }}
-                    placeholder="Bemorni qidiring yoki tanlang..."
-                    className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-                    autoComplete="off"
-                  />
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                      search
+                    </span>
+                    <input
+                      list="patients-list"
+                      value={patientSearch}
+                      onChange={(e) => {
+                        const newValue = e.target.value;
+                        setPatientSearch(newValue);
+                        
+                        // Find and select patient if exact match (without API call)
+                        const matchedPatient = searchResults.find(p => {
+                          const fullName = `${p.first_name} ${p.last_name} - ${p.phone}`;
+                          return fullName === newValue;
+                        });
+                        
+                        if (matchedPatient) {
+                          // Only load full patient data when selected
+                          api.get(`/patients/${matchedPatient.id || matchedPatient._id}`)
+                            .then(response => {
+                              if (response.data.success) {
+                                setSelectedPatient(response.data.data);
+                              }
+                            })
+                            .catch(error => {
+                              console.error('Error loading patient:', error);
+                            });
+                        } else if (!newValue) {
+                          setSelectedPatient(null);
+                        }
+                      }}
+                      placeholder="Bemorni qidiring (ism, familiya yoki telefon)..."
+                      className="w-full pl-10 pr-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+                      autoComplete="off"
+                    />
+                    {patientSearch && (
+                      <button
+                        onClick={() => {
+                          setPatientSearch('');
+                          setSelectedPatient(null);
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        <span className="material-symbols-outlined text-lg">close</span>
+                      </button>
+                    )}
+                  </div>
                   
                   <datalist id="patients-list">
                     {searchResults.map(patient => (
@@ -1769,6 +1786,30 @@ const CashierAdvanced = () => {
           {/* Invoices Tab */}
           {activeTab === 'invoices' && (
             <div className="space-y-3 sm:space-y-4">
+              {/* Patient Search Filter */}
+              <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700">
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={invoicePatientFilter}
+                    onChange={(e) => setInvoicePatientFilter(e.target.value)}
+                    placeholder="Bemorni qidiring (ism, familiya yoki bemor raqami)..."
+                    className="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+                  />
+                  {invoicePatientFilter && (
+                    <button
+                      onClick={() => setInvoicePatientFilter('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      <span className="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {invoices.length === 0 ? (
                 <div className="text-center py-12">
                   <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
@@ -1782,7 +1823,18 @@ const CashierAdvanced = () => {
                     // Invoicelarni bemor bo'yicha guruhlash
                     const grouped = {};
                     
-                    invoices.forEach(invoice => {
+                    // Qidiruv filtri bo'yicha invoicelarni filtrlash
+                    const filteredInvoices = invoices.filter(invoice => {
+                      if (!invoicePatientFilter) return true;
+                      
+                      const searchLower = invoicePatientFilter.toLowerCase();
+                      const fullName = `${invoice.first_name} ${invoice.last_name}`.toLowerCase();
+                      const patientNumber = (invoice.patient_number || '').toLowerCase();
+                      
+                      return fullName.includes(searchLower) || patientNumber.includes(searchLower);
+                    });
+                    
+                    filteredInvoices.forEach(invoice => {
                       const patientKey = `${invoice.first_name}_${invoice.last_name}_${invoice.patient_number}`;
                       
                       if (!grouped[patientKey]) {
@@ -1803,6 +1855,20 @@ const CashierAdvanced = () => {
                     });
                     
                     const groupedArray = Object.values(grouped);
+                    
+                    // Agar qidiruv natijasi bo'lmasa
+                    if (invoicePatientFilter && groupedArray.length === 0) {
+                      return (
+                        <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border-2 border-gray-200 dark:border-gray-700">
+                          <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
+                            search_off
+                          </span>
+                          <p className="text-gray-500 dark:text-gray-400">
+                            "{invoicePatientFilter}" bo'yicha natija topilmadi
+                          </p>
+                        </div>
+                      );
+                    }
                     
                     return groupedArray.map((patientGroup, index) => {
                       const isExpanded = expandedPatients[index];
@@ -2722,3 +2788,4 @@ const CashierAdvanced = () => {
 };
 
 export default CashierAdvanced;
+

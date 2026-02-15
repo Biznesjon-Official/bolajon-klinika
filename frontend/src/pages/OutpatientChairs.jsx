@@ -277,3 +277,4 @@ const ChairDetailModal = ({ chair, onClose }) => {
 };
 
 export default OutpatientChairs;
+

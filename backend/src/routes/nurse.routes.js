@@ -72,32 +72,52 @@ router.get('/medicines', authenticate, async (req, res) => {
 /**
  * Get nurse statistics
  * GET /api/v1/nurse/stats
+ * HAMMA HAMSHIRALARGA BARCHA MUOLAJALAR STATISTIKASI
  */
 router.get('/stats', authenticate, async (req, res) => {
   try {
     const nurseId = req.user._id || req.user.id;
     
-    const [pendingTasks, overdueTasks, activePatients] = await Promise.all([
+    console.log('=== GET NURSE STATS (ALL TREATMENTS) ===');
+    console.log('Nurse ID:', nurseId);
+    
+    // Barcha muolajalar statistikasi - nurse_id filter yo'q
+    const [pendingTasks, pendingSchedules, overdueTasks, overdueSchedules, activePatients] = await Promise.all([
       Task.countDocuments({
-        nurse_id: nurseId,
+        status: 'pending'
+      }),
+      TreatmentSchedule.countDocuments({
         status: 'pending'
       }),
       Task.countDocuments({
-        nurse_id: nurseId,
+        status: 'pending',
+        scheduled_time: { $lt: new Date() }
+      }),
+      TreatmentSchedule.countDocuments({
         status: 'pending',
         scheduled_time: { $lt: new Date() }
       }),
       Task.distinct('patient_id', {
-        nurse_id: nurseId,
         status: { $in: ['pending', 'in_progress'] }
       })
     ]);
     
+    const totalPending = pendingTasks + pendingSchedules;
+    const totalOverdue = overdueTasks + overdueSchedules;
+    
+    console.log('📊 Stats:', {
+      pending_tasks: pendingTasks,
+      pending_schedules: pendingSchedules,
+      total_pending: totalPending,
+      total_overdue: totalOverdue,
+      total_patients: activePatients.length
+    });
+    
     res.json({
       success: true,
       data: {
-        pending_treatments: pendingTasks,
-        overdue_treatments: overdueTasks,
+        pending_treatments: totalPending,
+        overdue_treatments: totalOverdue,
         total_patients: activePatients.length,
         active_calls: 0
       }
@@ -115,17 +135,19 @@ router.get('/stats', authenticate, async (req, res) => {
 /**
  * Get nurse treatments/tasks
  * GET /api/v1/nurse/treatments
+ * HAMMA HAMSHIRALARGA BARCHA MUOLAJALAR KO'RINADI
  */
 router.get('/treatments', authenticate, async (req, res) => {
   try {
     const nurseId = req.user._id || req.user.id;
     const { status, floor } = req.query;
     
-    console.log('=== GET NURSE TREATMENTS ===');
+    console.log('=== GET NURSE TREATMENTS (ALL NURSES SEE ALL TREATMENTS) ===');
     console.log('Nurse ID:', nurseId);
     console.log('Status filter:', status);
     
-    // YANGI: Barcha muolajalarni olish (nurse_id filter yo'q)
+    // Barcha muolajalarni olish - nurse_id filter yo'q
+    // Hamma hamshiralar barcha muolajalarni ko'radi
     const query = {};
     
     if (status && status !== 'all') {
@@ -133,6 +155,7 @@ router.get('/treatments', authenticate, async (req, res) => {
     }
     
     console.log('Query:', JSON.stringify(query));
+    console.log('📢 Fetching ALL treatments for ALL nurses');
     
     // Get both Tasks (urgent/emergency) and TreatmentSchedules (regular)
     const [tasks, treatmentSchedules] = await Promise.all([
@@ -141,14 +164,26 @@ router.get('/treatments', authenticate, async (req, res) => {
         .populate('assigned_by', 'first_name last_name')
         .populate('nurse_id', 'first_name last_name')
         .populate('admission_id')
-        .populate('prescription_id')
+        .populate({
+          path: 'prescription_id',
+          populate: {
+            path: 'doctor_id',
+            select: 'first_name last_name specialization'
+          }
+        })
         .sort({ scheduled_time: 1 })
         .lean(),
       TreatmentSchedule.find(query)
         .populate('patient_id', 'first_name last_name patient_number')
         .populate('nurse_id', 'first_name last_name')
         .populate('admission_id')
-        .populate('prescription_id')
+        .populate({
+          path: 'prescription_id',
+          populate: {
+            path: 'doctor_id',
+            select: 'first_name last_name specialization'
+          }
+        })
         .sort({ scheduled_time: 1 })
         .lean()
     ]);
@@ -157,18 +192,44 @@ router.get('/treatments', authenticate, async (req, res) => {
     console.log('📋 Found TreatmentSchedules:', treatmentSchedules.length);
     
     if (tasks.length > 0) {
-      console.log('Sample Task:', JSON.stringify(tasks[0], null, 2));
-      console.log('All Task IDs:', tasks.map(t => t._id.toString()));
+      console.log('Sample Task:', {
+        _id: tasks[0]._id,
+        title: tasks[0].title,
+        patient_id: tasks[0].patient_id,
+        medication_name: tasks[0].medication_name,
+        dosage: tasks[0].dosage
+      });
     }
     if (treatmentSchedules.length > 0) {
-      console.log('Sample TreatmentSchedule:', JSON.stringify(treatmentSchedules[0], null, 2));
-      console.log('All TreatmentSchedule IDs:', treatmentSchedules.map(t => t._id.toString()));
-      console.log('All TreatmentSchedule medicines:', treatmentSchedules.map(t => `${t.medication_name} (${t.dosage})`));
-      console.log('TreatmentSchedule admission_ids:', treatmentSchedules.map(t => t.admission_id?._id || t.admission_id));
+      console.log('Sample TreatmentSchedule:', {
+        _id: treatmentSchedules[0]._id,
+        medication_name: treatmentSchedules[0].medication_name,
+        dosage: treatmentSchedules[0].dosage,
+        patient_id: treatmentSchedules[0].patient_id
+      });
     }
     
     // Transform Tasks
     const transformedTasks = await Promise.all(tasks.map(async (task) => {
+      console.log('\n=== TASK TRANSFORM ===');
+      console.log('Task ID:', task._id);
+      console.log('Task title:', task.title);
+      console.log('Task patient_id:', task.patient_id);
+      console.log('Task medication_name:', task.medication_name);
+      console.log('Task dosage:', task.dosage);
+      console.log('Task prescription_id:', task.prescription_id?._id);
+      
+      // Get medication info from prescription if not in task
+      let medicationName = task.medication_name || task.title;
+      let dosage = task.dosage;
+      
+      if ((!medicationName || medicationName === 'vazifa') && task.prescription_id?.medications?.length > 0) {
+        const firstMed = task.prescription_id.medications[0];
+        medicationName = firstMed.medication_name;
+        dosage = firstMed.dosage;
+        console.log('  → Using medication from prescription:', medicationName, dosage);
+      }
+      
       let prescriptionType = task.task_type === 'emergency' ? 'URGENT' : 'REGULAR';
       let admissionInfo = {
         is_admitted: false,
@@ -190,20 +251,10 @@ router.get('/treatments', authenticate, async (req, res) => {
         // Get room info if inpatient
         if (admission.admission_type === 'inpatient') {
           try {
-            console.log('  Loading bed info for inpatient admission:', admission._id);
-            console.log('  Bed ID:', admission.bed_id);
-            console.log('  Room ID:', admission.room_id);
-            
             if (admission.bed_id) {
               // Use bed_id to get full info
               const Bed = mongoose.model('Bed');
               const bed = await Bed.findById(admission.bed_id).populate('room_id').lean();
-              
-              console.log('  Bed found:', bed ? 'YES' : 'NO');
-              if (bed) {
-                console.log('  Bed number:', bed.bed_number);
-                console.log('  Room populated:', bed.room_id ? 'YES' : 'NO');
-              }
               
               if (bed && bed.room_id) {
                 admissionInfo.room_info = {
@@ -212,14 +263,11 @@ router.get('/treatments', authenticate, async (req, res) => {
                   bed_number: bed.bed_number,
                   floor: bed.room_id.floor
                 };
-                console.log('  ✅ Room info created:', admissionInfo.room_info);
               }
             } else if (admission.room_id) {
               // Fallback: use room_id directly
               const AmbulatorRoom = mongoose.model('AmbulatorRoom');
               const room = await AmbulatorRoom.findById(admission.room_id).lean();
-              
-              console.log('  Room found (fallback):', room ? 'YES' : 'NO');
               
               if (room) {
                 admissionInfo.room_info = {
@@ -228,7 +276,6 @@ router.get('/treatments', authenticate, async (req, res) => {
                   bed_number: admission.bed_number || 'N/A',
                   floor: room.floor
                 };
-                console.log('  ✅ Room info created (fallback):', admissionInfo.room_info);
               }
             }
           } catch (error) {
@@ -250,22 +297,60 @@ router.get('/treatments', authenticate, async (req, res) => {
         }
       }
       
-      return {
+      const transformed = {
         ...task,
         id: task._id.toString(),
         patient_name: task.patient_id ? `${task.patient_id.first_name} ${task.patient_id.last_name}` : 'N/A',
-        medicine_name: task.medication_name || 'N/A',
-        medicine_dosage: task.dosage || 'N/A',
+        medicine_name: medicationName || 'N/A',
+        medicine_dosage: dosage || 'N/A',
+        medication_name: medicationName,
+        dosage: dosage,
         prescription_type: prescriptionType,
+        prescription_id: task.prescription_id ? {
+          _id: task.prescription_id._id,
+          prescription_number: task.prescription_id.prescription_number,
+          diagnosis: task.prescription_id.diagnosis,
+          doctor_id: task.prescription_id.doctor_id,
+          medications: task.prescription_id.medications
+        } : null,
         admission_info: admissionInfo,
         source: 'task',
         completed_at: task.completed_at,
         completion_notes: task.completion_notes
       };
+      
+      console.log('TASK TRANSFORMED:', {
+        id: transformed.id,
+        patient_name: transformed.patient_name,
+        medication_name: transformed.medication_name,
+        medicine_name: transformed.medicine_name,
+        dosage: transformed.dosage,
+        medicine_dosage: transformed.medicine_dosage
+      });
+      
+      return transformed;
     }));
     
     // Transform TreatmentSchedules
     const transformedSchedules = await Promise.all(treatmentSchedules.map(async (schedule) => {
+      console.log('\n=== SCHEDULE TRANSFORM ===');
+      console.log('ID:', schedule._id);
+      console.log('medication_name:', schedule.medication_name);
+      console.log('dosage:', schedule.dosage);
+      console.log('patient_id:', schedule.patient_id);
+      console.log('prescription_id:', schedule.prescription_id?._id);
+      
+      // Get medication info from prescription if not in schedule
+      let medicationName = schedule.medication_name;
+      let dosage = schedule.dosage;
+      
+      if (!medicationName && schedule.prescription_id?.medications?.length > 0) {
+        const firstMed = schedule.prescription_id.medications[0];
+        medicationName = firstMed.medication_name;
+        dosage = firstMed.dosage;
+        console.log('  → Using medication from prescription:', medicationName, dosage);
+      }
+      
       let prescriptionType = 'REGULAR';
       let admissionInfo = {
         is_admitted: false,
@@ -347,15 +432,22 @@ router.get('/treatments', authenticate, async (req, res) => {
         }
       }
       
-      return {
+      const transformed = {
         ...schedule,
         id: schedule._id.toString(),
         patient_name: schedule.patient_id ? `${schedule.patient_id.first_name} ${schedule.patient_id.last_name}` : 'N/A',
-        medicine_name: schedule.medication_name || 'N/A',
-        medicine_dosage: schedule.dosage || 'N/A',
-        medication_name: schedule.medication_name,
-        dosage: schedule.dosage,
+        medicine_name: medicationName || 'N/A',
+        medicine_dosage: dosage || 'N/A',
+        medication_name: medicationName,
+        dosage: dosage,
         prescription_type: prescriptionType,
+        prescription_id: schedule.prescription_id ? {
+          _id: schedule.prescription_id._id,
+          prescription_number: schedule.prescription_id.prescription_number,
+          diagnosis: schedule.prescription_id.diagnosis,
+          doctor_id: schedule.prescription_id.doctor_id,
+          medications: schedule.prescription_id.medications
+        } : null,
         admission_info: admissionInfo,
         source: 'schedule',
         completed_at: schedule.completed_at,
@@ -364,6 +456,17 @@ router.get('/treatments', authenticate, async (req, res) => {
         completed_doses: schedule.completed_doses || 0,
         dose_history: schedule.dose_history || []
       };
+      
+      console.log('TRANSFORMED:', {
+        id: transformed.id,
+        patient_name: transformed.patient_name,
+        medication_name: transformed.medication_name,
+        medicine_name: transformed.medicine_name,
+        dosage: transformed.dosage,
+        medicine_dosage: transformed.medicine_dosage
+      });
+      
+      return transformed;
     }));
     
     // Combine and sort by scheduled_time
@@ -717,19 +820,32 @@ router.post('/treatments/:id/complete', authenticate, async (req, res) => {
 /**
  * Get nurse patients
  * GET /api/v1/nurse/patients
+ * HAMMA HAMSHIRALARGA BARCHA BEMORLAR KO'RINADI
  */
 router.get('/patients', authenticate, async (req, res) => {
   try {
     const nurseId = req.user._id || req.user.id;
     const { floor } = req.query;
     
-    // Get unique patient IDs from active tasks
-    const patientIds = await Task.distinct('patient_id', {
-      nurse_id: nurseId,
-      status: { $in: ['pending', 'in_progress'] }
-    });
+    console.log('=== GET NURSE PATIENTS (ALL PATIENTS) ===');
+    console.log('Nurse ID:', nurseId);
     
-    const patients = await Patient.find({ _id: { $in: patientIds } })
+    // Barcha faol muolajalar bo'lgan bemorlarni olish
+    const [taskPatientIds, schedulePatientIds] = await Promise.all([
+      Task.distinct('patient_id', {
+        status: { $in: ['pending', 'in_progress'] }
+      }),
+      TreatmentSchedule.distinct('patient_id', {
+        status: { $in: ['pending', 'in_progress'] }
+      })
+    ]);
+    
+    // Combine and deduplicate patient IDs
+    const allPatientIds = [...new Set([...taskPatientIds, ...schedulePatientIds])];
+    
+    console.log('📋 Total patients with active treatments:', allPatientIds.length);
+    
+    const patients = await Patient.find({ _id: { $in: allPatientIds } })
       .select('first_name last_name patient_number phone')
       .lean();
     
@@ -777,38 +893,140 @@ router.get('/calls', authenticate, async (req, res) => {
 /**
  * Get treatment history
  * GET /api/v1/nurse/history
+ * HAMMA HAMSHIRALARGA BARCHA TARIX KO'RINADI
  */
 router.get('/history', authenticate, async (req, res) => {
   try {
     const nurseId = req.user._id || req.user.id;
     
-    const history = await Task.find({
-      nurse_id: nurseId,
-      status: 'completed'
-    })
-      .populate('patient_id', 'first_name last_name patient_number')
-      .sort({ completed_at: -1 })
-      .limit(50)
-      .lean();
+    console.log('=== GET NURSE HISTORY (ALL COMPLETED TREATMENTS) ===');
+    console.log('Nurse ID:', nurseId);
     
-    // Transform data to include id field and patient_name
-    const transformedHistory = history.map(task => ({
+    // Barcha yakunlangan muolajalarni olish
+    const [taskHistory, scheduleHistory] = await Promise.all([
+      Task.find({
+        status: 'completed'
+      })
+        .populate('patient_id', 'first_name last_name patient_number')
+        .populate('nurse_id', 'first_name last_name')
+        .sort({ completed_at: -1 })
+        .limit(50)
+        .lean(),
+      TreatmentSchedule.find({
+        status: 'completed'
+      })
+        .populate('patient_id', 'first_name last_name patient_number')
+        .populate('nurse_id', 'first_name last_name')
+        .sort({ completed_at: -1 })
+        .limit(50)
+        .lean()
+    ]);
+    
+    // Transform tasks
+    const transformedTasks = taskHistory.map(task => ({
       ...task,
       id: task._id.toString(),
       patient_name: task.patient_id ? `${task.patient_id.first_name} ${task.patient_id.last_name}` : 'N/A',
       medicine_name: task.medication_name || 'N/A',
-      dosage: task.dosage || 'N/A'
+      medication_name: task.medication_name,
+      dosage: task.dosage || 'N/A',
+      source: 'task',
+      completed_by_name: task.nurse_id ? `${task.nurse_id.first_name} ${task.nurse_id.last_name}` : 'N/A'
     }));
+    
+    // Transform schedules
+    const transformedSchedules = scheduleHistory.map(schedule => ({
+      ...schedule,
+      id: schedule._id.toString(),
+      patient_name: schedule.patient_id ? `${schedule.patient_id.first_name} ${schedule.patient_id.last_name}` : 'N/A',
+      medicine_name: schedule.medication_name || 'N/A',
+      medication_name: schedule.medication_name,
+      dosage: schedule.dosage || 'N/A',
+      source: 'schedule',
+      completed_by_name: schedule.nurse_id ? `${schedule.nurse_id.first_name} ${schedule.nurse_id.last_name}` : 'N/A'
+    }));
+    
+    // Combine and sort by completed_at
+    const allHistory = [...transformedTasks, ...transformedSchedules]
+      .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))
+      .slice(0, 50);
+    
+    console.log('📜 Total history items:', allHistory.length);
     
     res.json({
       success: true,
-      data: transformedHistory
+      data: allHistory
     });
   } catch (error) {
     console.error('Get history error:', error);
     res.status(500).json({
       success: false,
       message: 'Tarixni olishda xatolik',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * FIX: Update old TreatmentSchedules with missing medication data
+ * GET /api/v1/nurse/fix-schedules
+ */
+router.get('/fix-schedules', authenticate, async (req, res) => {
+  try {
+    console.log('=== FIX TREATMENT SCHEDULES ===');
+    
+    // Find all TreatmentSchedules with missing medication_name or dosage
+    const schedules = await TreatmentSchedule.find({
+      $or: [
+        { medication_name: { $exists: false } },
+        { medication_name: null },
+        { medication_name: '' },
+        { dosage: { $exists: false } },
+        { dosage: null },
+        { dosage: '' }
+      ]
+    }).populate('prescription_id');
+
+    console.log(`Found ${schedules.length} schedules with missing data`);
+
+    let fixed = 0;
+    let failed = 0;
+
+    for (const schedule of schedules) {
+      try {
+        if (!schedule.prescription_id || !schedule.prescription_id.medications || schedule.prescription_id.medications.length === 0) {
+          console.log(`Skip ${schedule._id}: no prescription or medications`);
+          failed++;
+          continue;
+        }
+
+        const medication = schedule.prescription_id.medications[0];
+        schedule.medication_name = medication.medication_name;
+        schedule.dosage = medication.dosage;
+        await schedule.save();
+        
+        console.log(`Fixed ${schedule._id}: ${medication.medication_name} - ${medication.dosage}`);
+        fixed++;
+      } catch (error) {
+        console.error(`Error fixing ${schedule._id}:`, error.message);
+        failed++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'TreatmentSchedules fixed',
+      data: {
+        total: schedules.length,
+        fixed,
+        failed
+      }
+    });
+  } catch (error) {
+    console.error('Fix schedules error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Xatolik yuz berdi',
       error: error.message
     });
   }

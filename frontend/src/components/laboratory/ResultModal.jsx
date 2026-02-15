@@ -97,7 +97,7 @@ export default function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
       <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl max-w-2xl sm:max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit} className="p-3 sm:p-4 sm:p-6 space-y-3 sm:space-y-4 sm:space-y-6">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-4 space-y-3 sm:space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-900 pb-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
@@ -219,3 +219,4 @@ export default function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
     </div>
   );
 }
+

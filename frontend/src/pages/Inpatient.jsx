@@ -1669,3 +1669,4 @@ export default function Inpatient() {
     </div>
   );
 }
+

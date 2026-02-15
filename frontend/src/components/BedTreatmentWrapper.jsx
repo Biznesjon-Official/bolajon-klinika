@@ -776,3 +776,4 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
     </>
   );
 }
+

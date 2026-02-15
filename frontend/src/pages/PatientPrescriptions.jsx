@@ -398,3 +398,4 @@ const PatientPrescriptions = () => {
 };
 
 export default PatientPrescriptions;
+

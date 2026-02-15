@@ -392,3 +392,4 @@ function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess })
     </div>
   );
 }
+

@@ -43,3 +43,4 @@ const ProtectedRoute = ({ children, allowPatient = false }) => {
 };
 
 export default ProtectedRoute;
+

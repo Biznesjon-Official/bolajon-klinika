@@ -1,4 +1,4 @@
-// ODDIY VA ISHLAYDIGAN ResultModal
+cd // ODDIY VA ISHLAYDIGAN ResultModal
 // Bu kodni Laboratory.jsx ga ko'chiring
 
 function ResultModal({ isOpen, onClose, order, onSuccess, t }) {

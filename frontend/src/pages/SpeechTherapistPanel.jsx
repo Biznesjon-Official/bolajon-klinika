@@ -436,3 +436,4 @@ const SpeechTherapistPanel = () => {
 };
 
 export default SpeechTherapistPanel;
+

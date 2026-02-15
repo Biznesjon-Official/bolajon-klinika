@@ -409,7 +409,7 @@ router.put('/:id/complete',
 );
 
 /**
- * Cancel appointment
+ * Cancel appointment - DB dan o'chirish
  */
 router.put('/:id/cancel',
   authenticate,
@@ -426,24 +426,18 @@ router.put('/:id/cancel',
         });
       }
       
-      queue.status = 'CANCELLED';
-      const cancelReason = reason || 'Sabab ko\'rsatilmagan';
-      queue.notes = queue.notes 
-        ? `${queue.notes} | Bekor qilish sababi: ${cancelReason}`
-        : `Bekor qilish sababi: ${cancelReason}`;
-      
-      await queue.save();
+      // DB dan butunlay o'chirish
+      await Queue.findByIdAndDelete(req.params.id);
       
       res.json({
         success: true,
-        data: queue,
-        message: 'Qabul bekor qilindi'
+        message: 'Navbat o\'chirildi'
       });
     } catch (error) {
       console.error('Cancel appointment error:', error);
       res.status(500).json({
         success: false,
-        message: 'Qabulni bekor qilishda xatolik',
+        message: 'Navbatni o\'chirishda xatolik',
         error: error.message
       });
     }

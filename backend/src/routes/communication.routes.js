@@ -15,7 +15,15 @@ router.post('/sms/send',
     try {
       const { patient_id, recipient_phone, message, template_id, metadata } = req.body;
 
+      console.log('SMS send request:', {
+        patient_id,
+        recipient_phone,
+        message: message?.substring(0, 50),
+        body: req.body
+      });
+
       if (!patient_id || !message) {
+        console.log('Validation failed:', { patient_id, message });
         return res.status(400).json({
           success: false,
           message: 'Patient ID and message are required'
@@ -33,6 +41,8 @@ router.post('/sms/send',
         patient = await Patient.findOne({ patient_number: patient_id });
       }
 
+      console.log('Patient found:', patient ? `${patient.first_name} ${patient.last_name}` : 'NOT FOUND');
+
       if (!patient) {
         return res.status(404).json({
           success: false,
@@ -42,7 +52,9 @@ router.post('/sms/send',
 
       // Create communication log
       const communication = await Communication.create({
-        patient_id: patient._id,
+        recipient_id: patient._id, // Majburiy maydon
+        recipient_type: 'patient',
+        patient_id: patient._id, // Legacy field
         recipient_name: `${patient.first_name} ${patient.last_name}`,
         recipient_phone: recipient_phone || patient.phone,
         channel: 'sms',
@@ -105,7 +117,9 @@ router.post('/telegram/send',
 
       // Create communication log
       const communication = await Communication.create({
-        patient_id: patient._id,
+        recipient_id: patient._id, // Majburiy maydon
+        recipient_type: 'patient',
+        patient_id: patient._id, // Legacy field
         recipient_name: `${patient.first_name} ${patient.last_name}`,
         recipient_phone: patient.phone,
         channel: 'telegram',

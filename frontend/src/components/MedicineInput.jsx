@@ -203,3 +203,4 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
     </div>
   );
 }
+

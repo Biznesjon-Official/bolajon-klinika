@@ -285,3 +285,4 @@ export default function TreatmentButton({ patientId, patientName, roomNumber, be
     </>
   );
 }
+
