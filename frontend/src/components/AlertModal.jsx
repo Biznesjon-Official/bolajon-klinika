@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom';
 import { useEffect } from 'react';
 
-const AlertModal = ({ isOpen, onClose, title, message, type = 'info' }) => {
+const AlertModal = ({ isOpen, onClose, title, message, type = 'info', onConfirm, showCancel = false, confirmText = 'OK', cancelText = 'Bekor qilish' }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -90,12 +90,34 @@ const AlertModal = ({ isOpen, onClose, title, message, type = 'info' }) => {
         </div>
 
         <div className="p-6">
-          <button
-            onClick={onClose}
-            className={`w-full px-6 py-3 ${config.buttonColor} text-white rounded-xl font-semibold transition-colors`}
-          >
-            OK
-          </button>
+          {showCancel ? (
+            // 2 ta tugma - OK va Bekor qilish
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                {cancelText}
+              </button>
+              <button
+                onClick={() => {
+                  if (onConfirm) onConfirm();
+                  onClose();
+                }}
+                className={`flex-1 px-6 py-3 ${config.buttonColor} text-white rounded-xl font-semibold transition-colors`}
+              >
+                {confirmText}
+              </button>
+            </div>
+          ) : (
+            // Faqat OK tugmasi
+            <button
+              onClick={onClose}
+              className={`w-full px-6 py-3 ${config.buttonColor} text-white rounded-xl font-semibold transition-colors`}
+            >
+              OK
+            </button>
+          )}
         </div>
       </div>
     </div>

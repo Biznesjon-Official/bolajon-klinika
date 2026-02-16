@@ -214,10 +214,21 @@ const DoctorPanel = () => {
           // To'lanmagan hisob-fakturalar bor
           const totalUnpaid = invoiceResponse.data.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
           
-          showAlert(
-            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nIltimos, avval to'lovni amalga oshiring.`,
-            'error',
-            'To\'lov kerak'
+          // Ogohlantirish ko'rsatamiz va tasdiqlash so'raymiz
+          showConfirm(
+            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nBaribir chaqirasizmi?`,
+            async () => {
+              // Tasdiqlansa, bemorni chaqiramiz
+              await queueService.callPatient(queueId);
+              showAlert(t('doctorPanel.patientCalled'), 'success', t('common.success'));
+              loadMyQueue();
+            },
+            {
+              title: 'To\'lov kerak',
+              type: 'warning',
+              confirmText: 'Ha, chaqirish',
+              cancelText: 'Bekor qilish'
+            }
           );
           return;
         }
@@ -226,6 +237,7 @@ const DoctorPanel = () => {
         // Xatolik bo'lsa ham davom etamiz
       }
 
+      // Qarz bo'lmasa yoki xatolik bo'lsa, oddiy chaqiramiz
       await queueService.callPatient(queueId);
       showAlert(t('doctorPanel.patientCalled'), 'success', t('common.success'));
       loadMyQueue();

@@ -3,14 +3,34 @@ import api from './api';
 const nurseService = {
   // Statistika
   getStats: async () => {
-    const response = await api.get('/nurse/stats');
-    return response.data;
+    console.log('📡 nurseService.getStats() called');
+    console.log('   URL: /nurse/stats');
+    try {
+      const response = await api.get('/nurse/stats');
+      console.log('✅ getStats response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ getStats error:', error);
+      console.error('   Error response:', error.response?.data);
+      throw error;
+    }
   },
 
   // Muolajalar
   getTreatments: async (params = {}) => {
-    const response = await api.get('/nurse/treatments', { params });
-    return response.data;
+    console.log('📡 nurseService.getTreatments() called');
+    console.log('   URL: /nurse/treatments');
+    console.log('   Params:', params);
+    try {
+      const response = await api.get('/nurse/treatments', { params });
+      console.log('✅ getTreatments response:', response.data);
+      console.log('   Data length:', response.data?.data?.length);
+      return response.data;
+    } catch (error) {
+      console.error('❌ getTreatments error:', error);
+      console.error('   Error response:', error.response?.data);
+      throw error;
+    }
   },
 
   completeTreatment: async (id, data) => {

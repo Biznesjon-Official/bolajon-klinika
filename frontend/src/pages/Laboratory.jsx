@@ -5,6 +5,7 @@ import laboratoryService from '../services/laboratoryService';
 import patientService from '../services/patientService';
 import api from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
+import ConfirmModal from '../components/ConfirmModal';
 import LabPharmacy from './LabPharmacy';
 import OrdersList from '../components/laboratory/OrdersList';
 import TestsCatalog from '../components/laboratory/TestsCatalog';
@@ -35,6 +36,7 @@ export default function Laboratory() {
   const [showNewOrderModal, setShowNewOrderModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
   
   // Form data
   const [patients, setPatients] = useState([]);
@@ -153,18 +155,29 @@ export default function Laboratory() {
           
           console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
           
-          toast.error(
-            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor! Iltimos, avval to'lovni amalga oshiring.`,
-            { duration: 5000 }
-          );
-          return; // To'xtatamiz
+          // Ogohlantirish ko'rsatamiz va tasdiqlash so'raymiz
+          setConfirmModal({
+            isOpen: true,
+            title: 'To\'lov kerak',
+            message: `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nBaribir natija kiritasizmi?`,
+            type: 'warning',
+            confirmText: 'Ha, davom etish',
+            cancelText: 'Bekor qilish',
+            onConfirm: () => {
+              // Tasdiqlansa, natija kiritish modalini ochamiz
+              console.log('✅ User confirmed, opening result modal');
+              setSelectedOrder(order);
+              setShowResultModal(true);
+              setConfirmModal({ isOpen: false, message: '', onConfirm: null });
+            }
+          });
+          return;
         } else {
           console.log('✅ No unpaid invoices');
         }
       } catch (invoiceError) {
         console.error('❌ Invoice check error:', invoiceError);
-        toast.error('To\'lov holatini tekshirishda xatolik yuz berdi');
-        return; // Xatolik bo'lsa ham to'xtatamiz
+        // Xatolik bo'lsa ham davom etamiz
       }
     } else {
       console.log('⚠️ No patient_id in order');
@@ -462,6 +475,18 @@ export default function Laboratory() {
           t={t}
         />
       )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        confirmText={confirmModal.confirmText}
+        cancelText={confirmModal.cancelText}
+      />
     </div>
   );
 }

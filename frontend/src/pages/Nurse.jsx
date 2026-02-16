@@ -23,6 +23,9 @@ const Nurse = () => {
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('=== NURSE PANEL: LOADING DATA ===');
+      console.log('Status Filter:', statusFilter);
+      
       const [treatmentsRes, statsRes] = await Promise.all([
         nurseService.getTreatments({ status: statusFilter }),
         nurseService.getStats()
@@ -30,24 +33,54 @@ const Nurse = () => {
 
       console.log('=== NURSE TREATMENTS RESPONSE ===');
       console.log('Treatments Response:', treatmentsRes);
+      console.log('Treatments Success:', treatmentsRes.success);
+      console.log('Treatments Data Length:', treatmentsRes.data?.length);
       console.log('Treatments Data:', treatmentsRes.data);
+      
+      console.log('=== NURSE STATS RESPONSE ===');
+      console.log('Stats Response:', statsRes);
+      console.log('Stats Success:', statsRes.success);
+      console.log('Stats Data:', statsRes.data);
       
       if (treatmentsRes.data && treatmentsRes.data.length > 0) {
         console.log('First Treatment:', treatmentsRes.data[0]);
         console.log('  - medication_name:', treatmentsRes.data[0].medication_name);
         console.log('  - dosage:', treatmentsRes.data[0].dosage);
         console.log('  - prescription_id:', treatmentsRes.data[0].prescription_id);
+      } else {
+        console.log('⚠️  NO TREATMENTS FOUND');
       }
 
       if (treatmentsRes.success) {
-        setTreatments(treatmentsRes.data);
+        console.log('✅ Setting treatments state with', treatmentsRes.data?.length, 'items');
+        setTreatments(treatmentsRes.data || []);
+        console.log('✅ Treatments state updated');
+      } else {
+        console.log('⚠️  Treatments response not successful');
+        setTreatments([]);
       }
       if (statsRes.success) {
-        setStats(statsRes.data);
+        console.log('✅ Setting stats state:', statsRes.data);
+        setStats(statsRes.data || {
+          pending_treatments: 0,
+          overdue_treatments: 0,
+          total_patients: 0
+        });
+        console.log('✅ Stats state updated');
+      } else {
+        console.log('⚠️  Stats response not successful');
+        setStats({
+          pending_treatments: 0,
+          overdue_treatments: 0,
+          total_patients: 0
+        });
       }
     } catch (error) {
-      console.error('Load data error:', error);
-      toast.error('Ma\'lumotlarni yuklashda xatolik');
+      console.error('=== LOAD DATA ERROR ===');
+      console.error('Error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error response:', error.response);
+      toast.error('Ma\'lumotlarni yuklashda xatolik: ' + (error.message || 'Noma\'lum xatolik'));
     } finally {
       setLoading(false);
     }
@@ -106,6 +139,7 @@ const Nurse = () => {
   };
 
   if (loading) {
+    console.log('🔄 Nurse panel is loading...');
     return (
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-center h-64">
@@ -114,6 +148,12 @@ const Nurse = () => {
       </div>
     );
   }
+
+  console.log('🎨 RENDERING NURSE PANEL');
+  console.log('   Treatments count:', treatments.length);
+  console.log('   Stats:', stats);
+  console.log('   Status filter:', statusFilter);
+  console.log('   Loading:', loading);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
@@ -172,6 +212,16 @@ const Nurse = () => {
       {/* Treatments List */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6">
         <h2 className="text-lg sm:text-xl font-bold mb-6">Muolajalar</h2>
+        
+        {(() => {
+          console.log('🎨 Rendering treatments list, count:', treatments.length);
+          if (treatments.length === 0) {
+            console.log('⚠️  Showing "no treatments" message');
+          } else {
+            console.log('✅ Showing', treatments.length, 'treatments');
+          }
+          return null;
+        })()}
         
         {treatments.length === 0 ? (
           <div className="text-center py-8 text-gray-500">

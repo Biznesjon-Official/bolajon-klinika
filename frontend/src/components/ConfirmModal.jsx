@@ -3,6 +3,10 @@ import { useEffect } from 'react';
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Tasdiqlash', cancelText = 'Bekor qilish', type = 'warning' }) => {
   useEffect(() => {
+    console.log('🎨 ConfirmModal render:', { isOpen, title, message });
+  }, [isOpen, title, message]);
+
+  useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {

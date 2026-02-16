@@ -78,8 +78,10 @@ router.get('/stats', authenticate, async (req, res) => {
   try {
     const nurseId = req.user._id || req.user.id;
     
-    console.log('=== GET NURSE STATS (ALL TREATMENTS) ===');
+    console.log('\n=== GET NURSE STATS (ALL TREATMENTS) ===');
+    console.log('Timestamp:', new Date().toISOString());
     console.log('Nurse ID:', nurseId);
+    console.log('User:', req.user.username);
     
     // Barcha muolajalar statistikasi - nurse_id filter yo'q
     const [pendingTasks, pendingSchedules, overdueTasks, overdueSchedules, activePatients] = await Promise.all([
@@ -113,7 +115,7 @@ router.get('/stats', authenticate, async (req, res) => {
       total_patients: activePatients.length
     });
     
-    res.json({
+    const responseData = {
       success: true,
       data: {
         pending_treatments: totalPending,
@@ -121,9 +123,14 @@ router.get('/stats', authenticate, async (req, res) => {
         total_patients: activePatients.length,
         active_calls: 0
       }
-    });
+    };
+    
+    console.log('✅ Sending response:', responseData);
+    
+    res.json(responseData);
   } catch (error) {
-    console.error('Get nurse stats error:', error);
+    console.error('❌ Get nurse stats error:', error);
+    console.error('   Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Statistikani olishda xatolik',
@@ -142,13 +149,19 @@ router.get('/treatments', authenticate, async (req, res) => {
     const nurseId = req.user._id || req.user.id;
     const { status, floor, limit = 100, skip = 0 } = req.query; // Add pagination
     
-    console.log('=== GET NURSE TREATMENTS (OPTIMIZED) ===');
+    console.log('\n=== GET NURSE TREATMENTS (OPTIMIZED) ===');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('Nurse ID:', nurseId);
+    console.log('User:', req.user.username);
+    console.log('Query params:', { status, floor, limit, skip });
     
     // Build query
     const query = {};
     if (status && status !== 'all') {
       query.status = status;
     }
+    
+    console.log('MongoDB query:', query);
     
     // Optimize: Only select needed fields
     const selectFields = 'title medication_name dosage scheduled_time status task_type patient_id nurse_id admission_id prescription_id total_doses completed_doses';
@@ -205,8 +218,31 @@ router.get('/treatments', authenticate, async (req, res) => {
         .lean()
     ]);
     
-    console.log('📋 Found Tasks:', tasks.length);
-    console.log('📋 Found TreatmentSchedules:', treatmentSchedules.length);
+    console.log('📋 Database results:');
+    console.log('   Tasks found:', tasks.length);
+    console.log('   TreatmentSchedules found:', treatmentSchedules.length);
+    console.log('   Total:', tasks.length + treatmentSchedules.length);
+    
+    if (tasks.length > 0) {
+      console.log('\n--- SAMPLE TASK (RAW) ---');
+      console.log('Task ID:', tasks[0]._id);
+      console.log('Task title:', tasks[0].title);
+      console.log('Task patient_id:', tasks[0].patient_id);
+      console.log('Task patient_id type:', typeof tasks[0].patient_id);
+      console.log('Task medication_name:', tasks[0].medication_name);
+      console.log('Task dosage:', tasks[0].dosage);
+      console.log('Full task:', JSON.stringify(tasks[0], null, 2));
+    }
+    
+    if (treatmentSchedules.length > 0) {
+      console.log('\n--- SAMPLE SCHEDULE (RAW) ---');
+      console.log('Schedule ID:', treatmentSchedules[0]._id);
+      console.log('Schedule patient_id:', treatmentSchedules[0].patient_id);
+      console.log('Schedule patient_id type:', typeof treatmentSchedules[0].patient_id);
+      console.log('Schedule medication_name:', treatmentSchedules[0].medication_name);
+      console.log('Schedule dosage:', treatmentSchedules[0].dosage);
+      console.log('Full schedule:', JSON.stringify(treatmentSchedules[0], null, 2));
+    }
     
     if (tasks.length > 0) {
       console.log('Sample Task:', {
@@ -232,6 +268,17 @@ router.get('/treatments', authenticate, async (req, res) => {
       console.log('Task ID:', task._id);
       console.log('Task title:', task.title);
       console.log('Task patient_id:', task.patient_id);
+      console.log('Task patient_id is null?', task.patient_id === null);
+      console.log('Task patient_id is undefined?', task.patient_id === undefined);
+      
+      if (!task.patient_id) {
+        console.log('⚠️  WARNING: Task has no patient_id!');
+      } else if (typeof task.patient_id === 'object') {
+        console.log('✅ Patient populated:', task.patient_id.first_name, task.patient_id.last_name);
+      } else {
+        console.log('⚠️  WARNING: Patient not populated, patient_id is:', typeof task.patient_id);
+      }
+      
       console.log('Task medication_name:', task.medication_name);
       console.log('Task dosage:', task.dosage);
       console.log('Task prescription_id:', task.prescription_id?._id);
@@ -352,9 +399,20 @@ router.get('/treatments', authenticate, async (req, res) => {
     const transformedSchedules = await Promise.all(treatmentSchedules.map(async (schedule) => {
       console.log('\n=== SCHEDULE TRANSFORM ===');
       console.log('ID:', schedule._id);
+      console.log('patient_id:', schedule.patient_id);
+      console.log('patient_id is null?', schedule.patient_id === null);
+      console.log('patient_id is undefined?', schedule.patient_id === undefined);
+      
+      if (!schedule.patient_id) {
+        console.log('⚠️  WARNING: Schedule has no patient_id!');
+      } else if (typeof schedule.patient_id === 'object') {
+        console.log('✅ Patient populated:', schedule.patient_id.first_name, schedule.patient_id.last_name);
+      } else {
+        console.log('⚠️  WARNING: Patient not populated, patient_id is:', typeof schedule.patient_id);
+      }
+      
       console.log('medication_name:', schedule.medication_name);
       console.log('dosage:', schedule.dosage);
-      console.log('patient_id:', schedule.patient_id);
       console.log('prescription_id:', schedule.prescription_id?._id);
       
       // Get medication info from prescription if not in schedule
@@ -496,11 +554,29 @@ router.get('/treatments', authenticate, async (req, res) => {
     
     if (allTreatments.length > 0) {
       console.log('Sample combined treatment:', JSON.stringify(allTreatments[0], null, 2));
+    } else {
+      console.log('⚠️  NO TREATMENTS TO RETURN');
     }
+    
+    const responseData = {
+      success: true,
+      data: allTreatments
+    };
+    
+    // Filter out treatments without patient info
+    const validTreatments = allTreatments.filter(t => {
+      const hasPatient = t.patient_name && t.patient_name !== 'N/A';
+      if (!hasPatient) {
+        console.log('⚠️  Filtering out treatment without patient:', t.id);
+      }
+      return hasPatient;
+    });
+    
+    console.log('✅ Sending response with', validTreatments.length, 'valid treatments (filtered from', allTreatments.length, 'total)');
     
     res.json({
       success: true,
-      data: allTreatments
+      data: validTreatments
     });
   } catch (error) {
     console.error('=== GET TREATMENTS ERROR ===');

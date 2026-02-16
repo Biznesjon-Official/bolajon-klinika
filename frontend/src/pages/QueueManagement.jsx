@@ -64,7 +64,7 @@ const QueueManagement = () => {
   const [filterDoctor, setFilterDoctor] = useState('all');
 
   // Alert and Confirm modals
-  const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+  const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info', onConfirm: null, showCancel: false, confirmText: 'OK', cancelText: 'Bekor qilish' });
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'warning', confirmText: '', cancelText: '' });
   
   // Complete appointment modal - separate state
@@ -76,12 +76,14 @@ const QueueManagement = () => {
   const [selectedPatientForQR, setSelectedPatientForQR] = useState(null);
 
   // Helper functions for alerts
-  const showAlert = (message, type = 'info', title = '') => {
-    setAlertModal({ isOpen: true, title, message, type });
+  const showAlert = (message, type = 'info', title = '', onConfirm = null, showCancel = false, confirmText = 'OK', cancelText = 'Bekor qilish') => {
+    setAlertModal({ isOpen: true, title, message, type, onConfirm, showCancel, confirmText, cancelText });
   };
 
   const showConfirm = (message, onConfirm, title = t('queue.confirm'), type = 'warning', confirmText = t('queue.confirm'), cancelText = t('queue.cancel')) => {
-    setConfirmModal({ 
+    console.log('🔔 showConfirm called with:', { message, title, type, confirmText, cancelText });
+    
+    const newState = { 
       isOpen: true, 
       title, 
       message, 
@@ -89,7 +91,10 @@ const QueueManagement = () => {
       type,
       confirmText,
       cancelText
-    });
+    };
+    
+    console.log('🔔 Setting confirmModal to:', newState);
+    setConfirmModal(newState);
   };
 
   useEffect(() => {
@@ -209,25 +214,44 @@ const QueueManagement = () => {
           
           console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
           
+          // Ogohlantirish ko'rsatamiz - OK bosilsa chaqiriladi, Bekor qilish bosilsa yo'q
           showAlert(
-            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nIltimos, avval to'lovni amalga oshiring.`,
-            'error',
-            'To\'lov kerak'
+            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nBaribir chaqirasizmi?`,
+            'warning',
+            'To\'lov kerak',
+            async () => {
+              // OK bosilsa - bemorni chaqiramiz
+              console.log('✅ User confirmed, calling patient...');
+              
+              try {
+                const response = await queueService.callPatient(queueId);
+                if (response.success) {
+                  // Avtomatik IN_PROGRESS ga o'tkazish
+                  try {
+                    await queueService.startAppointment(queueId);
+                    showAlert('Bemor qabulga olindi', 'success', t('common.success'));
+                  } catch (startError) {
+                    console.error('Start appointment error:', startError);
+                    showAlert(t('queue.patientCalled'), 'success', t('common.success'));
+                  }
+                  loadData(); // Navbatni yangilash
+                }
+              } catch (error) {
+                console.error('Call patient error:', error);
+                showAlert(t('queue.errorOccurred'), 'error', t('common.error'));
+              }
+            },
+            true, // showCancel = true
+            'Ha, chaqirish', // confirmText
+            'Bekor qilish' // cancelText
           );
-          return; // MUHIM: Bu yerda to'xtatamiz
+          return;
         } else {
           console.log('✅ No unpaid invoices found');
         }
       } catch (invoiceError) {
         console.error('❌ Invoice check error:', invoiceError);
-        // Xatolik bo'lsa, to'lovni tekshirishni o'tkazib yuboramiz va davom etamiz
-        showAlert(
-          'To\'lov holatini tekshirishda xatolik yuz berdi. Davom ettirilsinmi?',
-          'warning',
-          'Ogohlantirish'
-        );
-        // Xatolik bo'lsa ham to'xtatamiz
-        return;
+        // Xatolik bo'lsa ham davom etamiz
       }
 
       // Agar to'lov tekshiruvi o'tgan bo'lsa, bemorni chaqiramiz
@@ -597,6 +621,10 @@ const QueueManagement = () => {
           title={alertModal.title}
           message={alertModal.message}
           type={alertModal.type}
+          onConfirm={alertModal.onConfirm}
+          showCancel={alertModal.showCancel}
+          confirmText={alertModal.confirmText}
+          cancelText={alertModal.cancelText}
         />
 
         {/* Complete Appointment Modal - FOR DOCTOR */}
@@ -974,12 +1002,21 @@ const QueueManagement = () => {
         title={alertModal.title}
         message={alertModal.message}
         type={alertModal.type}
+        onConfirm={alertModal.onConfirm}
+        showCancel={alertModal.showCancel}
+        confirmText={alertModal.confirmText}
+        cancelText={alertModal.cancelText}
       />
 
-      {/* Confirm Modal */}
+      {/* Confirm Modal - Main confirmation dialog */}
+      {console.log('🎨 Rendering ConfirmModal with state:', confirmModal)}
       <ConfirmModal
+        key="main-confirm-modal"
         isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onClose={() => {
+          console.log('🔴 ConfirmModal onClose called');
+          setConfirmModal({ ...confirmModal, isOpen: false });
+        }}
         onConfirm={confirmModal.onConfirm}
         title={confirmModal.title}
         message={confirmModal.message}

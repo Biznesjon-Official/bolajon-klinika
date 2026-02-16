@@ -164,47 +164,140 @@ export default function SanitarPanel() {
             </div>
 
             {areas.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl sm:rounded-xl sm:rounded-2xl p-3 sm:p-4 sm:p-4 sm:p-6 shadow-sm">
-                <h3 className="text-base sm:text-base sm:text-lg font-bold mb-3 flex items-center gap-2 sm:gap-2 sm:gap-3 text-gray-900 dark:text-white"><span className="material-symbols-outlined">location_on</span>Sizning hududlaringiz</h3>
-                <div className="flex flex-wrap gap-2 sm:gap-2 sm:gap-3">{areas.map((a, i) => <div key={i} className="bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-700 px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl"><p className="text-sm sm:text-sm sm:text-base font-bold text-green-700 dark:text-green-300">{a.area}</p>{a.department && <p className="text-xs text-green-600 dark:text-green-400">{a.department === 'inpatient' ? 'Statsionar' : 'Ambulatorxona'}</p>}</div>)}</div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
+                <h3 className="text-lg sm:text-xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                  <span className="material-symbols-outlined">location_on</span>
+                  Sizning hududlaringiz
+                </h3>
+                
+                {/* Department Badges - Responsive */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {areas.map((a, i) => (
+                    <div 
+                      key={i} 
+                      className="bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-700 px-4 py-2 rounded-lg"
+                    >
+                      <p className="text-sm sm:text-base font-bold text-green-700 dark:text-green-300">
+                        {a.department === 'inpatient' ? 'Statsionar' : 'Ambulatorxona'}
+                      </p>
+                      <p className="text-xs text-green-600 dark:text-green-400">{a.area}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Grid Layout - Responsive */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                  {/* Asosiy */}
+                  <button
+                    onClick={() => setActiveTab('dashboard')}
+                    className={`flex flex-col items-center justify-center gap-3 p-4 sm:p-6 rounded-xl transition-all ${
+                      activeTab === 'dashboard'
+                        ? 'bg-primary text-white shadow-lg'
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-3xl sm:text-4xl">dashboard</span>
+                    <span className="text-sm sm:text-base font-semibold">Asosiy</span>
+                  </button>
+
+                  {/* Xonalar */}
+                  <button
+                    onClick={() => setActiveTab('rooms')}
+                    className={`flex flex-col items-center justify-center gap-3 p-4 sm:p-6 rounded-xl transition-all ${
+                      activeTab === 'rooms'
+                        ? 'bg-primary text-white shadow-lg'
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-3xl sm:text-4xl">meeting_room</span>
+                    <span className="text-sm sm:text-base font-semibold">Xonalar</span>
+                  </button>
+
+                  {/* Vazifalar */}
+                  <button
+                    onClick={() => setActiveTab('tasks')}
+                    className={`flex flex-col items-center justify-center gap-3 p-4 sm:p-6 rounded-xl transition-all ${
+                      activeTab === 'tasks'
+                        ? 'bg-primary text-white shadow-lg'
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-3xl sm:text-4xl">task_alt</span>
+                    <span className="text-sm sm:text-base font-semibold">Vazifalar</span>
+                  </button>
+
+                  {/* Maoshlarim */}
+                  <button
+                    onClick={() => setActiveTab('salary')}
+                    className={`flex flex-col items-center justify-center gap-3 p-4 sm:p-6 rounded-xl transition-all ${
+                      activeTab === 'salary'
+                        ? 'bg-primary text-white shadow-lg'
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-3xl sm:text-4xl">payments</span>
+                    <span className="text-sm sm:text-base font-semibold">Maoshlarim</span>
+                  </button>
+
+                  {/* Tarix */}
+                  <button
+                    onClick={() => setActiveTab('history')}
+                    className={`flex flex-col items-center justify-center gap-3 p-4 sm:p-6 rounded-xl transition-all ${
+                      activeTab === 'history'
+                        ? 'bg-primary text-white shadow-lg'
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-3xl sm:text-4xl">history</span>
+                    <span className="text-sm sm:text-base font-semibold">Tarix</span>
+                  </button>
+                </div>
               </div>
             )}
           </>
         )}
 
 
-        {/* Tabs - Responsive with Full Labels */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl sm:rounded-xl sm:rounded-2xl shadow-sm overflow-hidden sm:block">
-          <div className="border-b dark:border-gray-700">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-2 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8">
-              {[
-                { id: 'dashboard', label: 'Asosiy', icon: 'dashboard' },
-                { id: 'rooms', label: 'Xonalar', icon: 'meeting_room' },
-                { id: 'tasks', label: 'Vazifalar', icon: 'task_alt' },
-                { id: 'salary', label: 'Maoshlarim', icon: 'payments' },
-                { id: 'history', label: 'Tarix', icon: 'history' }
-              ].map(t => (
-                <button key={t.id} onClick={() => setActiveTab(t.id)} className={`flex flex-col items-center justify-center gap-1 px-2 py-2 sm:py-3 font-semibold border-b-2 transition-all ${activeTab === t.id ? 'border-primary text-primary bg-green-50 dark:bg-green-900/30' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
-                  <span className="material-symbols-outlined text-lg sm:text-lg sm:text-xl">{t.icon}</span>
-                  <span className="text-[10px] sm:text-xs lg:text-sm sm:text-sm sm:text-base">{t.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="p-3 sm:p-3 sm:p-4 lg:p-4 sm:p-6 min-h-[300px]">
+        {/* Content Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
+          <div className="min-h-[300px]">
             {/* Xonalar Tab */}
             {activeTab === 'rooms' && (
-              <div className="space-y-2 sm:space-y-3 sm:space-y-3 sm:space-y-4">
-                {/* Search & Filter - Responsive */}
-                <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
-                  <div className="relative flex-1">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">search</span>
-                    <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Xona qidirish..." className="w-full pl-10 pr-4 py-2 sm:py-2.5 sm:py-2 sm:py-3 border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary text-sm sm:text-sm sm:text-base" />
+              <div className="space-y-3 sm:space-y-4">
+                {/* Search & Filter - Compact and Always Visible */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  {/* Search Input - Compact */}
+                  <div className="relative flex-1 max-w-xs">
+                    <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-base">search</span>
+                    <input 
+                      type="text" 
+                      value={searchQuery} 
+                      onChange={(e) => setSearchQuery(e.target.value)} 
+                      placeholder="Qidirish..." 
+                      className="w-full pl-8 pr-3 py-1.5 border dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary text-sm" 
+                    />
                   </div>
-                  <div className="flex gap-2 sm:gap-2 sm:gap-3 overflow-x-auto pb-1">
-                    {[{ value: 'all', label: 'Barchasi' }, { value: 'tozalanmagan', label: 'Tozalanmagan' }, { value: 'tozalanmoqda', label: 'Jarayonda' }, { value: 'toza', label: 'Toza' }].map(f => (
-                      <button key={f.value} onClick={() => setSelectedStatus(f.value)} className={`px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 rounded-lg sm:rounded-lg sm:rounded-xl font-semibold transition-colors whitespace-nowrap text-xs sm:text-sm sm:text-sm sm:text-base ${selectedStatus === f.value ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>{f.label}</button>
+                  
+                  {/* Status Filters - Compact Pills */}
+                  <div className="flex gap-1.5 flex-wrap">
+                    {[
+                      { value: 'all', label: 'Barchasi', icon: 'grid_view' }, 
+                      { value: 'tozalanmagan', label: 'Tozalanmagan', icon: 'warning' }, 
+                      { value: 'tozalanmoqda', label: 'Jarayonda', icon: 'sync' }, 
+                      { value: 'toza', label: 'Toza', icon: 'check_circle' }
+                    ].map(f => (
+                      <button 
+                        key={f.value} 
+                        onClick={() => setSelectedStatus(f.value)} 
+                        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all text-xs ${
+                          selectedStatus === f.value 
+                            ? 'bg-primary text-white shadow-sm' 
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-sm">{f.icon}</span>
+                        <span className="whitespace-nowrap">{f.label}</span>
+                      </button>
                     ))}
                   </div>
                 </div>
