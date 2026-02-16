@@ -1,5 +1,6 @@
 import toast from 'react-hot-toast';
 import laboratoryService from '../../services/laboratoryService';
+import api from '../../services/api';
 
 export default function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, isLaborant, isDoctor, isReception, getStatusColor, getStatusText, t }) {
   const handleStatusChange = async (orderId, newStatus, patientId) => {
@@ -7,25 +8,17 @@ export default function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, 
       // Agar namuna olinayotgan bo'lsa, avval to'lovni tekshirish
       if (newStatus === 'in_progress' && patientId) {
         try {
-          const response = await fetch(`http://localhost:5001/api/v1/billing/invoices/patient/${patientId}/unpaid`, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          });
+          const response = await api.get(`/billing/invoices/patient/${patientId}/unpaid`);
           
-          if (response.ok) {
-            const invoiceData = await response.json();
+          if (response.data.success && response.data.data && response.data.data.length > 0) {
+            // To'lanmagan hisob-fakturalar bor
+            const totalUnpaid = response.data.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
             
-            if (invoiceData.success && invoiceData.data && invoiceData.data.length > 0) {
-              // To'lanmagan hisob-fakturalar bor
-              const totalUnpaid = invoiceData.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
-              
-              toast.error(
-                `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor! Iltimos, avval to'lovni amalga oshiring.`,
-                { duration: 5000 }
-              );
-              return;
-            }
+            toast.error(
+              `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor! Iltimos, avval to'lovni amalga oshiring.`,
+              { duration: 5000 }
+            );
+            return;
           }
         } catch (invoiceError) {
           console.error('Invoice check error:', invoiceError);

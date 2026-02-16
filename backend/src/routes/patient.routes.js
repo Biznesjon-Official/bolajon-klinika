@@ -241,11 +241,18 @@ router.get('/:id',
       // Get invoices with full details
       const invoices = await Invoice.find({ patient_id: patient._id })
         .sort({ created_at: -1 })
-        .limit(10)
         .lean();
       
+      // Calculate total debt from ALL invoices
+      const totalDebt = invoices.reduce((sum, inv) => {
+        return sum + ((inv.total_amount || 0) - (inv.paid_amount || 0));
+      }, 0);
+      
+      // Get only last 10 invoices for display
+      const recentInvoices = invoices.slice(0, 10);
+      
       // Format invoices to include all fields
-      const formattedInvoices = invoices.map(inv => ({
+      const formattedInvoices = recentInvoices.map(inv => ({
         id: inv._id,
         invoice_number: inv.invoice_number,
         total_amount: inv.total_amount,
@@ -293,7 +300,7 @@ router.get('/:id',
         emergency_contact: patient.emergency_contact,
         insurance_number: patient.insurance_number,
         insurance_provider: patient.insurance_provider,
-        current_balance: patient.total_debt || 0,
+        current_balance: totalDebt, // Barcha invoicelardan hisoblangan to'g'ri qarz
         debt_limit: patient.debt_limit || 500000,
         is_blocked: patient.status !== 'active',
         status: patient.status,
@@ -306,7 +313,15 @@ router.get('/:id',
         data: {
           patient: formattedPatient,
           admissions: formattedAdmissions,
-          invoices: formattedInvoices,
+          invoices: formattedInvoices, // Oxirgi 10 ta invoice
+          allInvoices: invoices.map(inv => ({ // Barcha invoicelar (qarz hisoblash uchun)
+            id: inv._id,
+            invoice_number: inv.invoice_number,
+            total_amount: inv.total_amount,
+            paid_amount: inv.paid_amount,
+            payment_status: inv.payment_status || inv.status,
+            created_at: inv.created_at
+          })),
           prescriptions: prescriptions.map(presc => ({
             id: presc._id,
             diagnosis: presc.diagnosis,

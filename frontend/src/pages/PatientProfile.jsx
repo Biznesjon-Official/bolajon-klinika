@@ -94,7 +94,7 @@ const PatientProfile = () => {
       if (response.success && response.data) {
         setPatient(response.data.patient);
         setMedicalRecords(response.data.medicalRecords || []);
-        setInvoices(response.data.invoices || []);
+        setInvoices(response.data.allInvoices || response.data.invoices || []); // Barcha invoicelarni yuklash
         setLabResults(response.data.labResults || []); // labOrders -> labResults
         setAdmissions(response.data.admissions || []);
       } else {

@@ -18,6 +18,7 @@ const CashierAdvanced = () => {
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false); // Invoice yaratish uchun
   const [stats, setStats] = useState({
     today_revenue: 0,
     month_revenue: 0,
@@ -190,7 +191,7 @@ const CashierAdvanced = () => {
       setLoading(true);
       const [statsData, invoicesData, transactionsData, patientsData] = await Promise.all([
         billingService.getStats(),
-        billingService.getInvoices({ limit: 20 }),
+        billingService.getInvoices({ limit: 1000 }), // Barcha invoicelarni yuklash
         billingService.getTransactions({ limit: 10 }),
         api.get('/patients/search', { params: { q: '', limit: 100 } })
       ]);
@@ -358,7 +359,7 @@ const CashierAdvanced = () => {
 
   const loadInvoices = async () => {
     try {
-      const invoicesData = await billingService.getInvoices({ limit: 100 }); // Ko'proq invoice yuklash
+      const invoicesData = await billingService.getInvoices({ limit: 1000 }); // Barcha invoicelarni yuklash
       if (invoicesData.success) {
         setInvoices(invoicesData.data);
         
@@ -651,6 +652,12 @@ const CashierAdvanced = () => {
   };
 
   const handleCreateInvoice = async () => {
+    // Agar allaqachon yuborilayotgan bo'lsa, to'xtatamiz
+    if (submitting) {
+      console.log('Already submitting, ignoring...');
+      return;
+    }
+    
     console.log('=== HANDLE CREATE INVOICE START ===');
     console.log('selectedPatient:', selectedPatient);
     console.log('invoiceItems:', invoiceItems);
@@ -681,6 +688,8 @@ const CashierAdvanced = () => {
       return;
     }
 
+    setSubmitting(true); // Yuborilayotganini belgilaymiz
+    
     try {
       // selectedPatient ichida patient obyekti bor
       const patient = selectedPatient.patient || selectedPatient;
@@ -809,6 +818,8 @@ const CashierAdvanced = () => {
       console.error('Create invoice error:', error);
       console.error('Error response:', error.response?.data);
       showAlert('Xatolik yuz berdi: ' + (error.response?.data?.message || error.message), 'error', 'Xatolik');
+    } finally {
+      setSubmitting(false); // Yuborilish tugadi
     }
   };
 
@@ -822,27 +833,103 @@ const CashierAdvanced = () => {
     if (!selectedInvoice || !paymentAmount) return;
 
     try {
-      const response = await billingService.addPayment(selectedInvoice.id, {
-        amount: parseFloat(paymentAmount),
-        payment_method: paymentMethod,
-        reference_number: transactionId,
-        notes: ''
-      });
-
-      if (response.success) {
-        showAlert('To\'lov muvaffaqiyatli qabul qilindi!', 'success', 'Muvaffaqiyatli');
+      // Agar bu ko'p invoicelar bo'lsa
+      if (selectedInvoice._isMultiple) {
+        setSubmitting(true);
+        
+        const unpaidInvoices = selectedInvoice._invoices;
+        let successCount = 0;
+        let errorCount = 0;
+        
+        // Har bir invoiceni to'lash
+        for (const invoice of unpaidInvoices) {
+          try {
+            const remainingAmount = invoice.total_amount - invoice.paid_amount;
+            
+            const response = await billingService.addPayment(invoice.id, {
+              amount: remainingAmount,
+              payment_method: paymentMethod,
+              reference_number: transactionId,
+              notes: 'Barcha qarzni to\'lash'
+            });
+            
+            if (response.success) {
+              successCount++;
+            } else {
+              errorCount++;
+            }
+          } catch (error) {
+            console.error('Payment error for invoice:', invoice.invoice_number, error);
+            errorCount++;
+          }
+        }
+        
+        setSubmitting(false);
+        
+        // Natijani ko'rsatish
+        if (errorCount === 0) {
+          showAlert(`Barcha qarzlar (${successCount} ta hisob-faktura) muvaffaqiyatli to'landi!`, 'success', 'Muvaffaqiyatli');
+        } else if (successCount > 0) {
+          showAlert(`${successCount} ta to'landi, ${errorCount} ta xatolik`, 'warning', 'Qisman muvaffaqiyatli');
+        } else {
+          showAlert('Xatolik yuz berdi', 'error', 'Xatolik');
+        }
+        
         setShowPaymentModal(false);
         setSelectedInvoice(null);
         setPaymentAmount('');
         setTransactionId('');
-        await loadInvoices(); // Hisob-fakturalarni qayta yuklash
-        await loadTransactions(); // Tranzaksiyalarni qayta yuklash
-        await loadStats(); // Statistikani qayta yuklash
+        await loadInvoices();
+        await loadTransactions();
+        await loadStats();
+        
+      } else {
+        // Oddiy bitta invoice to'lash
+        const response = await billingService.addPayment(selectedInvoice.id, {
+          amount: parseFloat(paymentAmount),
+          payment_method: paymentMethod,
+          reference_number: transactionId,
+          notes: ''
+        });
+
+        if (response.success) {
+          showAlert('To\'lov muvaffaqiyatli qabul qilindi!', 'success', 'Muvaffaqiyatli');
+          setShowPaymentModal(false);
+          setSelectedInvoice(null);
+          setPaymentAmount('');
+          setTransactionId('');
+          await loadInvoices();
+          await loadTransactions();
+          await loadStats();
+        }
       }
     } catch (error) {
       console.error('Process payment error:', error);
       showAlert(error.response?.data?.message || 'Xatolik yuz berdi', 'error', 'Xatolik');
     }
+  };
+
+  const handlePayAllDebts = async (patientGroup) => {
+    // Modal ochish - barcha qarzni to'lash uchun
+    const unpaidInvoices = patientGroup.invoices.filter(inv => inv.payment_status !== 'paid');
+    
+    // Virtual invoice yaratish - barcha qarzlarni birlashtirish
+    const totalRemaining = patientGroup.remaining_amount;
+    
+    const virtualInvoice = {
+      id: 'multiple', // Ko'p invoicelar
+      invoice_number: `${unpaidInvoices.length} ta hisob-faktura`,
+      patient_name: patientGroup.patient_name,
+      total_amount: totalRemaining,
+      paid_amount: 0,
+      payment_status: 'pending',
+      _isMultiple: true, // Bu ko'p invoicelar ekanligini belgilash
+      _invoices: unpaidInvoices // Barcha invoicelar
+    };
+    
+    setSelectedInvoice(virtualInvoice);
+    setPaymentAmount(totalRemaining.toString());
+    setShowPaymentModal(true);
   };
 
   const generateInvoiceQR = async (invoice) => {
@@ -1769,6 +1856,7 @@ const CashierAdvanced = () => {
                 <button
                   onClick={handleCreateInvoice}
                   disabled={
+                    submitting ||
                     !selectedPatient || 
                     invoiceItems.length === 0 || 
                     (hasLabServices && !selectedLaborant) ||
@@ -1776,8 +1864,17 @@ const CashierAdvanced = () => {
                   }
                   className="w-full mt-4 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
                 >
-                  <span className="material-symbols-outlined">check_circle</span>
-                  Hisob-faktura yaratish
+                  {submitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Yaratilmoqda...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined">check_circle</span>
+                      <span>Hisob-faktura yaratish</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -1908,6 +2005,19 @@ const CashierAdvanced = () => {
                                   </p>
                                 )}
                               </div>
+                              
+                              {/* Pay All Button */}
+                              {patientGroup.remaining_amount > 0 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePayAllDebts(patientGroup);
+                                  }}
+                                  className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition-colors mr-2"
+                                >
+                                  Barchasini to'lash
+                                </button>
+                              )}
                               
                               <span className="material-symbols-outlined text-gray-600 dark:text-gray-400">
                                 {isExpanded ? 'expand_less' : 'expand_more'}
@@ -2298,17 +2408,32 @@ const CashierAdvanced = () => {
           
           {selectedInvoice && (
             <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg sm:rounded-lg sm:rounded-xl">
-              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Hisob-faktura</p>
-              <p className="font-bold text-gray-900 dark:text-white">{selectedInvoice.invoice_number}</p>
-              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
-                Jami: {formatCurrency(selectedInvoice.total_amount)}
-              </p>
-              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                To'langan: {formatCurrency(selectedInvoice.paid_amount)}
-              </p>
-              <p className="text-base sm:text-lg font-bold text-red-600 mt-1">
-                Qoldi: {formatCurrency(selectedInvoice.total_amount - selectedInvoice.paid_amount)}
-              </p>
+              {selectedInvoice._isMultiple ? (
+                <>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Bemor</p>
+                  <p className="font-bold text-gray-900 dark:text-white">{selectedInvoice.patient_name}</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
+                    {selectedInvoice.invoice_number}
+                  </p>
+                  <p className="text-base sm:text-lg font-bold text-red-600 mt-1">
+                    Jami qarz: {formatCurrency(selectedInvoice.total_amount)}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Hisob-faktura</p>
+                  <p className="font-bold text-gray-900 dark:text-white">{selectedInvoice.invoice_number}</p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
+                    Jami: {formatCurrency(selectedInvoice.total_amount)}
+                  </p>
+                  <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    To'langan: {formatCurrency(selectedInvoice.paid_amount)}
+                  </p>
+                  <p className="text-base sm:text-lg font-bold text-red-600 mt-1">
+                    Qoldi: {formatCurrency(selectedInvoice.total_amount - selectedInvoice.paid_amount)}
+                  </p>
+                </>
+              )}
             </div>
           )}
 
@@ -2381,9 +2506,17 @@ const CashierAdvanced = () => {
             </button>
             <button
               onClick={handleProcessPayment}
-              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl font-semibold hover:opacity-90"
+              disabled={submitting || !paymentAmount || !paymentMethod}
+              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              To'lovni qabul qilish
+              {submitting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>To'lanmoqda...</span>
+                </>
+              ) : (
+                <span>To'lovni qabul qilish</span>
+              )}
             </button>
           </div>
         </div>

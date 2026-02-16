@@ -143,34 +143,23 @@ export default function Laboratory() {
       console.log('Checking payment status for patient:', order.patient_id);
       
       try {
-        const response = await fetch(`http://localhost:5001/api/v1/billing/invoices/patient/${order.patient_id}/unpaid`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+        const response = await api.get(`/billing/invoices/patient/${order.patient_id}/unpaid`);
         
-        console.log('Payment check response status:', response.status);
+        console.log('Payment check response:', response.data);
         
-        if (response.ok) {
-          const invoiceData = await response.json();
-          console.log('Invoice data:', invoiceData);
+        if (response.data.success && response.data.data && response.data.data.length > 0) {
+          // To'lanmagan hisob-fakturalar bor
+          const totalUnpaid = response.data.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
           
-          if (invoiceData.success && invoiceData.data && invoiceData.data.length > 0) {
-            // To'lanmagan hisob-fakturalar bor
-            const totalUnpaid = invoiceData.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
-            
-            console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
-            
-            toast.error(
-              `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor! Iltimos, avval to'lovni amalga oshiring.`,
-              { duration: 5000 }
-            );
-            return; // To'xtatamiz
-          } else {
-            console.log('✅ No unpaid invoices');
-          }
+          console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
+          
+          toast.error(
+            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor! Iltimos, avval to'lovni amalga oshiring.`,
+            { duration: 5000 }
+          );
+          return; // To'xtatamiz
         } else {
-          console.log('⚠️ Payment check failed with status:', response.status);
+          console.log('✅ No unpaid invoices');
         }
       } catch (invoiceError) {
         console.error('❌ Invoice check error:', invoiceError);

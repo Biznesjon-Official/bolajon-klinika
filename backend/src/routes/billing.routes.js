@@ -426,17 +426,17 @@ router.post('/invoices',
 
       const invoice = await Invoice.create([invoiceData], { session });
 
-      // Create invoice items
-      for (const item of invoiceItems) {
-        await BillingItem.create([{
-          billing_id: invoice[0]._id,
-          service_id: item.service_id,
-          service_name: item.service_name,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total_price: item.total_price
-        }], { session });
-      }
+      // Create invoice items in bulk (optimized)
+      const billingItemsData = invoiceItems.map(item => ({
+        billing_id: invoice[0]._id,
+        service_id: item.service_id,
+        service_name: item.service_name,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.total_price
+      }));
+      
+      await BillingItem.insertMany(billingItemsData, { session });
 
       // Create transaction if payment made
       if (paidAmt > 0) {
@@ -450,28 +450,10 @@ router.post('/invoices',
         }], { session });
       }
 
-      // Update patient's current balance and last visit date
-      const balanceResult = await Invoice.aggregate([
-        {
-          $match: { patient_id: new mongoose.Types.ObjectId(patient_id) }
-        },
-        {
-          $group: {
-            _id: null,
-            total_debt: { $sum: '$total_amount' },
-            total_paid: { $sum: '$paid_amount' }
-          }
-        }
-      ]);
-
-      const totalDebt = balanceResult[0]?.total_debt || 0;
-      const totalPaid = balanceResult[0]?.total_paid || 0;
-      const calculatedBalance = totalPaid - totalDebt;
-      
+      // Update patient's last visit date only (balance calculation removed for performance)
       await Patient.findByIdAndUpdate(
         patient_id,
         { 
-          current_balance: calculatedBalance,
           last_visit_date: new Date(),
           updated_at: new Date()
         },

@@ -4,6 +4,7 @@ import { queueService } from '../services/queueService';
 import { patientService } from '../services/patientService';
 import doctorNurseService from '../services/doctorNurseService';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../services/api';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -198,36 +199,24 @@ const QueueManagement = () => {
 
       // To'lov holatini tekshirish
       try {
-        const invoiceResponse = await fetch(`http://localhost:5001/api/v1/billing/invoices/patient/${queueItem.patient_id}/unpaid`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+        const invoiceResponse = await api.get(`/billing/invoices/patient/${queueItem.patient_id}/unpaid`);
         
-        console.log('Invoice Response Status:', invoiceResponse.status);
+        console.log('Invoice Response:', invoiceResponse.data);
         
-        if (invoiceResponse.ok) {
-          const invoiceData = await invoiceResponse.json();
+        if (invoiceResponse.data.success && invoiceResponse.data.data && invoiceResponse.data.data.length > 0) {
+          // To'lanmagan hisob-fakturalar bor
+          const totalUnpaid = invoiceResponse.data.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
           
-          console.log('Invoice Data:', invoiceData);
+          console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
           
-          if (invoiceData.success && invoiceData.data && invoiceData.data.length > 0) {
-            // To'lanmagan hisob-fakturalar bor
-            const totalUnpaid = invoiceData.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
-            
-            console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
-            
-            showAlert(
-              `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nIltimos, avval to'lovni amalga oshiring.`,
-              'error',
-              'To\'lov kerak'
-            );
-            return; // MUHIM: Bu yerda to'xtatamiz
-          } else {
-            console.log('✅ No unpaid invoices found');
-          }
+          showAlert(
+            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nIltimos, avval to'lovni amalga oshiring.`,
+            'error',
+            'To\'lov kerak'
+          );
+          return; // MUHIM: Bu yerda to'xtatamiz
         } else {
-          console.log('⚠️ Invoice check failed with status:', invoiceResponse.status);
+          console.log('✅ No unpaid invoices found');
         }
       } catch (invoiceError) {
         console.error('❌ Invoice check error:', invoiceError);
