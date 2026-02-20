@@ -178,7 +178,7 @@ router.get('/staff-activity', authenticate, authorize('chief_doctor'), async (re
  * Get on-duty doctors schedule
  * GET /api/v1/chief-doctor/on-duty-schedule
  */
-router.get('/on-duty-schedule', authenticate, authorize('chief_doctor', 'admin', 'cashier', 'receptionist'), async (req, res) => {
+router.get('/on-duty-schedule', authenticate, authorize('chief_doctor', 'admin', 'receptionist'), async (req, res) => {
   try {
     const { start_date, end_date } = req.query;
     

@@ -43,8 +43,6 @@ const Login = () => {
           navigate('/nurse');
         } else if (roleName === 'laborant') {
           navigate('/lab');
-        } else if (roleName === 'pharmacist') {
-          navigate('/pharmacy');
         } else if (roleName === 'sanitar') {
           navigate('/sanitar');
         } else if (roleName === 'receptionist') {

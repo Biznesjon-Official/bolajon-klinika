@@ -455,7 +455,7 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
 });
 
 // Create lab order
-router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist', 'cashier'), createOrderLimiter, async (req, res, next) => {
+router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist'), createOrderLimiter, async (req, res, next) => {
   const session = await mongoose.startSession();
   
   try {

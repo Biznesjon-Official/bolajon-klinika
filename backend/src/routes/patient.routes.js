@@ -33,6 +33,25 @@ router.get('/search',
         .sort({ createdAt: -1 })
         .lean();
       
+      // Load Invoice model to calculate real balance
+      const Invoice = (await import('../models/Invoice.js')).default;
+      
+      // Get all invoices for these patients to calculate real balance
+      const patientIds = patients.map(p => p._id);
+      const invoices = await Invoice.find({ 
+        patient_id: { $in: patientIds } 
+      }).select('patient_id total_amount paid_amount').lean();
+      
+      // Calculate balance for each patient from invoices
+      const balanceMap = {};
+      invoices.forEach(inv => {
+        const patientId = inv.patient_id.toString();
+        if (!balanceMap[patientId]) {
+          balanceMap[patientId] = 0;
+        }
+        balanceMap[patientId] += (inv.total_amount || 0) - (inv.paid_amount || 0);
+      });
+      
       const formattedPatients = patients.map(patient => ({
         id: patient._id,
         patient_number: patient.patient_number,
@@ -42,7 +61,7 @@ router.get('/search',
         phone: patient.phone,
         birth_date: patient.date_of_birth,
         gender: patient.gender,
-        current_balance: patient.total_debt || 0,
+        current_balance: balanceMap[patient._id.toString()] || 0, // Invoicelardan hisoblangan to'g'ri balans
         is_blocked: patient.status !== 'active',
         created_at: patient.createdAt || patient.registration_date,
         last_visit_date: patient.last_visit_date
@@ -80,6 +99,15 @@ router.get('/',
         }).select('-password -refresh_token').lean();
         
         if (exactMatch) {
+          // Calculate real balance from invoices
+          const Invoice = (await import('../models/Invoice.js')).default;
+          const invoices = await Invoice.find({ patient_id: exactMatch._id })
+            .select('total_amount paid_amount').lean();
+          
+          const totalDebt = invoices.reduce((sum, inv) => {
+            return sum + ((inv.total_amount || 0) - (inv.paid_amount || 0));
+          }, 0);
+          
           // If exact match found, return only that patient
           const formattedPatient = {
             id: exactMatch._id,
@@ -90,7 +118,7 @@ router.get('/',
             phone: exactMatch.phone,
             birth_date: exactMatch.date_of_birth,
             gender: exactMatch.gender,
-            current_balance: exactMatch.total_debt || 0,
+            current_balance: totalDebt, // Invoicelardan hisoblangan to'g'ri balans
             is_blocked: exactMatch.status !== 'active',
             created_at: exactMatch.createdAt || exactMatch.registration_date
           };
@@ -127,6 +155,25 @@ router.get('/',
       // Get total count
       const total = await Patient.countDocuments(query);
       
+      // Load Invoice model to calculate real balance
+      const Invoice = (await import('../models/Invoice.js')).default;
+      
+      // Get all invoices for these patients to calculate real balance
+      const patientIds = patients.map(p => p._id);
+      const invoices = await Invoice.find({ 
+        patient_id: { $in: patientIds } 
+      }).select('patient_id total_amount paid_amount').lean();
+      
+      // Calculate balance for each patient from invoices
+      const balanceMap = {};
+      invoices.forEach(inv => {
+        const patientId = inv.patient_id.toString();
+        if (!balanceMap[patientId]) {
+          balanceMap[patientId] = 0;
+        }
+        balanceMap[patientId] += (inv.total_amount || 0) - (inv.paid_amount || 0);
+      });
+      
       // Format response
       const formattedPatients = patients.map(p => ({
         id: p._id,
@@ -138,7 +185,7 @@ router.get('/',
         phone: p.phone,
         birth_date: p.date_of_birth,
         gender: p.gender,
-        current_balance: p.total_debt || 0,
+        current_balance: balanceMap[p._id.toString()] || 0, // Invoicelardan hisoblangan to'g'ri balans
         is_blocked: p.status !== 'active',
         telegram_username: p.telegram_username,
         created_at: p.createdAt || p.registration_date

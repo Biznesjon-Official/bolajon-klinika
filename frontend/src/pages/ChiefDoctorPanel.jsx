@@ -155,7 +155,6 @@ export default function ChiefDoctorPanel() {
       doctor: 'Shifokor',
       nurse: 'Hamshira',
       laborant: 'Laborant',
-      pharmacist: 'Dorixona',
       sanitar: 'Tozalovchi',
       receptionist: 'Qabulxona',
       masseur: 'Massajchi',
@@ -301,7 +300,6 @@ export default function ChiefDoctorPanel() {
                     <option value="doctor">Shifokor</option>
                     <option value="nurse">Hamshira</option>
                     <option value="laborant">Laborant</option>
-                    <option value="pharmacist">Dorixona</option>
                     <option value="receptionist">Qabulxona</option>
                     <option value="sanitar">Tozalovchi</option>
                   </select>

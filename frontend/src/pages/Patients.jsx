@@ -176,12 +176,12 @@ const Patients = () => {
                     
                     return (
                       <tr
-                        key={patient.id}
-                        onClick={() => navigate(`/patients/${patient.id}`)}
+                        key={patient.id || patient._id}
+                        onClick={() => navigate(`/patients/${patient.id || patient._id}`)}
                         className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                       >
                         <td className="px-6 py-4 text-sm font-semibold text-primary">
-                          {patient.patient_number || `#${patient.id.slice(0, 8)}`}
+                          {patient.patient_number || `#${(patient.id || patient._id).toString().slice(0, 8)}`}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -224,9 +224,9 @@ const Patients = () => {
                         </td>
                         <td className="px-6 py-4">
                           <span className={`text-sm font-bold ${
-                            (patient.current_balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                            (patient.current_balance || 0) === 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {(patient.current_balance || 0) >= 0 ? '+' : ''}{(patient.current_balance || 0).toLocaleString()} so'm
+                            {(patient.current_balance || 0) === 0 ? '0' : `-${Math.abs(patient.current_balance || 0).toLocaleString()}`} so'm
                           </span>
                         </td>
                         <td className="px-6 py-4">
@@ -239,7 +239,7 @@ const Patients = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/patients/${patient.id}`);
+                              navigate(`/patients/${patient.id || patient._id}`);
                             }}
                             className="text-primary hover:text-green-700 transition-colors"
                           >
@@ -264,8 +264,8 @@ const Patients = () => {
                 
                 return (
                   <div
-                    key={patient.id}
-                    onClick={() => navigate(`/patients/${patient.id}`)}
+                    key={patient.id || patient._id}
+                    onClick={() => navigate(`/patients/${patient.id || patient._id}`)}
                     className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                   >
                     {/* Header: Avatar + Name + ID */}
@@ -292,7 +292,7 @@ const Patients = () => {
                             )}
                           </div>
                           <span className="text-xs font-semibold text-primary whitespace-nowrap flex-shrink-0">
-                            {patient.patient_number || `#${patient.id.slice(0, 8)}`}
+                            {patient.patient_number || `#${(patient.id || patient._id).toString().slice(0, 8)}`}
                           </span>
                         </div>
                       </div>
@@ -342,9 +342,9 @@ const Patients = () => {
                           {t('patients.balanceLabel')}
                         </span>
                         <span className={`font-bold ${
-                          (patient.current_balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                          (patient.current_balance || 0) === 0 ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {(patient.current_balance || 0) >= 0 ? '+' : ''}{(patient.current_balance || 0).toLocaleString()} so'm
+                          {(patient.current_balance || 0) === 0 ? '0' : `-${Math.abs(patient.current_balance || 0).toLocaleString()}`} so'm
                         </span>
                       </div>
 
@@ -366,7 +366,7 @@ const Patients = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/patients/${patient.id}`);
+                          navigate(`/patients/${patient.id || patient._id}`);
                         }}
                         className="w-full px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-semibold hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
                       >

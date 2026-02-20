@@ -113,7 +113,7 @@ router.post('/staff-salaries',
       let calculation_type = 'fixed';
       if (staff.role === 'sanitar') {
         calculation_type = 'per_room';
-      } else if (['doctor', 'nurse', 'laborant', 'pharmacist'].includes(staff.role)) {
+      } else if (['doctor', 'nurse', 'laborant'].includes(staff.role)) {
         calculation_type = 'commission';
       }
 
@@ -650,7 +650,6 @@ function getRoleNameUz(role) {
     'chief_doctor': 'Bosh shifokor',
     'nurse': 'Hamshira',
     'laborant': 'Laborant',
-    'pharmacist': 'Dorixona',
     'sanitar': 'Tozalovchi'
   };
   return roleMap[role] || role;
@@ -806,25 +805,6 @@ router.post('/calculate-monthly',
             // TODO: Need to track room cleaning activities
             // For now, we'll use a placeholder
             serviceCommission = 0; // Will be calculated from room cleaning logs
-            break;
-
-          case 'pharmacist':
-            // Pharmacist: Could have commission from pharmacy sales
-            const pharmacySales = await Invoice.aggregate([
-              {
-                $match: {
-                  created_at: { $gte: startDate, $lte: endDate },
-                  service_name: { $regex: /dori|farmatsiya|pharmacy/i }
-                }
-              },
-              {
-                $group: {
-                  _id: null,
-                  total: { $sum: '$total_amount' }
-                }
-              }
-            ]);
-            serviceCommission = (pharmacySales[0]?.total || 0) * (salary.commission_rate / 100);
             break;
 
           default:

@@ -239,10 +239,14 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="space-y-3 sm:space-y-4">
-              {todayQueue.slice(0, 5).map((patient) => (
+              {todayQueue.slice(0, 5).map((patient) => {
+                const patientId = patient.patientId || patient.patient_id || patient.id || patient._id;
+                const safePatientId = typeof patientId === 'object' ? patientId._id || patientId.id : patientId;
+                
+                return (
                 <div 
                   key={patient.id} 
-                  onClick={() => navigate(`/patients/${patient.patientId || patient.patient_id}`)}
+                  onClick={() => navigate(`/patients/${safePatientId}`)}
                   className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
@@ -266,7 +270,7 @@ const Dashboard = () => {
                     />
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </div>

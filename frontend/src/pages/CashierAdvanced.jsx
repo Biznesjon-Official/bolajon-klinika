@@ -367,6 +367,24 @@ const CashierAdvanced = () => {
         const unpaidInvoices = invoicesData.data.filter(inv => inv.payment_status !== 'paid');
         const grouped = {};
         
+        // Unique patient ID'larni to'plash
+        const uniquePatientIds = [...new Set(invoicesData.data.map(inv => inv.patient_id).filter(Boolean))];
+        
+        // Har bir bemor uchun to'g'ri balansni olish
+        const patientBalances = {};
+        await Promise.all(
+          uniquePatientIds.map(async (patientId) => {
+            try {
+              const response = await api.get(`/patients/${patientId}`);
+              if (response.data.success) {
+                patientBalances[patientId] = response.data.data.current_balance || 0;
+              }
+            } catch (error) {
+              console.error(`Error loading balance for patient ${patientId}:`, error);
+            }
+          })
+        );
+        
         unpaidInvoices.forEach(invoice => {
           const patientKey = invoice.patient_id || `${invoice.first_name}_${invoice.last_name}`;
           if (!grouped[patientKey]) {
@@ -378,13 +396,13 @@ const CashierAdvanced = () => {
               invoices: [],
               total_amount: 0,
               paid_amount: 0,
-              remaining_amount: 0
+              remaining_amount: patientBalances[invoice.patient_id] || 0 // Backend'dan olingan to'g'ri balans
             };
           }
           grouped[patientKey].invoices.push(invoice);
           grouped[patientKey].total_amount += invoice.total_amount || 0;
           grouped[patientKey].paid_amount += invoice.paid_amount || 0;
-          grouped[patientKey].remaining_amount += (invoice.total_amount - invoice.paid_amount) || 0;
+          // remaining_amount allaqachon to'g'ri qiymat bilan to'ldirilgan
         });
         
         // Object'ni array'ga aylantirish

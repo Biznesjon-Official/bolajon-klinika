@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Login Test</h1>
+    
+    <div class="form-group">
+        <label>Select User:</label>
+        <select id="userSelect" onchange="fillCredentials()">
+            <option value="">-- Select --</option>
+            <option value="admin:admin123">Admin</option>
+            <option value="reception:reception123">Qabulxona</option>
+            <option value="doctor:doctor123">Shifokor</option>
+            <option value="nurse:nurse123">Hamshira</option>
+            <option value="laborant:laborant123">Laborant</option>
+            <option value="cashier:cashier123">Kassa</option>
+            <option value="pharmacist:pharmacist123">Dorixonachi</option>
+            <option value="chief_doctor:chief123">Bosh Shifokor</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Username:</label>
+        <input type="text" id="username" placeholder="Enter username">
+    </div>
+
+    <div class="form-group">
+        <label>Password:</label>
+        <input type="password" id="password" placeholder="Enter password">
+    </div>
+
+    <button onclick="testLogin()">Test Login</button>
+
+    <div id="result"></div>
+
+    <script>
+        function fillCredentials() {
+            const select = document.getElementById('userSelect');
+            const [username, password] = select.value.split(':');
+            document.getElementById('username').value = username || '';
+            document.getElementById('password').value = password || '';
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!username || !password) {
+                resultDiv.innerHTML = '<div class="result error">Please enter username and password</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result">Testing login...</div>';
+
+            try {
+                const response = await fetch('http://localhost:5001/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Login Successful!</h3>
+                            <p><strong>User:</strong> ${data.user.full_name}</p>
+                            <p><strong>Role:</strong> ${data.user.role_name}</p>
+                            <p><strong>Token:</strong> ${data.accessToken.substring(0, 50)}...</p>
+                            <details>
+                                <summary>Full Response</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Login Failed</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Error:</strong> ${data.error || data.message}</p>
+                            <details>
+                                <summary>Full Response</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Network Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

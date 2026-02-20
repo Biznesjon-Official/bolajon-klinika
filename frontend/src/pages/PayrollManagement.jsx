@@ -38,7 +38,6 @@ export default function PayrollManagement() {
       'chief_doctor': 'Bosh shifokor',
       'nurse': 'Hamshira',
       'laborant': 'Laborant',
-      'pharmacist': 'Dorixona',
       'sanitar': 'Tozalovchi'
     };
     return roleMap[role] || role;
@@ -1436,9 +1435,7 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
       } else if (selectedStaffData.role_name === 'Hamshira') {
         setCommissionType('fixed');
         setCommissionValue('2000000'); // 2,000,000 so'm default
-      } else if (selectedStaffData.role_name === 'Dorixona') {
-        setCommissionType('fixed');
-        setCommissionValue('2500000'); // 2,500,000 so'm default
+      } else if (selectedStaffData.role_name === 'Laborant') {
       } else if (selectedStaffData.role_name === 'Tozalovchi' || selectedStaffData.role_name === 'Sanitar') {
         setCommissionType('fixed');
         setCommissionValue('1500000'); // 1,500,000 so'm default
@@ -1509,7 +1506,6 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
     if (selectedRole === 'Shifokor') return 'Masalan: 3000000';
     if (selectedRole === 'Laborant') return 'Masalan: 2500000';
     if (selectedRole === 'Hamshira') return 'Masalan: 2000000';
-    if (selectedRole === 'Dorixona') return 'Masalan: 2500000';
     if (selectedRole === 'Tozalovchi' || selectedRole === 'Sanitar') return 'Masalan: 1500000';
     return 'Masalan: 2000000';
   };

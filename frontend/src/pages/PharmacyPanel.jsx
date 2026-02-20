@@ -14,11 +14,10 @@ export default function PharmacyPanel() {
   const [activeTab, setActiveTab] = useState('medicines');
   const [selectedFloor, setSelectedFloor] = useState(1); // Qavat tanlash
   
-  // User role tekshirish
-  const isPharmacyStaff = user?.role?.name === 'pharmacist' || user?.role_name === 'pharmacist';
+  // User role tekshirish - Dori shkafi: admin to'ldiradi, nurse oladi
   const isNurse = user?.role?.name === 'nurse' || user?.role_name === 'nurse' || user?.role_name === 'Hamshira';
   const isAdmin = user?.role?.name === 'admin' || user?.role_name === 'admin';
-  const canManagePharmacy = isAdmin || isPharmacyStaff || isNurse;
+  const canManagePharmacy = isAdmin || isNurse;
   
   // Dashboard
   const [stats, setStats] = useState({});
@@ -295,7 +294,7 @@ export default function PharmacyPanel() {
                 { id: 'requests', label: 'Buyurtmalar', icon: 'shopping_cart' },
                 { id: 'suppliers', label: 'Dorixonalar', icon: 'store' },
                 { id: 'dispensing', label: 'Chiqim', icon: 'remove_circle' },
-                ...(isPharmacyStaff && !isAdmin ? [{ id: 'salary', label: 'Mening Maoshlarim', icon: 'payments' }] : [])
+                ...(isNurse && !isAdmin ? [{ id: 'salary', label: 'Mening Maoshlarim', icon: 'payments' }] : [])
               ].map(tab => (
                 <button 
                   key={tab.id}
@@ -702,7 +701,7 @@ export default function PharmacyPanel() {
             )}
 
             {/* Mening Maoshlarim Tab - Faqat dorixona xodimi uchun */}
-            {activeTab === 'salary' && isPharmacyStaff && !isAdmin && (
+            {activeTab === 'salary' && isNurse && !isAdmin && (
               <MySalary />
             )}
           </div>

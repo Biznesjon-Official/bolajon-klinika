@@ -501,8 +501,30 @@ const DoctorPanel = () => {
         });
       }
     } catch (error) {
-      console.error('Assign to nurse error:', error);
+      console.error('Assign task error:', error);
       toast.error('Topshiriq yuborishda xatolik');
+    }
+  };
+
+  const handleCompleteConsultation = async (queueId) => {
+    try {
+      showConfirm(
+        'Qabulni yakunlaysizmi? Bemor navbatdan chiqariladi.',
+        async () => {
+          await queueService.completeQueue(queueId);
+          showAlert('Qabul yakunlandi', 'success', 'Muvaffaqiyat');
+          loadMyQueue();
+        },
+        {
+          title: 'Qabulni yakunlash',
+          type: 'info',
+          confirmText: 'Ha, yakunlash',
+          cancelText: 'Bekor qilish'
+        }
+      );
+    } catch (error) {
+      console.error('Complete consultation error:', error);
+      showAlert('Xatolik yuz berdi', 'error', 'Xatolik');
     }
   };
 
@@ -684,12 +706,18 @@ const DoctorPanel = () => {
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {myQueue
               .filter(q => q.status === 'WAITING' || q.status === 'CALLED')
-              .sort((a, b) => a.queueNumber - b.queueNumber)
+              .sort((a, b) => {
+                // Shoshilinch navbatlar birinchi o'rinda
+                if (a.queue_type === 'URGENT' && b.queue_type !== 'URGENT') return -1;
+                if (a.queue_type !== 'URGENT' && b.queue_type === 'URGENT') return 1;
+                // Keyin navbat raqami bo'yicha
+                return a.queueNumber - b.queueNumber;
+              })
               .map((patient, index) => (
-                <div key={patient.id} className="p-3 sm:p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <div key={patient.id} className={`p-3 sm:p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${patient.queue_type === 'URGENT' ? 'bg-red-50 dark:bg-red-900/10 border-l-4 border-red-500' : ''}`}>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
                     <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
-                      <div className="size-10 sm:size-12 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-base sm:text-base sm:text-lg flex-shrink-0">
+                      <div className={`size-10 sm:size-12 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-base sm:text-base sm:text-lg flex-shrink-0 ${patient.queue_type === 'URGENT' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'}`}>
                         {index + 1}
                       </div>
                       
@@ -714,18 +742,99 @@ const DoctorPanel = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
-                      {patient.queueType === 'EMERGENCY' && (
-                        <span className="px-2 sm:px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-full text-xs font-semibold whitespace-nowrap">
-                          {t('doctorPanel.emergency')}
+                    <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+                      {patient.queue_type === 'URGENT' && (
+                        <span className="px-2 sm:px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-full text-xs font-semibold whitespace-nowrap flex items-center gap-1">
+                          <span className="material-symbols-outlined text-sm">emergency</span>
+                          Shoshilinch
                         </span>
                       )}
                       
+                      {patient.status === 'WAITING' && (
+                        <button
+                          onClick={() => handleCallPatient(patient.id)}
+                          className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 whitespace-nowrap flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-sm">call</span>
+                          Chaqirish
+                        </button>
+                      )}
+                      
+                      {patient.status === 'CALLED' && (
+                        <button
+                          onClick={() => handleStartConsultation(patient)}
+                          className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 whitespace-nowrap flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-sm">play_arrow</span>
+                          Qabulni boshlash
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Qabul jarayonidagi bemorlar */}
+      {myQueue.filter(q => q.status === 'IN_PROGRESS').length > 0 && (
+        <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800">
+          <div className="p-3 sm:p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800">
+            <h2 className="text-base sm:text-base sm:text-lg font-bold text-gray-900 dark:text-white">Qabul jarayonida</h2>
+            <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">Hozir qabul qilinayotgan bemorlar</p>
+          </div>
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {myQueue
+              .filter(q => q.status === 'IN_PROGRESS')
+              .map((patient) => (
+                <div key={patient.id} className="p-3 sm:p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
+                      <div className="size-10 sm:size-12 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span className="material-symbols-outlined">person</span>
+                      </div>
+                      
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                          {patient.patientName}
+                        </p>
+                        <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
+                          {patient.patientNumber} • {patient.patientPhone}
+                        </p>
+                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-xs">schedule</span>
+                          Qabul boshlangan: {new Date(patient.appointmentTime).toLocaleTimeString('uz-UZ', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 flex-wrap">
                       <button
-                        onClick={() => navigate('/queue')}
-                        className="w-full sm:w-auto px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-600 whitespace-nowrap"
+                        onClick={() => handleStartConsultation(patient)}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-600 whitespace-nowrap flex items-center gap-1"
                       >
-                        {t('doctorPanel.acceptPatient')}
+                        <span className="material-symbols-outlined text-sm">edit_note</span>
+                        Retsept yozish
+                      </button>
+                      
+                      <button
+                        onClick={() => handleOpenNurseModal(patient)}
+                        className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-semibold hover:bg-orange-600 whitespace-nowrap flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">medical_services</span>
+                        Hamshiraga topshiriq
+                      </button>
+                      
+                      <button
+                        onClick={() => handleCompleteConsultation(patient.id)}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 whitespace-nowrap flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">check_circle</span>
+                        Qabulni yakunlash
                       </button>
                     </div>
                   </div>

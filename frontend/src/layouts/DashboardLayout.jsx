@@ -25,8 +25,8 @@ const DashboardLayout = ({ children }) => {
     { name: t('nav.patients'), icon: 'groups', path: '/patients', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Qabulxona', 'Reception', 'receptionist'] },
     { name: t('nav.queue'), icon: 'format_list_numbered', path: '/queue', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor'] },
     
-    // 3. Kassa - To'lovlar
-    { name: t('nav.cashier'), icon: 'payments', path: '/cashier', roles: ['Admin', 'Administrator', 'Kassa', 'Cashier', 'Qabulxona', 'Reception', 'receptionist'] },
+    // 3. Kassa - To'lovlar (receptionist bajaradi)
+    { name: t('nav.cashier'), icon: 'payments', path: '/cashier', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist'] },
     
     // 4. Shifokor paneli
     { name: t('nav.doctorPanel'), icon: 'medical_services', path: '/doctor', roles: ['Shifokor', 'Doctor'] },
@@ -45,7 +45,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Hamshira Paneli', icon: 'medical_services', path: '/nurse', roles: ['Hamshira', 'Nurse'] },
     
     // 7. Dorixona
-    { name: 'Dorixona', icon: 'medication', path: '/pharmacy', roles: ['Admin', 'Administrator', 'Hamshira', 'Nurse', 'Dorixona', 'Pharmacy', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: 'Dorixona', icon: 'medication', path: '/pharmacy', roles: ['Admin', 'Administrator', 'Hamshira', 'Nurse', 'Qabulxona', 'Reception', 'receptionist'] },
     
     // 8. Laboratoriya
     { name: 'Laborant Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab'] },
@@ -65,7 +65,7 @@ const DashboardLayout = ({ children }) => {
     
     // 13. Vazifalar
     { name: 'Vazifalar', icon: 'task_alt', path: '/tasks', roles: ['Admin', 'Administrator'] },
-    { name: 'Mening Vazifalarim', icon: 'task_alt', path: '/my-tasks', roles: ['Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Dorixona', 'Pharmacy', 'Qabulxona', 'Reception', 'receptionist', 'Kassa', 'Cashier', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor'] },
+    { name: 'Mening Vazifalarim', icon: 'task_alt', path: '/my-tasks', roles: ['Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Qabulxona', 'Reception', 'receptionist', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor'] },
     
     // 14. Aloqa
     { name: t('nav.communications'), icon: 'chat', path: '/communications', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Qabulxona', 'Reception'] },
@@ -79,7 +79,7 @@ const DashboardLayout = ({ children }) => {
     
     // 15. Maoshlar (oxirida)
     { name: 'Maoshlar', icon: 'payments', path: '/payroll', roles: ['Admin', 'Administrator'] },
-    { name: 'Mening Maoshim', icon: 'account_balance_wallet', path: '/my-salary', roles: ['Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'Dorixona', 'Pharmacy', 'pharmacist', 'chief_doctor', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: 'Mening Maoshim', icon: 'account_balance_wallet', path: '/my-salary', roles: ['Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor', 'Qabulxona', 'Reception', 'receptionist'] },
     
     // Bemor paneli yashirilgan (hozircha ko'rinmaydigan)
     // { name: 'Bemor Paneli', icon: 'person', path: '/patient-portal', roles: ['Patient', 'Bemor'] },

@@ -15,6 +15,8 @@ const Nurse = () => {
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [completionNotes, setCompletionNotes] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [patientFilter, setPatientFilter] = useState('all'); // all, inpatient, outpatient, not_admitted
+  const [searchQuery, setSearchQuery] = useState(''); // For prescription location search
 
   useEffect(() => {
     loadData();
@@ -175,38 +177,113 @@ const Nurse = () => {
         </div>
       </div>
 
+      {/* Search for Prescription Location */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">🔍 Retsept joyini topish</h3>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Bemor ismi, retsept raqami yoki xona raqamini kiriting..."
+            className="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              Tozalash
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Filters */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => setStatusFilter('all')}
-          className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
-            statusFilter === 'all'
-              ? 'bg-primary text-white shadow-md'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-        >
-          Barchasi
-        </button>
-        <button
-          onClick={() => setStatusFilter('pending')}
-          className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
-            statusFilter === 'pending'
-              ? 'bg-primary text-white shadow-md'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-        >
-          Kutilmoqda
-        </button>
-        <button
-          onClick={() => setStatusFilter('completed')}
-          className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
-            statusFilter === 'completed'
-              ? 'bg-primary text-white shadow-md'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-        >
-          Yakunlangan
-        </button>
+      <div className="space-y-3">
+        {/* Status Filter */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Holat bo'yicha</h3>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                statusFilter === 'all'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Barchasi
+            </button>
+            <button
+              onClick={() => setStatusFilter('pending')}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                statusFilter === 'pending'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Kutilmoqda
+            </button>
+            <button
+              onClick={() => setStatusFilter('completed')}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                statusFilter === 'completed'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Yakunlangan
+            </button>
+          </div>
+        </div>
+
+        {/* Patient Filter */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Bemorlar bo'yicha</h3>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setPatientFilter('all')}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                patientFilter === 'all'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Barchasi ({treatments.length})
+            </button>
+            <button
+              onClick={() => setPatientFilter('inpatient')}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                patientFilter === 'inpatient'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Statsionardagi ({treatments.filter(t => t.admission_id || t.admission_info?.is_admitted).length})
+            </button>
+            <button
+              onClick={() => setPatientFilter('outpatient')}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                patientFilter === 'outpatient'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Ambulatordagi ({treatments.filter(t => !(t.admission_id || t.admission_info?.is_admitted)).length})
+            </button>
+            <button
+              onClick={() => setPatientFilter('not_admitted')}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                patientFilter === 'not_admitted'
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Yotqizilmagan ({treatments.filter(t => !(t.admission_id || t.admission_info?.is_admitted)).length})
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Treatments List */}
@@ -215,28 +292,93 @@ const Nurse = () => {
         
         {(() => {
           console.log('🎨 Rendering treatments list, count:', treatments.length);
-          if (treatments.length === 0) {
-            console.log('⚠️  Showing "no treatments" message');
-          } else {
-            console.log('✅ Showing', treatments.length, 'treatments');
+          console.log('Patient filter:', patientFilter);
+          console.log('Search query:', searchQuery);
+          
+          // Filter treatments by patient type
+          let filteredTreatments = treatments;
+          
+          // Apply patient type filter
+          if (patientFilter === 'inpatient') {
+            filteredTreatments = treatments.filter(t => {
+              const hasAdmission = t.admission_id || t.admission_info?.is_admitted;
+              console.log(`Treatment ${t.id}: admission_id=${t.admission_id}, is_admitted=${t.admission_info?.is_admitted}, hasAdmission=${hasAdmission}`);
+              return hasAdmission;
+            });
+          } else if (patientFilter === 'outpatient') {
+            filteredTreatments = treatments.filter(t => {
+              const hasAdmission = t.admission_id || t.admission_info?.is_admitted;
+              return !hasAdmission;
+            });
+          } else if (patientFilter === 'not_admitted') {
+            filteredTreatments = treatments.filter(t => {
+              const hasAdmission = t.admission_id || t.admission_info?.is_admitted;
+              return !hasAdmission;
+            });
           }
-          return null;
-        })()}
-        
-        {treatments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            Muolajalar topilmadi
-          </div>
-        ) : (
-          <div className="space-y-3 sm:space-y-4">
-            {treatments.map((treatment) => (
-              <div key={treatment.id} className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+          
+          // Apply search filter
+          if (searchQuery && searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            filteredTreatments = filteredTreatments.filter(t => {
+              const patientName = (t.patient_name || '').toLowerCase();
+              const prescriptionNumber = (t.prescription_id?.prescription_number || '').toLowerCase();
+              const roomNumber = (t.admission_info?.room_info?.room_number || '').toString().toLowerCase();
+              const roomName = (t.admission_info?.room_info?.room_name || '').toLowerCase();
+              
+              return patientName.includes(query) || 
+                     prescriptionNumber.includes(query) || 
+                     roomNumber.includes(query) ||
+                     roomName.includes(query);
+            });
+          }
+          
+          console.log('✅ Filtered treatments:', filteredTreatments.length);
+          
+          if (filteredTreatments.length === 0) {
+            console.log('⚠️  Showing "no treatments" message');
+            return (
+              <div className="text-center py-8 text-gray-500">
+                {searchQuery ? `"${searchQuery}" bo'yicha natija topilmadi` :
+                 patientFilter === 'all' ? 'Muolajalar topilmadi' :
+                 patientFilter === 'inpatient' ? 'Statsionardagi bemorlar uchun muolajalar topilmadi' :
+                 patientFilter === 'outpatient' ? 'Ambulatordagi bemorlar uchun muolajalar topilmadi' :
+                 'Yotqizilmagan bemorlar uchun muolajalar topilmadi'}
+              </div>
+            );
+          }
+          
+          return (
+            <div className="space-y-3 sm:space-y-4">
+              {filteredTreatments.map((treatment) => {
+                // Highlight search matches
+                const isHighlighted = searchQuery && searchQuery.trim() && (
+                  (treatment.patient_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (treatment.prescription_id?.prescription_number || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (treatment.admission_info?.room_info?.room_number || '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (treatment.admission_info?.room_info?.room_name || '').toLowerCase().includes(searchQuery.toLowerCase())
+                );
+                
+                return (
+              <div 
+                key={treatment.id} 
+                className={`p-3 sm:p-4 rounded-xl border transition-all ${
+                  isHighlighted 
+                    ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400 dark:border-yellow-600 shadow-lg' 
+                    : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                }`}
+              >
                 <div className="flex flex-col gap-3">
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <p className="font-bold text-sm sm:text-base text-gray-900 dark:text-white">
                         {treatment.patient_name}
                       </p>
+                      {(treatment.admission_id || treatment.admission_info?.is_admitted) && (
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded text-xs font-semibold whitespace-nowrap">
+                          Statsionar
+                        </span>
+                      )}
                       {getStatusBadge(treatment.status)}
                     </div>
                     
@@ -310,9 +452,11 @@ const Nurse = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
-        )}
+        );
+      })()}
       </div>
 
       {/* Complete Modal */}

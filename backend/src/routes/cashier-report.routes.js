@@ -145,6 +145,33 @@ router.get('/my/reports',
 );
 
 /**
+ * Get today's reports (alias for /today/summary)
+ * GET /api/v1/cashier-reports/today
+ */
+router.get('/today',
+  authenticate,
+  authorize('admin', 'doctor'),
+  async (req, res) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const reports = await CashierReport.find({
+        date: { $gte: today, $lt: tomorrow }
+      })
+        .populate('staff_id', 'first_name last_name employee_id')
+        .lean();
+
+      res.json({ success: true, data: reports });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message });
+    }
+  }
+);
+
+/**
  * Get today's summary for all cashiers
  * GET /api/v1/cashier-reports/today/summary
  */

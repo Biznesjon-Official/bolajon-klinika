@@ -26,16 +26,12 @@ const RoleBasedRedirect = ({ children }) => {
         defaultPath = '/chief-doctor'; // Bosh shifokor paneli - birinchi
       } else if (roleName === 'reception' || roleName === 'qabulxona' || roleName === 'receptionist') {
         defaultPath = '/patients'; // Bemorlar - birinchi
-      } else if (roleName === 'cashier' || roleName === 'kassa') {
-        defaultPath = '/cashier'; // Kassa - birinchi
       } else if (roleName === 'nurse' || roleName === 'hamshira') {
         defaultPath = '/ambulator'; // Xonalar - birinchi
       } else if (roleName === 'lab' || roleName === 'laborant') {
         defaultPath = '/lab'; // Laborant Dashboard - birinchi
       } else if (roleName === 'cleaner' || roleName === 'tozalovchi') {
         defaultPath = '/sanitar'; // Tozalovchi paneli - birinchi
-      } else if (roleName === 'pharmacy' || roleName === 'dorixona' || roleName === 'pharmacist') {
-        defaultPath = '/pharmacy'; // Dorixona - birinchi
       } else if (roleName === 'masseur' || roleName === 'massajchi') {
         defaultPath = '/masseur'; // Massajchi paneli - birinchi
       } else if (roleName === 'speechtherapist' || roleName === 'logoped' || roleName === 'speech_therapist') {

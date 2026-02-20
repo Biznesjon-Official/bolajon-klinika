@@ -58,6 +58,27 @@ router.get('/rooms', authenticate, async (req, res, next) => {
   }
 });
 
+// Get today's patients
+router.get('/today', authenticate, async (req, res, next) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const queues = await Queue.find({
+      createdAt: { $gte: today, $lt: tomorrow }
+    })
+      .populate('patient_id', 'patient_number first_name last_name phone')
+      .sort({ queue_number: 1 })
+      .lean();
+
+    res.json({ success: true, data: queues });
+  } catch (error) {
+    res.json({ success: true, data: [] });
+  }
+});
+
 // ============================================
 // QR CHEKLAR
 // ============================================

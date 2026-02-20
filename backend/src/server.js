@@ -8,9 +8,24 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Load environment variables FIRST
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables FIRST - from backend root directory
+const envPath = join(__dirname, '..', '.env');
+console.log('🔍 Loading .env from:', envPath);
+dotenv.config({ path: envPath });
+
+console.log('🔍 Environment check:');
+console.log('   NODE_ENV:', process.env.NODE_ENV);
+console.log('   PORT:', process.env.PORT);
+console.log('   MONGODB_URI exists:', !!process.env.MONGODB_URI);
+if (process.env.MONGODB_URI) {
+  console.log('   MONGODB_URI preview:', process.env.MONGODB_URI.substring(0, 50) + '...');
+}
 
 // MongoDB connection
 import { connectMongoDB } from './config/mongodb.js';

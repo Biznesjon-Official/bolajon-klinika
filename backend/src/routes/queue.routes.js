@@ -159,6 +159,42 @@ router.get('/doctors',
 );
 
 /**
+ * Get today's queue
+ */
+router.get('/today',
+  authenticate,
+  async (req, res, next) => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const queues = await Queue.find({
+        createdAt: { $gte: today, $lt: tomorrow }
+      })
+        .populate('patient_id', 'patient_number first_name last_name phone')
+        .populate('doctor_id', 'first_name last_name specialization')
+        .sort({ queue_number: 1 })
+        .lean();
+
+      const queueData = queues.map(q => ({
+        id: q._id,
+        queueNumber: q.queue_number,
+        status: q.status,
+        patientName: q.patient_id ? `${q.patient_id.first_name} ${q.patient_id.last_name}` : 'N/A',
+        doctorName: q.doctor_id ? `${q.doctor_id.first_name} ${q.doctor_id.last_name}` : 'N/A',
+        createdAt: q.createdAt
+      }));
+
+      res.json({ success: true, data: queueData });
+    } catch (error) {
+      res.json({ success: true, data: [] });
+    }
+  }
+);
+
+/**
  * Get queue statistics
  */
 router.get('/stats',

@@ -5,6 +5,47 @@ import Settings from '../models/Settings.js';
 const router = express.Router();
 
 /**
+ * Get all settings
+ * GET /api/v1/settings
+ */
+router.get('/', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const settings = await Settings.find().sort({ key: 1 }).lean();
+
+    // Group settings by category
+    const grouped = {
+      bonus: {},
+      system: {},
+      other: {}
+    };
+
+    settings.forEach(setting => {
+      if (setting.key.startsWith('bonus_')) {
+        grouped.bonus[setting.key] = setting.value;
+      } else if (setting.key.startsWith('system_')) {
+        grouped.system[setting.key] = setting.value;
+      } else {
+        grouped.other[setting.key] = setting.value;
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        settings: settings,
+        grouped: grouped
+      }
+    });
+  } catch (error) {
+    console.error('Get settings error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error'
+    });
+  }
+});
+
+/**
  * Get bonus settings
  * GET /api/v1/settings/bonus
  */

@@ -7,6 +7,66 @@ import { sendTaskNotification } from '../services/telegramService.js';
 const router = express.Router();
 
 /**
+ * Get all tasks (Admin only) - Main endpoint
+ */
+router.get('/',
+  authenticate,
+  authorize('admin', 'doctor'),
+  async (req, res, next) => {
+    try {
+      const { status } = req.query;
+
+      const filter = {};
+      if (status) {
+        const statuses = status.split(',');
+        filter.status = { $in: statuses };
+      }
+
+      const tasks = await Task.find(filter)
+        .populate('assigned_to', 'first_name last_name role employee_id')
+        .populate('created_by', 'first_name last_name')
+        .sort({ created_at: -1 })
+        .lean();
+
+      // Format for frontend
+      const formattedTasks = tasks.map(task => ({
+        id: task._id,
+        title: task.title,
+        description: task.description,
+        task_type: task.task_type,
+        priority: task.priority,
+        status: task.status,
+        assigned_to: task.assigned_to?._id || null,
+        first_name: task.assigned_to?.first_name || 'O\'chirilgan',
+        last_name: task.assigned_to?.last_name || 'xodim',
+        role: task.assigned_to?.role || 'unknown',
+        employee_id: task.assigned_to?.employee_id || 'N/A',
+        created_by: task.created_by?._id || null,
+        creator_name: task.created_by ? `${task.created_by.first_name} ${task.created_by.last_name}` : 'O\'chirilgan xodim',
+        due_date: task.due_date,
+        location_details: task.location_details,
+        started_at: task.started_at,
+        completed_at: task.completed_at,
+        verified_at: task.verified_at,
+        completion_notes: task.completion_notes,
+        verification_notes: task.verification_notes,
+        rejection_reason: task.rejection_reason,
+        created_at: task.created_at,
+        updated_at: task.updated_at
+      }));
+
+      res.json({
+        success: true,
+        data: formattedTasks
+      });
+    } catch (error) {
+      console.error('Get all tasks error:', error);
+      next(error);
+    }
+  }
+);
+
+/**
  * Create new task (Admin only)
  */
 router.post('/create',

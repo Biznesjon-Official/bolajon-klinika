@@ -38,6 +38,31 @@ router.get('/stats', authenticate, async (req, res, next) => {
 });
 
 // ==================== MEDICINES ====================
+// Get low stock medicines (alias)
+router.get('/low-stock', authenticate, async (req, res, next) => {
+  try {
+    const medicines = await Medicine.find({
+      $or: [
+        { status: 'out_of_stock' },
+        { $expr: { $lte: ['$quantity', '$reorder_level'] } }
+      ]
+    }).sort({ name: 1 }).lean();
+
+    res.json({
+      success: true,
+      data: medicines.map(med => ({
+        id: med._id,
+        name: med.name,
+        quantity: med.quantity,
+        reorder_level: med.reorder_level,
+        status: med.status
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get out of stock medicines (specific route - MUST be before /medicines/:id)
 router.get('/medicines/out-of-stock', authenticate, async (req, res, next) => {
   try {
@@ -156,7 +181,7 @@ router.get('/medicines/:id', authenticate, async (req, res, next) => {
 });
 
 // Create medicine
-router.post('/medicines', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.post('/medicines', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const medicineData = req.body;
     
@@ -183,7 +208,7 @@ router.post('/medicines', authenticate, authorize('admin', 'pharmacist'), async 
 });
 
 // Update medicine
-router.put('/medicines/:id', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.put('/medicines/:id', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const medicine = await Medicine.findByIdAndUpdate(
       req.params.id,
@@ -213,7 +238,7 @@ router.put('/medicines/:id', authenticate, authorize('admin', 'pharmacist'), asy
 });
 
 // Delete medicine
-router.delete('/medicines/:id', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.delete('/medicines/:id', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const medicine = await Medicine.findByIdAndDelete(req.params.id);
     
@@ -274,7 +299,7 @@ router.get('/suppliers', authenticate, async (req, res, next) => {
 });
 
 // Create supplier
-router.post('/suppliers', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.post('/suppliers', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const supplierData = req.body;
     
@@ -301,7 +326,7 @@ router.post('/suppliers', authenticate, authorize('admin', 'pharmacist'), async 
 });
 
 // Update supplier
-router.put('/suppliers/:id', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.put('/suppliers/:id', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const supplier = await Supplier.findByIdAndUpdate(
       req.params.id,
@@ -331,7 +356,7 @@ router.put('/suppliers/:id', authenticate, authorize('admin', 'pharmacist'), asy
 });
 
 // Delete supplier
-router.delete('/suppliers/:id', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.delete('/suppliers/:id', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const supplier = await Supplier.findByIdAndDelete(req.params.id);
     
@@ -434,7 +459,7 @@ router.post('/requests', authenticate, async (req, res, next) => {
 });
 
 // Update pharmacy request
-router.put('/requests/:id', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.put('/requests/:id', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const updateData = { ...req.body };
     
@@ -474,7 +499,7 @@ router.put('/requests/:id', authenticate, authorize('admin', 'pharmacist'), asyn
 });
 
 // Accept pharmacy request (qabul qilish)
-router.post('/requests/:id/accept', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.post('/requests/:id/accept', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const { expiry_date, unit_price } = req.body;
     
@@ -552,7 +577,7 @@ router.post('/requests/:id/accept', authenticate, authorize('admin', 'pharmacist
 });
 
 // Delete pharmacy request
-router.delete('/requests/:id', authenticate, authorize('admin', 'pharmacist'), async (req, res, next) => {
+router.delete('/requests/:id', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const request = await PharmacyRequest.findByIdAndDelete(req.params.id);
     
@@ -602,7 +627,7 @@ router.get('/dispense/history', authenticate, async (req, res, next) => {
  * Dispense medicine to patient (Dori ishlatish)
  * POST /api/v1/pharmacy/medicines/:id/dispense
  */
-router.post('/medicines/:id/dispense', authenticate, authorize('admin', 'pharmacist', 'nurse'), async (req, res, next) => {
+router.post('/medicines/:id/dispense', authenticate, authorize('admin', 'nurse'), async (req, res, next) => {
   try {
     const { patient_id, quantity, notes } = req.body;
 

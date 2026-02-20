@@ -62,6 +62,7 @@ const QueueManagement = () => {
   // Filter (Admin/Reception only)
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterDoctor, setFilterDoctor] = useState('all');
+  const [patientFilter, setPatientFilter] = useState('all'); // all, inpatient, outpatient, not_admitted
 
   // Alert and Confirm modals
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info', onConfirm: null, showCancel: false, confirmText: 'OK', cancelText: 'Bekor qilish' });
@@ -508,18 +509,86 @@ const QueueManagement = () => {
           </div>
         </div>
 
+        {/* Patient Filter Buttons for Doctor */}
+        <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">Bemorlarni filtrlash</h3>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setPatientFilter('all')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                patientFilter === 'all'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Barchasi ({queue.length})
+            </button>
+            <button
+              onClick={() => setPatientFilter('inpatient')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                patientFilter === 'inpatient'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Statsionardagi ({queue.filter(p => p.admission_id).length})
+            </button>
+            <button
+              onClick={() => setPatientFilter('outpatient')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                patientFilter === 'outpatient'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Ambulatordagi ({queue.filter(p => !p.admission_id && p.status !== 'COMPLETED').length})
+            </button>
+            <button
+              onClick={() => setPatientFilter('not_admitted')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                patientFilter === 'not_admitted'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              Yotqizilmagan ({queue.filter(p => !p.admission_id).length})
+            </button>
+          </div>
+        </div>
+
         {/* Queue List */}
         <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden sm:block">
-          {queue.length === 0 ? (
-            <div className="p-12 text-center">
-              <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
-                event_available
-              </span>
-              <p className="text-gray-500 dark:text-gray-400">{t('queue.noQueue')}</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {queue.map((patient) => (
+          {(() => {
+            // Filter patients for doctor
+            let filteredPatients = queue;
+            
+            if (patientFilter === 'inpatient') {
+              filteredPatients = queue.filter(p => p.admission_id);
+            } else if (patientFilter === 'outpatient') {
+              filteredPatients = queue.filter(p => !p.admission_id && p.status !== 'COMPLETED');
+            } else if (patientFilter === 'not_admitted') {
+              filteredPatients = queue.filter(p => !p.admission_id);
+            }
+            
+            if (filteredPatients.length === 0) {
+              return (
+                <div className="p-12 text-center">
+                  <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
+                    person_off
+                  </span>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {patientFilter === 'all' ? t('queue.noQueue') :
+                     patientFilter === 'inpatient' ? 'Statsionardagi bemorlar yo\'q' :
+                     patientFilter === 'outpatient' ? 'Ambulatordagi bemorlar yo\'q' :
+                     'Yotqizilmagan bemorlar yo\'q'}
+                  </p>
+                </div>
+              );
+            }
+            
+            return (
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredPatients.map((patient) => (
                 <div key={patient.id} className="p-3 sm:p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                   <div className="flex flex-col sm:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
                     <div className="flex items-start gap-2 sm:gap-3 sm:gap-3 min-w-0 flex-1">
@@ -528,9 +597,16 @@ const QueueManagement = () => {
                       </div>
                       
                       <div className="min-w-0 flex-1">
-                        <p className="font-bold text-gray-900 dark:text-white text-base sm:text-lg break-words">
-                          {patient.patientName}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-gray-900 dark:text-white text-base sm:text-lg break-words">
+                            {patient.patientName}
+                          </p>
+                          {patient.admission_id && (
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded text-xs font-semibold whitespace-nowrap">
+                              Statsionar
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-words">
                           {patient.patientNumber} • {patient.patientPhone}
                         </p>
@@ -610,11 +686,12 @@ const QueueManagement = () => {
                 </div>
               ))}
             </div>
-          )}
+            );
+          })()}
         </div>
-        </div>
+      </div>
 
-        {/* Alert Modal */}
+      {/* Alert Modal */}
         <AlertModal
           isOpen={alertModal.isOpen}
           onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
@@ -950,9 +1027,9 @@ const QueueManagement = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setQueueType('EMERGENCY')}
+                onClick={() => setQueueType('URGENT')}
                 className={`flex-1 px-4 sm:px-4 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
-                  queueType === 'EMERGENCY'
+                  queueType === 'URGENT'
                     ? 'bg-red-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                 }`}

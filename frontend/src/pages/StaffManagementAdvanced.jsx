@@ -67,7 +67,6 @@ const StaffManagementAdvanced = () => {
       'doctor': 'Shifokor',
       'nurse': 'Hamshira',
       'laborant': 'Laborant',
-      'pharmacist': 'Dorixonachi',
       'sanitar': 'Tozalovchi',
       'masseur': 'Massajchi',
       'speech_therapist': 'Logoped',
@@ -82,7 +81,6 @@ const StaffManagementAdvanced = () => {
       'Shifokor': 'doctor',
       'Hamshira': 'nurse',
       'Laborant': 'laborant',
-      'Dorixonachi': 'pharmacist',
       'Tozalovchi': 'sanitar',
       'Massajchi': 'masseur',
       'Logoped': 'speech_therapist',
@@ -690,7 +688,7 @@ Iltimos, bu ma'lumotlarni saqlang!
               {(() => {
                 const selectedRole = roles.find(r => r.id === parseInt(staffForm.role_id));
                 const roleName = selectedRole?.name || '';
-                const needsSpecialization = ['doctor', 'nurse', 'laborant', 'pharmacist'].includes(roleName);
+                const needsSpecialization = ['doctor', 'nurse', 'laborant'].includes(roleName);
                 
                 return needsSpecialization && (
                   <div className="space-y-2 sm:space-y-3">

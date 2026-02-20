@@ -376,4 +376,82 @@ router.put('/beds/:id/price', authenticate, authorize('admin'), async (req, res,
   }
 });
 
+// ============================================
+// BEDS ENDPOINTS
+// ============================================
+
+/**
+ * Get all beds
+ */
+router.get('/beds', authenticate, async (req, res, next) => {
+  try {
+    const { status, room_id } = req.query;
+    
+    const Bed = (await import('../models/Bed.js')).default;
+    
+    const filter = {};
+    if (status) filter.status = status;
+    if (room_id) filter.room_id = room_id;
+    
+    const beds = await Bed.find(filter)
+      .populate('room_id', 'room_number room_name floor department')
+      .populate('current_patient_id', 'patient_number first_name last_name')
+      .sort({ 'room_id.room_number': 1, bed_number: 1 })
+      .lean();
+    
+    res.json({
+      success: true,
+      data: beds
+    });
+  } catch (error) {
+    console.error('Get beds error:', error);
+    next(error);
+  }
+});
+
+// ============================================
+// ADMISSIONS ENDPOINTS
+// ============================================
+
+/**
+ * Get all admissions
+ */
+router.get('/admissions', authenticate, async (req, res, next) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    
+    const Admission = (await import('../models/Admission.js')).default;
+    
+    const filter = {};
+    if (status) filter.status = status;
+    
+    const skip = (page - 1) * limit;
+    
+    const [admissions, total] = await Promise.all([
+      Admission.find(filter)
+        .populate('patient_id', 'patient_number first_name last_name phone')
+        .populate('bed_id', 'bed_number room_id')
+        .sort({ admission_date: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Admission.countDocuments(filter)
+    ]);
+    
+    res.json({
+      success: true,
+      data: admissions,
+      pagination: {
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / limit),
+        limit: parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get admissions error:', error);
+    next(error);
+  }
+});
+
 export default router;

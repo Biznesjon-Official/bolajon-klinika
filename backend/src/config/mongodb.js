@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { logger } from '../utils/logger.js';
 
+// Use the correct MongoDB URI
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://mironshox:D1WVdeVfthVP1Z2F@cluster0.zthjn1c.mongodb.net/clinic_db?retryWrites=true&w=majority&appName=Cluster0';
 
 let isConnected = false;
@@ -11,21 +12,21 @@ export const connectMongoDB = async () => {
     return;
   }
 
+  console.log('🔍 Connecting to MongoDB...');
+  console.log('   Using hardcoded URI (temporary)');
+
   try {
-    console.log('🔍 Connecting to MongoDB...');
-    console.log('URI:', MONGODB_URI.substring(0, 50) + '...');
-    
     const options = {
-      maxPoolSize: 100, // Increased from 10 to 100 for better parallel request handling
-      minPoolSize: 10,  // Increased from 2 to 10 for better performance
+      maxPoolSize: 100,
+      minPoolSize: 10,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
       connectTimeoutMS: 10000,
       family: 4,
       retryWrites: true,
       w: 'majority',
-      maxIdleTimeMS: 30000, // Close idle connections after 30 seconds
-      waitQueueTimeoutMS: 10000 // Wait up to 10 seconds for a connection from the pool
+      maxIdleTimeMS: 30000,
+      waitQueueTimeoutMS: 10000
     };
 
     await mongoose.connect(MONGODB_URI, options);

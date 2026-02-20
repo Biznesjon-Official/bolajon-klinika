@@ -53,7 +53,7 @@ const addPaymentSchema = Joi.object({
  */
 router.get('/stats',
   authenticate,
-  authorize('admin', 'cashier', 'receptionist'),
+  authorize('admin', 'receptionist'),
   async (req, res, next) => {
     try {
       const today = new Date();
@@ -178,6 +178,59 @@ router.get('/stats',
 );
 
 /**
+ * Get revenue report (alias)
+ */
+router.get('/revenue',
+  authenticate,
+  async (req, res, next) => {
+    try {
+      const { period } = req.query;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const filter = { transaction_type: 'payment' };
+      if (period === 'today') {
+        filter.created_at = { $gte: today };
+      } else if (period === 'month') {
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        filter.created_at = { $gte: startOfMonth };
+      }
+
+      const result = await Transaction.aggregate([
+        { $match: filter },
+        { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } }
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          total: result[0]?.total || 0,
+          count: result[0]?.count || 0,
+          period: period || 'all'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * Get service categories (alias)
+ */
+router.get('/service-categories',
+  authenticate,
+  async (req, res, next) => {
+    try {
+      const categories = await ServiceCategory.find().sort({ name: 1 });
+      res.json({ success: true, data: categories });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * Get service categories
  */
 router.get('/services/categories',
@@ -234,7 +287,7 @@ router.get('/services',
  */
 router.post('/invoices',
   authenticate,
-  authorize('admin', 'cashier', 'receptionist'),
+  authorize('admin', 'receptionist'),
   async (req, res, next) => {
     const session = await mongoose.startSession();
     
@@ -502,7 +555,7 @@ router.post('/invoices',
  */
 router.get('/invoices',
   authenticate,
-  authorize('admin', 'cashier', 'receptionist'),
+  authorize('admin', 'receptionist'),
   async (req, res, next) => {
     try {
       const { patient_id, payment_status, from_date, to_date, limit = 50, offset = 0 } = req.query;
@@ -562,7 +615,7 @@ router.get('/invoices',
  */
 router.get('/invoices/:id',
   authenticate,
-  authorize('admin', 'cashier', 'receptionist'),
+  authorize('admin', 'receptionist'),
   async (req, res, next) => {
     try {
       // Get invoice
@@ -641,7 +694,7 @@ router.get('/invoices/:id',
  */
 router.post('/invoices/:id/payment',
   authenticate,
-  authorize('admin', 'cashier', 'receptionist'),
+  authorize('admin', 'receptionist'),
   async (req, res, next) => {
     const session = await mongoose.startSession();
     
@@ -774,7 +827,7 @@ router.post('/invoices/:id/payment',
  */
 router.get('/transactions',
   authenticate,
-  authorize('admin', 'cashier', 'receptionist'),
+  authorize('admin', 'receptionist'),
   async (req, res, next) => {
     try {
       const { patient_id, transaction_type, from_date, to_date, limit = 50, offset = 0 } = req.query;

@@ -197,4 +197,19 @@ router.get('/today-queue', authenticate, async (req, res) => {
   }
 });
 
+// Dashboard root (alias for /stats)
+router.get('/', authenticate, async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const totalPatients = await Patient.countDocuments();
+    res.json({
+      success: true,
+      data: { total_patients: totalPatients, date: today }
+    });
+  } catch (error) {
+    res.json({ success: true, data: {} });
+  }
+});
+
 export default router;

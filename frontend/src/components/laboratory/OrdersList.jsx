@@ -6,7 +6,7 @@ export default function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, 
   const handleStatusChange = async (orderId, newStatus, patientId) => {
     try {
       // Agar namuna olinayotgan bo'lsa, avval to'lovni tekshirish
-      if (newStatus === 'in_progress' && patientId) {
+      if (newStatus === 'sample_collected' && patientId) {
         try {
           const response = await api.get(`/billing/invoices/patient/${patientId}/unpaid`);
           
@@ -93,13 +93,13 @@ export default function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, 
                   <div className="flex gap-2 sm:gap-2 flex-wrap">
                     {isLaborant && order.status === 'pending' && (
                       <button
-                        onClick={() => handleStatusChange(order.id, 'in_progress', order.patient_id)}
+                        onClick={() => handleStatusChange(order.id, 'sample_collected', order.patient_id)}
                         className="px-3 py-1 bg-green-500 text-white rounded text-xs font-semibold hover:bg-green-600 whitespace-nowrap"
                       >
                         Namuna olindi
                       </button>
                     )}
-                    {isLaborant && order.status === 'in_progress' && !order.result_id && (
+                    {isLaborant && (order.status === 'sample_collected' || order.status === 'in_progress') && !order.result_id && (
                       <button
                         onClick={() => onEnterResult(order)}
                         className="px-3 py-1 bg-purple-500 text-white rounded text-xs font-semibold hover:bg-purple-600 whitespace-nowrap"
@@ -196,13 +196,13 @@ export default function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, 
             <div className="flex flex-col gap-2 sm:gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
               {isLaborant && order.status === 'pending' && (
                 <button
-                  onClick={() => handleStatusChange(order.id, 'in_progress', order.patient_id)}
+                  onClick={() => handleStatusChange(order.id, 'sample_collected', order.patient_id)}
                   className="w-full px-3 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg text-sm sm:text-sm font-semibold hover:bg-green-600"
                 >
                   Namuna olindi
                 </button>
               )}
-              {isLaborant && order.status === 'in_progress' && !order.result_id && (
+              {isLaborant && (order.status === 'sample_collected' || order.status === 'in_progress') && !order.result_id && (
                 <button
                   onClick={() => onEnterResult(order)}
                   className="w-full px-3 py-2 sm:py-2.5 bg-purple-500 text-white rounded-lg sm:rounded-lg text-sm sm:text-sm font-semibold hover:bg-purple-600"

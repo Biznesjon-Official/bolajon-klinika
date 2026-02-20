@@ -12,6 +12,123 @@ import mongoose from 'mongoose';
 const router = express.Router();
 
 /**
+ * Get daily report
+ */
+router.get('/daily',
+  authenticate,
+  authorize('admin', 'doctor'),
+  async (req, res, next) => {
+    try {
+      const { date } = req.query;
+      
+      // Parse date or use today
+      const reportDate = date ? new Date(date) : new Date();
+      reportDate.setHours(0, 0, 0, 0);
+      const nextDay = new Date(reportDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      
+      // Get daily statistics
+      const [
+        newPatients,
+        totalInvoices,
+        totalRevenue,
+        labOrders,
+        admissions,
+        expenses
+      ] = await Promise.all([
+        Patient.countDocuments({ 
+          created_at: { $gte: reportDate, $lt: nextDay } 
+        }),
+        Invoice.countDocuments({ 
+          created_at: { $gte: reportDate, $lt: nextDay } 
+        }),
+        Transaction.aggregate([
+          {
+            $match: {
+              created_at: { $gte: reportDate, $lt: nextDay },
+              transaction_type: 'payment'
+            }
+          },
+          {
+            $group: {
+              _id: '$payment_method',
+              total: { $sum: '$amount' },
+              count: { $sum: 1 }
+            }
+          }
+        ]),
+        LabOrder.countDocuments({ 
+          createdAt: { $gte: reportDate, $lt: nextDay } 
+        }),
+        Admission.countDocuments({ 
+          admission_date: { $gte: reportDate, $lt: nextDay } 
+        }),
+        Expense.aggregate([
+          {
+            $match: {
+              date: { $gte: reportDate, $lt: nextDay }
+            }
+          },
+          {
+            $group: {
+              _id: '$category',
+              total: { $sum: '$amount' },
+              count: { $sum: 1 }
+            }
+          }
+        ])
+      ]);
+      
+      // Calculate totals
+      const revenueByMethod = {};
+      let totalRevenueAmount = 0;
+      totalRevenue.forEach(item => {
+        revenueByMethod[item._id] = item.total;
+        totalRevenueAmount += item.total;
+      });
+      
+      const expensesByCategory = {};
+      let totalExpensesAmount = 0;
+      expenses.forEach(item => {
+        expensesByCategory[item._id] = item.total;
+        totalExpensesAmount += item.total;
+      });
+      
+      res.json({
+        success: true,
+        data: {
+          date: reportDate.toISOString().split('T')[0],
+          patients: {
+            new: newPatients
+          },
+          invoices: {
+            total: totalInvoices
+          },
+          revenue: {
+            total: totalRevenueAmount,
+            byMethod: revenueByMethod
+          },
+          laboratory: {
+            orders: labOrders
+          },
+          inpatient: {
+            admissions: admissions
+          },
+          expenses: {
+            total: totalExpensesAmount,
+            byCategory: expensesByCategory
+          },
+          netProfit: totalRevenueAmount - totalExpensesAmount
+        }
+      });
+    } catch (error) {
+      console.error('Get daily report error:', error);
+      next(error);
+    }
+  }
+);
+
+/**
  * Get dashboard statistics
  */
 router.get('/dashboard',
@@ -728,6 +845,40 @@ router.get('/services',
       });
     } catch (error) {
       console.error('Get services report error:', error);
+      next(error);
+    }
+  }
+);
+
+/**
+ * Get staff report
+ */
+router.get('/staff',
+  authenticate,
+  authorize('admin', 'doctor'),
+  async (req, res, next) => {
+    try {
+      const Staff = mongoose.model('Staff');
+      const staffList = await Staff.find({ status: 'active' })
+        .select('first_name last_name role specialization phone status created_at')
+        .sort({ role: 1, first_name: 1 })
+        .lean();
+
+      const byRole = {};
+      staffList.forEach(s => {
+        if (!byRole[s.role]) byRole[s.role] = [];
+        byRole[s.role].push(s);
+      });
+
+      res.json({
+        success: true,
+        data: {
+          total: staffList.length,
+          by_role: byRole,
+          staff: staffList
+        }
+      });
+    } catch (error) {
       next(error);
     }
   }

@@ -16,6 +16,11 @@ router.post('/login', loginRateLimiter, async (req, res, next) => {
   try {
     const { username, password, twoFaToken } = req.body;
     
+    console.log('=== LOGIN ATTEMPT ===');
+    console.log('Username:', username);
+    console.log('Password length:', password?.length);
+    console.log('Username lowercase:', username?.toLowerCase());
+    
     if (!username || !password) {
       throw new AppError('Username and password required', 400);
     }
@@ -26,13 +31,24 @@ router.post('/login', loginRateLimiter, async (req, res, next) => {
       status: 'active'
     });
     
+    console.log('Staff found:', !!staff);
+    if (staff) {
+      console.log('  Username in DB:', staff.username);
+      console.log('  Role:', staff.role);
+      console.log('  Status:', staff.status);
+    }
+    
     if (!staff) {
+      console.log('❌ Staff not found with username:', username.toLowerCase());
       throw new AppError('Invalid credentials', 401);
     }
     
     // Verify password
     const isValidPassword = await staff.comparePassword(password);
+    console.log('Password valid:', isValidPassword);
+    
     if (!isValidPassword) {
+      console.log('❌ Invalid password');
       throw new AppError('Invalid credentials', 401);
     }
     

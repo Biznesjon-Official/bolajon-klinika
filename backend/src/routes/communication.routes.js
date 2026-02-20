@@ -6,6 +6,49 @@ import Patient from '../models/Patient.js';
 const router = express.Router();
 
 /**
+ * Get all communications
+ */
+router.get('/',
+  authenticate,
+  authorize('admin', 'doctor', 'nurse'),
+  async (req, res, next) => {
+    try {
+      const { channel, status, page = 1, limit = 20 } = req.query;
+
+      const filter = {};
+      if (channel) filter.channel = channel;
+      if (status) filter.status = status;
+
+      const skip = (page - 1) * limit;
+
+      const [communications, total] = await Promise.all([
+        Communication.find(filter)
+          .populate('recipient_id', 'first_name last_name phone patient_number')
+          .sort({ created_at: -1 })
+          .skip(skip)
+          .limit(parseInt(limit))
+          .lean(),
+        Communication.countDocuments(filter)
+      ]);
+
+      res.json({
+        success: true,
+        data: communications,
+        pagination: {
+          total,
+          page: parseInt(page),
+          pages: Math.ceil(total / limit),
+          limit: parseInt(limit)
+        }
+      });
+    } catch (error) {
+      console.error('Get communications error:', error);
+      next(error);
+    }
+  }
+);
+
+/**
  * Send SMS
  */
 router.post('/sms/send',
@@ -231,6 +274,21 @@ router.get('/stats',
       });
     } catch (error) {
       console.error('Get stats error:', error);
+      next(error);
+    }
+  }
+);
+
+/**
+ * Get unread count
+ */
+router.get('/unread-count',
+  authenticate,
+  async (req, res, next) => {
+    try {
+      const count = await Communication.countDocuments({ status: { $in: ['sent', 'pending'] } });
+      res.json({ success: true, count, data: { unread: count } });
+    } catch (error) {
       next(error);
     }
   }

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(while read f)",
+      "Bash(do basename \"$f\")",
+      "Bash(done)",
+      "Bash(node --version:*)",
+      "Bash(curl:*)",
+      "Bash(node test-comprehensive.js:*)",
+      "Bash(cmd //c \"taskkill /PID 4380 /F\")",
+      "Bash(netstat:*)",
+      "Bash(ss:*)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(node -e \"const d=require\\(''fs''\\).readFileSync\\(''/dev/stdin'',''utf8''\\);const j=JSON.parse\\(d\\);console.log\\(''Token:'',j.accessToken?.substring\\(0,20\\)\\)\")",
+      "Bash(node --experimental-vm-modules:*)"
+    ]
+  }
+}

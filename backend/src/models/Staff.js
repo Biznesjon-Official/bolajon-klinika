@@ -41,7 +41,7 @@ const staffSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['admin', 'doctor', 'nurse', 'laborant', 'pharmacist', 'sanitar', 'receptionist', 'masseur', 'speech_therapist', 'chief_doctor'],
+    enum: ['admin', 'doctor', 'nurse', 'laborant', 'sanitar', 'receptionist', 'masseur', 'speech_therapist', 'chief_doctor'],
     lowercase: true
   },
   specialization: {
@@ -162,6 +162,6 @@ staffSchema.virtual('full_name').get(function() {
   return `${this.first_name} ${this.last_name}`;
 });
 
-const Staff = mongoose.model('Staff', staffSchema);
+const Staff = mongoose.model('Staff', staffSchema, 'staff');
 
 export default Staff;

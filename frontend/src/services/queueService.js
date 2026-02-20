@@ -56,6 +56,17 @@ export const queueService = {
     }
   },
 
+  // Qabulni yakunlash (alias)
+  completeQueue: async (id) => {
+    try {
+      const response = await api.put(`/queue/${id}/complete`);
+      return response.data;
+    } catch (error) {
+      console.error('Complete queue error:', error);
+      throw error;
+    }
+  },
+
   // Qabulni bekor qilish
   cancelAppointment: async (id, reason) => {
     try {
