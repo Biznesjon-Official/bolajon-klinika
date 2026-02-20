@@ -100,6 +100,9 @@ app.use(cors({
   credentials: true
 }));
 
+// Trust proxy - for Nginx reverse proxy
+app.set('trust proxy', 1);
+
 // Apply rate limiting before other middleware
 app.use(rateLimiter);
 
