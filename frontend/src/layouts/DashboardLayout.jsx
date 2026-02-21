@@ -46,7 +46,7 @@ const DashboardLayout = ({ children }) => {
     
     // 7. Laboratoriya
     { name: 'Laborant Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab'] },
-    { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Laborant', 'Lab', 'Shifokor', 'Doctor', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Laborant', 'Lab', 'Shifokor', 'Doctor'] },
     
     // 9. Tozalovchi
     { name: 'Tozalovchi Paneli', icon: 'cleaning_services', path: '/sanitar', roles: ['Tozalovchi', 'Cleaner', 'sanitar'] },

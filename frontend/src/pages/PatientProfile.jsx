@@ -13,6 +13,9 @@ import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import PatientQRModal from '../components/PatientQRModal';
 import DateInput from '../components/DateInput';
+import PrescriptionModal from '../components/PrescriptionModal';
+import doctorNurseService from '../services/doctorNurseService';
+import { laboratoryService } from '../services/laboratoryService';
 
 const PatientProfile = () => {
   const { id } = useParams();
@@ -71,6 +74,21 @@ const PatientProfile = () => {
 
   // Alert modal
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+
+  // Doctor action modals
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [showNurseModal, setShowNurseModal] = useState(false);
+  const [showLabOrderModal, setShowLabOrderModal] = useState(false);
+  const [nurses, setNurses] = useState([]);
+  const [selectedNurse, setSelectedNurse] = useState('');
+  const [nurseTaskData, setNurseTaskData] = useState({
+    task_type: 'medication_administration',
+    medication_name: '', dosage: '', route: 'oral', frequency: '', priority: 'normal', instructions: ''
+  });
+  const [labTests, setLabTests] = useState([]);
+  const [selectedLabTest, setSelectedLabTest] = useState('');
+  const [labOrderPriority, setLabOrderPriority] = useState('normal');
+  const [labOrderNotes, setLabOrderNotes] = useState('');
 
   const showAlert = (message, type = 'info', title = '') => {
     setAlertModal({ isOpen: true, title, message, type });
@@ -213,6 +231,61 @@ const PatientProfile = () => {
       loadPatientData();
     } catch (error) {
       console.error('Add record error:', error);
+    }
+  };
+
+  // Doctor: Hamshiraga topshiriq
+  const handleOpenNurseModal = async () => {
+    setShowNurseModal(true);
+    try {
+      const res = await doctorNurseService.getActiveNurses();
+      setNurses(res.data || []);
+    } catch {
+      setNurses([]);
+    }
+  };
+
+  const handleAssignToNurse = async () => {
+    if (!selectedNurse) return showAlert('Hamshirani tanlang', 'error');
+    try {
+      await doctorNurseService.assignTask({
+        patient_id: id, nurse_id: selectedNurse, ...nurseTaskData
+      });
+      showAlert('Topshiriq yuborildi', 'success');
+      setShowNurseModal(false);
+      setSelectedNurse('');
+      setNurseTaskData({ task_type: 'medication_administration', medication_name: '', dosage: '', route: 'oral', frequency: '', priority: 'normal', instructions: '' });
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Xatolik', 'error');
+    }
+  };
+
+  // Doctor: Lab buyurtma
+  const handleOpenLabOrderModal = async () => {
+    setShowLabOrderModal(true);
+    try {
+      const res = await laboratoryService.getTests();
+      setLabTests(res.data || []);
+    } catch {
+      setLabTests([]);
+    }
+  };
+
+  const handleCreateLabOrder = async () => {
+    if (!selectedLabTest) return showAlert('Tahlilni tanlang', 'error');
+    try {
+      await laboratoryService.createOrder({
+        patient_id: id, test_id: selectedLabTest,
+        priority: labOrderPriority, notes: labOrderNotes
+      });
+      showAlert('Tahlil buyurtma yaratildi', 'success');
+      setShowLabOrderModal(false);
+      setSelectedLabTest('');
+      setLabOrderNotes('');
+      setLabOrderPriority('normal');
+      loadPatientData();
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Xatolik', 'error');
     }
   };
 
@@ -469,6 +542,38 @@ const PatientProfile = () => {
               >
                 <span className="material-symbols-outlined">hotel</span>
                 <span className="hidden sm:inline">Yotqizish</span>
+              </button>
+            </>
+          )}
+          {isDoctor && (
+            <>
+              <button
+                onClick={() => setShowPrescriptionModal(true)}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">edit_note</span>
+                <span className="hidden sm:inline">Retsept yozish</span>
+              </button>
+              <button
+                onClick={() => setShowAddRecordModal(true)}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">diagnosis</span>
+                <span className="hidden sm:inline">Tashxis</span>
+              </button>
+              <button
+                onClick={handleOpenNurseModal}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-orange-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">medical_services</span>
+                <span className="hidden sm:inline">Hamshiraga topshiriq</span>
+              </button>
+              <button
+                onClick={handleOpenLabOrderModal}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">biotech</span>
+                <span className="hidden sm:inline">Tahlil buyurtma</span>
               </button>
             </>
           )}
@@ -2114,6 +2219,188 @@ const PatientProfile = () => {
               className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
             >
               {admissionLoading ? 'Yuklanmoqda...' : 'Yotqizish'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Prescription Modal */}
+      {patient && (
+        <PrescriptionModal
+          isOpen={showPrescriptionModal}
+          onClose={() => setShowPrescriptionModal(false)}
+          patient={patient}
+          onSuccess={() => { setShowPrescriptionModal(false); loadPatientData(); }}
+          user={user}
+        />
+      )}
+
+      {/* Nurse Task Modal */}
+      <Modal isOpen={showNurseModal} onClose={() => setShowNurseModal(false)} size="md">
+        <div className="p-6">
+          <h3 className="text-lg font-bold mb-4 dark:text-white">Hamshiraga topshiriq</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Hamshira</label>
+              <select
+                value={selectedNurse}
+                onChange={(e) => setSelectedNurse(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="">Tanlang...</option>
+                {nurses.map(n => (
+                  <option key={n._id} value={n._id}>
+                    {n.first_name} {n.last_name} {n.workload !== undefined ? `(${n.workload} ta vazifa)` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Topshiriq turi</label>
+              <select
+                value={nurseTaskData.task_type}
+                onChange={(e) => setNurseTaskData({ ...nurseTaskData, task_type: e.target.value })}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="medication_administration">Dori berish</option>
+                <option value="patient_care">Bemor parvarishi</option>
+                <option value="vital_signs">Vital belgilar</option>
+                <option value="specimen_collection">Namuna olish</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Dori nomi</label>
+                <input
+                  type="text"
+                  value={nurseTaskData.medication_name}
+                  onChange={(e) => setNurseTaskData({ ...nurseTaskData, medication_name: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="Dori nomi"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Dozasi</label>
+                <input
+                  type="text"
+                  value={nurseTaskData.dosage}
+                  onChange={(e) => setNurseTaskData({ ...nurseTaskData, dosage: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="Masalan: 500mg"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Yo'l</label>
+                <select
+                  value={nurseTaskData.route}
+                  onChange={(e) => setNurseTaskData({ ...nurseTaskData, route: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                >
+                  <option value="oral">Og'iz orqali</option>
+                  <option value="iv">Vena ichiga (IV)</option>
+                  <option value="im">Mushak ichiga (IM)</option>
+                  <option value="sc">Teri ostiga (SC)</option>
+                  <option value="topical">Tashqi</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Muhimlik</label>
+                <select
+                  value={nurseTaskData.priority}
+                  onChange={(e) => setNurseTaskData({ ...nurseTaskData, priority: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                >
+                  <option value="normal">Oddiy</option>
+                  <option value="urgent">Shoshilinch</option>
+                  <option value="stat">STAT</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Ko'rsatmalar</label>
+              <textarea
+                value={nurseTaskData.instructions}
+                onChange={(e) => setNurseTaskData({ ...nurseTaskData, instructions: e.target.value })}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                rows={2}
+                placeholder="Qo'shimcha ko'rsatmalar..."
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <button
+              onClick={() => setShowNurseModal(false)}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Bekor qilish
+            </button>
+            <button
+              onClick={handleAssignToNurse}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:opacity-90"
+            >
+              Topshiriq yuborish
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Lab Order Modal */}
+      <Modal isOpen={showLabOrderModal} onClose={() => setShowLabOrderModal(false)} size="md">
+        <div className="p-6">
+          <h3 className="text-lg font-bold mb-4 dark:text-white">Tahlil buyurtma qilish</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Tahlil turi</label>
+              <select
+                value={selectedLabTest}
+                onChange={(e) => setSelectedLabTest(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="">Tanlang...</option>
+                {labTests.map(test => (
+                  <option key={test._id} value={test._id}>
+                    {test.name} {test.price ? `— ${test.price?.toLocaleString()} so'm` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Muhimlik</label>
+              <select
+                value={labOrderPriority}
+                onChange={(e) => setLabOrderPriority(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="normal">Oddiy</option>
+                <option value="urgent">Shoshilinch</option>
+                <option value="stat">STAT</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Izoh</label>
+              <textarea
+                value={labOrderNotes}
+                onChange={(e) => setLabOrderNotes(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                rows={2}
+                placeholder="Qo'shimcha izoh..."
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <button
+              onClick={() => setShowLabOrderModal(false)}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Bekor qilish
+            </button>
+            <button
+              onClick={handleCreateLabOrder}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:opacity-90"
+            >
+              Buyurtma berish
             </button>
           </div>
         </div>
