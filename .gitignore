@@ -45,12 +45,35 @@ dev-dist/
 # Test coverage
 coverage/
 
-# Deprecated folders (to be removed)
-routes/
-config/
-middleware/
-Bolajon_klinik/
+# Deprecated folders (root level only)
+/routes/
+/config/
+/middleware/
+/Bolajon_klinik/
 
 # Temporary files
 *.tmp
 *.temp
+
+# Claude/AI config
+.claude/
+CLAUDE.md
+**/CLAUDE.md
+.claudeignore
+.kiro/
+
+# Documentation (not needed in production)
+PHARMACY-CASHIER-CLEANUP.md
+ROLES.md
+SYSTEM-ARCHITECTURE.md
+WORKFLOWS.md
+frontend/BUGS-FOUND.md
+frontend/E2E-FINAL-REPORT.md
+frontend/E2E-TEST-RESULTS.md
+
+# E2E tests
+frontend/e2e/
+frontend/playwright.config.js
+
+# Misc scripts
+backend/check-roles.js

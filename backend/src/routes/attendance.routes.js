@@ -275,8 +275,8 @@ router.post('/check-out', authenticate, async (req, res) => {
     attendance.check_out = checkOutTime;
     await attendance.save();
 
-    // Create cashier report if user is reception/cashier
-    if (staff && (staff.role === 'reception' || staff.role === 'admin')) {
+    // Create cashier report if user is receptionist
+    if (staff && (staff.role === 'receptionist' || staff.role === 'admin')) {
       console.log('📊 Creating cashier report for:', staff.first_name, staff.last_name);
       
       try {

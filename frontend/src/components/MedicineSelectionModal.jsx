@@ -209,7 +209,7 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
                         {medicines.length === 0 && !loading && (
                           <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
                             <span className="material-symbols-outlined text-sm">info</span>
-                            2-qavatdagi dorixonada dorilar mavjud emas yoki yuklanmadi
+                            2-qavatdagi dori omborida dorilar mavjud emas yoki yuklanmadi
                           </p>
                         )}
                       </div>

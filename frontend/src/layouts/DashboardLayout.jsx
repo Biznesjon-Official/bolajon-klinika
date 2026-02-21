@@ -44,10 +44,7 @@ const DashboardLayout = ({ children }) => {
     // 6. Hamshira paneli
     { name: 'Hamshira Paneli', icon: 'medical_services', path: '/nurse', roles: ['Hamshira', 'Nurse'] },
     
-    // 7. Dorixona
-    { name: 'Dorixona', icon: 'medication', path: '/pharmacy', roles: ['Admin', 'Administrator', 'Hamshira', 'Nurse', 'Qabulxona', 'Reception', 'receptionist'] },
-    
-    // 8. Laboratoriya
+    // 7. Laboratoriya
     { name: 'Laborant Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab'] },
     { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Laborant', 'Lab', 'Shifokor', 'Doctor', 'Qabulxona', 'Reception', 'receptionist'] },
     

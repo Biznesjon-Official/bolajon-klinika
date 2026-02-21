@@ -130,6 +130,7 @@ const staffSchema = new mongoose.Schema({
   toJSON: {
     transform: function(doc, ret) {
       delete ret.password;
+      delete ret.plain_password;
       delete ret.two_factor_secret;
       delete ret.refresh_token;
       return ret;

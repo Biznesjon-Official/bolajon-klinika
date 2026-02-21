@@ -72,7 +72,7 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
       {/* Medicine Selection */}
       <div className="relative">
         <label className="block text-sm font-semibold mb-1">
-          💊 Dori nomi (2-qavat dorixonasi)
+          💊 Dori nomi (2-qavat dori ombori)
         </label>
         <input
           type="text"
@@ -192,7 +192,7 @@ export default function MedicineInput({ value, onChange, availableMedicines, flo
           </div>
           {quantity > (selectedMedicine.total_stock || selectedMedicine.quantity || 0) && (
             <p className="text-xs text-red-600 mt-1">
-              ⚠️ Dorixonada yetarli dori yo'q! Mavjud: {selectedMedicine.total_stock || selectedMedicine.quantity || 0} {selectedMedicine.unit}
+              ⚠️ Dori omborida yetarli dori yo'q! Mavjud: {selectedMedicine.total_stock || selectedMedicine.quantity || 0} {selectedMedicine.unit}
             </p>
           )}
           <p className="text-xs text-gray-500 mt-1">

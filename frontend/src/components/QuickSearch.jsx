@@ -17,7 +17,6 @@ export default function QuickSearch() {
     { id: 'queue', title: 'Navbat', icon: 'format_list_numbered', path: '/queue', keywords: ['navbat', 'queue'] },
     { id: 'doctor', title: 'Shifokor Panel', icon: 'medical_services', path: '/doctor-panel', keywords: ['shifokor', 'doctor'] },
     { id: 'nurse', title: 'Hamshira Panel', icon: 'medication', path: '/nurse-panel', keywords: ['hamshira', 'nurse'] },
-    { id: 'pharmacy', title: 'Dorixona', icon: 'local_pharmacy', path: '/pharmacy', keywords: ['dorixona', 'dori', 'pharmacy'] },
     { id: 'laboratory', title: 'Laboratoriya', icon: 'science', path: '/laboratory', keywords: ['laboratoriya', 'tahlil', 'lab'] },
     { id: 'sanitar', title: 'Tozalovchi', icon: 'cleaning_services', path: '/sanitar', keywords: ['tozalovchi', 'sanitar'] },
     { id: 'staff', title: 'Xodimlar', icon: 'badge', path: '/staff', keywords: ['xodim', 'staff'] },

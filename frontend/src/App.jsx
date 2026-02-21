@@ -34,7 +34,6 @@ const LaborantPanel = lazy(() => import('./pages/LaborantPanel'));
 const LabPharmacy = lazy(() => import('./pages/LabPharmacy'));
 const NursePanel = lazy(() => import('./pages/NursePanel'));
 const SanitarPanel = lazy(() => import('./pages/SanitarPanel'));
-const PharmacyPanel = lazy(() => import('./pages/PharmacyPanel'));
 const ReceptionPanel = lazy(() => import('./pages/ReceptionPanel'));
 const MasseurPanel = lazy(() => import('./pages/MasseurPanel'));
 const SpeechTherapistPanel = lazy(() => import('./pages/SpeechTherapistPanel'));
@@ -135,7 +134,6 @@ function AppContent() {
               <Route path="/lab" element={<ProtectedRoute><DashboardLayout><LaborantPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/nurse" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/sanitar" element={<ProtectedRoute><DashboardLayout><SanitarPanel /></DashboardLayout></ProtectedRoute>} />
-              <Route path="/pharmacy" element={<ProtectedRoute><DashboardLayout><PharmacyPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/masseur" element={<ProtectedRoute><DashboardLayout><MasseurPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/speech-therapist" element={<ProtectedRoute><DashboardLayout><SpeechTherapistPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/laboratory" element={<ProtectedRoute><DashboardLayout><Laboratory /></DashboardLayout></ProtectedRoute>} />

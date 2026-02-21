@@ -92,6 +92,8 @@ export const authorize = (...allowedRoles) => {
       'doctor': ['Doctor', 'Shifokor', 'doctor'],
       'Doctor': ['Doctor', 'Shifokor', 'doctor'],
       'Shifokor': ['Doctor', 'Shifokor', 'doctor'],
+      'chief_doctor': ['chief_doctor', 'ChiefDoctor', 'Bosh Shifokor'],
+      'ChiefDoctor': ['chief_doctor', 'ChiefDoctor', 'Bosh Shifokor'],
       'nurse': ['Nurse', 'Hamshira', 'nurse'],
       'Nurse': ['Nurse', 'Hamshira', 'nurse'],
       'Hamshira': ['Nurse', 'Hamshira', 'nurse'],
