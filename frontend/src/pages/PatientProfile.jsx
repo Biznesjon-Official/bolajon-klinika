@@ -7,6 +7,8 @@ import { prescriptionService } from '../services/prescriptionService';
 import treatmentService from '../services/treatmentService';
 import { queueService } from '../services/queueService';
 import billingService from '../services/billingService';
+import ambulatorInpatientService from '../services/ambulatorInpatientService';
+import inpatientRoomService from '../services/inpatientRoomService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import PatientQRModal from '../components/PatientQRModal';
@@ -58,12 +60,67 @@ const PatientProfile = () => {
     notes: ''
   });
 
+  // Admission states
+  const [showAdmissionModal, setShowAdmissionModal] = useState(false);
+  const [admissionDepartment, setAdmissionDepartment] = useState('ambulator');
+  const [admissionRooms, setAdmissionRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState('');
+  const [selectedBed, setSelectedBed] = useState('');
+  const [admissionForm, setAdmissionForm] = useState({ diagnosis: '', notes: '' });
+  const [admissionLoading, setAdmissionLoading] = useState(false);
+
   // Alert modal
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
 
   const showAlert = (message, type = 'info', title = '') => {
     setAlertModal({ isOpen: true, title, message, type });
   };
+
+  const loadAdmissionRooms = async (dept) => {
+    try {
+      const res = dept === 'ambulator'
+        ? await ambulatorInpatientService.getRooms()
+        : await inpatientRoomService.getRooms()
+      setAdmissionRooms(res.data || [])
+      setSelectedRoom('')
+      setSelectedBed('')
+    } catch {
+      setAdmissionRooms([])
+    }
+  }
+
+  const handleOpenAdmissionModal = () => {
+    setShowAdmissionModal(true)
+    setAdmissionDepartment('ambulator')
+    setAdmissionForm({ diagnosis: '', notes: '' })
+    setSelectedRoom('')
+    setSelectedBed('')
+    loadAdmissionRooms('ambulator')
+  }
+
+  const handleCreateAdmission = async () => {
+    if (!selectedRoom || !selectedBed) {
+      showAlert('Xona va koykani tanlang', 'error')
+      return
+    }
+    try {
+      setAdmissionLoading(true)
+      await ambulatorInpatientService.createAdmission({
+        patient_id: id,
+        room_id: selectedRoom,
+        bed_number: Number(selectedBed),
+        diagnosis: admissionForm.diagnosis,
+        notes: admissionForm.notes
+      })
+      showAlert('Bemor muvaffaqiyatli yotqizildi', 'success')
+      setShowAdmissionModal(false)
+      loadPatientData()
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Xatolik yuz berdi', 'error')
+    } finally {
+      setAdmissionLoading(false)
+    }
+  }
 
   useEffect(() => {
     loadPatientData();
@@ -405,6 +462,13 @@ const PatientProfile = () => {
               >
                 <span className="material-symbols-outlined">point_of_sale</span>
                 <span className="hidden sm:inline">To'lov qilish</span>
+              </button>
+              <button
+                onClick={handleOpenAdmissionModal}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">hotel</span>
+                <span className="hidden sm:inline">Yotqizish</span>
               </button>
             </>
           )}
@@ -1941,6 +2005,114 @@ const PatientProfile = () => {
             <button type="button" onClick={handleProcessPayment} disabled={submitting || !paymentForm.amount}
               className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50">
               {submitting ? 'Yuklanmoqda...' : 'To\'lov qilish'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Admission Modal */}
+      <Modal isOpen={showAdmissionModal} onClose={() => setShowAdmissionModal(false)} size="md">
+        <div className="space-y-4">
+          <h2 className="text-xl font-black text-gray-900 dark:text-white">Yotqizish</h2>
+
+          {/* Department toggle */}
+          <div className="flex gap-2">
+            {[{ key: 'ambulator', label: 'Ambulatoriya' }, { key: 'inpatient', label: 'Statsionar' }].map(d => (
+              <button
+                key={d.key}
+                onClick={() => { setAdmissionDepartment(d.key); loadAdmissionRooms(d.key) }}
+                className={`flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-colors ${
+                  admissionDepartment === d.key
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Room select */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Xona</label>
+            <select
+              value={selectedRoom}
+              onChange={(e) => { setSelectedRoom(e.target.value); setSelectedBed('') }}
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="">Xona tanlang</option>
+              {admissionRooms.map(room => {
+                const availableBeds = (room.beds || []).filter(b => b.status === 'available').length
+                return (
+                  <option key={room._id} value={room._id} disabled={availableBeds === 0}>
+                    {room.room_number} - {room.room_type} ({availableBeds} bo'sh joy)
+                  </option>
+                )
+              })}
+            </select>
+          </div>
+
+          {/* Bed select */}
+          {selectedRoom && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Koyka</label>
+              <select
+                value={selectedBed}
+                onChange={(e) => setSelectedBed(e.target.value)}
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="">Koyka tanlang</option>
+                {(admissionRooms.find(r => r._id === selectedRoom)?.beds || [])
+                  .filter(b => b.status === 'available')
+                  .map(bed => (
+                    <option key={bed._id || bed.bed_number} value={bed.bed_number}>
+                      Koyka #{bed.bed_number}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+
+          {/* Diagnosis */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tashxis</label>
+            <textarea
+              value={admissionForm.diagnosis}
+              onChange={(e) => setAdmissionForm({ ...admissionForm, diagnosis: e.target.value })}
+              rows="2"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+              placeholder="Tashxis..."
+            />
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Izoh</label>
+            <textarea
+              value={admissionForm.notes}
+              onChange={(e) => setAdmissionForm({ ...admissionForm, notes: e.target.value })}
+              rows="2"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+              placeholder="Izoh..."
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAdmissionModal(false)}
+              className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200"
+            >
+              Bekor qilish
+            </button>
+            <button
+              type="button"
+              onClick={handleCreateAdmission}
+              disabled={admissionLoading || !selectedRoom || !selectedBed}
+              className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
+            >
+              {admissionLoading ? 'Yuklanmoqda...' : 'Yotqizish'}
             </button>
           </div>
         </div>
