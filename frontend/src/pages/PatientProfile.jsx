@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { patientService } from '../services/patientService';
 import { prescriptionService } from '../services/prescriptionService';
 import treatmentService from '../services/treatmentService';
+import { queueService } from '../services/queueService';
+import billingService from '../services/billingService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import PatientQRModal from '../components/PatientQRModal';
@@ -16,7 +18,8 @@ const PatientProfile = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isDoctor = user?.role?.name === 'Doctor';
-  
+  const isReceptionist = ['Receptionist', 'Admin'].includes(user?.role?.name);
+
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState(null);
   const [medicalRecords, setMedicalRecords] = useState([]);
@@ -29,7 +32,23 @@ const PatientProfile = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [activeTab, setActiveTab] = useState('overview');
   const [showQRModal, setShowQRModal] = useState(false);
-  
+
+  // Queue & Billing states
+  const [queueData, setQueueData] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [services, setServices] = useState([]);
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const [showAddQueueModal, setShowAddQueueModal] = useState(false);
+  const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
+  const [queueForm, setQueueForm] = useState({ doctor_id: '', queue_type: 'NORMAL', notes: '' });
+  const [invoiceItems, setInvoiceItems] = useState([]);
+  const [invoiceDoctor, setInvoiceDoctor] = useState('');
+  const [invoiceDiscount, setInvoiceDiscount] = useState(0);
+  const [paymentForm, setPaymentForm] = useState({ amount: '', method: 'cash', notes: '' });
+  const [submitting, setSubmitting] = useState(false);
+
   // Modals
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
   const [showAddLabModal, setShowAddLabModal] = useState(false);
@@ -55,6 +74,12 @@ const PatientProfile = () => {
       loadTreatmentSchedule();
     } else if (activeTab === 'specialists') {
       loadAssignedSpecialists();
+    } else if (activeTab === 'queue' && isReceptionist) {
+      loadQueueData();
+      loadDoctors();
+    } else if (activeTab === 'cashier' && isReceptionist) {
+      loadDoctors();
+      loadServices();
     }
   }, [activeTab, selectedDate, id]);
 
@@ -134,6 +159,176 @@ const PatientProfile = () => {
     }
   };
 
+  // Queue & Billing functions
+  const loadQueueData = async () => {
+    try {
+      const response = await queueService.getQueue({ patient_id: id });
+      if (response.success) {
+        setQueueData(response.data || []);
+      }
+    } catch (error) {
+      console.error('Load queue error:', error);
+    }
+  };
+
+  const loadDoctors = async () => {
+    try {
+      const response = await queueService.getDoctors();
+      if (response.success) {
+        setDoctors(response.data || []);
+      }
+    } catch (error) {
+      console.error('Load doctors error:', error);
+    }
+  };
+
+  const loadServices = async () => {
+    try {
+      const response = await billingService.getServices();
+      if (response.success) {
+        setServices(response.data || []);
+      }
+    } catch (error) {
+      console.error('Load services error:', error);
+    }
+  };
+
+  const handleAddToQueue = async (e) => {
+    e.preventDefault();
+    if (!queueForm.doctor_id) return;
+    try {
+      setSubmitting(true);
+      const response = await queueService.addToQueue({
+        patient_id: id,
+        doctor_id: queueForm.doctor_id,
+        queue_type: queueForm.queue_type,
+        notes: queueForm.notes
+      });
+      if (response.success) {
+        showAlert('Bemor navbatga qo\'shildi', 'success', 'Muvaffaqiyatli');
+        setShowAddQueueModal(false);
+        setQueueForm({ doctor_id: '', queue_type: 'NORMAL', notes: '' });
+        loadQueueData();
+      }
+    } catch (error) {
+      showAlert(error.response?.data?.message || 'Xatolik yuz berdi', 'error', 'Xatolik');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelQueue = async (queueId) => {
+    try {
+      const response = await queueService.cancelAppointment(queueId, 'Bekor qilindi');
+      if (response.success) {
+        showAlert('Navbat bekor qilindi', 'success', 'Muvaffaqiyatli');
+        loadQueueData();
+      }
+    } catch (error) {
+      showAlert(error.response?.data?.message || 'Xatolik', 'error', 'Xatolik');
+    }
+  };
+
+  const groupServicesByCategory = () => {
+    const grouped = {};
+    services.forEach(service => {
+      const category = service.category || 'Boshqa';
+      if (!grouped[category]) grouped[category] = [];
+      grouped[category].push(service);
+    });
+    return grouped;
+  };
+
+  const addServiceToInvoice = (service) => {
+    const serviceId = service._id || service.id;
+    if (!serviceId) return;
+    const existing = invoiceItems.find(item => item.service_id === serviceId);
+    if (existing) {
+      setInvoiceItems(invoiceItems.map(item =>
+        item.service_id === serviceId ? { ...item, quantity: item.quantity + 1 } : item
+      ));
+    } else {
+      setInvoiceItems([...invoiceItems, {
+        service_id: serviceId,
+        description: service.name,
+        quantity: 1,
+        unit_price: parseFloat(service.price) || 0,
+        discount_percentage: 0
+      }]);
+    }
+  };
+
+  const removeServiceFromInvoice = (serviceId) => {
+    setInvoiceItems(invoiceItems.filter(item => item.service_id !== serviceId));
+  };
+
+  const getInvoiceTotal = () => {
+    const subtotal = invoiceItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+    return subtotal - (subtotal * invoiceDiscount / 100);
+  };
+
+  const handleCreateInvoice = async (e) => {
+    e.preventDefault();
+    if (invoiceItems.length === 0) {
+      showAlert('Kamida 1 ta xizmat tanlang', 'warning', 'Ogohlantirish');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      const response = await billingService.createInvoice({
+        patient_id: id,
+        doctor_id: invoiceDoctor || undefined,
+        items: invoiceItems,
+        discount_percentage: invoiceDiscount,
+        notes: ''
+      });
+      if (response.success) {
+        showAlert('Faktura yaratildi', 'success', 'Muvaffaqiyatli');
+        setShowNewInvoiceModal(false);
+        setInvoiceItems([]);
+        setInvoiceDoctor('');
+        setInvoiceDiscount(0);
+        loadPatientData();
+      }
+    } catch (error) {
+      showAlert(error.response?.data?.message || 'Xatolik', 'error', 'Xatolik');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openPaymentModal = (invoice) => {
+    setSelectedInvoiceForPayment(invoice);
+    setPaymentForm({
+      amount: ((invoice.total_amount || 0) - (invoice.paid_amount || 0)).toString(),
+      method: 'cash',
+      notes: ''
+    });
+    setShowPaymentModal(true);
+  };
+
+  const handleProcessPayment = async () => {
+    if (!selectedInvoiceForPayment || !paymentForm.amount) return;
+    try {
+      setSubmitting(true);
+      const response = await billingService.addPayment(selectedInvoiceForPayment.id, {
+        amount: parseFloat(paymentForm.amount),
+        payment_method: paymentForm.method,
+        notes: paymentForm.notes
+      });
+      if (response.success) {
+        showAlert('To\'lov qabul qilindi', 'success', 'Muvaffaqiyatli');
+        setShowPaymentModal(false);
+        setSelectedInvoiceForPayment(null);
+        loadPatientData();
+      }
+    } catch (error) {
+      showAlert(error.response?.data?.message || 'Xatolik', 'error', 'Xatolik');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const formatPhone = (phone) => {
     if (!phone) return '-';
     return phone.replace(/(\+998)(\d{2})(\d{3})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
@@ -195,6 +390,24 @@ const PatientProfile = () => {
             <span className="material-symbols-outlined">qr_code</span>
             <span className="hidden sm:inline">QR Kod</span>
           </button>
+          {isReceptionist && (
+            <>
+              <button
+                onClick={() => { setShowAddQueueModal(true); loadDoctors(); }}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">queue</span>
+                <span className="hidden sm:inline">Navbatga qo'shish</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('cashier')}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">point_of_sale</span>
+                <span className="hidden sm:inline">To'lov qilish</span>
+              </button>
+            </>
+          )}
           {!isDoctor && (
             <button
               onClick={() => navigate(`/patients/${id}/edit`)}
@@ -300,7 +513,11 @@ const PatientProfile = () => {
               { id: 'specialists', label: 'Mutaxasislar', icon: 'medical_information' },
               { id: 'lab', label: 'Tahlillar', icon: 'biotech' },
               { id: 'billing', label: 'Moliya', icon: 'payments' },
-              { id: 'admissions', label: 'Yotqizish', icon: 'bed' }
+              { id: 'admissions', label: 'Yotqizish', icon: 'bed' },
+              ...(isReceptionist ? [
+                { id: 'queue', label: 'Navbat', icon: 'queue' },
+                { id: 'cashier', label: 'Kassa', icon: 'point_of_sale' }
+              ] : [])
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1194,6 +1411,233 @@ const PatientProfile = () => {
               )}
             </div>
           )}
+          {/* Queue Tab */}
+          {activeTab === 'queue' && isReceptionist && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                <h3 className="font-bold text-gray-900 dark:text-white">Navbat</h3>
+                <button
+                  onClick={() => { setShowAddQueueModal(true); loadDoctors(); }}
+                  className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined">add</span>
+                  Navbatga qo'shish
+                </button>
+              </div>
+
+              {/* Bugungi navbat */}
+              {(() => {
+                const today = new Date().toISOString().split('T')[0];
+                const todayQueue = queueData.filter(q => q.created_at?.startsWith(today));
+                const historyQueue = queueData.filter(q => !q.created_at?.startsWith(today)).slice(0, 10);
+
+                return (
+                  <>
+                    {todayQueue.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Bugungi navbat</h4>
+                        <div className="space-y-2">
+                          {todayQueue.map(q => (
+                            <div key={q.id} className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border ${
+                              q.status === 'WAITING' ? 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800' :
+                              q.status === 'IN_PROGRESS' ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' :
+                              q.status === 'COMPLETED' ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' :
+                              'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                            }`}>
+                              <div className="flex items-center gap-3">
+                                <span className="font-bold text-lg text-gray-900 dark:text-white">#{q.queue_number}</span>
+                                <div>
+                                  <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                                    Dr. {q.doctor_first_name} {q.doctor_last_name}
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {new Date(q.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                </div>
+                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                  q.status === 'WAITING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                                  q.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' :
+                                  q.status === 'COMPLETED' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
+                                  'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                }`}>
+                                  {q.status === 'WAITING' ? 'Kutmoqda' :
+                                   q.status === 'IN_PROGRESS' ? 'Qabulda' :
+                                   q.status === 'COMPLETED' ? 'Yakunlandi' :
+                                   'Bekor qilingan'}
+                                </span>
+                                {q.queue_type === 'URGENT' && (
+                                  <span className="px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-full text-xs font-semibold">Shoshilinch</span>
+                                )}
+                              </div>
+                              {q.status === 'WAITING' && (
+                                <button
+                                  onClick={() => handleCancelQueue(q.id)}
+                                  className="mt-2 sm:mt-0 px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-lg text-sm font-semibold hover:bg-red-200"
+                                >
+                                  Bekor qilish
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {todayQueue.length === 0 && (
+                      <div className="text-center py-8">
+                        <span className="material-symbols-outlined text-5xl text-gray-300 dark:text-gray-700 mb-3">queue</span>
+                        <p className="text-gray-500 dark:text-gray-400">Bugun navbat yo'q</p>
+                      </div>
+                    )}
+
+                    {historyQueue.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 mt-4">Navbat tarixi</h4>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="text-left text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+                                <th className="pb-2 font-semibold">#</th>
+                                <th className="pb-2 font-semibold">Shifokor</th>
+                                <th className="pb-2 font-semibold">Holat</th>
+                                <th className="pb-2 font-semibold">Sana</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {historyQueue.map(q => (
+                                <tr key={q.id} className="border-b dark:border-gray-700">
+                                  <td className="py-2 font-semibold text-gray-900 dark:text-white">{q.queue_number}</td>
+                                  <td className="py-2 text-gray-700 dark:text-gray-300">Dr. {q.doctor_first_name} {q.doctor_last_name}</td>
+                                  <td className="py-2">
+                                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                      q.status === 'COMPLETED' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
+                                      'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                    }`}>
+                                      {q.status === 'COMPLETED' ? 'Yakunlandi' : 'Bekor qilingan'}
+                                    </span>
+                                  </td>
+                                  <td className="py-2 text-gray-500 dark:text-gray-400">{formatDate(q.created_at)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* Cashier Tab */}
+          {activeTab === 'cashier' && isReceptionist && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white">Kassa</h3>
+                  {(() => {
+                    const totalDebt = invoices.reduce((sum, inv) => sum + ((inv.total_amount || 0) - (inv.paid_amount || 0)), 0);
+                    return totalDebt > 0 ? (
+                      <p className="text-red-600 font-bold text-lg">Qarz: {totalDebt.toLocaleString()} so'm</p>
+                    ) : (
+                      <p className="text-green-600 font-semibold">Qarz yo'q</p>
+                    );
+                  })()}
+                </div>
+                <button
+                  onClick={() => { setShowNewInvoiceModal(true); loadServices(); loadDoctors(); }}
+                  className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined">add</span>
+                  Yangi faktura
+                </button>
+              </div>
+
+              {/* To'lanmagan fakturalar */}
+              {(() => {
+                const unpaid = invoices.filter(inv => inv.payment_status !== 'paid');
+                const paid = invoices.filter(inv => inv.payment_status === 'paid');
+
+                return (
+                  <>
+                    {unpaid.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-2">To'lanmagan fakturalar ({unpaid.length})</h4>
+                        <div className="space-y-2">
+                          {unpaid.map(invoice => {
+                            const debt = (invoice.total_amount || 0) - (invoice.paid_amount || 0);
+                            const serviceNames = invoice.services?.map(s => s.service_name).join(', ') ||
+                                                 invoice.items?.map(i => i.description).join(', ') ||
+                                                 'Tibbiy xizmat';
+                            return (
+                              <div key={invoice.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{invoice.invoice_number}</p>
+                                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                      invoice.payment_status === 'partial' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                                    }`}>
+                                      {invoice.payment_status === 'partial' ? 'Qisman' : 'To\'lanmagan'}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{serviceNames}</p>
+                                  <div className="flex gap-3 text-xs mt-1">
+                                    <span className="text-gray-500">Summa: {(invoice.total_amount || 0).toLocaleString()}</span>
+                                    {invoice.paid_amount > 0 && <span className="text-green-600">To'langan: {(invoice.paid_amount || 0).toLocaleString()}</span>}
+                                    <span className="text-red-600 font-bold">Qarz: {debt.toLocaleString()}</span>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => openPaymentModal(invoice)}
+                                  className="mt-2 sm:mt-0 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-1"
+                                >
+                                  <span className="material-symbols-outlined text-base">payments</span>
+                                  To'lov
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {unpaid.length === 0 && (
+                      <div className="text-center py-6 bg-green-50 dark:bg-green-900/10 rounded-lg">
+                        <span className="material-symbols-outlined text-4xl text-green-500 mb-2">check_circle</span>
+                        <p className="text-green-700 dark:text-green-400 font-semibold">Barcha fakturalar to'langan</p>
+                      </div>
+                    )}
+
+                    {paid.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2 mt-4">To'langan fakturalar ({paid.length})</h4>
+                        <div className="space-y-2">
+                          {paid.slice(0, 10).map(invoice => {
+                            const serviceNames = invoice.services?.map(s => s.service_name).join(', ') ||
+                                                 invoice.items?.map(i => i.description).join(', ') ||
+                                                 'Tibbiy xizmat';
+                            return (
+                              <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{invoice.invoice_number}</p>
+                                  <p className="text-xs text-gray-500 truncate">{serviceNames}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold text-gray-900 dark:text-white">{(invoice.total_amount || 0).toLocaleString()} so'm</p>
+                                  <span className="px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 rounded-full text-xs font-semibold">To'langan</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1266,6 +1710,240 @@ const PatientProfile = () => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Add to Queue Modal */}
+      <Modal isOpen={showAddQueueModal} onClose={() => setShowAddQueueModal(false)}>
+        <form onSubmit={handleAddToQueue} className="space-y-4">
+          <h2 className="text-xl font-black text-gray-900 dark:text-white">Navbatga qo'shish</h2>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Shifokorni tanlang <span className="text-red-500">*</span>
+            </label>
+            <select
+              required
+              value={queueForm.doctor_id}
+              onChange={(e) => setQueueForm({ ...queueForm, doctor_id: e.target.value })}
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Shifokorni tanlang</option>
+              {doctors.map(doc => (
+                <option key={doc.id} value={doc.id}>
+                  Dr. {doc.first_name} {doc.last_name} - {doc.specialization}
+                  {doc.waiting_count > 0 ? ` (${doc.waiting_count} kutmoqda)` : ' (Bo\'sh)'}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Navbat turi</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setQueueForm({ ...queueForm, queue_type: 'NORMAL' })}
+                className={`flex-1 px-4 py-2.5 rounded-lg font-semibold transition-all ${
+                  queueForm.queue_type === 'NORMAL' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                Oddiy
+              </button>
+              <button
+                type="button"
+                onClick={() => setQueueForm({ ...queueForm, queue_type: 'URGENT' })}
+                className={`flex-1 px-4 py-2.5 rounded-lg font-semibold transition-all ${
+                  queueForm.queue_type === 'URGENT' ? 'bg-red-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                Shoshilinch
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Izoh</label>
+            <textarea
+              value={queueForm.notes}
+              onChange={(e) => setQueueForm({ ...queueForm, notes: e.target.value })}
+              rows="2"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              placeholder="Qo'shimcha izoh..."
+            />
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button type="button" onClick={() => setShowAddQueueModal(false)}
+              className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200">
+              Bekor qilish
+            </button>
+            <button type="submit" disabled={submitting}
+              className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50">
+              {submitting ? 'Yuklanmoqda...' : 'Qo\'shish'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* New Invoice Modal */}
+      <Modal isOpen={showNewInvoiceModal} onClose={() => setShowNewInvoiceModal(false)}>
+        <form onSubmit={handleCreateInvoice} className="space-y-4">
+          <h2 className="text-xl font-black text-gray-900 dark:text-white">Yangi faktura</h2>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Shifokor (ixtiyoriy)</label>
+            <select
+              value={invoiceDoctor}
+              onChange={(e) => setInvoiceDoctor(e.target.value)}
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Tanlang...</option>
+              {doctors.map(doc => (
+                <option key={doc.id} value={doc.id}>Dr. {doc.first_name} {doc.last_name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Xizmatlar</label>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {Object.entries(groupServicesByCategory()).map(([category, categoryServices]) => (
+                <div key={category} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                  <button type="button"
+                    onClick={() => setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }))}
+                    className="w-full p-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-between transition-colors"
+                  >
+                    <span className="font-semibold text-sm text-gray-900 dark:text-white">{category}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500">{categoryServices.length}</span>
+                      <span className="material-symbols-outlined text-gray-600 dark:text-gray-400 text-base">
+                        {expandedCategories[category] ? 'expand_less' : 'expand_more'}
+                      </span>
+                    </div>
+                  </button>
+                  {expandedCategories[category] && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-2 bg-white dark:bg-gray-900">
+                      {categoryServices.map(service => (
+                        <button type="button" key={service._id || service.id}
+                          onClick={() => addServiceToInvoice(service)}
+                          className="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          <p className="font-semibold text-gray-900 dark:text-white text-xs">{service.name}</p>
+                          <p className="text-primary font-bold text-sm mt-0.5">{(service.price || 0).toLocaleString()} so'm</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {invoiceItems.length > 0 && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tanlangan xizmatlar</label>
+              <div className="space-y-1.5">
+                {invoiceItems.map(item => (
+                  <div key={item.service_id} className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.description}</p>
+                      <p className="text-xs text-gray-500">{item.quantity} x {item.unit_price.toLocaleString()} so'm</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm">{(item.unit_price * item.quantity).toLocaleString()}</span>
+                      <button type="button" onClick={() => removeServiceFromInvoice(item.service_id)}
+                        className="text-red-500 hover:text-red-700">
+                        <span className="material-symbols-outlined text-base">close</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Chegirma (%)</label>
+            <input type="number" min="0" max="100" value={invoiceDiscount}
+              onChange={(e) => setInvoiceDiscount(Number(e.target.value))}
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          {invoiceItems.length > 0 && (
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-right">
+              <p className="text-2xl font-black text-primary">{getInvoiceTotal().toLocaleString()} so'm</p>
+              {invoiceDiscount > 0 && <p className="text-xs text-gray-500">Chegirma: {invoiceDiscount}%</p>}
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <button type="button" onClick={() => { setShowNewInvoiceModal(false); setInvoiceItems([]); setInvoiceDiscount(0); }}
+              className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200">
+              Bekor qilish
+            </button>
+            <button type="submit" disabled={submitting || invoiceItems.length === 0}
+              className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50">
+              {submitting ? 'Yuklanmoqda...' : 'Faktura yaratish'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Payment Modal */}
+      <Modal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)}>
+        <div className="space-y-4">
+          <h2 className="text-xl font-black text-gray-900 dark:text-white">To'lov qilish</h2>
+          {selectedInvoiceForPayment && (
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+              <p className="text-sm text-gray-500">Faktura: <span className="font-semibold text-gray-900 dark:text-white">{selectedInvoiceForPayment.invoice_number}</span></p>
+              <p className="text-sm text-gray-500">Qarz: <span className="font-bold text-red-600">{((selectedInvoiceForPayment.total_amount || 0) - (selectedInvoiceForPayment.paid_amount || 0)).toLocaleString()} so'm</span></p>
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">To'lov summasi</label>
+            <input type="number" value={paymentForm.amount}
+              onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Summa kiriting"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">To'lov usuli</label>
+            <div className="flex gap-2">
+              {[
+                { value: 'cash', label: 'Naqd', icon: 'payments' },
+                { value: 'card', label: 'Karta', icon: 'credit_card' },
+                { value: 'transfer', label: "O'tkazma", icon: 'swap_horiz' }
+              ].map(method => (
+                <button key={method.value} type="button"
+                  onClick={() => setPaymentForm({ ...paymentForm, method: method.value })}
+                  className={`flex-1 px-3 py-2.5 rounded-lg font-semibold transition-all flex items-center justify-center gap-1 text-sm ${
+                    paymentForm.method === method.value ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-base">{method.icon}</span>
+                  {method.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Izoh</label>
+            <textarea value={paymentForm.notes}
+              onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
+              rows="2"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+              placeholder="Izoh..."
+            />
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button type="button" onClick={() => setShowPaymentModal(false)}
+              className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200">
+              Bekor qilish
+            </button>
+            <button type="button" onClick={handleProcessPayment} disabled={submitting || !paymentForm.amount}
+              className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50">
+              {submitting ? 'Yuklanmoqda...' : 'To\'lov qilish'}
+            </button>
+          </div>
+        </div>
       </Modal>
 
       {/* Alert Modal */}
