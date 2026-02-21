@@ -2042,9 +2042,10 @@ const PatientProfile = () => {
             >
               <option value="">Xona tanlang</option>
               {admissionRooms.map(room => {
-                const availableBeds = (room.beds || []).filter(b => b.status === 'available').length
+                const roomId = room._id || room.id
+                const availableBeds = (room.beds || []).filter(b => (b.status || b.bed_status) === 'available').length
                 return (
-                  <option key={room._id} value={room._id} disabled={availableBeds === 0}>
+                  <option key={roomId} value={roomId} disabled={availableBeds === 0}>
                     {room.room_number} - {room.room_type} ({availableBeds} bo'sh joy)
                   </option>
                 )
@@ -2062,10 +2063,10 @@ const PatientProfile = () => {
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="">Koyka tanlang</option>
-                {(admissionRooms.find(r => r._id === selectedRoom)?.beds || [])
-                  .filter(b => b.status === 'available')
+                {(admissionRooms.find(r => (r._id || r.id) === selectedRoom)?.beds || [])
+                  .filter(b => (b.status || b.bed_status) === 'available')
                   .map(bed => (
-                    <option key={bed._id || bed.bed_number} value={bed.bed_number}>
+                    <option key={bed._id || bed.id || bed.bed_number} value={bed.bed_number}>
                       Koyka #{bed.bed_number}
                     </option>
                   ))}
