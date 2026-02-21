@@ -323,7 +323,7 @@ const Expenses = () => {
               receipt_long
             </span>
             <p className="text-gray-500 dark:text-gray-400">
-              {selectedCategory === 'all' ? 'Xarajatlar yo\'q' : 'Bu kategoriyada xarajatlar yo\'q'}
+              Xarajatlar yo'q
             </p>
           </div>
         ) : (

@@ -368,7 +368,7 @@ const CashierAdvanced = () => {
         const grouped = {};
         
         // Unique patient ID'larni to'plash
-        const uniquePatientIds = [...new Set(invoicesData.data.map(inv => inv.patient_id).filter(Boolean))];
+        const uniquePatientIds = [...new Set(invoicesData.data.map(inv => typeof inv.patient_id === 'object' ? inv.patient_id?._id : inv.patient_id).filter(Boolean))];
         
         // Har bir bemor uchun to'g'ri balansni olish
         const patientBalances = {};
@@ -386,17 +386,18 @@ const CashierAdvanced = () => {
         );
         
         unpaidInvoices.forEach(invoice => {
-          const patientKey = invoice.patient_id || `${invoice.first_name}_${invoice.last_name}`;
+          const pid = typeof invoice.patient_id === 'object' ? invoice.patient_id?._id : invoice.patient_id
+          const patientKey = pid || `${invoice.first_name}_${invoice.last_name}`;
           if (!grouped[patientKey]) {
             grouped[patientKey] = {
-              patient_id: invoice.patient_id,
-              patient_number: invoice.patient_number,
-              first_name: invoice.first_name,
-              last_name: invoice.last_name,
+              patient_id: pid,
+              patient_number: invoice.patient_number || invoice.patient_id?.patient_number,
+              first_name: invoice.first_name || invoice.patient_id?.first_name,
+              last_name: invoice.last_name || invoice.patient_id?.last_name,
               invoices: [],
               total_amount: 0,
               paid_amount: 0,
-              remaining_amount: patientBalances[invoice.patient_id] || 0 // Backend'dan olingan to'g'ri balans
+              remaining_amount: patientBalances[pid] || 0
             };
           }
           grouped[patientKey].invoices.push(invoice);
