@@ -18,7 +18,7 @@ const PatientProfile = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isDoctor = user?.role?.name === 'Doctor';
-  const isReceptionist = ['Receptionist', 'Admin'].includes(user?.role?.name);
+  const isReceptionist = ['Receptionist', 'Reception', 'Qabulxona', 'Registrator', 'receptionist', 'Admin', 'admin', 'Super Admin'].includes(user?.role?.name);
 
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState(null);
