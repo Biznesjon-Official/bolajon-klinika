@@ -279,7 +279,7 @@ const PatientProfile = () => {
         patient_id: id,
         doctor_id: invoiceDoctor || undefined,
         items: invoiceItems,
-        discount_percentage: invoiceDiscount,
+        discount_amount: invoiceItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0) * invoiceDiscount / 100,
         notes: ''
       });
       if (response.success) {

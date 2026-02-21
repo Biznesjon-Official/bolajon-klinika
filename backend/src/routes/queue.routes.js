@@ -14,7 +14,7 @@ router.get('/',
   authenticate,
   async (req, res, next) => {
     try {
-      const { date, doctor_id, status } = req.query;
+      const { date, doctor_id, status, patient_id } = req.query;
       
       console.log('=== GET QUEUE (MongoDB) ===');
       console.log('Filters:', { date, doctor_id, status });
@@ -51,6 +51,10 @@ router.get('/',
       
       if (status) {
         query.status = status;
+      }
+
+      if (patient_id) {
+        query.patient_id = patient_id;
       }
       
       // Get queues with populated data
