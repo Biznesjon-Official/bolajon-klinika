@@ -10,6 +10,7 @@ import AlertModal from '../components/AlertModal';
 import ConfirmModal from '../components/ConfirmModal';
 import PatientQRModal from '../components/PatientQRModal';
 import PrescriptionModal from '../components/PrescriptionModal';
+import { laboratoryService } from '../services/laboratoryService';
 import toast, { Toaster } from 'react-hot-toast';
 
 const QueueManagement = () => {
@@ -59,6 +60,14 @@ const QueueManagement = () => {
   });
   const [nursePatient, setNursePatient] = useState(null);
   
+  // Lab order (Doctor only)
+  const [showLabOrderModal, setShowLabOrderModal] = useState(false);
+  const [labTests, setLabTests] = useState([]);
+  const [selectedLabTest, setSelectedLabTest] = useState('');
+  const [labOrderPriority, setLabOrderPriority] = useState('normal');
+  const [labOrderNotes, setLabOrderNotes] = useState('');
+  const [labOrderPatient, setLabOrderPatient] = useState(null);
+
   // Filter (Admin/Reception only)
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterDoctor, setFilterDoctor] = useState('all');
@@ -96,6 +105,36 @@ const QueueManagement = () => {
     
     console.log('🔔 Setting confirmModal to:', newState);
     setConfirmModal(newState);
+  };
+
+  const handleOpenLabOrder = async (item) => {
+    setLabOrderPatient({ id: item.patient_id, name: item.patientName });
+    setShowLabOrderModal(true);
+    try {
+      const res = await laboratoryService.getTests();
+      setLabTests(res.data || []);
+    } catch {
+      setLabTests([]);
+    }
+  };
+
+  const handleCreateLabOrder = async () => {
+    if (!selectedLabTest) return showAlert('Tahlilni tanlang', 'error');
+    try {
+      await laboratoryService.createOrder({
+        patient_id: labOrderPatient.id,
+        test_id: selectedLabTest,
+        priority: labOrderPriority,
+        notes: labOrderNotes
+      });
+      toast.success('Tahlil buyurtma yaratildi');
+      setShowLabOrderModal(false);
+      setSelectedLabTest('');
+      setLabOrderNotes('');
+      setLabOrderPriority('normal');
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Xatolik', 'error');
+    }
   };
 
   useEffect(() => {
@@ -922,6 +961,18 @@ const QueueManagement = () => {
                         </>
                       )}
                       
+                      {/* Lab order button - Doctor only */}
+                      {isDoctor && (item.status === 'CALLED' || item.status === 'IN_PROGRESS') && (
+                        <button
+                          onClick={() => handleOpenLabOrder(item)}
+                          className="px-3 py-2 sm:py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600 flex items-center gap-1"
+                          title="Tahlil buyurtma"
+                        >
+                          <span className="material-symbols-outlined text-base sm:text-lg">biotech</span>
+                          Tahlil
+                        </button>
+                      )}
+
                       {/* QR Code button - always visible */}
                       <button
                         onClick={() => {
@@ -1238,6 +1289,69 @@ const QueueManagement = () => {
           }}
         />
       )}
+
+      {/* Lab Order Modal */}
+      <Modal isOpen={showLabOrderModal} onClose={() => setShowLabOrderModal(false)} size="md">
+        <div className="p-6">
+          <h3 className="text-lg font-bold mb-1 dark:text-white">Tahlil buyurtma qilish</h3>
+          {labOrderPatient && (
+            <p className="text-sm text-gray-500 mb-4">{labOrderPatient.name}</p>
+          )}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Tahlil turi</label>
+              <select
+                value={selectedLabTest}
+                onChange={(e) => setSelectedLabTest(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="">Tanlang...</option>
+                {labTests.map(test => (
+                  <option key={test._id} value={test._id}>
+                    {test.name} {test.price ? `— ${test.price?.toLocaleString()} so'm` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Muhimlik</label>
+              <select
+                value={labOrderPriority}
+                onChange={(e) => setLabOrderPriority(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="normal">Oddiy</option>
+                <option value="urgent">Shoshilinch</option>
+                <option value="stat">STAT</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Izoh</label>
+              <textarea
+                value={labOrderNotes}
+                onChange={(e) => setLabOrderNotes(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                rows={2}
+                placeholder="Qo'shimcha izoh..."
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <button
+              onClick={() => setShowLabOrderModal(false)}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Bekor qilish
+            </button>
+            <button
+              onClick={handleCreateLabOrder}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:opacity-90"
+            >
+              Buyurtma berish
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };

@@ -22,7 +22,7 @@ const DashboardLayout = ({ children }) => {
     { name: t('nav.dashboard'), icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Administrator', 'Manager', 'Menejer'] },
     
     // 2. Qabulxona - Bemorlar qabul qilish
-    { name: t('nav.patients'), icon: 'groups', path: '/patients', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: t('nav.patients'), icon: 'groups', path: '/patients', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist'] },
     { name: t('nav.queue'), icon: 'format_list_numbered', path: '/queue', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor'] },
     
     // 3. Kassa - To'lovlar (receptionist bajaradi)
