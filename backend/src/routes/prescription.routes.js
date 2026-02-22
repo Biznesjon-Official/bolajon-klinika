@@ -59,8 +59,7 @@ router.post('/', authenticate, async (req, res) => {
           message: `Dori ${i + 1}: Dori nomi majburiy`
         });
       }
-      if (!med.dosage) {
-        console.log(`❌ Medication ${i + 1} missing dosage`);
+      if (!med.dosage && !med.per_dose_amount) {
         return res.status(400).json({
           success: false,
           message: `Dori ${i + 1}: Dozasi majburiy`
@@ -148,7 +147,7 @@ router.post('/', authenticate, async (req, res) => {
           admission_id: admission?._id,
           nurse_id: medicationNurseId,
           medication_name: med.medication_name,
-          dosage: med.dosage,
+          dosage: med.per_dose_amount || med.dosage,
           frequency_per_day: med.frequency_per_day || null,
           schedule_times: med.schedule_times || [],
           duration_days: med.duration_days || null,
