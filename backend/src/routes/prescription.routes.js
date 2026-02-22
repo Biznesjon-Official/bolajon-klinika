@@ -231,10 +231,18 @@ router.get('/patient/:patientId', authenticate, async (req, res) => {
       .populate('doctor_id', 'first_name last_name specialization')
       .sort({ issued_date: -1 })
       .lean();
-    
+
+    const formatted = prescriptions.map(p => ({
+      ...p,
+      id: p._id,
+      doctor_first_name: p.doctor_id?.first_name,
+      doctor_last_name: p.doctor_id?.last_name,
+      doctor_specialization: p.doctor_id?.specialization
+    }));
+
     res.json({
       success: true,
-      data: prescriptions
+      data: formatted
     });
   } catch (error) {
     console.error('Get patient prescriptions error:', error);

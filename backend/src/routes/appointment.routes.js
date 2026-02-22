@@ -18,11 +18,14 @@ router.get('/patient/:patientId', authenticate, async (req, res) => {
     console.log('All invoices for patient:', allInvoices.length);
     console.log('All invoices:', JSON.stringify(allInvoices, null, 2));
     
-    // Invoice'lardan mutaxasis konsultatsiyalarini topish
+    // Invoice'lardan mutaxasis konsultatsiyalarini topish (specialist_type YOKI doctor_name)
     const invoices = await Invoice.find({
       patient_id: patientId,
-      'metadata.specialist_type': { $exists: true }
-    }).sort({ createdAt: -1 }).lean();
+      $or: [
+        { 'metadata.specialist_type': { $exists: true } },
+        { 'metadata.doctor_name': { $exists: true, $ne: '' } }
+      ]
+    }).sort({ created_at: -1 }).lean();
     
     console.log('Found specialist invoices:', invoices.length);
     console.log('Specialist invoices:', JSON.stringify(invoices, null, 2));
@@ -41,17 +44,21 @@ router.get('/patient/:patientId', authenticate, async (req, res) => {
       'ent': 'LOR'
     };
     
-    const specialists = invoices.map(invoice => ({
-      id: invoice._id,
-      doctor_name: invoice.metadata.doctor_name,
-      specialist_type: invoice.metadata.specialist_type,
-      specialist_type_label: specialistTypeMap[invoice.metadata.specialist_type] || invoice.metadata.specialist_type,
-      appointment_time: invoice.metadata.appointment_time,
-      price: invoice.total_amount,
-      notes: invoice.items[0]?.notes || '',
-      status: invoice.status === 'paid' ? 'completed' : 'scheduled',
-      created_at: invoice.createdAt
-    }));
+    const specialists = invoices.map(invoice => {
+      const specType = invoice.metadata?.specialist_type;
+      const serviceName = invoice.items?.[0]?.description || '';
+      return {
+        id: invoice._id,
+        doctor_name: invoice.metadata?.doctor_name || 'Noma\'lum',
+        specialist_type: specType || serviceName || 'Konsultatsiya',
+        specialist_type_label: specialistTypeMap[specType] || specType || serviceName || 'Konsultatsiya',
+        appointment_time: invoice.metadata?.appointment_time || invoice.created_at,
+        price: invoice.total_amount,
+        notes: invoice.items?.map(i => i.description).join(', ') || '',
+        status: invoice.payment_status === 'paid' ? 'completed' : 'scheduled',
+        created_at: invoice.created_at
+      };
+    });
     
     console.log('Mapped specialists:', specialists);
     
