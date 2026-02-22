@@ -39,7 +39,7 @@ const QueueManagement = () => {
   const [queueType, setQueueType] = useState('NORMAL');
   const [notes, setNotes] = useState('');
   const [consultationServices, setConsultationServices] = useState([]);
-  const [selectedService, setSelectedService] = useState('');
+  const [selectedServices, setSelectedServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(false);
   
   // Prescription Modal (Doctor only)
@@ -200,7 +200,7 @@ const QueueManagement = () => {
         doctor_id: selectedDoctor,
         queue_type: queueType,
         notes,
-        service_id: selectedService || undefined
+        service_ids: selectedServices.length > 0 ? selectedServices : undefined
       });
 
       if (response.success) {
@@ -219,13 +219,19 @@ const QueueManagement = () => {
     setSelectedDoctor('');
     setQueueType('NORMAL');
     setNotes('');
-    setSelectedService('');
+    setSelectedServices([]);
     setConsultationServices([]);
+  };
+
+  const handleServiceToggle = (serviceId) => {
+    setSelectedServices(prev =>
+      prev.includes(serviceId) ? prev.filter(id => id !== serviceId) : [...prev, serviceId]
+    );
   };
 
   const handleDoctorChange = async (doctorId) => {
     setSelectedDoctor(doctorId);
-    setSelectedService('');
+    setSelectedServices([]);
     if (!doctorId) {
       setConsultationServices([]);
       return;
@@ -1045,34 +1051,42 @@ const QueueManagement = () => {
             </select>
           </div>
 
-          {/* Consultation Service */}
+          {/* Consultation Services (checkboxes) */}
           {selectedDoctor && (
             <div>
               <label className="block text-sm sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Konsultatsiya xizmati
+                Konsultatsiya xizmatlari
               </label>
               {loadingServices ? (
                 <p className="text-sm text-gray-500 py-2">Yuklanmoqda...</p>
               ) : consultationServices.length > 0 ? (
-                <select
-                  value={selectedService}
-                  onChange={(e) => setSelectedService(e.target.value)}
-                  className="w-full px-4 sm:px-4 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Xizmat tanlanmagan (bepul)</option>
+                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
                   {consultationServices.map(s => (
-                    <option key={s._id} value={s._id}>
-                      {s.name} — {s.price?.toLocaleString()} so'm
-                    </option>
+                    <label key={s._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedServices.includes(s._id)}
+                        onChange={() => handleServiceToggle(s._id)}
+                        className="size-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <span className="flex-1 text-sm text-gray-900 dark:text-white">{s.name}</span>
+                      <span className="text-sm font-semibold text-primary">{s.price?.toLocaleString()} so'm</span>
+                    </label>
                   ))}
-                </select>
+                </div>
               ) : (
                 <p className="text-sm text-gray-400 py-2">Konsultatsiya xizmatlari topilmadi</p>
               )}
-              {selectedService && (
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                  Navbatga qo'shilganda avtomatik hisob-faktura yaratiladi
-                </p>
+              {selectedServices.length > 0 && (
+                <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+                    Jami: {consultationServices
+                      .filter(s => selectedServices.includes(s._id))
+                      .reduce((sum, s) => sum + (s.price || 0), 0)
+                      .toLocaleString()} so'm
+                    <span className="font-normal text-xs ml-2">({selectedServices.length} xizmat)</span>
+                  </p>
+                </div>
               )}
             </div>
           )}

@@ -255,7 +255,7 @@ router.post('/',
   authorize('admin', 'receptionist'),
   async (req, res, next) => {
     try {
-      const { patient_id, doctor_id, queue_type = 'NORMAL', notes, service_id } = req.body;
+      const { patient_id, doctor_id, queue_type = 'NORMAL', notes, service_ids } = req.body;
 
       if (!patient_id || !doctor_id) {
         return res.status(400).json({
@@ -290,12 +290,15 @@ router.post('/',
         notes
       };
 
-      // If service selected, create invoice automatically
+      // If services selected, create invoice automatically
       let invoice = null;
-      if (service_id) {
-        const service = await Service.findById(service_id);
-        if (service) {
-          queueData.service_id = service_id;
+      const serviceIdList = Array.isArray(service_ids) ? service_ids : (service_ids ? [service_ids] : []);
+
+      if (serviceIdList.length > 0) {
+        const services = await Service.find({ _id: { $in: serviceIdList } });
+
+        if (services.length > 0) {
+          queueData.service_id = services[0]._id;
 
           const doctor = await Staff.findById(doctor_id).select('first_name last_name');
 
@@ -307,22 +310,28 @@ router.post('/',
           });
           const invoiceNumber = `INV-${dateStr}-${String(todayInvoiceCount + 1).padStart(4, '0')}`;
 
-          const price = service.base_price || service.price;
-          invoice = await Invoice.create({
-            patient_id,
-            invoice_number: invoiceNumber,
-            items: [{
+          const items = services.map(s => {
+            const price = s.price || s.base_price || 0;
+            return {
               item_type: 'service',
-              description: service.name,
+              description: s.name,
               quantity: 1,
               unit_price: price,
               total_price: price
-            }],
-            total_amount: price,
+            };
+          });
+          const totalAmount = items.reduce((sum, i) => sum + i.total_price, 0);
+
+          invoice = await Invoice.create({
+            patient_id,
+            invoice_number: invoiceNumber,
+            items,
+            total_amount: totalAmount,
             paid_amount: 0,
-            balance: price,
+            balance: totalAmount,
             status: 'pending',
             payment_status: 'pending',
+            payment_method: 'cash',
             created_by: req.user._id,
             metadata: {
               doctor_id,
