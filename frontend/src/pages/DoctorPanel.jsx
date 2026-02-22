@@ -7,6 +7,7 @@ import doctorNurseService from '../services/doctorNurseService';
 import pharmacyService from '../services/pharmacyService';
 import api from '../services/api';
 import { laboratoryService } from '../services/laboratoryService';
+import { patientService } from '../services/patientService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -56,6 +57,13 @@ const DoctorPanel = () => {
   const [availableMedicines, setAvailableMedicines] = useState([]);
   const [loadingMedicines, setLoadingMedicines] = useState(false);
 
+  // All patients list
+  const [allPatients, setAllPatients] = useState([]);
+  const [patientSearch, setPatientSearch] = useState('');
+  const [patientPage, setPatientPage] = useState(1);
+  const [patientPagination, setPatientPagination] = useState({ total: 0, totalPages: 0 });
+  const [loadingPatients, setLoadingPatients] = useState(false);
+
   // Alert and Confirm modals
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
@@ -80,7 +88,36 @@ const DoctorPanel = () => {
   useEffect(() => {
     loadMyQueue();
     loadAvailableMedicines();
+    loadAllPatients();
   }, []);
+
+  useEffect(() => {
+    loadAllPatients();
+  }, [patientSearch, patientPage]);
+
+  const loadAllPatients = async () => {
+    try {
+      setLoadingPatients(true);
+      const response = await patientService.getAll({
+        page: patientPage,
+        limit: 20,
+        search: patientSearch
+      });
+      if (response.success && response.data) {
+        setAllPatients(response.data);
+        if (response.pagination) {
+          setPatientPagination({
+            total: response.pagination.total || 0,
+            totalPages: response.pagination.totalPages || 0
+          });
+        }
+      }
+    } catch (error) {
+      setAllPatients([]);
+    } finally {
+      setLoadingPatients(false);
+    }
+  };
   
   const loadAvailableMedicines = async () => {
     try {
@@ -847,6 +884,99 @@ const DoctorPanel = () => {
           </div>
         </div>
       )}
+
+      {/* Barcha bemorlar ro'yxati */}
+      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800">
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Barcha bemorlar</h2>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Jami: {patientPagination.total} ta bemor
+              </p>
+            </div>
+            <div className="relative w-full sm:w-72">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+              <input
+                type="text"
+                value={patientSearch}
+                onChange={(e) => {
+                  setPatientSearch(e.target.value);
+                  setPatientPage(1);
+                }}
+                placeholder="Bemor qidirish..."
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
+        {loadingPatients ? (
+          <div className="p-8 text-center">
+            <div className="size-8 border-3 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm text-gray-500">Yuklanmoqda...</p>
+          </div>
+        ) : allPatients.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            <span className="material-symbols-outlined text-3xl mb-2">person_off</span>
+            <p className="text-sm">Bemor topilmadi</p>
+          </div>
+        ) : (
+          <>
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {allPatients
+                .filter(p => !myQueue.some(q => (q.patient_id === p.id || q.patient_id === p._id) && q.status !== 'COMPLETED'))
+                .map((patient) => (
+                <div
+                  key={patient.id || patient._id}
+                  onClick={() => navigate(`/patients/${patient.id || patient._id}`)}
+                  className="p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="size-10 sm:size-12 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span className="material-symbols-outlined">person</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                          {patient.first_name} {patient.last_name}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                          {patient.patient_number} {patient.phone ? `• ${patient.phone}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="material-symbols-outlined text-gray-400 flex-shrink-0">chevron_right</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {patientPagination.totalPages > 1 && (
+              <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <button
+                  onClick={() => setPatientPage(p => Math.max(1, p - 1))}
+                  disabled={patientPage <= 1}
+                  className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-gray-200 dark:hover:bg-gray-700"
+                >
+                  Oldingi
+                </button>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {patientPage} / {patientPagination.totalPages}
+                </span>
+                <button
+                  onClick={() => setPatientPage(p => Math.min(patientPagination.totalPages, p + 1))}
+                  disabled={patientPage >= patientPagination.totalPages}
+                  className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-gray-200 dark:hover:bg-gray-700"
+                >
+                  Keyingi
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Lab Order Modal */}
       <Modal isOpen={showLabOrderModal} onClose={() => setShowLabOrderModal(false)} title="Tahlil buyurtma berish">

@@ -12,7 +12,7 @@ const PrescriptionModal = ({
   user 
 }) => {
   const { t } = useTranslation();
-  const isDoctor = user?.role_name === 'doctor' || user?.role_name === 'Shifokor' || user?.role_name === 'Doctor';
+  const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role_name || user?.role?.name);
   
   // Form state
   const [diagnosis, setDiagnosis] = useState('');

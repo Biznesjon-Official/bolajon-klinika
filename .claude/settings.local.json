@@ -14,7 +14,21 @@
       "Bash(pkill:*)",
       "Bash(taskkill:*)",
       "Bash(node -e \"const d=require\\(''fs''\\).readFileSync\\(''/dev/stdin'',''utf8''\\);const j=JSON.parse\\(d\\);console.log\\(''Token:'',j.accessToken?.substring\\(0,20\\)\\)\")",
-      "Bash(node --experimental-vm-modules:*)"
+      "Bash(node --experimental-vm-modules:*)",
+      "Bash(cd C:/Users/User/Desktop/Bolajon_klinik/frontend && npx playwright --version 2>&1)",
+      "Bash(head:*)",
+      "Bash(cd /c/Users/User/Desktop/Bolajon_klinik/frontend && npx playwright --version 2>&1)",
+      "Bash(cd /c/Users/User/Desktop/Bolajon_klinik/frontend && npx playwright test 2>&1)",
+      "Bash(ssh:*)",
+      "Bash(cd:*)",
+      "Bash(npx kill-port 5001)",
+      "Bash(lsof -ti:5001)",
+      "Bash(xargs kill -9)",
+      "Bash(echo not found:*)",
+      "Bash(tail:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(cd /c/Users/User/Desktop/Bolajon_klinik && git push origin main 2>&1)",
+      "Bash(cd /c/Users/User/Desktop/Bolajon_klinik && git add frontend/src/pages/QueueManagement.jsx frontend/src/layouts/DashboardLayout.jsx && git commit -m \"$\\(cat <<'EOF'\nfeat: Add lab order button to queue patient rows for doctors\n\n- Add Tahlil buyurtma button per patient in queue \\(CALLED/IN_PROGRESS\\)\n- Add lab order modal with test selection, priority, notes\n- Remove Bemorlar page from doctor sidebar \\(navbat yetarli\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git push origin main 2>&1)"
     ]
   }
 }

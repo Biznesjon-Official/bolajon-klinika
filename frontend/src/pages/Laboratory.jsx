@@ -212,29 +212,12 @@ export default function Laboratory() {
     return texts[status] || status;
   };
 
-  const isAdmin = user?.role?.name === 'admin' || user?.role?.name === 'Administrator' || user?.role_name === 'admin' || user?.role_name === 'Administrator';
-  const isLaborant = user?.role?.name === 'laborant' || user?.role?.name === 'Laborant' || user?.role?.name === 'Lab' || user?.role_name === 'laborant' || user?.role_name === 'Laborant' || user?.role_name === 'Lab';
-  const isDoctor = user?.role?.name === 'doctor' || user?.role?.name === 'Shifokor' || user?.role?.name === 'Doctor' || user?.role_name === 'doctor' || user?.role_name === 'Shifokor' || user?.role_name === 'Doctor';
-  const isReception = user?.role?.name === 'reception' || 
-                      user?.role?.name === 'Reception' || 
-                      user?.role?.name === 'receptionist' || 
-                      user?.role?.name === 'Receptionist' || 
-                      user?.role?.name === 'Qabulxona' || 
-                      user?.role_name === 'reception' || 
-                      user?.role_name === 'Reception' || 
-                      user?.role_name === 'receptionist' || 
-                      user?.role_name === 'Receptionist' || 
-                      user?.role_name === 'Qabulxona';
+  const roleName = user?.role?.name || user?.role_name;
+  const isAdmin = roleName === 'admin';
+  const isLaborant = roleName === 'laborant';
+  const isDoctor = ['doctor', 'chief_doctor'].includes(roleName);
+  const isReception = roleName === 'receptionist';
 
-  // Debug
-  console.log('=== LABORATORY PAGE ===');
-  console.log('User:', user);
-  console.log('User role:', user?.role);
-  console.log('User role_name:', user?.role_name);
-  console.log('isAdmin:', isAdmin);
-  console.log('isLaborant:', isLaborant);
-  console.log('isDoctor:', isDoctor);
-  console.log('isReception:', isReception);
 
   return (
     <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8 space-y-3 sm:space-y-4 sm:space-y-4 sm:space-y-6">

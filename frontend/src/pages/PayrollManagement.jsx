@@ -1426,7 +1426,7 @@ function SalaryModal({ staff, editingSalary, onClose, onSuccess }) {
       } else if (selectedStaffData.role_name === 'Administrator') {
         setCommissionType('fixed');
         setCommissionValue('5000000'); // 5,000,000 so'm default
-      } else if (selectedStaffData.role_name === 'Shifokor') {
+      } else if (selectedStaffData.role_name === 'doctor' || selectedStaffData.role_name === 'chief_doctor') {
         setCommissionType('fixed');
         setCommissionValue('3000000'); // 3,000,000 so'm default
       } else if (selectedStaffData.role_name === 'Laborant') {

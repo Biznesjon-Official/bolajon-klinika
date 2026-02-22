@@ -10,7 +10,7 @@ const Patients = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isDoctor = user?.role_name === 'doctor' || user?.role?.name === 'doctor' || user?.role_name === 'Shifokor' || user?.role?.name === 'Shifokor' || user?.role_name === 'Doctor' || user?.role?.name === 'Doctor';
+  const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role_name || user?.role?.name);
   
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);

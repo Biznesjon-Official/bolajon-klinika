@@ -37,7 +37,22 @@ export default function PatientQRModal({ patient, onClose }) {
   };
 
   const handlePrint = () => {
-    window.print();
+    const svg = qrRef.current?.querySelector('svg');
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    printWindow.document.write(`
+      <html><head><title>QR - ${qrData}</title>
+      <style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:sans-serif}
+      h2{margin:0 0 4px;font-size:18px}p{margin:0 0 16px;color:#666;font-size:14px}</style></head>
+      <body>
+        <h2>${patient.first_name} ${patient.last_name}</h2>
+        <p>${qrData}</p>
+        ${svgData}
+        <script>window.onload=function(){window.print();window.close()}<\/script>
+      </body></html>
+    `);
+    printWindow.document.close();
   };
 
   return (
