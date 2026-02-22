@@ -23,7 +23,7 @@ const PatientProfile = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuth();
-  const isDoctor = user?.role?.name === 'Doctor';
+  const isDoctor = ['Doctor', 'doctor', 'shifokor', 'Shifokor', 'chief_doctor', 'Chief Doctor'].includes(user?.role?.name);
   const isReceptionist = ['Receptionist', 'Reception', 'Qabulxona', 'Registrator', 'receptionist', 'Admin', 'admin', 'Super Admin'].includes(user?.role?.name);
 
   const [loading, setLoading] = useState(true);
