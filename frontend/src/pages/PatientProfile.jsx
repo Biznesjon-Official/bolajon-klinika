@@ -222,11 +222,12 @@ const PatientProfile = () => {
     e.preventDefault();
     try {
       await patientService.addMedicalRecord(id, recordForm);
+      showAlert('Tibbiy yozuv qo\'shildi', 'success');
       setShowAddRecordModal(false);
       setRecordForm({ diagnosis_text: '', treatment_plan: '', notes: '' });
       loadPatientData();
     } catch (error) {
-      console.error('Add record error:', error);
+      showAlert(error.response?.data?.message || 'Xatolik yuz berdi', 'error');
     }
   };
 
@@ -251,6 +252,7 @@ const PatientProfile = () => {
       setShowNurseModal(false);
       setSelectedNurse('');
       setNurseTaskData({ task_type: 'medication_administration', medication_name: '', dosage: '', route: 'oral', frequency: '', priority: 'normal', instructions: '' });
+      loadPatientData();
     } catch (err) {
       showAlert(err.response?.data?.message || 'Xatolik', 'error');
     }

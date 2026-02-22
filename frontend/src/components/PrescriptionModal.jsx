@@ -94,7 +94,7 @@ const PrescriptionModal = ({
 
     try {
       const prescriptionData = {
-        patient_id: patient.patient_id,
+        patient_id: patient.patient_id || patient._id || patient.id,
         queue_id: patient.id,
         diagnosis,
         prescription_type: prescriptionType,

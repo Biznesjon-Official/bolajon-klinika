@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
 import Patient from '../models/Patient.js';
+import MedicalRecord from '../models/MedicalRecord.js';
 
 const router = express.Router();
 
@@ -589,5 +590,70 @@ router.delete('/:id',
     }
   }
 );
+
+/**
+ * Add medical record to patient
+ */
+router.post('/:id/medical-records',
+  authenticate,
+  async (req, res, next) => {
+    try {
+      const { diagnosis_text, treatment_plan, notes } = req.body
+
+      if (!diagnosis_text || !diagnosis_text.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Tashxis matni kiritilishi shart'
+        })
+      }
+
+      const patient = await Patient.findById(req.params.id)
+      if (!patient) {
+        return res.status(404).json({
+          success: false,
+          message: 'Bemor topilmadi'
+        })
+      }
+
+      const record = await MedicalRecord.create({
+        patient_id: req.params.id,
+        doctor_id: req.user._id,
+        diagnosis_text: diagnosis_text.trim(),
+        treatment_plan: treatment_plan?.trim() || '',
+        notes: notes?.trim() || ''
+      })
+
+      res.status(201).json({
+        success: true,
+        data: record,
+        message: 'Tibbiy yozuv qo\'shildi'
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
+
+/**
+ * Get medical records for patient
+ */
+router.get('/:id/medical-records',
+  authenticate,
+  async (req, res, next) => {
+    try {
+      const records = await MedicalRecord.find({ patient_id: req.params.id })
+        .populate('doctor_id', 'first_name last_name')
+        .sort({ created_at: -1 })
+        .lean()
+
+      res.json({
+        success: true,
+        data: records
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 export default router;
