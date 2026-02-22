@@ -332,7 +332,7 @@ router.post('/',
             status: 'pending',
             payment_status: 'pending',
             payment_method: 'cash',
-            created_by: req.user._id,
+            created_by: req.user.id,
             metadata: {
               doctor_id,
               doctor_name: doctor ? `${doctor.first_name} ${doctor.last_name}` : ''
