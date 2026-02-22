@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { queueService } from '../services/queueService';
 import { patientService } from '../services/patientService';
@@ -16,6 +17,7 @@ import toast, { Toaster } from 'react-hot-toast';
 const QueueManagement = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isDoctor = user?.role_name === 'doctor' || user?.role?.name === 'doctor' || user?.role_name === 'Shifokor' || user?.role?.name === 'Shifokor' || user?.role_name === 'Doctor' || user?.role?.name === 'Doctor';
 
   const [loading, setLoading] = useState(true);
