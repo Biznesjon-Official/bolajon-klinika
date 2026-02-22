@@ -75,6 +75,7 @@ router.get('/',
         queueType: q.queue_type,
         status: q.status,
         appointmentTime: q.createdAt,
+        created_at: q.createdAt,
         calledAt: q.called_at,
         completedAt: q.completed_at,
         notes: q.notes,
@@ -84,7 +85,9 @@ router.get('/',
         patientName: q.patient_id ? `${q.patient_id.first_name} ${q.patient_id.last_name}` : 'N/A',
         patientNumber: q.patient_id?.patient_number,
         patientPhone: q.patient_id?.phone,
-        doctorName: q.doctor_id ? `${q.doctor_id.first_name} ${q.doctor_id.last_name}` : 'N/A'
+        doctorName: q.doctor_id ? `${q.doctor_id.first_name} ${q.doctor_id.last_name}` : 'N/A',
+        doctor_first_name: q.doctor_id?.first_name,
+        doctor_last_name: q.doctor_id?.last_name
       }));
       
       res.json({

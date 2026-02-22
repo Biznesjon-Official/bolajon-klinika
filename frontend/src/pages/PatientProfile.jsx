@@ -824,6 +824,11 @@ const PatientProfile = () => {
                             {/* Activity details */}
                             {activity.type === 'invoice' && (
                               <div className="text-sm">
+                                {(activity.data.created_by_name || activity.data.doctor_name) && (
+                                  <p className="text-gray-700 dark:text-gray-300">
+                                    <span className="font-medium">Yaratdi:</span> {activity.data.doctor_name || activity.data.created_by_name}
+                                  </p>
+                                )}
                                 <p className="text-gray-700 dark:text-gray-300">
                                   <span className="font-medium">Summa:</span> {activity.data.total_amount.toLocaleString()} so'm
                                 </p>
@@ -1403,6 +1408,9 @@ const PatientProfile = () => {
                             
                             <p className="text-xs text-gray-500 dark:text-gray-400">
                               Sana: {formatDate(invoice.created_at)}
+                              {(invoice.doctor_name || invoice.created_by_name) && (
+                                <span className="ml-2">• Yaratdi: {invoice.doctor_name || invoice.created_by_name}</span>
+                              )}
                             </p>
                           </div>
                           

@@ -289,6 +289,7 @@ router.get('/:id',
       
       // Get invoices with full details
       const invoices = await Invoice.find({ patient_id: patient._id })
+        .populate('created_by', 'first_name last_name role')
         .sort({ created_at: -1 })
         .lean();
       
@@ -311,7 +312,10 @@ router.get('/:id',
         services: inv.services || [],
         items: inv.items || [],
         metadata: inv.metadata || {},
-        notes: inv.notes
+        notes: inv.notes,
+        created_by_name: inv.created_by ? `${inv.created_by.first_name} ${inv.created_by.last_name}` : null,
+        created_by_role: inv.created_by?.role || null,
+        doctor_name: inv.metadata?.doctor_name || null
       }));
       
       // Get prescriptions
