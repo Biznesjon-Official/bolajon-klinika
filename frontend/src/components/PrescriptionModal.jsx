@@ -17,8 +17,9 @@ const PrescriptionModal = ({
   // Form state
   const [diagnosis, setDiagnosis] = useState('');
   const [prescriptionType, setPrescriptionType] = useState('REGULAR');
-  const [prescriptionNotes, setPrescriptionNotes] = useState('');
   const [medications, setMedications] = useState([]);
+  const [diagnosisSuggestions, setDiagnosisSuggestions] = useState([]);
+  const [medSuggestions, setMedSuggestions] = useState([]);
   
   // Nurses list (for reference only, not for selection)
   const [nurses, setNurses] = useState([]);
@@ -27,49 +28,59 @@ const PrescriptionModal = ({
     if (isOpen) {
       loadNurses();
       resetForm();
+      // Load saved suggestions from localStorage
+      const savedDiagnoses = JSON.parse(localStorage.getItem('prescription_diagnoses') || '[]');
+      const savedMeds = JSON.parse(localStorage.getItem('prescription_medications') || '[]');
+      setDiagnosisSuggestions(savedDiagnoses);
+      setMedSuggestions(savedMeds);
     }
   }, [isOpen]);
 
   const loadNurses = async () => {
     try {
       const response = await doctorNurseService.getActiveNurses();
-      console.log('🩺 Nurses response:', response);
       if (response.success) {
-        console.log('🩺 Nurses data:', response.data);
         setNurses(response.data);
       }
     } catch (error) {
-      console.error('Load nurses error:', error);
+      // silent
     }
   };
 
   const resetForm = () => {
     setDiagnosis('');
     setPrescriptionType('REGULAR');
-    setPrescriptionNotes('');
     setMedications([]);
+  };
+
+  // Save diagnosis/medication to localStorage for future autocomplete
+  const saveSuggestion = (key, value) => {
+    if (!value?.trim()) return;
+    const stored = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!stored.includes(value.trim())) {
+      const updated = [value.trim(), ...stored].slice(0, 50);
+      localStorage.setItem(key, JSON.stringify(updated));
+    }
   };
 
   const addMedication = () => {
     if (prescriptionType === 'URGENT') {
       setMedications([...medications, {
         medication_name: '',
-        dosage: '',
+        per_dose_amount: '',
         frequency: 'Shoshilinch',
         duration_days: 1,
-        instructions: 'Shoshilinch',
-        is_urgent: true
+        instructions: 'Shoshilinch'
       }]);
     } else {
       setMedications([...medications, {
         medication_name: '',
-        dosage: '',
+        per_dose_amount: '',
         frequency: '',
-        frequency_per_day: 2, // Default: kuniga 2 marta
-        schedule_times: ['09:00', '21:00'], // Default vaqtlar
-        duration_days: 3, // Default: 3 kun
-        instructions: '',
-        is_urgent: false
+        frequency_per_day: 2,
+        schedule_times: ['09:00', '21:00'],
+        duration_days: 3,
+        instructions: ''
       }]);
     }
   };
@@ -93,14 +104,17 @@ const PrescriptionModal = ({
     }
 
     try {
+      // Save diagnosis and medication names for autocomplete
+      saveSuggestion('prescription_diagnoses', diagnosis);
+      medications.forEach(med => saveSuggestion('prescription_medications', med.medication_name));
+
       const prescriptionData = {
         patient_id: patient.patient_id || patient._id || patient.id,
         queue_id: patient.id,
         diagnosis,
         prescription_type: prescriptionType,
         medications,
-        notes: prescriptionNotes,
-        nurse_id: null // Barcha hamshiralarga ko'rinadi
+        nurse_id: null
       };
       
       const patientData = {
@@ -134,7 +148,7 @@ const PrescriptionModal = ({
         onClose();
       }
     } catch (error) {
-      console.error('Submit prescription error:', error);
+      // prescription error
       alert(t('queue.errorOccurred') + ': ' + (error.response?.data?.message || error.message));
     }
   };
@@ -169,14 +183,20 @@ const PrescriptionModal = ({
           <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
             {t('common.diagnosis')} <span className="text-red-500">*</span>
           </label>
-          <textarea
+          <input
+            type="text"
+            list="diagnosis-suggestions"
             required
             value={diagnosis}
             onChange={(e) => setDiagnosis(e.target.value)}
-            rows="3"
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-sm sm:text-base"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
             placeholder={t('common.diagnosisPlaceholder')}
           />
+          <datalist id="diagnosis-suggestions">
+            {diagnosisSuggestions.map((d, i) => (
+              <option key={i} value={d} />
+            ))}
+          </datalist>
         </div>
 
         {/* Prescription Type */}
@@ -184,7 +204,7 @@ const PrescriptionModal = ({
           <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
             {t('common.prescriptionType')}
           </label>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => setPrescriptionType('REGULAR')}
@@ -206,17 +226,6 @@ const PrescriptionModal = ({
               }`}
             >
               {t('common.urgent')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setPrescriptionType('CHRONIC')}
-              className={`px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                prescriptionType === 'CHRONIC'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {t('common.chronic')}
             </button>
           </div>
         </div>
@@ -265,27 +274,37 @@ const PrescriptionModal = ({
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                    {/* Dori nomi - oddiy input */}
+                    {/* Dori nomi - autocomplete */}
                     <div className="sm:col-span-2">
                       <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        💊 Dori nomi
+                        Dori nomi
                       </label>
                       <input
                         type="text"
+                        list={`med-suggestions-${index}`}
                         required
                         value={med.medication_name}
                         onChange={(e) => updateMedication(index, 'medication_name', e.target.value)}
                         placeholder="Dori nomini kiriting..."
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-xs sm:text-sm"
                       />
+                      <datalist id={`med-suggestions-${index}`}>
+                        {medSuggestions.map((m, i) => (
+                          <option key={i} value={m} />
+                        ))}
+                      </datalist>
                     </div>
-                    <div className={prescriptionType === 'URGENT' ? 'sm:col-span-2' : ''}>
+                    {/* Har nahalada qanchadan */}
+                    <div className={prescriptionType === 'URGENT' ? 'sm:col-span-2' : 'sm:col-span-2'}>
+                      <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Har nahalada qanchadan
+                      </label>
                       <input
                         type="text"
                         required
-                        value={med.dosage}
-                        onChange={(e) => updateMedication(index, 'dosage', e.target.value)}
-                        placeholder={t('common.dosagePlaceholder')}
+                        value={med.per_dose_amount}
+                        onChange={(e) => updateMedication(index, 'per_dose_amount', e.target.value)}
+                        placeholder="Masalan: 1 tabletka, 5 ml, 2 kapsula"
                         className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs sm:text-sm"
                       />
                     </div>
@@ -428,18 +447,6 @@ const PrescriptionModal = ({
                           />
                         </div>
                         
-                        {/* Urgent checkbox */}
-                        <div className="sm:col-span-2">
-                          <label className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={med.is_urgent}
-                              onChange={(e) => updateMedication(index, 'is_urgent', e.target.checked)}
-                              className="size-4"
-                            />
-                            <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">{t('common.urgentMedication')}</span>
-                          </label>
-                        </div>
                       </>
                     )}
                   </div>
@@ -447,20 +454,6 @@ const PrescriptionModal = ({
               ))}
             </div>
           )}
-        </div>
-
-        {/* Notes */}
-        <div>
-          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            {t('common.additionalNotes')}
-          </label>
-          <textarea
-            value={prescriptionNotes}
-            onChange={(e) => setPrescriptionNotes(e.target.value)}
-            rows="2"
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary resize-none text-xs sm:text-sm"
-            placeholder={t('common.additionalNotesPlaceholder')}
-          />
         </div>
 
         {/* Urgent nurse assignment */}
