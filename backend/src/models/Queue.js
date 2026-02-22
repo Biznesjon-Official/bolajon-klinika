@@ -31,6 +31,14 @@ const queueSchema = new mongoose.Schema({
   completed_at: {
     type: Date
   },
+  service_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service'
+  },
+  invoice_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Invoice'
+  },
   notes: {
     type: String
   }

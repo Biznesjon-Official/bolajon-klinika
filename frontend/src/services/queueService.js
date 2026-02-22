@@ -114,6 +114,19 @@ export const queueService = {
     }
   },
 
+  // Konsultatsiya xizmatlari
+  getConsultationServices: async () => {
+    try {
+      const response = await api.get('/billing/services', {
+        params: { category: 'Konsultatsiya', is_active: true }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Get consultation services error:', error)
+      throw error
+    }
+  },
+
   // Shifokorlar ro'yxati
   getDoctors: async () => {
     try {

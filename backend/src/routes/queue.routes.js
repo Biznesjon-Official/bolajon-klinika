@@ -3,6 +3,8 @@ import { authenticate, authorize } from '../middleware/auth.js';
 import Queue from '../models/Queue.js';
 import Patient from '../models/Patient.js';
 import Staff from '../models/Staff.js';
+import Service from '../models/Service.js';
+import Invoice from '../models/Invoice.js';
 import { sendQueueCallNotification } from '../services/telegram.service.js';
 
 const router = express.Router();
@@ -253,24 +255,21 @@ router.post('/',
   authorize('admin', 'receptionist'),
   async (req, res, next) => {
     try {
-      const { patient_id, doctor_id, queue_type = 'NORMAL', notes } = req.body;
-      
-      console.log('=== ADD TO QUEUE (MongoDB) ===');
-      console.log('Data:', { patient_id, doctor_id, queue_type, notes });
-      
+      const { patient_id, doctor_id, queue_type = 'NORMAL', notes, service_id } = req.body;
+
       if (!patient_id || !doctor_id) {
         return res.status(400).json({
           success: false,
           message: 'Bemor va shifokor tanlanishi kerak'
         });
       }
-      
+
       // Get today's queue count for this doctor
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      
+
       const count = await Queue.countDocuments({
         doctor_id,
         createdAt: {
@@ -278,26 +277,70 @@ router.post('/',
           $lt: tomorrow
         }
       });
-      
+
       const queueNumber = count + 1;
-      
+
       // Create queue entry
-      const queue = new Queue({
+      const queueData = {
         patient_id,
         doctor_id,
         queue_number: queueNumber,
         queue_type,
         status: 'WAITING',
         notes
-      });
-      
+      };
+
+      // If service selected, create invoice automatically
+      let invoice = null;
+      if (service_id) {
+        const service = await Service.findById(service_id);
+        if (service) {
+          queueData.service_id = service_id;
+
+          const doctor = await Staff.findById(doctor_id).select('first_name last_name');
+
+          // Generate invoice number
+          const now = new Date();
+          const dateStr = now.toISOString().slice(2, 10).replace(/-/g, '');
+          const todayInvoiceCount = await Invoice.countDocuments({
+            created_at: { $gte: today, $lt: tomorrow }
+          });
+          const invoiceNumber = `INV-${dateStr}-${String(todayInvoiceCount + 1).padStart(4, '0')}`;
+
+          const price = service.base_price || service.price;
+          invoice = await Invoice.create({
+            patient_id,
+            invoice_number: invoiceNumber,
+            items: [{
+              item_type: 'service',
+              description: service.name,
+              quantity: 1,
+              unit_price: price,
+              total_price: price
+            }],
+            total_amount: price,
+            paid_amount: 0,
+            balance: price,
+            status: 'pending',
+            payment_status: 'pending',
+            created_by: req.user._id,
+            metadata: {
+              doctor_id,
+              doctor_name: doctor ? `${doctor.first_name} ${doctor.last_name}` : ''
+            }
+          });
+
+          queueData.invoice_id = invoice._id;
+        }
+      }
+
+      const queue = new Queue(queueData);
       await queue.save();
-      
-      console.log('✅ Queue created:', queue._id);
-      
+
       res.status(201).json({
         success: true,
         data: queue,
+        invoice: invoice || null,
         message: 'Bemor navbatga qo\'shildi'
       });
     } catch (error) {

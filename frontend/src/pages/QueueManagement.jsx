@@ -38,6 +38,9 @@ const QueueManagement = () => {
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [queueType, setQueueType] = useState('NORMAL');
   const [notes, setNotes] = useState('');
+  const [consultationServices, setConsultationServices] = useState([]);
+  const [selectedService, setSelectedService] = useState('');
+  const [loadingServices, setLoadingServices] = useState(false);
   
   // Prescription Modal (Doctor only)
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
@@ -196,7 +199,8 @@ const QueueManagement = () => {
         patient_id: selectedPatient,
         doctor_id: selectedDoctor,
         queue_type: queueType,
-        notes
+        notes,
+        service_id: selectedService || undefined
       });
 
       if (response.success) {
@@ -215,6 +219,26 @@ const QueueManagement = () => {
     setSelectedDoctor('');
     setQueueType('NORMAL');
     setNotes('');
+    setSelectedService('');
+    setConsultationServices([]);
+  };
+
+  const handleDoctorChange = async (doctorId) => {
+    setSelectedDoctor(doctorId);
+    setSelectedService('');
+    if (!doctorId) {
+      setConsultationServices([]);
+      return;
+    }
+    setLoadingServices(true);
+    try {
+      const res = await queueService.getConsultationServices();
+      setConsultationServices(res.data || []);
+    } catch {
+      setConsultationServices([]);
+    } finally {
+      setLoadingServices(false);
+    }
   };
 
   const handleCallPatient = async (queueId) => {
@@ -1008,7 +1032,7 @@ const QueueManagement = () => {
             <select
               required
               value={selectedDoctor}
-              onChange={(e) => setSelectedDoctor(e.target.value)}
+              onChange={(e) => handleDoctorChange(e.target.value)}
               className="w-full px-4 sm:px-4 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Shifokorni tanlang</option>
@@ -1020,6 +1044,38 @@ const QueueManagement = () => {
               ))}
             </select>
           </div>
+
+          {/* Consultation Service */}
+          {selectedDoctor && (
+            <div>
+              <label className="block text-sm sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Konsultatsiya xizmati
+              </label>
+              {loadingServices ? (
+                <p className="text-sm text-gray-500 py-2">Yuklanmoqda...</p>
+              ) : consultationServices.length > 0 ? (
+                <select
+                  value={selectedService}
+                  onChange={(e) => setSelectedService(e.target.value)}
+                  className="w-full px-4 sm:px-4 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Xizmat tanlanmagan (bepul)</option>
+                  {consultationServices.map(s => (
+                    <option key={s._id} value={s._id}>
+                      {s.name} — {s.price?.toLocaleString()} so'm
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-sm text-gray-400 py-2">Konsultatsiya xizmatlari topilmadi</p>
+              )}
+              {selectedService && (
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  Navbatga qo'shilganda avtomatik hisob-faktura yaratiladi
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Queue Type */}
           <div>
