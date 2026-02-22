@@ -17,14 +17,7 @@ const QueueManagement = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isDoctor = user?.role_name === 'doctor' || user?.role?.name === 'doctor' || user?.role_name === 'Shifokor' || user?.role?.name === 'Shifokor' || user?.role_name === 'Doctor' || user?.role?.name === 'Doctor';
-  
-  // Debug logging
-  console.log('=== QUEUE MANAGEMENT DEBUG ===');
-  console.log('User:', user);
-  console.log('User role_name:', user?.role_name);
-  console.log('User role.name:', user?.role?.name);
-  console.log('isDoctor:', isDoctor);
-  
+
   const [loading, setLoading] = useState(true);
   const [queue, setQueue] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -91,9 +84,7 @@ const QueueManagement = () => {
   };
 
   const showConfirm = (message, onConfirm, title = t('queue.confirm'), type = 'warning', confirmText = t('queue.confirm'), cancelText = t('queue.cancel')) => {
-    console.log('🔔 showConfirm called with:', { message, title, type, confirmText, cancelText });
-    
-    const newState = { 
+    const newState = {
       isOpen: true, 
       title, 
       message, 
@@ -103,7 +94,6 @@ const QueueManagement = () => {
       cancelText
     };
     
-    console.log('🔔 Setting confirmModal to:', newState);
     setConfirmModal(newState);
   };
 
@@ -169,7 +159,6 @@ const QueueManagement = () => {
       if (doctorsData.success && doctorsData.data) {
         setDoctors(doctorsData.data);
       } else {
-        console.error('❌ Doctors data not successful:', doctorsData);
         setDoctors([]);
       }
       
@@ -183,8 +172,6 @@ const QueueManagement = () => {
         setPatients([]);
       }
     } catch (error) {
-      console.error('❌ Load data error:', error);
-      console.error('Error details:', error.response?.data);
       // Set empty arrays on error
       setDoctors([]);
       setPatients([]);
@@ -217,7 +204,6 @@ const QueueManagement = () => {
         loadData();
       }
     } catch (error) {
-      console.error('Add to queue error:', error);
       showAlert(t('queue.errorOccurred'), 'error', t('common.error'));
     }
   };
@@ -238,22 +224,14 @@ const QueueManagement = () => {
         return;
       }
 
-      console.log('=== CHECKING PAYMENT STATUS ===');
-      console.log('Queue Item:', queueItem);
-      console.log('Patient ID:', queueItem.patient_id);
-
       // To'lov holatini tekshirish
       try {
         const invoiceResponse = await api.get(`/billing/invoices/patient/${queueItem.patient_id}/unpaid`);
-        
-        console.log('Invoice Response:', invoiceResponse.data);
-        
+
         if (invoiceResponse.data.success && invoiceResponse.data.data && invoiceResponse.data.data.length > 0) {
           // To'lanmagan hisob-fakturalar bor
           const totalUnpaid = invoiceResponse.data.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
-          
-          console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
-          
+
           // Ogohlantirish ko'rsatamiz - OK bosilsa chaqiriladi, Bekor qilish bosilsa yo'q
           showAlert(
             `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nBaribir chaqirasizmi?`,
@@ -261,8 +239,6 @@ const QueueManagement = () => {
             'To\'lov kerak',
             async () => {
               // OK bosilsa - bemorni chaqiramiz
-              console.log('✅ User confirmed, calling patient...');
-              
               try {
                 const response = await queueService.callPatient(queueId);
                 if (response.success) {
@@ -271,13 +247,11 @@ const QueueManagement = () => {
                     await queueService.startAppointment(queueId);
                     showAlert('Bemor qabulga olindi', 'success', t('common.success'));
                   } catch (startError) {
-                    console.error('Start appointment error:', startError);
                     showAlert(t('queue.patientCalled'), 'success', t('common.success'));
                   }
                   loadData(); // Navbatni yangilash
                 }
               } catch (error) {
-                console.error('Call patient error:', error);
                 showAlert(t('queue.errorOccurred'), 'error', t('common.error'));
               }
             },
@@ -286,17 +260,12 @@ const QueueManagement = () => {
             'Bekor qilish' // cancelText
           );
           return;
-        } else {
-          console.log('✅ No unpaid invoices found');
         }
       } catch (invoiceError) {
-        console.error('❌ Invoice check error:', invoiceError);
         // Xatolik bo'lsa ham davom etamiz
       }
 
       // Agar to'lov tekshiruvi o'tgan bo'lsa, bemorni chaqiramiz
-      console.log('✅ Payment check passed, calling patient...');
-      
       const response = await queueService.callPatient(queueId);
       if (response.success) {
         // Avtomatik IN_PROGRESS ga o'tkazish
@@ -304,13 +273,11 @@ const QueueManagement = () => {
           await queueService.startAppointment(queueId);
           showAlert('Bemor qabulga olindi', 'success', t('common.success'));
         } catch (startError) {
-          console.error('Start appointment error:', startError);
           showAlert(t('queue.patientCalled'), 'success', t('common.success'));
         }
         loadData();
       }
     } catch (error) {
-      console.error('Call patient error:', error);
       showAlert(t('queue.errorOccurred'), 'error', t('common.error'));
     }
   };
@@ -341,7 +308,6 @@ const QueueManagement = () => {
         showAlert(response.message || t('queue.errorOccurred'), 'error', t('common.error'));
       }
     } catch (error) {
-      console.error('Complete appointment error:', error);
       showAlert(error.response?.data?.message || t('queue.errorOccurred'), 'error', t('common.error'));
     }
   };
@@ -358,7 +324,6 @@ const QueueManagement = () => {
             loadData();
           }
         } catch (error) {
-          console.error('Cancel appointment error:', error);
           showAlert(t('queue.errorOccurred') || 'Xatolik yuz berdi', 'error', t('common.error'));
         }
       },
@@ -385,7 +350,6 @@ const QueueManagement = () => {
         setShowNurseModal(true);
       }
     } catch (error) {
-      console.error('Load nurses error:', error);
       toast.error('Hamshiralarni yuklashda xatolik');
     }
   };
@@ -429,7 +393,6 @@ const QueueManagement = () => {
         setNursePatient(null);
       }
     } catch (error) {
-      console.error('Assign to nurse error:', error);
       toast.error('Topshiriq yuborishda xatolik');
     }
   };
@@ -628,7 +591,7 @@ const QueueManagement = () => {
             return (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredPatients.map((patient) => (
-                <div key={patient.id} className="p-3 sm:p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <div key={patient.id} onClick={() => navigate(`/patients/${patient.patient_id}`)} className="p-3 sm:p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
                   <div className="flex flex-col sm:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
                     <div className="flex items-start gap-2 sm:gap-3 sm:gap-3 min-w-0 flex-1">
                       <div className="size-12 sm:size-16 bg-primary/10 text-primary rounded-lg sm:rounded-lg flex items-center justify-center flex-shrink-0">
@@ -673,7 +636,7 @@ const QueueManagement = () => {
                       <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                         {patient.status === 'WAITING' && (
                           <button
-                            onClick={() => handleCallPatient(patient.id)}
+                            onClick={(e) => { e.stopPropagation(); handleCallPatient(patient.id) }}
                             className="px-3 sm:px-4 lg:px-8 py-2 sm:py-2 bg-green-500 text-white rounded-lg sm:rounded-lg text-sm sm:text-sm font-semibold hover:bg-green-600 flex items-center justify-center gap-2 sm:gap-2"
                           >
                             <span className="material-symbols-outlined text-sm sm:text-base">call</span>
@@ -684,14 +647,14 @@ const QueueManagement = () => {
                         {patient.status === 'IN_PROGRESS' && (
                           <>
                             <button
-                              onClick={() => handleStartConsultation(patient)}
+                              onClick={(e) => { e.stopPropagation(); handleStartConsultation(patient) }}
                               className="px-3 sm:px-4 lg:px-8 py-2 sm:py-2 bg-purple-500 text-white rounded-lg sm:rounded-lg text-sm sm:text-sm font-semibold hover:bg-purple-600 flex items-center justify-center gap-2 sm:gap-2"
                             >
                               <span className="material-symbols-outlined text-sm sm:text-base">medication</span>
                               {t('queue.writePrescription')}
                             </button>
                             <button
-                              onClick={() => handleCompleteAppointment(patient.id)}
+                              onClick={(e) => { e.stopPropagation(); handleCompleteAppointment(patient.id) }}
                               className="px-3 sm:px-4 lg:px-8 py-2 sm:py-2 bg-green-500 text-white rounded-lg sm:rounded-lg text-sm sm:text-sm font-semibold hover:bg-green-600 flex items-center justify-center gap-2 sm:gap-2"
                             >
                               <span className="material-symbols-outlined text-sm sm:text-base">check_circle</span>
@@ -702,7 +665,7 @@ const QueueManagement = () => {
                         
                         {/* QR Code button - always visible */}
                         <button
-                          onClick={() => {
+                          onClick={(e) => { e.stopPropagation();
                             setSelectedPatientForQR({
                               id: patient.patient_id,
                               patient_number: patient.patientNumber,
@@ -937,9 +900,6 @@ const QueueManagement = () => {
                         </>
                       )}
                       
-                      {/* Debug: Show button visibility logic */}
-                      {console.log(`Queue item ${item.id}: status=${item.status}, isDoctor=${isDoctor}, shouldShow=${isDoctor && (item.status === 'CALLED' || item.status === 'IN_PROGRESS')}`)}
-                      
                       {isDoctor && (item.status === 'CALLED' || item.status === 'IN_PROGRESS') && (
                         <>
                           <button
@@ -1137,12 +1097,10 @@ const QueueManagement = () => {
       />
 
       {/* Confirm Modal - Main confirmation dialog */}
-      {console.log('🎨 Rendering ConfirmModal with state:', confirmModal)}
       <ConfirmModal
         key="main-confirm-modal"
         isOpen={confirmModal.isOpen}
         onClose={() => {
-          console.log('🔴 ConfirmModal onClose called');
           setConfirmModal({ ...confirmModal, isOpen: false });
         }}
         onConfirm={confirmModal.onConfirm}

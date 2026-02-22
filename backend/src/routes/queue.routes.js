@@ -91,10 +91,10 @@ router.get('/',
       });
     } catch (error) {
       console.error('Queue GET error:', error);
-      res.json({
-        success: true,
+      res.status(500).json({
+        success: false,
         data: [],
-        error: error.message
+        message: error.message
       });
     }
   }

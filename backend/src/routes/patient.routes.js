@@ -17,7 +17,8 @@ router.get('/search',
       
       // Search filter
       if (q && q.trim()) {
-        const searchRegex = new RegExp(q.trim(), 'i');
+        const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const searchRegex = new RegExp(escaped, 'i');
         query.$or = [
           { first_name: searchRegex },
           { last_name: searchRegex },

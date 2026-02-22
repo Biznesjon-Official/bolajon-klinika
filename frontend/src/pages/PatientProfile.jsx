@@ -13,6 +13,7 @@ import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import PatientQRModal from '../components/PatientQRModal';
 import DateInput from '../components/DateInput';
+import api from '../services/api';
 import PrescriptionModal from '../components/PrescriptionModal';
 import doctorNurseService from '../services/doctorNurseService';
 import { laboratoryService } from '../services/laboratoryService';
@@ -171,14 +172,9 @@ const PatientProfile = () => {
 
   const loadAssignedSpecialists = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1'}/appointments/patient/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      if (data.success) {
-        setAssignedSpecialists(data.data || []);
+      const response = await api.get(`/appointments/patient/${id}`)
+      if (response.data.success) {
+        setAssignedSpecialists(response.data.data || [])
       }
     } catch (error) {
       console.error('Load specialists error:', error);

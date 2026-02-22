@@ -6,6 +6,7 @@ import { prescriptionService } from '../services/prescriptionService';
 import doctorNurseService from '../services/doctorNurseService';
 import pharmacyService from '../services/pharmacyService';
 import api from '../services/api';
+import { laboratoryService } from '../services/laboratoryService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -36,7 +37,15 @@ const DoctorPanel = () => {
     medication_name: '',
     dosage: ''
   });
-  
+
+  // Lab order
+  const [showLabOrderModal, setShowLabOrderModal] = useState(false)
+  const [labTests, setLabTests] = useState([])
+  const [selectedLabTest, setSelectedLabTest] = useState('')
+  const [labOrderPriority, setLabOrderPriority] = useState('normal')
+  const [labOrderNotes, setLabOrderNotes] = useState('')
+  const [labOrderPatient, setLabOrderPatient] = useState(null)
+
   // Prescription form
   const [diagnosis, setDiagnosis] = useState('');
   const [prescriptionType, setPrescriptionType] = useState('REGULAR');
@@ -56,8 +65,7 @@ const DoctorPanel = () => {
   };
 
   const showConfirm = (message, onConfirm, options = {}) => {
-    console.log('🔔 showConfirm called:', { message, options, hasOnConfirm: !!onConfirm });
-    const modalData = { 
+    const modalData = {
       isOpen: true, 
       title: options.title || 'Tasdiqlash',
       message, 
@@ -66,7 +74,6 @@ const DoctorPanel = () => {
       confirmText: options.confirmText || 'Tasdiqlash',
       cancelText: options.cancelText || 'Bekor qilish'
     };
-    console.log('🔔 Setting confirmModal to:', modalData);
     setConfirmModal(modalData);
   };
 
@@ -83,7 +90,6 @@ const DoctorPanel = () => {
         setAvailableMedicines(response.medicines);
       }
     } catch (error) {
-      console.error('Load medicines error:', error);
     } finally {
       setLoadingMedicines(false);
     }
@@ -92,9 +98,6 @@ const DoctorPanel = () => {
   // QR kod skanerlash va bemor ma'lumotlarini olish
   const handleQRScan = async (qrCode) => {
     try {
-      console.log('=== QR CODE SCANNED ===');
-      console.log('QR Code:', qrCode);
-      
       // QR kod formatini tekshirish: PATIENT_NUMBER-INVOICE_NUMBER
       if (!qrCode || !qrCode.includes('-')) {
         showAlert('Noto\'g\'ri QR kod formati', 'error', 'Xatolik');
@@ -102,20 +105,16 @@ const DoctorPanel = () => {
       }
       
       const [patientNumber, invoiceNumber] = qrCode.split('-');
-      console.log('Patient Number:', patientNumber);
-      console.log('Invoice Number:', invoiceNumber);
-      
+
       // Backend'dan bemor va invoice ma'lumotlarini olish
       const response = await api.get(`/billing/invoice/${invoiceNumber}`);
-      console.log('Invoice response:', response.data);
-      
+
       if (response.data.success) {
         const invoiceData = response.data.data;
         
         // Bemor ma'lumotlarini olish
         const patientResponse = await api.get(`/patients/${invoiceData.patient_id}`);
-        console.log('Patient response:', patientResponse.data);
-        
+
         if (patientResponse.data.success) {
           const patientData = patientResponse.data.data;
           
@@ -130,7 +129,6 @@ const DoctorPanel = () => {
         }
       }
     } catch (error) {
-      console.error('QR scan error:', error);
       showAlert('QR kod ma\'lumotlarini yuklashda xatolik', 'error', 'Xatolik');
     }
   };
@@ -140,7 +138,6 @@ const DoctorPanel = () => {
     
     // Agar oxirgi scan'dan 500ms o'tmagan bo'lsa, ignore qilish (duplicate scan)
     if (now - lastScanTimeRef.current < 500) {
-      console.log('Duplicate scan detected, ignoring...');
       return;
     }
     
@@ -161,16 +158,10 @@ const DoctorPanel = () => {
       setLoading(true);
       const today = new Date().toISOString().split('T')[0];
       
-      console.log('=== DOCTOR PANEL LOAD QUEUE ===');
-      console.log('Today:', today);
-      console.log('User:', user);
-      
       // Get doctor ID from user object - backend returns user.id as staff._id
       const doctorId = user?.id;
-      console.log('Doctor ID:', doctorId);
-      
+
       if (!doctorId) {
-        console.error('Doctor ID not found in user object');
         setMyQueue([]);
         return;
       }
@@ -181,17 +172,10 @@ const DoctorPanel = () => {
         doctor_id: doctorId 
       });
       
-      console.log('Queue response:', response);
-      
       if (response.success) {
-        console.log('My patients count:', response.data.length);
-        console.log('My patients:', response.data);
-        console.log('WAITING patients:', response.data.filter(q => q.status === 'WAITING'));
-        console.log('WAITING count:', response.data.filter(q => q.status === 'WAITING').length);
         setMyQueue(response.data);
       }
     } catch (error) {
-      console.error('Load queue error:', error);
     } finally {
       setLoading(false);
     }
@@ -233,7 +217,6 @@ const DoctorPanel = () => {
           return;
         }
       } catch (invoiceError) {
-        console.error('Invoice check error:', invoiceError);
         // Xatolik bo'lsa ham davom etamiz
       }
 
@@ -242,7 +225,6 @@ const DoctorPanel = () => {
       showAlert(t('doctorPanel.patientCalled'), 'success', t('common.success'));
       loadMyQueue();
     } catch (error) {
-      console.error('Call patient error:', error);
       showAlert(t('doctorPanel.errorOccurred'), 'error', t('common.error'));
     }
   };
@@ -294,19 +276,12 @@ const DoctorPanel = () => {
   const handleSubmitPrescription = async (e, shouldPrint = false) => {
     e.preventDefault();
     
-    console.log('=== PRESCRIPTION SUBMIT STARTED ===');
-    console.log('Should print:', shouldPrint);
-    
     if (!diagnosis || medications.length === 0) {
       showAlert('Iltimos, tashxis va kamida 1 ta dori kiriting', 'warning', 'Ogohlantirish');
       return;
     }
 
     try {
-      console.log('Patient:', selectedPatient);
-      console.log('Diagnosis:', diagnosis);
-      console.log('Medications:', medications);
-      
       const prescriptionData = {
         patient_id: selectedPatient.patient_id,
         queue_id: selectedPatient.id,
@@ -329,14 +304,8 @@ const DoctorPanel = () => {
       const isUrgent = prescriptionType === 'URGENT';
       const patientForNurse = isUrgent ? { ...selectedPatient } : null;
       
-      console.log('Prescription data:', prescriptionData);
-      console.log('Is Urgent:', isUrgent);
-      console.log('Patient for nurse:', patientForNurse);
-      
       const response = await prescriptionService.createPrescription(prescriptionData);
       
-      console.log('Prescription response:', response);
-
       if (response.success) {
         // Qabulni yakunlash
         await queueService.completeAppointment(selectedPatient.id);
@@ -345,16 +314,7 @@ const DoctorPanel = () => {
         setShowPrescriptionModal(false);
         
         // Agar shoshilinch bo'lsa va hamshira tanlangan bo'lsa, avtomatik topshiriq yuborish
-        console.log('=== NURSE ASSIGNMENT CHECK ===');
-        console.log('isUrgent:', isUrgent);
-        console.log('prescriptionType:', prescriptionType);
-        console.log('patientForNurse:', patientForNurse);
-        console.log('selectedNurse:', selectedNurse);
-        console.log('medications.length:', medications.length);
-        
         if (isUrgent && patientForNurse && selectedNurse && medications.length > 0) {
-          console.log('✅ URGENT PRESCRIPTION with nurse - Sending task automatically');
-          
           try {
             const taskData = {
               patient_id: patientForNurse.patient_id,
@@ -370,9 +330,7 @@ const DoctorPanel = () => {
               scheduled_time: new Date().toISOString()
             };
 
-            console.log('📤 Sending task data:', taskData);
             const nurseResponse = await doctorNurseService.assignTask(taskData);
-            console.log('📥 Nurse response:', nurseResponse);
             
             if (nurseResponse.success) {
               showAlert('Retsept saqlandi va hamshiraga topshiriq yuborildi!', 'success', 'Muvaffaqiyatli');
@@ -380,7 +338,6 @@ const DoctorPanel = () => {
               showAlert('Retsept saqlandi, lekin hamshiraga yuborishda xatolik', 'warning', 'Ogohlantirish');
             }
           } catch (error) {
-            console.error('❌ Assign to nurse error:', error);
             showAlert('Retsept saqlandi, lekin hamshiraga yuborishda xatolik', 'warning', 'Ogohlantirish');
           }
           
@@ -388,8 +345,6 @@ const DoctorPanel = () => {
           setSelectedNurse(null);
         } else if (prescriptionType === 'REGULAR' && selectedNurse) {
           // Oddiy retsept uchun - muolaja jadvali backend'da yaratildi
-          console.log('✅ REGULAR PRESCRIPTION with nurse - Treatment schedule created automatically');
-          
           const hasScheduledMeds = medications.some(med => 
             med.schedule_times && med.schedule_times.length > 0 && med.duration_days
           );
@@ -411,19 +366,12 @@ const DoctorPanel = () => {
           // Reset nurse selection
           setSelectedNurse(null);
         } else {
-          console.log('❌ NOT sending to nurse - condition failed');
-          if (!isUrgent && prescriptionType !== 'REGULAR') console.log('  - Not urgent or regular');
-          if (!patientForNurse && !selectedPatient) console.log('  - No patient');
-          if (!selectedNurse) console.log('  - No nurse selected');
-          if (medications.length === 0) console.log('  - No medications');
-          
           // Show success alert
           showAlert('Retsept muvaffaqiyatli saqlandi va qabul yakunlandi!', 'success', 'Muvaffaqiyatli');
         }
 
         // If shouldPrint is true, print the receipt
         if (shouldPrint) {
-          console.log('=== PRINTING RECEIPT ===');
           setTimeout(() => {
             prescriptionService.printPrescriptionReceipt(
               {
@@ -442,8 +390,6 @@ const DoctorPanel = () => {
         showAlert('Xatolik: ' + (response.message || 'Noma\'lum xatolik'), 'error', 'Xatolik');
       }
     } catch (error) {
-      console.error('Submit prescription error:', error);
-      console.error('Error response:', error.response?.data);
       showAlert('Xatolik yuz berdi: ' + (error.response?.data?.message || error.message), 'error', 'Xatolik');
     }
   };
@@ -458,7 +404,6 @@ const DoctorPanel = () => {
         setShowNurseModal(true);
       }
     } catch (error) {
-      console.error('Load nurses error:', error);
       toast.error('Hamshiralarni yuklashda xatolik');
     }
   };
@@ -501,10 +446,38 @@ const DoctorPanel = () => {
         });
       }
     } catch (error) {
-      console.error('Assign task error:', error);
       toast.error('Topshiriq yuborishda xatolik');
     }
   };
+
+  // Lab order handlers
+  const handleOpenLabOrder = async (patient) => {
+    setLabOrderPatient(patient)
+    setShowLabOrderModal(true)
+    try {
+      const res = await laboratoryService.getTests()
+      setLabTests(res.data || [])
+    } catch { setLabTests([]) }
+  }
+
+  const handleCreateLabOrder = async () => {
+    if (!selectedLabTest) return toast.error('Tahlilni tanlang')
+    try {
+      await laboratoryService.createOrder({
+        patient_id: labOrderPatient.patient_id,
+        test_id: selectedLabTest,
+        priority: labOrderPriority,
+        notes: labOrderNotes
+      })
+      toast.success('Tahlil buyurtma yaratildi')
+      setShowLabOrderModal(false)
+      setSelectedLabTest('')
+      setLabOrderNotes('')
+      setLabOrderPriority('normal')
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Xatolik')
+    }
+  }
 
   const handleCompleteConsultation = async (queueId) => {
     try {
@@ -523,7 +496,6 @@ const DoctorPanel = () => {
         }
       );
     } catch (error) {
-      console.error('Complete consultation error:', error);
       showAlert('Xatolik yuz berdi', 'error', 'Xatolik');
     }
   };
@@ -714,7 +686,7 @@ const DoctorPanel = () => {
                 return a.queueNumber - b.queueNumber;
               })
               .map((patient, index) => (
-                <div key={patient.id} className={`p-3 sm:p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${patient.queue_type === 'URGENT' ? 'bg-red-50 dark:bg-red-900/10 border-l-4 border-red-500' : ''}`}>
+                <div key={patient.id} onClick={() => navigate(`/patients/${patient.patient_id}`)} className={`p-3 sm:p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer ${patient.queue_type === 'URGENT' ? 'bg-red-50 dark:bg-red-900/10 border-l-4 border-red-500' : ''}`}>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
                     <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
                       <div className={`size-10 sm:size-12 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-base sm:text-base sm:text-lg flex-shrink-0 ${patient.queue_type === 'URGENT' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'}`}>
@@ -749,20 +721,32 @@ const DoctorPanel = () => {
                           Shoshilinch
                         </span>
                       )}
-                      
+
+                      <span className={`px-2 sm:px-3 py-1 ${getStatusColor(patient.status)} dark:bg-opacity-20 rounded-full text-xs font-semibold whitespace-nowrap`}>
+                        {getStatusText(patient.status)}
+                      </span>
+
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/patients/${patient.patient_id}`) }}
+                        className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                        title="Bemor profili"
+                      >
+                        <span className="material-symbols-outlined text-sm">visibility</span>
+                      </button>
+
                       {patient.status === 'WAITING' && (
                         <button
-                          onClick={() => handleCallPatient(patient.id)}
+                          onClick={(e) => { e.stopPropagation(); handleCallPatient(patient.id) }}
                           className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 whitespace-nowrap flex items-center gap-1"
                         >
                           <span className="material-symbols-outlined text-sm">call</span>
                           Chaqirish
                         </button>
                       )}
-                      
+
                       {patient.status === 'CALLED' && (
                         <button
-                          onClick={() => handleStartConsultation(patient)}
+                          onClick={(e) => { e.stopPropagation(); handleStartConsultation(patient) }}
                           className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 whitespace-nowrap flex items-center gap-1"
                         >
                           <span className="material-symbols-outlined text-sm">play_arrow</span>
@@ -813,6 +797,18 @@ const DoctorPanel = () => {
                     </div>
                     
                     <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2 sm:px-3 py-1 bg-purple-100 text-purple-700 dark:bg-opacity-20 rounded-full text-xs font-semibold whitespace-nowrap">
+                        Qabulda
+                      </span>
+
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/patients/${patient.patient_id}`) }}
+                        className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                        title="Bemor profili"
+                      >
+                        <span className="material-symbols-outlined text-sm">visibility</span>
+                      </button>
+
                       <button
                         onClick={() => handleStartConsultation(patient)}
                         className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-600 whitespace-nowrap flex items-center gap-1"
@@ -828,7 +824,15 @@ const DoctorPanel = () => {
                         <span className="material-symbols-outlined text-sm">medical_services</span>
                         Hamshiraga topshiriq
                       </button>
-                      
+
+                      <button
+                        onClick={() => handleOpenLabOrder(patient)}
+                        className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600 whitespace-nowrap flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">biotech</span>
+                        Tahlil buyurtma
+                      </button>
+
                       <button
                         onClick={() => handleCompleteConsultation(patient.id)}
                         className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 whitespace-nowrap flex items-center gap-1"
@@ -844,6 +848,61 @@ const DoctorPanel = () => {
         </div>
       )}
 
+      {/* Lab Order Modal */}
+      <Modal isOpen={showLabOrderModal} onClose={() => setShowLabOrderModal(false)} title="Tahlil buyurtma berish">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahlil turi</label>
+            <select
+              value={selectedLabTest}
+              onChange={(e) => setSelectedLabTest(e.target.value)}
+              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option value="">Tanlang...</option>
+              {labTests.map(test => (
+                <option key={test._id} value={test._id}>{test.name} — {test.price?.toLocaleString()} so'm</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Muhimlik</label>
+            <select
+              value={labOrderPriority}
+              onChange={(e) => setLabOrderPriority(e.target.value)}
+              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option value="normal">Oddiy</option>
+              <option value="urgent">Shoshilinch</option>
+              <option value="stat">STAT (Zudlik bilan)</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Izoh</label>
+            <textarea
+              value={labOrderNotes}
+              onChange={(e) => setLabOrderNotes(e.target.value)}
+              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              rows={3}
+              placeholder="Qo'shimcha izoh..."
+            />
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowLabOrderModal(false)}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
+            >
+              Bekor qilish
+            </button>
+            <button
+              onClick={handleCreateLabOrder}
+              className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+            >
+              Buyurtma berish
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Alert Modal */}
       <AlertModal
         isOpen={alertModal.isOpen}
@@ -854,11 +913,9 @@ const DoctorPanel = () => {
       />
 
       {/* Confirm Modal */}
-      {console.log('🎨 Rendering ConfirmModal with state:', confirmModal)}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={() => {
-          console.log('🔴 ConfirmModal onClose called');
           setConfirmModal({ ...confirmModal, isOpen: false });
         }}
         onConfirm={confirmModal.onConfirm}
@@ -1143,8 +1200,8 @@ const DoctorPanel = () => {
                                 if (response.success) {
                                   setNurses(response.data);
                                 }
-                              } catch (error) {
-                                console.error('Load nurses error:', error);
+                              } catch {
+                                // silently ignore
                               }
                             }
                           }}
@@ -1229,8 +1286,8 @@ const DoctorPanel = () => {
                       if (response.success) {
                         setNurses(response.data);
                       }
-                    } catch (error) {
-                      console.error('Load nurses error:', error);
+                    } catch {
+                      // silently ignore
                     }
                   }
                 }}
@@ -1241,8 +1298,8 @@ const DoctorPanel = () => {
                       if (response.success) {
                         setNurses(response.data);
                       }
-                    } catch (error) {
-                      console.error('Load nurses error:', error);
+                    } catch {
+                      // silently ignore
                     }
                   }
                 }}
@@ -1284,8 +1341,8 @@ const DoctorPanel = () => {
                         if (response.success) {
                           setNurses(response.data);
                         }
-                      } catch (error) {
-                        console.error('Load nurses error:', error);
+                      } catch {
+                        // silently ignore
                       }
                     }
                   }}
@@ -1296,8 +1353,8 @@ const DoctorPanel = () => {
                         if (response.success) {
                           setNurses(response.data);
                         }
-                      } catch (error) {
-                        console.error('Load nurses error:', error);
+                      } catch {
+                        // silently ignore
                       }
                     }
                   }}
