@@ -42,7 +42,12 @@ const DashboardLayout = ({ children }) => {
     { name: 'Statsionar', icon: 'bed', path: '/inpatient', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Qabulxona', 'Reception', 'receptionist'] },
     
     // 6. Hamshira paneli
-    { name: 'Hamshira Paneli', icon: 'medical_services', path: '/nurse', roles: ['Hamshira', 'Nurse'] },
+    { name: 'Hamshira Dashboard', icon: 'dashboard', path: '/nurse', roles: ['Hamshira', 'Nurse'] },
+    { name: 'Muolajalar', icon: 'medication', path: '/nurse/treatments', roles: ['Hamshira', 'Nurse'] },
+    { name: 'Dori shkafi', icon: 'medical_services', path: '/nurse/medicine', roles: ['Hamshira', 'Nurse'] },
+    { name: 'Chaqiruvlar', icon: 'notifications', path: '/nurse/calls', roles: ['Hamshira', 'Nurse'] },
+    { name: 'Xabarlar', icon: 'mail', path: '/nurse/messages', roles: ['Hamshira', 'Nurse'] },
+    { name: 'Tarix', icon: 'history', path: '/nurse/history', roles: ['Hamshira', 'Nurse'] },
     
     // 7. Laboratoriya
     { name: 'Laborant Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab'] },
@@ -94,7 +99,10 @@ const DashboardLayout = ({ children }) => {
     return item.roles.some(role => role.toLowerCase() === userRoleLower);
   });
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (path === '/nurse') return location.pathname === '/nurse'
+    return location.pathname === path || location.pathname.startsWith(path + '/')
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-background-light dark:bg-background-dark">

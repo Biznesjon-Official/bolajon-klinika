@@ -133,6 +133,11 @@ function AppContent() {
               <Route path="/staff" element={<ProtectedRoute><DashboardLayout><StaffManagementAdvanced /></DashboardLayout></ProtectedRoute>} />
               <Route path="/lab" element={<ProtectedRoute><DashboardLayout><LaborantPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/nurse" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/nurse/treatments" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/nurse/medicine" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/nurse/calls" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/nurse/messages" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/nurse/history" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/sanitar" element={<ProtectedRoute><DashboardLayout><SanitarPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/masseur" element={<ProtectedRoute><DashboardLayout><MasseurPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/speech-therapist" element={<ProtectedRoute><DashboardLayout><SpeechTherapistPanel /></DashboardLayout></ProtectedRoute>} />

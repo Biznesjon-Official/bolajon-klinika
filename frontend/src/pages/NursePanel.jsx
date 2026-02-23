@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import useNurseData from '../hooks/useNurseData'
 import nurseService from '../services/nurseService'
@@ -6,7 +7,7 @@ import communicationService from '../services/communicationService'
 import pharmacyService from '../services/pharmacyService'
 import toast from 'react-hot-toast'
 
-// Tab components
+// Page components
 import NurseDashboard from '../components/nurse/NurseDashboard'
 import NurseTreatments from '../components/nurse/NurseTreatments'
 import NurseMedicineCabinet from '../components/nurse/NurseMedicineCabinet'
@@ -19,18 +20,20 @@ import CompleteTreatmentModal from '../components/nurse/CompleteTreatmentModal'
 import DispenseMedicineModal from '../components/nurse/DispenseMedicineModal'
 import SendMessageModal from '../components/nurse/SendMessageModal'
 
-const TABS = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { id: 'treatments', label: 'Muolajalar', icon: 'medication' },
-  { id: 'medicine-cabinet', label: 'Dori shkafi', icon: 'medical_services' },
-  { id: 'calls', label: 'Chaqiruvlar', icon: 'notifications' },
-  { id: 'messages', label: 'Xabarlar', icon: 'mail' },
-  { id: 'history', label: 'Tarix', icon: 'history' }
-]
-
 export default function NursePanel() {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const location = useLocation()
+
+  // Determine active page from URL
+  const activeTab = useMemo(() => {
+    if (location.pathname === '/nurse/treatments') return 'treatments'
+    if (location.pathname === '/nurse/medicine') return 'medicine-cabinet'
+    if (location.pathname === '/nurse/calls') return 'calls'
+    if (location.pathname === '/nurse/messages') return 'messages'
+    if (location.pathname === '/nurse/history') return 'history'
+    return 'dashboard'
+  }, [location.pathname])
+
   const [filters, setFilters] = useState({ floor: '', status: 'all' })
 
   // Data
@@ -166,42 +169,7 @@ export default function NursePanel() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-rose-600 rounded-2xl p-4 sm:p-6 text-white shadow-xl">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <span className="material-symbols-outlined text-4xl sm:text-5xl">medical_services</span>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black">HAMSHIRA PANELI</h1>
-            <p className="text-sm sm:text-lg opacity-90">Xush kelibsiz, {user?.first_name || 'Hamshira'}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-1 sm:gap-2 px-2 sm:px-4 overflow-x-auto scrollbar-hide">
-            {TABS.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 font-semibold border-b-2 transition-colors whitespace-nowrap text-xs sm:text-sm ${
-                  activeTab === tab.id
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <span className="material-symbols-outlined text-base sm:text-xl">{tab.icon}</span>
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-4 sm:p-6">
-          {renderTab()}
-        </div>
-      </div>
+      {renderTab()}
 
       {/* Modals */}
       <CompleteTreatmentModal
