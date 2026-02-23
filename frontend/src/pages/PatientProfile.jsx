@@ -54,6 +54,9 @@ const PatientProfile = () => {
   const [invoiceDiscount, setInvoiceDiscount] = useState(0);
   const [paymentForm, setPaymentForm] = useState({ amount: '', method: 'cash', notes: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [consultationServices, setConsultationServices] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(false);
 
   // Modals
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
@@ -281,7 +284,7 @@ const PatientProfile = () => {
       await laboratoryService.createOrder({
         patient_id: id, test_id: selectedLabTest,
         priority: labOrderPriority, notes: labOrderNotes,
-        admission_id: activeAdmission?.id || null
+        admission_id: activeAdmission?._id || activeAdmission?.id || null
       });
       showAlert('Tahlil buyurtma yaratildi', 'success');
       setShowLabOrderModal(false);
@@ -361,6 +364,24 @@ const PatientProfile = () => {
     }
   };
 
+  const handleQueueDoctorChange = async (doctorId) => {
+    setQueueForm(prev => ({ ...prev, doctor_id: doctorId }))
+    setSelectedServices([])
+    if (!doctorId) { setConsultationServices([]); return }
+    setLoadingServices(true)
+    try {
+      const res = await queueService.getConsultationServices()
+      setConsultationServices(res.data || [])
+    } catch { setConsultationServices([]) }
+    finally { setLoadingServices(false) }
+  }
+
+  const handleServiceToggle = (serviceId) => {
+    setSelectedServices(prev =>
+      prev.includes(serviceId) ? prev.filter(id => id !== serviceId) : [...prev, serviceId]
+    )
+  }
+
   const handleAddToQueue = async (e) => {
     e.preventDefault();
     if (!queueForm.doctor_id) return;
@@ -370,12 +391,15 @@ const PatientProfile = () => {
         patient_id: id,
         doctor_id: queueForm.doctor_id,
         queue_type: queueForm.queue_type,
-        notes: queueForm.notes
+        notes: queueForm.notes,
+        service_ids: selectedServices
       });
       if (response.success) {
         showAlert('Bemor navbatga qo\'shildi', 'success', 'Muvaffaqiyatli');
         setShowAddQueueModal(false);
         setQueueForm({ doctor_id: '', queue_type: 'NORMAL', notes: '' });
+        setSelectedServices([]);
+        setConsultationServices([]);
         loadQueueData();
       }
     } catch (error) {
@@ -1945,7 +1969,7 @@ const PatientProfile = () => {
             <select
               required
               value={queueForm.doctor_id}
-              onChange={(e) => setQueueForm({ ...queueForm, doctor_id: e.target.value })}
+              onChange={(e) => handleQueueDoctorChange(e.target.value)}
               className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Shifokorni tanlang</option>
@@ -1957,6 +1981,47 @@ const PatientProfile = () => {
               ))}
             </select>
           </div>
+
+          {/* Consultation Services (checkboxes) */}
+          {queueForm.doctor_id && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Konsultatsiya xizmatlari
+              </label>
+              {loadingServices ? (
+                <p className="text-sm text-gray-500 py-2">Yuklanmoqda...</p>
+              ) : consultationServices.length > 0 ? (
+                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-xl p-3 bg-gray-50 dark:bg-gray-800">
+                  {consultationServices.map(s => (
+                    <label key={s._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedServices.includes(s._id)}
+                        onChange={() => handleServiceToggle(s._id)}
+                        className="size-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <span className="flex-1 text-sm text-gray-900 dark:text-white">{s.name}</span>
+                      <span className="text-sm font-semibold text-primary">{s.price?.toLocaleString()} so'm</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 py-2">Konsultatsiya xizmatlari topilmadi</p>
+              )}
+              {selectedServices.length > 0 && (
+                <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+                    Jami: {consultationServices
+                      .filter(s => selectedServices.includes(s._id))
+                      .reduce((sum, s) => sum + (s.price || 0), 0)
+                      .toLocaleString()} so'm
+                    <span className="font-normal text-xs ml-2">({selectedServices.length} xizmat)</span>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Navbat turi</label>
             <div className="flex gap-2">

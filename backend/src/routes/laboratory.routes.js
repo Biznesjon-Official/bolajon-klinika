@@ -497,6 +497,15 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist'
       });
     }
     
+    // Validation: admission_id format
+    if (admission_id && !mongoose.Types.ObjectId.isValid(admission_id)) {
+      await session.abortTransaction()
+      return res.status(400).json({
+        success: false,
+        message: 'Noto\'g\'ri admission ID formati'
+      })
+    }
+
     // Validation: Notes length (max 1000 characters)
     if (notes && notes.length > 1000) {
       await session.abortTransaction();
