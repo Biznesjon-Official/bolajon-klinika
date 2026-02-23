@@ -43,11 +43,9 @@ const DashboardLayout = ({ children }) => {
     
     // 6. Hamshira paneli
     { name: 'Hamshira Dashboard', icon: 'dashboard', path: '/nurse', roles: ['Hamshira', 'Nurse'] },
-    { name: 'Muolajalar', icon: 'medication', path: '/nurse/treatments', roles: ['Hamshira', 'Nurse'] },
     { name: 'Dori shkafi', icon: 'medical_services', path: '/nurse/medicine', roles: ['Hamshira', 'Nurse'] },
     { name: 'Chaqiruvlar', icon: 'notifications', path: '/nurse/calls', roles: ['Hamshira', 'Nurse'] },
-    { name: 'Xabarlar', icon: 'mail', path: '/nurse/messages', roles: ['Hamshira', 'Nurse'] },
-    { name: 'Tarix', icon: 'history', path: '/nurse/history', roles: ['Hamshira', 'Nurse'] },
+    { name: 'Boshqa', icon: 'more_horiz', path: '/nurse/more', roles: ['Hamshira', 'Nurse'] },
     
     // 7. Laboratoriya
     { name: 'Laborant Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab'] },
@@ -67,10 +65,10 @@ const DashboardLayout = ({ children }) => {
     
     // 13. Vazifalar
     { name: 'Vazifalar', icon: 'task_alt', path: '/tasks', roles: ['Admin', 'Administrator'] },
-    { name: 'Mening Vazifalarim', icon: 'task_alt', path: '/my-tasks', roles: ['Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Qabulxona', 'Reception', 'receptionist', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor'] },
+    { name: 'Mening Vazifalarim', icon: 'task_alt', path: '/my-tasks', roles: ['Shifokor', 'Doctor', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Qabulxona', 'Reception', 'receptionist', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor'] },
     
     // 14. Aloqa
-    { name: t('nav.communications'), icon: 'chat', path: '/communications', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Qabulxona', 'Reception'] },
+    { name: t('nav.communications'), icon: 'chat', path: '/communications', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Qabulxona', 'Reception'] },
     
     // 13. Hisobotlar
     { name: t('nav.reports'), icon: 'bar_chart', path: '/reports', roles: ['Admin', 'Administrator', 'Manager', 'Menejer'] },
@@ -81,7 +79,7 @@ const DashboardLayout = ({ children }) => {
     
     // 15. Maoshlar (oxirida)
     { name: 'Maoshlar', icon: 'payments', path: '/payroll', roles: ['Admin', 'Administrator'] },
-    { name: 'Mening Maoshim', icon: 'account_balance_wallet', path: '/my-salary', roles: ['Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: 'Mening Maoshim', icon: 'account_balance_wallet', path: '/my-salary', roles: ['Shifokor', 'Doctor', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor', 'Qabulxona', 'Reception', 'receptionist'] },
     
     // Bemor paneli yashirilgan (hozircha ko'rinmaydigan)
     // { name: 'Bemor Paneli', icon: 'person', path: '/patient-portal', roles: ['Patient', 'Bemor'] },

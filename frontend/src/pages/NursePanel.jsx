@@ -9,11 +9,9 @@ import toast from 'react-hot-toast'
 
 // Page components
 import NurseDashboard from '../components/nurse/NurseDashboard'
-import NurseTreatments from '../components/nurse/NurseTreatments'
 import NurseMedicineCabinet from '../components/nurse/NurseMedicineCabinet'
 import NurseCalls from '../components/nurse/NurseCalls'
-import NurseMessages from '../components/nurse/NurseMessages'
-import NurseHistory from '../components/nurse/NurseHistory'
+import NurseMore from '../components/nurse/NurseMore'
 
 // Modals
 import CompleteTreatmentModal from '../components/nurse/CompleteTreatmentModal'
@@ -26,11 +24,9 @@ export default function NursePanel() {
 
   // Determine active page from URL
   const activeTab = useMemo(() => {
-    if (location.pathname === '/nurse/treatments') return 'treatments'
     if (location.pathname === '/nurse/medicine') return 'medicine-cabinet'
     if (location.pathname === '/nurse/calls') return 'calls'
-    if (location.pathname === '/nurse/messages') return 'messages'
-    if (location.pathname === '/nurse/history') return 'history'
+    if (location.pathname === '/nurse/more') return 'more'
     return 'dashboard'
   }, [location.pathname])
 
@@ -147,21 +143,17 @@ export default function NursePanel() {
     )
   }
 
-  // Render active tab
+  // Render active page
   const renderTab = () => {
     switch (activeTab) {
       case 'dashboard':
         return <NurseDashboard stats={stats} treatments={treatments} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} />
-      case 'treatments':
-        return <NurseTreatments treatments={treatments} filters={filters} onFilterChange={setFilters} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} />
       case 'medicine-cabinet':
         return <NurseMedicineCabinet medicines={medicines} onDispense={setDispenseMedicine} />
       case 'calls':
         return <NurseCalls calls={calls} onAcceptCall={handleAcceptCall} />
-      case 'messages':
-        return <NurseMessages patients={patients} onSendMessage={setMessagePatient} />
-      case 'history':
-        return <NurseHistory history={history} />
+      case 'more':
+        return <NurseMore history={history} patients={patients} onSendMessage={setMessagePatient} />
       default:
         return null
     }

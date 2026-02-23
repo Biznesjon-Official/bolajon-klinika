@@ -36,9 +36,11 @@ export default function useNurseData(activeTab, filters) {
         if (callsData.success) setCalls(callsData.data)
       }
 
-      if (activeTab === 'history') {
+      if (activeTab === 'history' || activeTab === 'more') {
         const historyData = await nurseService.getHistory()
         if (historyData.success) setHistory(historyData.data)
+        const patientsData = await nurseService.getPatients({ floor: filters.floor })
+        if (patientsData.success) setPatients(patientsData.data)
       }
 
       if (activeTab === 'medicine-cabinet') {
