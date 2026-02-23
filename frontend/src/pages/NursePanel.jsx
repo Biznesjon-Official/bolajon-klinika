@@ -1,356 +1,137 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import nurseService from '../services/nurseService';
-import doctorNurseService from '../services/doctorNurseService';
-import communicationService from '../services/communicationService';
-import patientService from '../services/patientService';
-import pharmacyService from '../services/pharmacyService';
-import api from '../services/api';
-import toast, { Toaster } from 'react-hot-toast';
-import { io } from 'socket.io-client';
+import { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import useNurseData from '../hooks/useNurseData'
+import nurseService from '../services/nurseService'
+import communicationService from '../services/communicationService'
+import pharmacyService from '../services/pharmacyService'
+import toast from 'react-hot-toast'
+
+// Tab components
+import NurseDashboard from '../components/nurse/NurseDashboard'
+import NurseTreatments from '../components/nurse/NurseTreatments'
+import NurseMedicineCabinet from '../components/nurse/NurseMedicineCabinet'
+import NurseCalls from '../components/nurse/NurseCalls'
+import NurseMessages from '../components/nurse/NurseMessages'
+import NurseHistory from '../components/nurse/NurseHistory'
+
+// Modals
+import CompleteTreatmentModal from '../components/nurse/CompleteTreatmentModal'
+import DispenseMedicineModal from '../components/nurse/DispenseMedicineModal'
+import SendMessageModal from '../components/nurse/SendMessageModal'
+
+const TABS = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { id: 'treatments', label: 'Muolajalar', icon: 'medication' },
+  { id: 'medicine-cabinet', label: 'Dori shkafi', icon: 'medical_services' },
+  { id: 'calls', label: 'Chaqiruvlar', icon: 'notifications' },
+  { id: 'messages', label: 'Xabarlar', icon: 'mail' },
+  { id: 'history', label: 'Tarix', icon: 'history' }
+]
 
 export default function NursePanel() {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [initialLoad, setInitialLoad] = useState(true); // Birinchi yuklash uchun
-  const [activeTab, setActiveTab] = useState('dashboard');
-  
-  // Dashboard stats
-  const [stats, setStats] = useState({
-    pending_treatments: 0,
-    overdue_treatments: 0,
-    total_patients: 0,
-    active_calls: 0
-  });
+  const { user } = useAuth()
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [filters, setFilters] = useState({ floor: '', status: 'all' })
 
-  // Treatments
-  const [treatments, setTreatments] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const [calls, setCalls] = useState([]);
+  // Data
+  const { stats, treatments, patients, calls, history, medicines, loading, refresh, loadInpatients } = useNurseData(activeTab, filters)
 
-  // Messages
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [selectedPatientForMessage, setSelectedPatientForMessage] = useState(null);
-  const [messageText, setMessageText] = useState('');
+  // Modal state
+  const [completeTreatment, setCompleteTreatment] = useState(null)
+  const [dispenseMedicine, setDispenseMedicine] = useState(null)
+  const [messagePatient, setMessagePatient] = useState(null)
+  const [inpatients, setInpatients] = useState([])
 
-  // History
-  const [history, setHistory] = useState([]);
-  const [selectedPatientHistory, setSelectedPatientHistory] = useState(null);
-
-  // Filters
-  const [selectedFloor, setSelectedFloor] = useState(1);
-  const [selectedStatus, setSelectedStatus] = useState('all');
-
-  // Modals
-  const [showCompleteTreatmentModal, setShowCompleteTreatmentModal] = useState(false);
-  const [selectedTreatment, setSelectedTreatment] = useState(null);
-  const [treatmentNotes, setTreatmentNotes] = useState('');
-  
-  // Medicine Cabinet
-  const [medicines, setMedicines] = useState([]);
-  const [showDispenseModal, setShowDispenseModal] = useState(false);
-  const [selectedMedicine, setSelectedMedicine] = useState(null);
-  const [dispenseData, setDispenseData] = useState({
-    patient_id: '',
-    quantity: 1,
-    notes: ''
-  });
-
+  // Load inpatients for dispense modal
   useEffect(() => {
-    loadData(true); // Birinchi yuklashda loading ko'rsatish
-    loadPatients();
-    // Auto-refresh every 30 seconds (background da, loading ko'rsatmasdan)
-    const interval = setInterval(() => loadData(false), 30000);
-    return () => clearInterval(interval);
-  }, [activeTab, selectedFloor, selectedStatus]);
-  
-  const loadPatients = async () => {
+    loadInpatients().then(setInpatients)
+  }, [loadInpatients])
+
+  // Handlers
+  const handleStartTreatment = async (treatment) => {
     try {
-      // Faqat statsionarda yotgan bemorlarni yuklash
-      const response = await api.get('/ambulator-inpatient/admissions');
-      if (response.data.success) {
-        // Admission ma'lumotlaridan bemor ma'lumotlarini formatlash
-        const inpatientList = response.data.data.map(admission => ({
-          _id: admission.patient_id,
-          id: admission.patient_id,
-          first_name: admission.first_name,
-          last_name: admission.last_name,
-          patient_number: admission.patient_number,
-          room_number: admission.room_number,
-          admission_id: admission.id
-        }));
-        setPatients(inpatientList);
-      }
-    } catch (error) {
-      console.error('Load inpatient patients error:', error);
-      toast.error('Statsionar bemorlarni yuklashda xatolik');
-    }
-  };
-
-  // Audio notification setup
-  useEffect(() => {
-    // Create audio context for alarm sound
-    // WebSocket connection for real-time notifications (faqat toast xabarlari)
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-    const socket = io(apiUrl.replace('/api/v1', ''));
-
-    // Listen for nurse calls
-    socket.on('nurse-call', (data) => {
-      console.log('Nurse call received:', data);
-      toast.success(`🔔 ${data.patientName} chaqiryapti! Xona: ${data.roomNumber}`, {
-        duration: 10000,
-        icon: '🚨'
-      });
-    });
-
-    // Listen for treatment notifications
-    socket.on('treatment-notification', (data) => {
-      console.log('Treatment notification received:', data);
-      toast.success(`⏰ Muolaja vaqti! ${data.patientName} - ${data.medicationName}`, {
-        duration: 10000,
-        icon: '💊'
-      });
-    });
-
-    // Listen for new admissions
-    socket.on('new-admission', (data) => {
-      toast.success(
-        `🏥 Yangi bemor yotqizildi!\n${data.patientName}\nXona: ${data.roomNumber}, Ko'rpa: ${data.bedNumber}`,
-        { duration: 15000, icon: '🛏️' }
-      );
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  const loadData = async (showLoading = false) => {
-    try {
-      // Faqat birinchi yuklashda yoki manual yuklashda loading ko'rsatish
-      if (showLoading) {
-        setLoading(true);
-      }
-      
-      if (activeTab === 'dashboard' || activeTab === 'treatments') {
-        const [statsData, treatmentsData] = await Promise.all([
-          nurseService.getStats(),
-          nurseService.getTreatments({ status: selectedStatus, floor: selectedFloor })
-        ]);
-        
-        if (statsData.success) {
-          setStats(statsData.data);
-        } else {
-          console.error('Stats error:', statsData);
-          if (showLoading) toast.error('Statistika yuklanmadi');
-        }
-        
-        if (treatmentsData.success) {
-          console.log('=== FRONTEND RECEIVED ===');
-          console.log('Total:', treatmentsData.data.length);
-          if (treatmentsData.data.length > 0) {
-            console.log('First 3 treatments:');
-            treatmentsData.data.slice(0, 3).forEach((t, i) => {
-              console.log(`${i + 1}:`, {
-                id: t.id,
-                patient_name: t.patient_name,
-                medication_name: t.medication_name,
-                medicine_name: t.medicine_name,
-                dosage: t.dosage,
-                medicine_dosage: t.medicine_dosage
-              });
-            });
-          }
-          setTreatments(treatmentsData.data);
-        } else {
-          console.error('❌ Treatments error:', treatmentsData);
-        }
-      }
-      
-      if (activeTab === 'messages') {
-        const patientsData = await nurseService.getPatients({ floor: selectedFloor });
-        console.log('Patients data:', patientsData);
-        if (patientsData.success) setPatients(patientsData.data);
-      }
-      
-      if (activeTab === 'calls') {
-        const callsData = await nurseService.getCalls();
-        console.log('Calls data:', callsData);
-        if (callsData.success) setCalls(callsData.data);
-      }
-      
-      if (activeTab === 'history') {
-        const historyData = await nurseService.getHistory();
-        console.log('History data:', historyData);
-        if (historyData.success) setHistory(historyData.data);
-      }
-      
-      if (activeTab === 'medicine-cabinet') {
-        const medicinesData = await pharmacyService.getMedicines({ floor: selectedFloor });
-        console.log('Medicines data:', medicinesData);
-        if (medicinesData.medicines) setMedicines(medicinesData.medicines);
-      }
-    } catch (error) {
-      console.error('Load error:', error);
-      if (showLoading) {
-        toast.error('Ma\'lumotlarni yuklashda xatolik: ' + (error.response?.data?.message || error.message));
-      }
-    } finally {
-      if (showLoading) {
-        setLoading(false);
-      }
-      if (initialLoad) {
-        setInitialLoad(false);
-      }
-    }
-  };
-
-  const handleCompleteTreatment = async () => {
-    try {
-      const response = await doctorNurseService.completeTask(selectedTreatment.id, {
-        notes: treatmentNotes
-      });
-      
+      const response = await nurseService.startTreatment(treatment._id || treatment.id)
       if (response.success) {
-        toast.success('Muolaja yakunlandi va dori dorixonadan ayirildi');
-        setShowCompleteTreatmentModal(false);
-        setSelectedTreatment(null);
-        setTreatmentNotes('');
-        loadData();
-      } else {
-        console.error('Response not successful:', response);
-        toast.error('Xatolik: ' + (response.message || response.error));
+        toast.success('Muolaja boshlandi')
+        refresh()
       }
     } catch (error) {
-      console.error('=== FRONTEND ERROR ===');
-      console.error('Complete treatment error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error data:', error.response?.data);
-      toast.error('Xatolik yuz berdi: ' + (error.response?.data?.error || error.message));
+      toast.error(error.response?.data?.message || 'Xatolik yuz berdi')
     }
-  };
+  }
+
+  const handleCompleteTreatment = async (treatmentId, notes) => {
+    try {
+      const response = await nurseService.completeTreatment(treatmentId, { notes })
+      if (response.success) {
+        toast.success('Muolaja yakunlandi')
+        setCompleteTreatment(null)
+        refresh()
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Xatolik yuz berdi')
+    }
+  }
 
   const handleAcceptCall = async (callId) => {
     try {
-      const response = await nurseService.acceptCall(callId);
+      const response = await nurseService.acceptCall(callId)
       if (response.success) {
-        toast.success('Chaqiruv qabul qilindi');
-        loadData();
+        toast.success('Chaqiruv qabul qilindi')
+        refresh()
       }
     } catch (error) {
-      toast.error('Xatolik yuz berdi');
+      toast.error('Xatolik yuz berdi')
     }
-  };
-  
-  const handleOpenDispenseModal = (medicine) => {
-    setSelectedMedicine(medicine);
-    setDispenseData({
-      patient_id: '',
-      quantity: 1,
-      notes: ''
-    });
-    setShowDispenseModal(true);
-  };
-  
-  const handleDispenseMedicine = async () => {
+  }
+
+  const handleDispenseMedicine = async (medicine, data) => {
     try {
-      console.log('=== DISPENSE MEDICINE ===');
-      console.log('Selected medicine:', selectedMedicine);
-      console.log('Dispense data:', dispenseData);
-      
-      if (!dispenseData.patient_id) {
-        toast.error('Iltimos, bemorni tanlang');
-        return;
+      if (data.quantity > medicine.quantity) {
+        toast.error('Dori yetarli emas')
+        return
       }
-      
-      if (!dispenseData.quantity || dispenseData.quantity < 1) {
-        toast.error('Iltimos, miqdorni kiriting');
-        return;
-      }
-      
-      if (dispenseData.quantity > selectedMedicine.quantity) {
-        toast.error('Dori yetarli emas');
-        return;
-      }
-      
-      const medicineId = selectedMedicine._id || selectedMedicine.id;
-      console.log('Medicine ID:', medicineId);
-      console.log('Sending data:', { ...dispenseData });
-      
-      const response = await pharmacyService.dispenseMedicine(medicineId, dispenseData);
-      
+      const response = await pharmacyService.dispenseMedicine(medicine._id || medicine.id, data)
       if (response.success) {
-        toast.success('Dori muvaffaqiyatli berildi!');
-        setShowDispenseModal(false);
-        loadData();
+        toast.success('Dori muvaffaqiyatli berildi!')
+        setDispenseMedicine(null)
+        refresh()
       }
     } catch (error) {
-      console.error('Dispense medicine error:', error);
-      console.error('Error response:', error.response?.data);
-      toast.error(error.response?.data?.message || 'Xatolik yuz berdi');
+      toast.error(error.response?.data?.message || 'Xatolik yuz berdi')
     }
-  };
+  }
 
-  const openCompleteTreatmentModal = (treatment) => {
-    setSelectedTreatment(treatment);
-    setTreatmentNotes('');
-    setShowCompleteTreatmentModal(true);
-  };
-
-  const openMessageModal = (patient) => {
-    setSelectedPatientForMessage(patient);
-    setMessageText('');
-    setShowMessageModal(true);
-  };
-
-  const handleSendMessage = async () => {
-    if (!messageText.trim()) {
-      toast.error('Xabar matnini kiriting');
-      return;
-    }
-
+  const handleSendMessage = async (patient, message) => {
     try {
       const response = await communicationService.sendMessage({
-        patient_id: selectedPatientForMessage.patient_id,
-        message: messageText,
+        patient_id: patient.patient_id || patient.id || patient._id,
+        message,
         metadata: {
-          room_number: selectedPatientForMessage.room_number,
-          bed_number: selectedPatientForMessage.bed_number,
-          diagnosis: selectedPatientForMessage.diagnosis
+          room_number: patient.room_number,
+          bed_number: patient.bed_number,
+          diagnosis: patient.diagnosis
         }
-      });
-
+      })
       if (response.success) {
-        toast.success('Xabar yuborildi!');
-        setShowMessageModal(false);
-        setSelectedPatientForMessage(null);
-        setMessageText('');
+        toast.success('Xabar yuborildi!')
+        setMessagePatient(null)
       }
     } catch (error) {
-      console.error('Send message error:', error);
-      toast.error('Xabar yuborishda xatolik: ' + (error.response?.data?.message || error.message));
+      toast.error(error.response?.data?.message || 'Xabar yuborishda xatolik')
     }
-  };
+  }
 
+  // Status helpers
   const getStatusColor = (status) => {
-    const statusLower = status?.toLowerCase();
-    const colors = {
-      pending: 'bg-yellow-100 text-yellow-700',
-      completed: 'bg-green-100 text-green-700',
-      cancelled: 'bg-red-100 text-red-700'
-    };
-    return colors[statusLower] || 'bg-gray-100 text-gray-700';
-  };
+    const colors = { pending: 'bg-yellow-100 text-yellow-700', completed: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-700' }
+    return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-700'
+  }
 
   const getStatusText = (status) => {
-    const statusLower = status?.toLowerCase();
-    const texts = {
-      pending: 'Kutilmoqda',
-      completed: 'Bajarildi',
-      cancelled: 'Bekor qilindi'
-    };
-    return texts[statusLower] || status;
-  };
+    const texts = { pending: 'Kutilmoqda', completed: 'Bajarildi', cancelled: 'Bekor qilindi' }
+    return texts[status?.toLowerCase()] || status
+  }
 
   if (loading) {
     return (
@@ -360,744 +141,90 @@ export default function NursePanel() {
           <p className="text-gray-600 dark:text-gray-400">Yuklanmoqda...</p>
         </div>
       </div>
-    );
+    )
+  }
+
+  // Render active tab
+  const renderTab = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <NurseDashboard stats={stats} treatments={treatments} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} />
+      case 'treatments':
+        return <NurseTreatments treatments={treatments} filters={filters} onFilterChange={setFilters} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} />
+      case 'medicine-cabinet':
+        return <NurseMedicineCabinet medicines={medicines} onDispense={setDispenseMedicine} />
+      case 'calls':
+        return <NurseCalls calls={calls} onAcceptCall={handleAcceptCall} />
+      case 'messages':
+        return <NurseMessages patients={patients} onSendMessage={setMessagePatient} />
+      case 'history':
+        return <NurseHistory history={history} />
+      default:
+        return null
+    }
   }
 
   return (
-    <div className="p-3 sm:p-4 sm:p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
-      <Toaster position="top-right" />
-
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-500 to-rose-600 rounded-xl sm:rounded-2xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white shadow-xl">
-        <div className="flex flex-col sm:flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
-            <span className="material-symbols-outlined text-4xl sm:text-5xl">medical_services</span>
-            <div>
-              <h1 className="text-2xl sm:text-2xl sm:text-3xl font-black">HAMSHIRA PANELI</h1>
-              <p className="text-sm sm:text-base sm:text-lg opacity-90">Xush kelibsiz, {user?.first_name || 'Hamshira'}</p>
-            </div>
+      <div className="bg-gradient-to-r from-pink-500 to-rose-600 rounded-2xl p-4 sm:p-6 text-white shadow-xl">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="material-symbols-outlined text-4xl sm:text-5xl">medical_services</span>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black">HAMSHIRA PANELI</h1>
+            <p className="text-sm sm:text-lg opacity-90">Xush kelibsiz, {user?.first_name || 'Hamshira'}</p>
           </div>
         </div>
       </div>
 
-      {/* Dashboard Stats */}
-      {activeTab === 'dashboard' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white">
-            <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2">schedule</span>
-            <p className="text-2xl sm:text-3xl sm:text-4xl font-black">{stats.pending_treatments}</p>
-            <p className="text-xs sm:text-sm opacity-90">Bajarilishi kerak</p>
-          </div>
-
-          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white">
-            <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2">warning</span>
-            <p className="text-2xl sm:text-3xl sm:text-4xl font-black">{stats.overdue_treatments}</p>
-            <p className="text-xs sm:text-sm opacity-90">Kechikkan</p>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white">
-            <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2">bed</span>
-            <p className="text-2xl sm:text-3xl sm:text-4xl font-black">{stats.total_patients}</p>
-            <p className="text-xs sm:text-sm opacity-90">Yotgan bemorlar</p>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg sm:rounded-xl p-3 sm:p-4 sm:p-4 sm:p-6 text-white">
-            <span className="material-symbols-outlined text-2xl sm:text-2xl sm:text-3xl mb-2">notifications_active</span>
-            <p className="text-2xl sm:text-3xl sm:text-4xl font-black">{stats.active_calls}</p>
-            <p className="text-xs sm:text-sm opacity-90">Faol chaqiruvlar</p>
-          </div>
-        </div>
-      )}
-
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-1 sm:gap-2 px-2 sm:px-4 lg:px-8 overflow-x-auto scrollbar-hide">
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-              { id: 'treatments', label: 'Muolajalar', icon: 'medication' },
-              { id: 'medicine-cabinet', label: 'Dori shkafi', icon: 'medical_services' },
-              { id: 'calls', label: 'Chaqiruvlar', icon: 'notifications' },
-              { id: 'messages', label: 'Xabarlar', icon: 'mail' },
-              { id: 'history', label: 'Tarix', icon: 'history' }
-            ].map(tab => (
+          <div className="flex gap-1 sm:gap-2 px-2 sm:px-4 overflow-x-auto scrollbar-hide">
+            {TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 lg:px-8 py-2 sm:py-2.5 sm:py-2 sm:py-3 font-semibold border-b-2 transition-colors whitespace-nowrap text-xs sm:text-sm ${
+                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 font-semibold border-b-2 transition-colors whitespace-nowrap text-xs sm:text-sm ${
                   activeTab === tab.id
                     ? 'border-primary text-primary'
                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
-                <span className="material-symbols-outlined text-base sm:text-lg sm:text-xl">{tab.icon}</span>
+                <span className="material-symbols-outlined text-base sm:text-xl">{tab.icon}</span>
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Tab Content */}
         <div className="p-4 sm:p-6">
-          {activeTab === 'dashboard' && (
-            <div className="space-y-3 sm:space-y-4">
-              <h3 className="text-lg sm:text-xl font-bold">Bugungi muolajalar</h3>
-              {treatments.length === 0 ? (
-                <p className="text-gray-600">Muolajalar yo'q</p>
-              ) : (
-                <div className="space-y-2 sm:space-y-2 sm:space-y-3">
-                  {treatments.slice(0, 5).map(treatment => (
-                    <div key={treatment.id} className="bg-gray-50 dark:bg-gray-800 p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 mb-1">
-                            <p className="font-semibold">{treatment.patient_name}</p>
-                            {treatment.prescription_type && (
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                treatment.prescription_type === 'URGENT' 
-                                  ? 'bg-orange-100 text-orange-700'
-                                  : treatment.prescription_type === 'CHRONIC'
-                                  ? 'bg-purple-100 text-purple-700'
-                                  : 'bg-blue-100 text-blue-700'
-                              }`}>
-                                {treatment.prescription_type === 'URGENT' ? '🚨' : 
-                                 treatment.prescription_type === 'CHRONIC' ? '📅' : 
-                                 '📋'}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{treatment.medication_name} - {treatment.dosage}</p>
-                          
-                          {/* Xona va koyka */}
-                          {treatment.admission_info?.is_admitted && treatment.admission_info.room_info ? (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              {treatment.admission_info.admission_type === 'inpatient' ? (
-                                <>
-                                  🏥 Stasionar - Xona {treatment.admission_info.room_info.room_number || 'N/A'}, Ko'rpa {treatment.admission_info.room_info.bed_number || 'N/A'}
-                                </>
-                              ) : (
-                                <>
-                                  🚪 Ambulator - Xona {treatment.admission_info.room_info.room_number || 'N/A'}, 
-                                  Ko'rpa {treatment.admission_info.room_info.bed_number || 'N/A'}
-                                </>
-                              )}
-                            </p>
-                          ) : (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              ❌ Hali yotqizilmagan
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm sm:text-sm sm:text-base font-semibold">{new Date(treatment.scheduled_time).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}</p>
-                          <span className={`px-2 py-1 rounded text-xs ${getStatusColor(treatment.status)}`}>
-                            {getStatusText(treatment.status)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'treatments' && (
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
-                <select
-                  value={selectedFloor}
-                  onChange={(e) => setSelectedFloor(e.target.value)}
-                  className="w-full sm:w-auto px-3 sm:px-4 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base dark:bg-gray-800 dark:border-gray-700"
-                >
-                  <option value="">Barcha qavatlar</option>
-                  <option value="1">1-qavat</option>
-                  <option value="2">2-qavat</option>
-                  <option value="3">3-qavat</option>
-                </select>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full sm:w-auto px-3 sm:px-4 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base dark:bg-gray-800 dark:border-gray-700"
-                >
-                  <option value="all">Barcha statuslar</option>
-                  <option value="pending">Kutilmoqda</option>
-                  <option value="completed">Bajarildi</option>
-                </select>
-                <button
-                  onClick={async () => {
-                    try {
-                      const response = await api.get('/nurse/fix-schedules');
-                      if (response.data.success) {
-                        toast.success(`Ma'lumotlar tuzatildi: ${response.data.data.fixed} ta`);
-                        loadData(true);
-                      }
-                    } catch (error) {
-                      toast.error('Xatolik: ' + error.message);
-                    }
-                  }}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm whitespace-nowrap"
-                >
-                  🔧 Ma'lumotlarni tuzatish
-                </button>
-              </div>
-              
-              {treatments.length === 0 ? (
-                <p className="text-center py-12 text-gray-600 dark:text-gray-400">Muolajalar topilmadi</p>
-              ) : (
-                <div className="space-y-2 sm:space-y-2 sm:space-y-3">
-                  {treatments.map(treatment => (
-                    <div key={treatment.id} className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-3 sm:p-4">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <p className="font-bold text-base sm:text-lg truncate">
-                              {treatment.patient_name || `${treatment.patient_id?.first_name || ''} ${treatment.patient_id?.last_name || ''}`.trim() || 'Bemor nomi yo\'q'}
-                            </p>
-                            {/* Retsept turi yoki vazifa turi */}
-                            {treatment.prescription_type ? (
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                treatment.prescription_type === 'URGENT' 
-                                  ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400'
-                                  : treatment.prescription_type === 'CHRONIC'
-                                  ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400'
-                                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                              }`}>
-                                {treatment.prescription_type === 'URGENT' ? '🚨 Shoshilinch' : 
-                                 treatment.prescription_type === 'CHRONIC' ? '📅 Surunkali' : 
-                                 '📋 Oddiy'}
-                              </span>
-                            ) : treatment.task_type && (
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                treatment.task_type === 'tozalash' 
-                                  ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-400'
-                                  : treatment.task_type === 'emergency'
-                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                                  : 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400'
-                              }`}>
-                                {treatment.task_type === 'tozalash' ? '🧹 Tozalash' : 
-                                 treatment.task_type === 'emergency' ? '🚨 Shoshilinch' : 
-                                 `📋 ${treatment.task_type}`}
-                              </span>
-                            )}
-                          </div>
-                          
-                          {/* Yotqizilgan joy */}
-                          {treatment.admission_info && (
-                            <div className="mb-2">
-                              {treatment.admission_info.is_admitted ? (
-                                <div className="flex items-center gap-1 text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                                  <span className="material-symbols-outlined text-sm sm:text-base">hotel</span>
-                                  {treatment.admission_info.admission_type === 'inpatient' ? (
-                                    <span>
-                                      🏥 Stasionar - {treatment.admission_info.room_info?.room_name || 'Xona'} {treatment.admission_info.room_info?.room_number || 'N/A'}, 
-                                      Ko'rpa {treatment.admission_info.room_info?.bed_number || 'N/A'}
-                                      {treatment.admission_info.room_info?.floor && ` (${treatment.admission_info.room_info.floor}-qavat)`}
-                                    </span>
-                                  ) : (
-                                    <span>
-                                      🚪 Ambulator - Xona {treatment.admission_info.room_info?.room_number || 'N/A'}
-                                      {treatment.admission_info.room_info?.bed_number && `, Ko'rpa ${treatment.admission_info.room_info.bed_number}`}
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-1 text-sm sm:text-sm sm:text-base text-gray-500 dark:text-gray-500">
-                                  <span className="material-symbols-outlined text-sm sm:text-base">info</span>
-                                  <span>❌ Hali yotqizilmagan</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          
-                          <p className="text-xs sm:text-sm mt-2">
-                            <span className="font-semibold">
-                              {treatment.medication_name || treatment.medicine_name ? 'Dori:' : 'Vazifa:'}
-                            </span>{' '}
-                            {treatment.medication_name || 
-                             treatment.medicine_name || 
-                             treatment.title || 
-                             treatment.task_description || 
-                             'Ma\'lumot yo\'q'}
-                          </p>
-                          {(treatment.dosage || treatment.medicine_dosage || treatment.dose) && (
-                            <p className="text-xs sm:text-sm">
-                              <span className="font-semibold">Doza:</span>{' '}
-                              {treatment.dosage || treatment.medicine_dosage || treatment.dose}
-                            </p>
-                          )}
-                          {treatment.description && !treatment.medication_name && (
-                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                              {treatment.description}
-                            </p>
-                          )}
-                          
-                          {/* Jadval ma'lumotlari */}
-                          {treatment.frequency_per_day && (
-                            <div className="mt-2 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg sm:rounded-lg sm:rounded-xl">
-                              <p className="text-xs sm:text-sm">
-                                <span className="font-semibold">📅 Jadval:</span> Kuniga {treatment.frequency_per_day} marta
-                                {treatment.duration_days && `, ${treatment.duration_days} kun davomida`}
-                              </p>
-                              {treatment.schedule_times && treatment.schedule_times.length > 0 && (
-                                <p className="text-xs sm:text-sm mt-1">
-                                  <span className="font-semibold">🕐 Vaqtlar:</span> {treatment.schedule_times.join(', ')}
-                                </p>
-                              )}
-                            </div>
-                          )}
-                          
-                          <p className="text-xs sm:text-sm mt-2">
-                            <span className="font-semibold">Boshlangan:</span>{' '}
-                            {treatment.scheduled_time 
-                              ? new Date(treatment.scheduled_time).toLocaleString('uz-UZ', {
-                                  year: 'numeric',
-                                  month: '2-digit',
-                                  day: '2-digit',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })
-                              : 'Vaqt ko\'rsatilmagan'
-                            }
-                          </p>
-                        </div>
-                        <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-2 sm:gap-3">
-                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap ${getStatusColor(treatment.status)}`}>
-                            {getStatusText(treatment.status)}
-                          </span>
-                          {(treatment.status === 'pending' || treatment.status === 'PENDING') && (
-                            <button
-                              onClick={() => openCompleteTreatmentModal(treatment)}
-                              className="px-3 sm:px-4 lg:px-8 py-1.5 sm:py-2 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-600 font-semibold text-xs sm:text-sm whitespace-nowrap"
-                            >
-                              ✓ Yakunlash
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'medicine-cabinet' && (
-            <div className="space-y-3 sm:space-y-4">
-              <h3 className="text-lg sm:text-xl font-bold">Dori shkafi</h3>
-              {medicines.length === 0 ? (
-                <div className="text-center py-12">
-                  <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">medical_services</span>
-                  <p className="text-gray-600 dark:text-gray-400">Dorilar topilmadi</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {medicines.map(medicine => (
-                    <div key={medicine._id || medicine.id} className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h4 className="font-bold text-base sm:text-lg">{medicine.name}</h4>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 capitalize">{medicine.category}</p>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          medicine.quantity > medicine.reorder_level 
-                            ? 'bg-green-100 text-green-700' 
-                            : medicine.quantity > 0 
-                            ? 'bg-yellow-100 text-yellow-700' 
-                            : 'bg-red-100 text-red-700'
-                        }`}>
-                          {medicine.quantity} dona
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-2 sm:space-y-2 sm:space-y-3 text-sm sm:text-sm sm:text-base mb-3">
-                        <p><span className="font-semibold">Narxi:</span> {medicine.unit_price?.toLocaleString()} so'm</p>
-                        {medicine.expiry_date && (
-                          <p><span className="font-semibold">Yaroqlilik:</span> {new Date(medicine.expiry_date).toLocaleDateString('uz-UZ')}</p>
-                        )}
-                      </div>
-                      
-                      {medicine.quantity > 0 && (
-                        <button
-                          onClick={() => handleOpenDispenseModal(medicine)}
-                          className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-600 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
-                        >
-                          <span className="material-symbols-outlined text-base sm:text-lg">remove_circle</span>
-                          Bemorga berish
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'calls' && (
-            <div className="space-y-3 sm:space-y-4">
-              {calls.length === 0 ? (
-                <div className="text-center py-12">
-                  <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">notifications_off</span>
-                  <p className="text-gray-600">Faol chaqiruvlar yo'q</p>
-                </div>
-              ) : (
-                <div className="space-y-2 sm:space-y-3">
-                  {calls.map(call => (
-                    <div key={call.id} className="bg-red-50 border-2 border-red-200 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-bold text-base sm:text-lg">{call.patient_name}</p>
-                        <p className="text-gray-600">Xona {call.room_number}, Ko'rpa {call.bed_number}</p>
-                        <p className="text-sm sm:text-sm sm:text-base text-gray-500">{new Date(call.created_at).toLocaleString('uz-UZ')}</p>
-                      </div>
-                      <button
-                        onClick={() => handleAcceptCall(call.id)}
-                        className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-green-600"
-                      >
-                        Qabul qilish
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'messages' && (
-            <div className="space-y-3 sm:space-y-4">
-              <h3 className="text-lg sm:text-xl font-bold">Bemorlarga xabar yuborish</h3>
-              {patients.length === 0 ? (
-                <p className="text-center py-12 text-gray-600">Sizga biriktirilgan bemorlar yo'q</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {patients.map(patient => (
-                    <div key={patient.patient_id} className="bg-white dark:bg-gray-800 border rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4">
-                      <div className="flex items-center gap-2 sm:gap-3 mb-3">
-                        <div className="size-12 bg-green-100 rounded-full flex items-center justify-center">
-                          <span className="material-symbols-outlined text-green-600">person</span>
-                        </div>
-                        <div>
-                          <p className="font-bold">{patient.patient_name}</p>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600">{patient.patient_number}</p>
-                        </div>
-                      </div>
-                      <div className="space-y-1 text-sm sm:text-sm sm:text-base mb-3">
-                        <p><span className="font-semibold">Xona:</span> {patient.room_number || 'N/A'}</p>
-                        <p><span className="font-semibold">Ko'rpa:</span> {patient.bed_number || 'N/A'}</p>
-                        <p><span className="font-semibold">Tashxis:</span> {patient.diagnosis || 'N/A'}</p>
-                      </div>
-                      <button
-                        onClick={() => openMessageModal(patient)}
-                        className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-primary/90 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
-                      >
-                        <span className="material-symbols-outlined text-base sm:text-lg">mail</span>
-                        Xabar yuborish
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'history' && (
-            <div className="space-y-3 sm:space-y-4">
-              <h3 className="text-lg sm:text-xl font-bold">Muolaja tarixi</h3>
-              
-              {!selectedPatientHistory ? (
-                // Bemorlar ro'yxati
-                <div>
-                  {history.length === 0 ? (
-                    <div className="text-center py-12">
-                      <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">history</span>
-                      <p className="text-gray-600 dark:text-gray-400">Hali muolaja qilingan bemorlar yo'q</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
-                      {history.map(item => (
-                        <div 
-                          key={item.id}
-                          onClick={() => setSelectedPatientHistory(item)}
-                          className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl p-3 sm:p-4 cursor-pointer hover:shadow-lg transition-shadow"
-                        >
-                          <div className="flex items-center gap-2 sm:gap-3 mb-3">
-                            <div className="size-12 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-xl sm:text-2xl">check_circle</span>
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-bold text-sm sm:text-base truncate">{item.patient_name}</p>
-                              <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                                {new Date(item.completed_at).toLocaleDateString('uz-UZ')}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="space-y-1 text-sm sm:text-sm sm:text-base">
-                            <p><span className="font-semibold">Xona:</span> {item.room_number || 'N/A'}</p>
-                            <p><span className="font-semibold">Ko'rpa:</span> {item.bed_number || 'N/A'}</p>
-                            <p className="truncate"><span className="font-semibold">Tashxis:</span> {item.medicine_name || 'N/A'}</p>
-                          </div>
-                          <div className="mt-3 flex items-center justify-between">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {item.completed_by_name || 'Hamshira'}
-                            </span>
-                            <span className="material-symbols-outlined text-gray-400">chevron_right</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                // Bemor muolajalar tafsiloti
-                <div>
-                  <button
-                    onClick={() => setSelectedPatientHistory(null)}
-                    className="mb-4 flex items-center gap-2 sm:gap-2 sm:gap-3 text-primary hover:text-primary/80 font-semibold"
-                  >
-                    <span className="material-symbols-outlined">arrow_back</span>
-                    Orqaga
-                  </button>
-                  
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white mb-6">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="size-16 bg-white/20 rounded-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-3xl sm:text-4xl">person</span>
-                      </div>
-                      <div>
-                        <h2 className="text-xl sm:text-2xl font-bold">{selectedPatientHistory.patient_name}</h2>
-                        <p className="text-sm sm:text-sm sm:text-base opacity-90">Xona {selectedPatientHistory.room_number}, Ko'rpa {selectedPatientHistory.bed_number}</p>
-                        <p className="text-sm sm:text-sm sm:text-base opacity-90">Yakunlangan: {new Date(selectedPatientHistory.completed_at).toLocaleString('uz-UZ')}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl border dark:border-gray-700 p-4 sm:p-6">
-                    <h3 className="text-base sm:text-lg font-bold mb-4">Muolaja tafsilotlari</h3>
-                    <div className="space-y-2 sm:space-y-3">
-                      <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl">
-                        <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-xl sm:text-2xl">medication</span>
-                        <div className="flex-1">
-                          <p className="font-semibold">{selectedPatientHistory.medicine_name || 'Davolash'}</p>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{selectedPatientHistory.dosage || 'Standart doza'}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl">
-                        <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-xl sm:text-2xl">person</span>
-                        <div className="flex-1">
-                          <p className="font-semibold">Bajargan hamshira</p>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">{selectedPatientHistory.completed_by_name || 'Hamshira'}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl">
-                        <span className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-xl sm:text-2xl">event</span>
-                        <div className="flex-1">
-                          <p className="font-semibold">Yakunlangan vaqt</p>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                            {new Date(selectedPatientHistory.completed_at).toLocaleString('uz-UZ', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          {renderTab()}
         </div>
       </div>
 
-      {/* Complete Treatment Modal */}
-      {showCompleteTreatmentModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-3 sm:p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl sm:rounded-xl sm:rounded-2xl p-3 sm:p-4 sm:p-4 sm:p-6 max-w-sm sm:max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg sm:text-lg sm:text-xl font-bold mb-3 sm:mb-4">Muolajani bajarish</h3>
-            <div className="space-y-2 sm:space-y-3 sm:space-y-3 sm:space-y-4">
-              <div>
-                <p className="font-semibold text-sm sm:text-sm sm:text-base">{selectedTreatment?.patient_name}</p>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{selectedTreatment?.medicine_name} - {selectedTreatment?.medicine_dosage}</p>
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold mb-2">Izoh (ixtiyoriy)</label>
-                <textarea
-                  value={treatmentNotes}
-                  onChange={(e) => setTreatmentNotes(e.target.value)}
-                  className="w-full px-3 sm:px-4 lg:px-8 py-2 sm:py-2.5 border dark:border-gray-700 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base"
-                  rows="3"
-                  placeholder="Izoh yozing..."
-                />
-              </div>
-              <div className="flex flex-col sm:flex-col sm:flex-row gap-2 sm:gap-2 sm:gap-3 sm:gap-2 sm:gap-3">
-                <button
-                  onClick={() => setShowCompleteTreatmentModal(false)}
-                  className="w-full sm:flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 text-sm sm:text-sm sm:text-base"
-                >
-                  Bekor qilish
-                </button>
-                <button
-                  onClick={handleCompleteTreatment}
-                  className="w-full sm:flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-600 text-sm sm:text-sm sm:text-base"
-                >
-                  Tasdiqlash
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modals */}
+      <CompleteTreatmentModal
+        isOpen={!!completeTreatment}
+        onClose={() => setCompleteTreatment(null)}
+        treatment={completeTreatment}
+        onComplete={handleCompleteTreatment}
+      />
 
-      {/* Send Message Modal */}
-      {showMessageModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-sm sm:max-w-md w-full">
-            <h3 className="text-lg sm:text-xl font-bold mb-4">Bemorga xabar yuborish</h3>
-            <div className="space-y-3 sm:space-y-4">
-              <div className="bg-green-50 dark:bg-green-900/20 p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="size-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-green-600">person</span>
-                  </div>
-                  <div>
-                    <p className="font-bold">{selectedPatientForMessage?.patient_name}</p>
-                    <p className="text-sm sm:text-sm sm:text-base text-gray-600">{selectedPatientForMessage?.patient_number}</p>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Xabar matni *</label>
-                <textarea
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border rounded-lg sm:rounded-lg sm:rounded-xl"
-                  rows="5"
-                  placeholder="Xabar matnini kiriting..."
-                  required
-                />
-              </div>
-              <div className="flex gap-2 sm:gap-3">
-                <button
-                  onClick={() => {
-                    setShowMessageModal(false);
-                    setSelectedPatientForMessage(null);
-                    setMessageText('');
-                  }}
-                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-200 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-300"
-                >
-                  Bekor qilish
-                </button>
-                <button
-                  onClick={handleSendMessage}
-                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-primary/90 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
-                >
-                  <span className="material-symbols-outlined text-base sm:text-lg">send</span>
-                  Yuborish
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DispenseMedicineModal
+        isOpen={!!dispenseMedicine}
+        onClose={() => setDispenseMedicine(null)}
+        medicine={dispenseMedicine}
+        patients={inpatients}
+        onDispense={handleDispenseMedicine}
+      />
 
-      {/* Dispense Medicine Modal */}
-      {showDispenseModal && selectedMedicine && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 max-w-sm sm:max-w-md w-full">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg sm:text-xl font-bold">Dori berish</h3>
-              <button
-                onClick={() => setShowDispenseModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            
-            <div className="space-y-3 sm:space-y-4">
-              {/* Dori ma'lumotlari */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="size-12 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center">
-                    <span className="material-symbols-outlined text-blue-600 dark:text-blue-400">medication</span>
-                  </div>
-                  <div>
-                    <p className="font-bold">{selectedMedicine.name}</p>
-                    <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 capitalize">{selectedMedicine.category}</p>
-                    <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400">Mavjud: {selectedMedicine.quantity} dona</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Bemor tanlash */}
-              <div>
-                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Bemor *</label>
-                <select
-                  value={dispenseData.patient_id}
-                  onChange={(e) => setDispenseData({ ...dispenseData, patient_id: e.target.value })}
-                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border dark:border-gray-700 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl"
-                  required
-                >
-                  <option value="">Bemorni tanlang...</option>
-                  {patients.map(patient => (
-                    <option key={patient.id || patient._id} value={patient.id || patient._id}>
-                      {patient.first_name} {patient.last_name} - {patient.patient_number}{patient.room_number ? ` (Xona: ${patient.room_number})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Miqdor */}
-              <div>
-                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Miqdor *</label>
-                <input
-                  type="number"
-                  min="1"
-                  max={selectedMedicine.quantity}
-                  value={dispenseData.quantity}
-                  onChange={(e) => setDispenseData({ ...dispenseData, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border dark:border-gray-700 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl"
-                  required
-                />
-              </div>
-              
-              {/* Izoh */}
-              <div>
-                <label className="block text-sm sm:text-sm sm:text-base font-semibold mb-2">Izoh (ixtiyoriy)</label>
-                <textarea
-                  value={dispenseData.notes}
-                  onChange={(e) => setDispenseData({ ...dispenseData, notes: e.target.value })}
-                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border dark:border-gray-700 dark:bg-gray-900 rounded-lg sm:rounded-lg sm:rounded-xl"
-                  rows="3"
-                  placeholder="Izoh yozing..."
-                />
-              </div>
-              
-              {/* Buttons */}
-              <div className="flex gap-2 sm:gap-3">
-                <button
-                  onClick={() => setShowDispenseModal(false)}
-                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  Bekor qilish
-                </button>
-                <button
-                  onClick={handleDispenseMedicine}
-                  className="flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl hover:bg-green-700 font-semibold"
-                >
-                  Berish
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SendMessageModal
+        isOpen={!!messagePatient}
+        onClose={() => setMessagePatient(null)}
+        patient={messagePatient}
+        onSend={handleSendMessage}
+      />
     </div>
-  );
+  )
 }
-
-
