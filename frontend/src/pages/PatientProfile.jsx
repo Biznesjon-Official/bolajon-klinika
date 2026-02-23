@@ -25,6 +25,7 @@ const PatientProfile = () => {
   const { user } = useAuth();
   const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role?.name);
   const isReceptionist = ['receptionist', 'admin', 'super admin'].includes(user?.role?.name);
+  const isNurse = ['nurse', 'hamshira'].includes(user?.role?.name?.toLowerCase());
 
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState(null);
@@ -639,7 +640,7 @@ const PatientProfile = () => {
               </button>
             </>
           )}
-          {!isDoctor && (
+          {!isDoctor && !isNurse && (
             <button
               onClick={() => navigate(`/patients/${id}/edit`)}
               className="flex-1 sm:flex-none px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
@@ -743,7 +744,7 @@ const PatientProfile = () => {
               { id: 'prescriptions', label: 'Retseptlar', icon: 'medication' },
               { id: 'specialists', label: 'Mutaxasislar', icon: 'medical_information' },
               { id: 'lab', label: 'Tahlillar', icon: 'biotech' },
-              { id: 'billing', label: 'Moliya', icon: 'payments' },
+              ...(!isNurse ? [{ id: 'billing', label: 'Moliya', icon: 'payments' }] : []),
               { id: 'admissions', label: 'Yotqizish', icon: 'bed' },
               ...(isReceptionist ? [
                 { id: 'queue', label: 'Navbat', icon: 'queue' },
@@ -1641,13 +1642,15 @@ const PatientProfile = () => {
                             <div className="size-16 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
                               <span className="material-symbols-outlined text-white text-2xl sm:text-3xl">bed</span>
                             </div>
-                            <button
-                              onClick={() => handleOpenDischargeModal(admission.id)}
-                              className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-semibold hover:bg-red-600 flex items-center gap-1"
-                            >
-                              <span className="material-symbols-outlined text-sm">logout</span>
-                              Chiqarish
-                            </button>
+                            {!isNurse && (
+                              <button
+                                onClick={() => handleOpenDischargeModal(admission.id)}
+                                className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-semibold hover:bg-red-600 flex items-center gap-1"
+                              >
+                                <span className="material-symbols-outlined text-sm">logout</span>
+                                Chiqarish
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
