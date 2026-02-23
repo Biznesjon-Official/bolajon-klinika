@@ -9,7 +9,7 @@
     "start": "node src/server.js",
     "migrate": "node src/database/migrate.js",
     "seed": "node scripts/seed.js",
-    "test": "jest --coverage --detectOpenHandles",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:unit": "jest __tests__/laboratory.test.js",
     "test:role": "jest __tests__/reception-role.test.js",
@@ -58,6 +58,11 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "winston": "^3.11.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {},
+    "testTimeout": 30000
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",

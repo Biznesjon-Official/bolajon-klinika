@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
 import AmbulatorRoom from '../models/AmbulatorRoom.js';
+import Staff from '../models/Staff.js';
 
 const router = express.Router();
 
@@ -582,7 +583,67 @@ router.post('/admissions', authenticate, async (req, res, next) => {
     
     console.log(`✅ Updated ${updatedSchedules.modifiedCount} TreatmentSchedules with admission_id`);
     console.log(`✅ Updated ${updatedTasks.modifiedCount} Tasks with admission_id`);
-    
+
+    // Hamshiralarga notification yuborish (inpatient uchun)
+    if (admission.admission_type === 'inpatient') {
+      try {
+        const Patient = (await import('../models/Patient.js')).default
+        const patient = await Patient.findById(patient_id).lean()
+        const patientName = patient ? `${patient.first_name} ${patient.last_name}` : ''
+        const patientNumber = patient?.patient_number || ''
+        const room = await AmbulatorRoom.findById(room_id).lean()
+
+        // WebSocket broadcast
+        if (global.io) {
+          global.io.emit('new-admission', {
+            admissionId: admission._id.toString(),
+            patientId: patient_id,
+            patientName,
+            patientNumber,
+            roomNumber: room?.room_number || '',
+            bedNumber: bed_number,
+            floor: room?.floor || 0,
+            diagnosis: diagnosis || '',
+            timestamp: new Date()
+          })
+        }
+
+        // Telegram notification — barcha faol hamshiralarga
+        const nurses = await Staff.find({
+          role: 'nurse',
+          status: 'active',
+          telegram_chat_id: { $exists: true, $ne: null },
+          telegram_notifications_enabled: true
+        }).lean()
+
+        if (nurses.length > 0) {
+          const TelegramBot = (await import('node-telegram-bot-api')).default
+          const bot = new TelegramBot(process.env.BOT_TOKEN)
+
+          const message = `🏥 *YANGI BEMOR YOTQIZILDI!*\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `👤 *Bemor:* ${patientName}\n` +
+            `📋 *Bemor №:* ${patientNumber}\n\n` +
+            `🚪 *Xona:* ${room?.room_number || ''}\n` +
+            `🛏 *Ko'rpa:* ${bed_number}\n` +
+            `🏢 *Qavat:* ${room?.floor || ''}\n\n` +
+            (diagnosis ? `📝 *Tashxis:* ${diagnosis}\n\n` : '') +
+            `⏰ *Vaqt:* ${new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}\n\n` +
+            `💡 Bo'sh hamshira bemorga biriksin!`
+
+          for (const nurse of nurses) {
+            try {
+              await bot.sendMessage(nurse.telegram_chat_id, message, { parse_mode: 'Markdown' })
+            } catch (err) {
+              console.error(`Telegram error for nurse ${nurse.first_name}:`, err.message)
+            }
+          }
+        }
+      } catch (notifError) {
+        console.error('Admission notification error:', notifError)
+      }
+    }
+
     res.status(201).json({
       success: true,
       message: 'Bemor muvaffaqiyatli yotqizildi',
@@ -765,6 +826,107 @@ router.post('/admissions/:id/discharge', authenticate, async (req, res, next) =>
     next(error);
   }
 });
+
+// ============================================
+// BILLING SUMMARY - Yotqizish xarajatlari
+// ============================================
+
+router.get('/admissions/:id/billing-summary', authenticate, async (req, res, next) => {
+  try {
+    const Admission = (await import('../models/Admission.js')).default
+    const Invoice = (await import('../models/Invoice.js')).default
+    const Bed = (await import('../models/Bed.js')).default
+    const Patient = (await import('../models/Patient.js')).default
+
+    const admission = await Admission.findById(req.params.id)
+      .populate('room_id', 'room_number room_name floor')
+      .populate('patient_id', 'first_name last_name patient_number')
+
+    if (!admission) {
+      return res.status(404).json({ success: false, message: 'Yotqizish topilmadi' })
+    }
+
+    // Bed charges hisoblash (hozirgi kungacha)
+    const now = new Date()
+    const admissionDate = new Date(admission.admission_date)
+    const hoursDiff = (now - admissionDate) / (1000 * 60 * 60)
+    let estimatedDays = 0
+    if (hoursDiff < 12) estimatedDays = 0
+    else if (hoursDiff <= 24) estimatedDays = 1
+    else estimatedDays = 1 + Math.ceil((hoursDiff - 24) / 24)
+
+    const bedDailyPrice = admission.bed_daily_price || 200000
+    const estimatedBedCharges = estimatedDays * bedDailyPrice
+
+    // Admission davridagi barcha invoicelar
+    const invoices = await Invoice.find({
+      patient_id: admission.patient_id._id,
+      created_at: { $gte: admissionDate }
+    }).sort({ created_at: -1 }).lean()
+
+    // Kategoriyalar bo'yicha ajratish
+    let totalMedicineCharges = 0
+    let totalLabCharges = 0
+    let totalOtherCharges = 0
+    let totalPaid = 0
+
+    for (const inv of invoices) {
+      totalPaid += inv.paid_amount || 0
+      const isLab = inv.items?.some(i => i.item_type === 'laboratory')
+      const isBed = inv.items?.some(i => i.item_type === 'bed_charge')
+      const isMedicine = inv.notes?.includes('Hamshira') || inv.items?.some(i => i.item_type === 'medication')
+
+      if (isLab) totalLabCharges += inv.total_amount || 0
+      else if (isMedicine) totalMedicineCharges += inv.total_amount || 0
+      else if (!isBed) totalOtherCharges += inv.total_amount || 0
+    }
+
+    const grandTotal = estimatedBedCharges + totalMedicineCharges + totalLabCharges + totalOtherCharges
+    const totalDebt = grandTotal - totalPaid
+    const unpaidInvoices = invoices.filter(inv => inv.payment_status !== 'paid')
+
+    res.json({
+      success: true,
+      data: {
+        admission: {
+          id: admission._id,
+          admission_date: admission.admission_date,
+          room_number: admission.room_id?.room_number,
+          room_name: admission.room_id?.room_name,
+          bed_number: admission.bed_number,
+          floor: admission.room_id?.floor,
+          patient_name: `${admission.patient_id?.first_name} ${admission.patient_id?.last_name}`,
+          patient_number: admission.patient_id?.patient_number
+        },
+        summary: {
+          estimated_days: estimatedDays,
+          bed_daily_price: bedDailyPrice,
+          bed_charges: estimatedBedCharges,
+          medicine_charges: totalMedicineCharges,
+          lab_charges: totalLabCharges,
+          other_charges: totalOtherCharges,
+          grand_total: grandTotal,
+          total_paid: totalPaid,
+          total_debt: totalDebt
+        },
+        invoices: invoices.map(inv => ({
+          id: inv._id,
+          invoice_number: inv.invoice_number,
+          total_amount: inv.total_amount,
+          paid_amount: inv.paid_amount,
+          payment_status: inv.payment_status,
+          items: inv.items,
+          notes: inv.notes,
+          created_at: inv.created_at
+        })),
+        unpaid_invoices: unpaidInvoices.length
+      }
+    })
+  } catch (error) {
+    console.error('Billing summary error:', error)
+    next(error)
+  }
+})
 
 // ============================================
 // COMPLAINTS - Shikoyatlar

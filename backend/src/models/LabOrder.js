@@ -19,6 +19,10 @@ const labOrderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Staff'
   },
+  admission_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admission'
+  },
   test_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'LabTest'
@@ -74,6 +78,7 @@ labOrderSchema.index({ doctor_id: 1 });
 labOrderSchema.index({ laborant_id: 1 });
 labOrderSchema.index({ status: 1 });
 labOrderSchema.index({ createdAt: -1 });
+labOrderSchema.index({ admission_id: 1 });
 
 // Auto-increment order_number
 labOrderSchema.pre('save', async function() {

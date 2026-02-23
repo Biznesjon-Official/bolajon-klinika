@@ -73,6 +73,11 @@ const PatientProfile = () => {
   const [admissionForm, setAdmissionForm] = useState({ diagnosis: '', notes: '' });
   const [admissionLoading, setAdmissionLoading] = useState(false);
 
+  // Discharge states
+  const [showDischargeModal, setShowDischargeModal] = useState(false);
+  const [billingSummary, setBillingSummary] = useState(null);
+  const [dischargeLoading, setDischargeLoading] = useState(false);
+
   // Alert modal
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
 
@@ -272,9 +277,11 @@ const PatientProfile = () => {
   const handleCreateLabOrder = async () => {
     if (!selectedLabTest) return showAlert('Tahlilni tanlang', 'error');
     try {
+      const activeAdmission = admissions.find(a => a.display_status === 'ACTIVE')
       await laboratoryService.createOrder({
         patient_id: id, test_id: selectedLabTest,
-        priority: labOrderPriority, notes: labOrderNotes
+        priority: labOrderPriority, notes: labOrderNotes,
+        admission_id: activeAdmission?.id || null
       });
       showAlert('Tahlil buyurtma yaratildi', 'success');
       setShowLabOrderModal(false);
@@ -286,6 +293,39 @@ const PatientProfile = () => {
       showAlert(err.response?.data?.message || 'Xatolik', 'error');
     }
   };
+
+  // Discharge functions
+  const handleOpenDischargeModal = async (admissionId) => {
+    setShowDischargeModal(true)
+    setDischargeLoading(true)
+    setBillingSummary(null)
+    try {
+      const res = await ambulatorInpatientService.getBillingSummary(admissionId)
+      if (res.success) setBillingSummary(res.data)
+    } catch (err) {
+      showAlert('Xatolik: ' + (err.response?.data?.message || err.message), 'error')
+    } finally {
+      setDischargeLoading(false)
+    }
+  }
+
+  const handleDischarge = async () => {
+    if (!billingSummary) return
+    try {
+      setDischargeLoading(true)
+      const result = await ambulatorInpatientService.dischargePatient(billingSummary.admission.id)
+      if (result.success) {
+        showAlert('Bemor muvaffaqiyatli chiqarildi', 'success')
+        setShowDischargeModal(false)
+        setBillingSummary(null)
+        loadPatientData()
+      }
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Xatolik', 'error')
+    } finally {
+      setDischargeLoading(false)
+    }
+  }
 
   // Queue & Billing functions
   const loadQueueData = async () => {
@@ -1573,10 +1613,17 @@ const PatientProfile = () => {
                         </div>
                         
                         {admission.display_status === 'ACTIVE' && (
-                          <div className="ml-4">
+                          <div className="ml-4 flex flex-col items-center gap-2">
                             <div className="size-16 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
                               <span className="material-symbols-outlined text-white text-2xl sm:text-3xl">bed</span>
                             </div>
+                            <button
+                              onClick={() => handleOpenDischargeModal(admission.id)}
+                              className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-semibold hover:bg-red-600 flex items-center gap-1"
+                            >
+                              <span className="material-symbols-outlined text-sm">logout</span>
+                              Chiqarish
+                            </button>
                           </div>
                         )}
                       </div>
@@ -2410,6 +2457,81 @@ const PatientProfile = () => {
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* Discharge Modal */}
+      <Modal isOpen={showDischargeModal} onClose={() => { setShowDischargeModal(false); setBillingSummary(null) }}>
+        <h2 className="text-xl font-black text-gray-900 dark:text-white mb-4">Bemorni chiqarish</h2>
+
+        {dischargeLoading && !billingSummary ? (
+          <div className="text-center py-8">
+            <span className="material-symbols-outlined text-4xl animate-spin">progress_activity</span>
+            <p className="mt-2 text-gray-500">Yuklanmoqda...</p>
+          </div>
+        ) : billingSummary ? (
+          <div className="space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+              <p className="font-semibold text-gray-900 dark:text-white">{billingSummary.admission.patient_name}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Xona {billingSummary.admission.room_number}, Ko'yka {billingSummary.admission.bed_number}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Yotish muddati: {billingSummary.summary.estimated_days} kun</p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                <span className="text-gray-700 dark:text-gray-300">Ko'yka to'lovi ({billingSummary.summary.estimated_days} x {billingSummary.summary.bed_daily_price?.toLocaleString()})</span>
+                <span className="font-bold text-gray-900 dark:text-white">{billingSummary.summary.bed_charges?.toLocaleString()} so'm</span>
+              </div>
+              <div className="flex justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                <span className="text-gray-700 dark:text-gray-300">Dori xarajatlari</span>
+                <span className="font-bold text-gray-900 dark:text-white">{billingSummary.summary.medicine_charges?.toLocaleString()} so'm</span>
+              </div>
+              <div className="flex justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                <span className="text-gray-700 dark:text-gray-300">Laboratoriya</span>
+                <span className="font-bold text-gray-900 dark:text-white">{billingSummary.summary.lab_charges?.toLocaleString()} so'm</span>
+              </div>
+              {billingSummary.summary.other_charges > 0 && (
+                <div className="flex justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                  <span className="text-gray-700 dark:text-gray-300">Boshqa xarajatlar</span>
+                  <span className="font-bold text-gray-900 dark:text-white">{billingSummary.summary.other_charges?.toLocaleString()} so'm</span>
+                </div>
+              )}
+              <div className="flex justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg font-bold text-lg">
+                <span className="text-gray-900 dark:text-white">JAMI</span>
+                <span className="text-blue-600">{billingSummary.summary.grand_total?.toLocaleString()} so'm</span>
+              </div>
+              {billingSummary.summary.total_paid > 0 && (
+                <div className="flex justify-between p-2 text-green-600">
+                  <span>To'langan</span>
+                  <span>-{billingSummary.summary.total_paid?.toLocaleString()} so'm</span>
+                </div>
+              )}
+              <div className="flex justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg font-bold text-lg text-red-600">
+                <span>QARZ</span>
+                <span>{billingSummary.summary.total_debt?.toLocaleString()} so'm</span>
+              </div>
+            </div>
+
+            {billingSummary.unpaid_invoices > 0 && (
+              <p className="text-sm text-orange-600">{billingSummary.unpaid_invoices} ta to'lanmagan faktura mavjud</p>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => { setShowDischargeModal(false); setBillingSummary(null) }}
+                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleDischarge}
+                disabled={dischargeLoading}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 disabled:opacity-50"
+              >
+                {dischargeLoading ? 'Yuklanmoqda...' : 'Chiqarish'}
+              </button>
+            </div>
+          </div>
+        ) : null}
       </Modal>
 
       {/* Alert Modal */}

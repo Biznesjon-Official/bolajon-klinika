@@ -1131,10 +1131,19 @@ router.get('/fix-schedules', authenticate, async (req, res) => {
  */
 router.get('/medicine-cabinets', authenticate, async (req, res) => {
   try {
+    const { floor } = req.query
+    const filter = { status: { $ne: 'discontinued' } }
+    if (floor) filter.floor = Number(floor)
+
+    const medicines = await Medicine.find(filter)
+      .select('name generic_name unit quantity unit_price floor shelf_location category status')
+      .sort({ name: 1 })
+      .lean()
+
     res.json({
       success: true,
-      data: []
-    });
+      data: medicines
+    })
   } catch (error) {
     console.error('Get medicine cabinets error:', error);
     res.status(500).json({

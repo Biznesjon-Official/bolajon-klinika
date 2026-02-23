@@ -260,4 +260,5 @@ process.on('SIGTERM', () => {
 });
 
 export { io };
+export default app;
 

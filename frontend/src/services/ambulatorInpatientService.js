@@ -41,6 +41,11 @@ const ambulatorInpatientService = {
     return response.data;
   },
 
+  getBillingSummary: async (admissionId) => {
+    const response = await api.get(`/ambulator-inpatient/admissions/${admissionId}/billing-summary`);
+    return response.data;
+  },
+
   // To'lovlar
   addPayment: async (paymentData) => {
     const response = await api.post('/ambulator-inpatient/payments', paymentData);

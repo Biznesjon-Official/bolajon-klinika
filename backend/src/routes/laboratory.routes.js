@@ -467,7 +467,8 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist'
       test_id,
       laborant_id,
       priority,
-      notes
+      notes,
+      admission_id
     } = req.body;
     
     // Validation: Required fields
@@ -549,6 +550,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'receptionist'
       patient_id,
       doctor_id: doctor_id || req.user.id,
       laborant_id: laborant_id || null,
+      admission_id: admission_id || null,
       test_id: test._id,
       test_type: test.category,
       test_name: test.name,

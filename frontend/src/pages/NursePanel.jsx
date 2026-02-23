@@ -112,6 +112,14 @@ export default function NursePanel() {
       });
     });
 
+    // Listen for new admissions
+    socket.on('new-admission', (data) => {
+      toast.success(
+        `🏥 Yangi bemor yotqizildi!\n${data.patientName}\nXona: ${data.roomNumber}, Ko'rpa: ${data.bedNumber}`,
+        { duration: 15000, icon: '🛏️' }
+      );
+    });
+
     return () => {
       socket.disconnect();
     };
