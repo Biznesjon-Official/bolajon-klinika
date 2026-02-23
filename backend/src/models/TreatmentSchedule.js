@@ -47,8 +47,11 @@ const treatmentScheduleSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'completed', 'missed', 'cancelled'],
+    enum: ['pending', 'in_progress', 'completed', 'missed', 'cancelled'],
     default: 'pending'
+  },
+  started_at: {
+    type: Date
   },
   // Completion tracking
   total_doses: {
