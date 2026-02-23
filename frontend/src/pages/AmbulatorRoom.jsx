@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ambulatorInpatientService from '../services/ambulatorInpatientService';
 import patientService from '../services/patientService';
 import toast, { Toaster } from 'react-hot-toast';
@@ -9,6 +10,7 @@ import { io } from 'socket.io-client';
 
 export default function AmbulatorRoom() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   // Audio notification system for Ambulator (Ambulatorxona)
   const [audioEnabled, setAudioEnabled] = useState(() => {
@@ -879,18 +881,12 @@ export default function AmbulatorRoom() {
                                          frontendStatus === 'cleaning' ? 'Tozalanmoqda' : frontendStatus}
                                       </p>
                                       {bedDetails.first_name && (
-                                        <>
-                                          <p className="text-xs font-semibold mt-1">
-                                            {bedDetails.first_name} {bedDetails.last_name}
-                                          </p>
-                                          {/* OLIB TASHLANDI: Barcha hamshiralar barcha bemorlarni ko'radi
-                                          {hasMyTreatments && (
-                                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-semibold">
-                                              💊 Sizning bemorngiz
-                                            </p>
-                                          )}
-                                          */}
-                                        </>
+                                        <p
+                                          className="text-xs font-semibold mt-1 text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                                          onClick={(e) => { e.stopPropagation(); navigate(`/patients/${bedDetails.patient_id}`); }}
+                                        >
+                                          {bedDetails.first_name} {bedDetails.last_name}
+                                        </p>
                                       )}
                                     </div>
                                   </div>

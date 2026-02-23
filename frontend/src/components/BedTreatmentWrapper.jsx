@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import doctorNurseService from '../services/doctorNurseService';
+import nurseService from '../services/nurseService';
 import MedicineSelectionModal from './MedicineSelectionModal';
 import TreatmentTimer from './TreatmentTimer';
 
 export default function BedTreatmentWrapper({ children, patientId, patientName, roomNumber, bedNumber, onTreatmentComplete, hasMyTreatments, admissionType, isNurseCalling, audioEnabled, playAlarmSound }) {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [treatments, setTreatments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -211,7 +214,7 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
     try {
       const loadingToast = toast.loading('Muolaja yakunlanmoqda...');
       
-      const response = await doctorNurseService.completeTask(treatmentId, {
+      const response = await nurseService.completeTreatment(treatmentId, {
         notes: treatmentNotes,
         used_medicines: usedMedicines
       });
@@ -281,13 +284,14 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
 
   // Group treatments by urgency
   const groupedTreatments = {
+    in_progress: treatments.filter(t => t.status === 'in_progress'),
     urgent: treatments.filter(t => t.prescription_type === 'URGENT' && t.status === 'pending'),
     regular: treatments.filter(t => t.prescription_type === 'REGULAR' && t.status === 'pending'),
     chronic: treatments.filter(t => t.prescription_type === 'CHRONIC' && t.status === 'pending'),
     completed: treatments.filter(t => t.status === 'completed')
   };
 
-  const totalPending = groupedTreatments.urgent.length + groupedTreatments.regular.length + groupedTreatments.chronic.length;
+  const totalPending = groupedTreatments.in_progress.length + groupedTreatments.urgent.length + groupedTreatments.regular.length + groupedTreatments.chronic.length;
   const totalCompleted = groupedTreatments.completed.length;
   const completionPercentage = treatments.length > 0 ? Math.round((totalCompleted / treatments.length) * 100) : 0;
 
@@ -628,10 +632,21 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{patientName}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                      <span className="material-symbols-outlined text-base">bed</span>
-                      Xona {roomNumber}, Ko'rpa {bedNumber}
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-base">bed</span>
+                        Xona {roomNumber}, Ko'rpa {bedNumber}
+                      </p>
+                      {patientId && (
+                        <button
+                          onClick={() => { setShowModal(false); navigate(`/patients/${patientId}`); }}
+                          className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 font-semibold flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-sm">person</span>
+                          Profil
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -684,7 +699,25 @@ export default function BedTreatmentWrapper({ children, patientId, patientName, 
                 </div>
               ) : (
                 <div className="space-y-6">
-                  
+
+                  {/* In Progress treatments */}
+                  {groupedTreatments.in_progress.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                          <span className="material-symbols-outlined text-blue-600 text-lg">play_circle</span>
+                          <span className="text-sm font-bold text-blue-700 dark:text-blue-400">Jarayonda</span>
+                          <span className="px-2 py-0.5 bg-blue-600 text-white rounded-full text-xs font-bold">
+                            {groupedTreatments.in_progress.length}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {groupedTreatments.in_progress.map(treatment => renderTreatmentCard(treatment, treatment.prescription_type === 'URGENT' ? 'urgent' : treatment.prescription_type === 'CHRONIC' ? 'chronic' : 'regular'))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Urgent treatments */}
                   {groupedTreatments.urgent.length > 0 && (
                     <div>

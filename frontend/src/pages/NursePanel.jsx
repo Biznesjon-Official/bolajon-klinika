@@ -123,12 +123,12 @@ export default function NursePanel() {
 
   // Status helpers
   const getStatusColor = (status) => {
-    const colors = { pending: 'bg-yellow-100 text-yellow-700', completed: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-700' }
+    const colors = { pending: 'bg-yellow-100 text-yellow-700', in_progress: 'bg-blue-100 text-blue-700', completed: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-700' }
     return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-700'
   }
 
   const getStatusText = (status) => {
-    const texts = { pending: 'Kutilmoqda', completed: 'Bajarildi', cancelled: 'Bekor qilindi' }
+    const texts = { pending: 'Kutilmoqda', in_progress: 'Jarayonda', completed: 'Bajarildi', cancelled: 'Bekor qilindi' }
     return texts[status?.toLowerCase()] || status
   }
 
