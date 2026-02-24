@@ -70,6 +70,7 @@ import labReagentRoutes from './routes/lab-reagent.routes.js';
 import chiefDoctorRoutes from './routes/chief-doctor.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 import cashierReportRoutes from './routes/cashier-report.routes.js';
+import diseaseRoutes from './routes/disease.routes.js';
 
 // Import services
 import { startTreatmentNotificationService } from './services/treatmentNotificationService.js';
@@ -192,6 +193,7 @@ app.use(`/api/${API_VERSION}/lab-reagents`, labReagentRoutes);
 app.use(`/api/${API_VERSION}/chief-doctor`, chiefDoctorRoutes);
 app.use(`/api/${API_VERSION}/settings`, settingsRoutes);
 app.use(`/api/${API_VERSION}/cashier-reports`, cashierReportRoutes);
+app.use(`/api/${API_VERSION}/diseases`, diseaseRoutes);
 
 // WebSocket for real-time updates
 io.on('connection', (socket) => {

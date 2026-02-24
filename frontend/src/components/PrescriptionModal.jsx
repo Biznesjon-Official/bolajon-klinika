@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { prescriptionService } from '../services/prescriptionService';
 import doctorNurseService from '../services/doctorNurseService';
+import diseaseService from '../services/diseaseService';
 import Modal from './Modal';
 
 const PrescriptionModal = ({ 
@@ -15,26 +16,49 @@ const PrescriptionModal = ({
   const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role_name || user?.role?.name);
   
   // Form state
+  const [complaint, setComplaint] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
   const [prescriptionType, setPrescriptionType] = useState('REGULAR');
   const [medications, setMedications] = useState([]);
   const [diagnosisSuggestions, setDiagnosisSuggestions] = useState([]);
   const [medSuggestions, setMedSuggestions] = useState([]);
-  
+
+  // Disease selection
+  const [allDiseases, setAllDiseases] = useState([]);
+  const [diseaseSearch, setDiseaseSearch] = useState('');
+  const [showDiseaseDropdown, setShowDiseaseDropdown] = useState(false);
+  const [selectedDisease, setSelectedDisease] = useState(null);
+  const [selectedDiagnoses, setSelectedDiagnoses] = useState([]);
+  const [selectedRecommendations, setSelectedRecommendations] = useState([]);
+
+  // Secondary disease
+  const [secondaryDiseaseSearch, setSecondaryDiseaseSearch] = useState('');
+  const [showSecondaryDropdown, setShowSecondaryDropdown] = useState(false);
+  const [selectedSecondaryDisease, setSelectedSecondaryDisease] = useState(null);
+  const [selectedSecondaryDiagnoses, setSelectedSecondaryDiagnoses] = useState([]);
+  const [selectedSecondaryRecommendations, setSelectedSecondaryRecommendations] = useState([]);
+
   // Nurses list (for reference only, not for selection)
   const [nurses, setNurses] = useState([]);
 
   useEffect(() => {
     if (isOpen) {
       loadNurses();
+      loadDiseases();
       resetForm();
-      // Load saved suggestions from localStorage
       const savedDiagnoses = JSON.parse(localStorage.getItem('prescription_diagnoses') || '[]');
       const savedMeds = JSON.parse(localStorage.getItem('prescription_medications') || '[]');
       setDiagnosisSuggestions(savedDiagnoses);
       setMedSuggestions(savedMeds);
     }
   }, [isOpen]);
+
+  const loadDiseases = async () => {
+    try {
+      const response = await diseaseService.getAll();
+      if (response.success) setAllDiseases(response.data);
+    } catch (error) { /* silent */ }
+  };
 
   const loadNurses = async () => {
     try {
@@ -48,10 +72,54 @@ const PrescriptionModal = ({
   };
 
   const resetForm = () => {
+    setComplaint('');
     setDiagnosis('');
     setPrescriptionType('REGULAR');
     setMedications([]);
+    setDiseaseSearch('');
+    setSelectedDisease(null);
+    setSelectedDiagnoses([]);
+    setSelectedRecommendations([]);
+    setSecondaryDiseaseSearch('');
+    setSelectedSecondaryDisease(null);
+    setSelectedSecondaryDiagnoses([]);
+    setSelectedSecondaryRecommendations([]);
   };
+
+  const handleSelectDisease = (disease, isSecondary = false) => {
+    if (isSecondary) {
+      setSelectedSecondaryDisease(disease);
+      setSecondaryDiseaseSearch(disease.name);
+      setShowSecondaryDropdown(false);
+      setSelectedSecondaryDiagnoses(disease.diagnoses?.filter(d => d.is_default).map(d => d.text) || []);
+      setSelectedSecondaryRecommendations(disease.recommendations?.filter(r => r.is_default).map(r => r.text) || []);
+    } else {
+      setSelectedDisease(disease);
+      setDiseaseSearch(disease.name);
+      setShowDiseaseDropdown(false);
+      setSelectedDiagnoses(disease.diagnoses?.filter(d => d.is_default).map(d => d.text) || []);
+      setSelectedRecommendations(disease.recommendations?.filter(r => r.is_default).map(r => r.text) || []);
+    }
+  };
+
+  const toggleDiagnosisCheck = (text, isSecondary = false) => {
+    if (isSecondary) {
+      setSelectedSecondaryDiagnoses(prev => prev.includes(text) ? prev.filter(d => d !== text) : [...prev, text]);
+    } else {
+      setSelectedDiagnoses(prev => prev.includes(text) ? prev.filter(d => d !== text) : [...prev, text]);
+    }
+  };
+
+  const toggleRecommendationCheck = (text, isSecondary = false) => {
+    if (isSecondary) {
+      setSelectedSecondaryRecommendations(prev => prev.includes(text) ? prev.filter(r => r !== text) : [...prev, text]);
+    } else {
+      setSelectedRecommendations(prev => prev.includes(text) ? prev.filter(r => r !== text) : [...prev, text]);
+    }
+  };
+
+  const filteredDiseases = allDiseases.filter(d => d.name.toLowerCase().includes(diseaseSearch.toLowerCase()));
+  const filteredSecondaryDiseases = allDiseases.filter(d => d.can_be_secondary && d.name.toLowerCase().includes(secondaryDiseaseSearch.toLowerCase()));
 
   // Save diagnosis/medication to localStorage for future autocomplete
   const saveSuggestion = (key, value) => {
@@ -98,7 +166,11 @@ const PrescriptionModal = ({
   const handleSubmit = async (e, shouldPrint = false) => {
     e.preventDefault();
     
-    if (!diagnosis || medications.length === 0) {
+    if (!diagnosis && !selectedDisease && medications.length === 0) {
+      alert('Kasallik tanlang yoki tashxis kiriting va dori qo\'shing');
+      return;
+    }
+    if (medications.length === 0) {
       alert(t('queue.enterDiagnosisAndMedication'));
       return;
     }
@@ -108,10 +180,25 @@ const PrescriptionModal = ({
       saveSuggestion('prescription_diagnoses', diagnosis);
       medications.forEach(med => saveSuggestion('prescription_medications', med.medication_name));
 
+      // Build full diagnosis text from disease selections
+      const allDiagTexts = [...selectedDiagnoses, ...selectedSecondaryDiagnoses];
+      const allRecTexts = [...selectedRecommendations, ...selectedSecondaryRecommendations];
+      const fullDiagnosis = [
+        diagnosis,
+        selectedDisease ? `Kasallik: ${selectedDisease.name}` : '',
+        selectedSecondaryDisease ? `Yondosh: ${selectedSecondaryDisease.name}` : '',
+        allDiagTexts.length > 0 ? `Tashxislar: ${allDiagTexts.join('; ')}` : ''
+      ].filter(Boolean).join('. ');
+
       const prescriptionData = {
         patient_id: patient.patient_id || patient._id || patient.id,
         queue_id: patient.id,
-        diagnosis,
+        diagnosis: fullDiagnosis,
+        complaint: complaint || undefined,
+        disease_id: selectedDisease?._id || undefined,
+        secondary_disease_id: selectedSecondaryDisease?._id || undefined,
+        selected_diagnoses: allDiagTexts.length > 0 ? allDiagTexts : undefined,
+        recommendations: allRecTexts.length > 0 ? allRecTexts : undefined,
         prescription_type: prescriptionType,
         medications,
         nurse_id: null
@@ -178,19 +265,150 @@ const PrescriptionModal = ({
           </div>
         )}
 
-        {/* Diagnosis */}
+        {/* Bezovtalik sababi */}
         <div>
           <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            {t('common.diagnosis')} <span className="text-red-500">*</span>
+            Bezovtalik sababi
+          </label>
+          <input
+            type="text"
+            value={complaint}
+            onChange={(e) => setComplaint(e.target.value)}
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+            placeholder="Bemor nimadan shikoyat qilmoqda..."
+          />
+        </div>
+
+        {/* Kasallik tanlash */}
+        <div className="relative">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            Kasallik
+          </label>
+          <input
+            type="text"
+            value={diseaseSearch}
+            onChange={(e) => { setDiseaseSearch(e.target.value); setShowDiseaseDropdown(true); if (!e.target.value) { setSelectedDisease(null); setSelectedDiagnoses([]); setSelectedRecommendations([]) } }}
+            onFocus={() => setShowDiseaseDropdown(true)}
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+            placeholder="Kasallik nomini yozing..."
+          />
+          {showDiseaseDropdown && diseaseSearch && filteredDiseases.length > 0 && (
+            <div className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+              {filteredDiseases.map(d => (
+                <button key={d._id} type="button" onClick={() => handleSelectDisease(d)}
+                  className="w-full text-left px-3 py-2 hover:bg-primary/10 text-sm flex items-center justify-between">
+                  <span className="font-medium">{d.name}</span>
+                  {d.category && <span className="text-xs text-gray-400">{d.category}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Tanlangan kasallik tashxislari va maslahatlar */}
+        {selectedDisease && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 border border-blue-200 dark:border-blue-800 space-y-3">
+            <p className="text-sm font-bold text-blue-800 dark:text-blue-300">{selectedDisease.name}</p>
+            {selectedDisease.diagnoses?.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Tashxislar:</p>
+                <div className="space-y-1">
+                  {selectedDisease.diagnoses.map((d, i) => (
+                    <label key={i} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={selectedDiagnoses.includes(d.text)} onChange={() => toggleDiagnosisCheck(d.text)} className="w-4 h-4 accent-blue-500 rounded" />
+                      <span>{d.text}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedDisease.recommendations?.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Maslahatlar:</p>
+                <div className="space-y-1">
+                  {selectedDisease.recommendations.map((r, i) => (
+                    <label key={i} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={selectedRecommendations.includes(r.text)} onChange={() => toggleRecommendationCheck(r.text)} className="w-4 h-4 accent-amber-500 rounded" />
+                      <span>{r.text}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Yondosh kasallik */}
+        <div className="relative">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            Yondosh kasallik <span className="text-xs text-gray-400 font-normal">(ixtiyoriy)</span>
+          </label>
+          <input
+            type="text"
+            value={secondaryDiseaseSearch}
+            onChange={(e) => { setSecondaryDiseaseSearch(e.target.value); setShowSecondaryDropdown(true); if (!e.target.value) { setSelectedSecondaryDisease(null); setSelectedSecondaryDiagnoses([]); setSelectedSecondaryRecommendations([]) } }}
+            onFocus={() => setShowSecondaryDropdown(true)}
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+            placeholder="Yondosh kasallik..."
+          />
+          {showSecondaryDropdown && secondaryDiseaseSearch && filteredSecondaryDiseases.length > 0 && (
+            <div className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+              {filteredSecondaryDiseases.map(d => (
+                <button key={d._id} type="button" onClick={() => handleSelectDisease(d, true)}
+                  className="w-full text-left px-3 py-2 hover:bg-primary/10 text-sm flex items-center justify-between">
+                  <span className="font-medium">{d.name}</span>
+                  {d.category && <span className="text-xs text-gray-400">{d.category}</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Yondosh kasallik tashxislari */}
+        {selectedSecondaryDisease && (
+          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 border border-purple-200 dark:border-purple-800 space-y-3">
+            <p className="text-sm font-bold text-purple-800 dark:text-purple-300">Yondosh: {selectedSecondaryDisease.name}</p>
+            {selectedSecondaryDisease.diagnoses?.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Tashxislar:</p>
+                <div className="space-y-1">
+                  {selectedSecondaryDisease.diagnoses.map((d, i) => (
+                    <label key={i} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={selectedSecondaryDiagnoses.includes(d.text)} onChange={() => toggleDiagnosisCheck(d.text, true)} className="w-4 h-4 accent-purple-500 rounded" />
+                      <span>{d.text}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            {selectedSecondaryDisease.recommendations?.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Maslahatlar:</p>
+                <div className="space-y-1">
+                  {selectedSecondaryDisease.recommendations.map((r, i) => (
+                    <label key={i} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={selectedSecondaryRecommendations.includes(r.text)} onChange={() => toggleRecommendationCheck(r.text, true)} className="w-4 h-4 accent-purple-500 rounded" />
+                      <span>{r.text}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Diagnosis (qo'shimcha yozish uchun) */}
+        <div>
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            Qo'shimcha tashxis <span className="text-xs text-gray-400 font-normal">(ixtiyoriy)</span>
           </label>
           <input
             type="text"
             list="diagnosis-suggestions"
-            required
             value={diagnosis}
             onChange={(e) => setDiagnosis(e.target.value)}
             className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
-            placeholder={t('common.diagnosisPlaceholder')}
+            placeholder="Qo'shimcha tashxis yozing..."
           />
           <datalist id="diagnosis-suggestions">
             {diagnosisSuggestions.map((d, i) => (
