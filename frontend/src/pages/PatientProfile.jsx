@@ -1177,13 +1177,42 @@ const PatientProfile = () => {
                             {formatDate(prescription.created_at)}
                           </p>
                         </div>
-                        <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 ${
-                          prescription.prescription_type === 'URGENT' 
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                            : 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                        }`}>
-                          {prescription.prescription_type === 'URGENT' ? 'Shoshilinch' : 'Oddiy'}
-                        </span>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => {
+                              prescriptionService.printPrescriptionReceipt(
+                                {
+                                  prescription_number: prescription.prescription_number,
+                                  diagnosis: prescription.diagnosis,
+                                  complaint: prescription.complaint,
+                                  disease_name: prescription.disease_name,
+                                  secondary_disease_name: prescription.secondary_disease_name,
+                                  recommendations: prescription.recommendations,
+                                  prescription_type: prescription.prescription_type,
+                                  medications: prescription.medications,
+                                  doctor_name: `${prescription.doctor_first_name} ${prescription.doctor_last_name}`
+                                },
+                                {
+                                  first_name: patient?.first_name,
+                                  last_name: patient?.last_name,
+                                  patient_number: patient?.patient_number,
+                                  phone: patient?.phone
+                                }
+                              )
+                            }}
+                            className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                            title="Chop etish"
+                          >
+                            <span className="material-symbols-outlined text-lg">print</span>
+                          </button>
+                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                            prescription.prescription_type === 'URGENT'
+                              ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                              : 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                          }`}>
+                            {prescription.prescription_type === 'URGENT' ? 'Shoshilinch' : 'Oddiy'}
+                          </span>
+                        </div>
                       </div>
                       
                       <div className="space-y-2 sm:space-y-3">
