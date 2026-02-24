@@ -316,17 +316,21 @@ export const prescriptionService = {
 
   <!-- Diagnosis -->
   <div class="diagnosis-box">
-    <div class="label">Tashxis:</div>
-    <div class="value">${prescription.diagnosis || 'Kiritilmagan'}</div>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr>
+        <td style="padding:4px 0;vertical-align:top;width:140px;font-weight:700;">Tashxis:</td>
+        <td style="padding:4px 0;">${prescription.diagnosis || 'Kiritilmagan'}</td>
+      </tr>
+      ${prescription.disease_name ? `<tr>
+        <td style="padding:4px 0;vertical-align:top;font-weight:700;">Kasallik:</td>
+        <td style="padding:4px 0;">${prescription.disease_name}</td>
+      </tr>` : ''}
+      ${prescription.secondary_disease_name ? `<tr>
+        <td style="padding:4px 0;vertical-align:top;font-weight:700;">Yondosh kasallik:</td>
+        <td style="padding:4px 0;">${prescription.secondary_disease_name}</td>
+      </tr>` : ''}
+    </table>
   </div>
-
-  <!-- Disease tags -->
-  ${(prescription.disease_name || prescription.secondary_disease_name) ? `
-  <div class="disease-tags">
-    ${prescription.disease_name ? `<span class="disease-tag primary">Kasallik: ${prescription.disease_name}</span>` : ''}
-    ${prescription.secondary_disease_name ? `<span class="disease-tag secondary">Yondosh: ${prescription.secondary_disease_name}</span>` : ''}
-  </div>
-  ` : ''}
 
   <!-- Recommendations -->
   ${(prescription.recommendations && prescription.recommendations.length > 0) ? `
