@@ -2622,7 +2622,7 @@ const PatientProfile = () => {
               >
                 <option value="">Tanlang...</option>
                 {labTests.map(test => (
-                  <option key={test._id} value={test._id}>
+                  <option key={test.id || test._id} value={test.id || test._id}>
                     {test.name} {test.price ? `— ${test.price?.toLocaleString()} so'm` : ''}
                   </option>
                 ))}
