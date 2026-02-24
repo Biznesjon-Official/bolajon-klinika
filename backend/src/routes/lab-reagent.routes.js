@@ -10,7 +10,7 @@ const router = express.Router();
  * Get all reagents
  * GET /api/v1/lab-reagents
  */
-router.get('/', authenticate, authorize('admin', 'laborant'), async (req, res) => {
+router.get('/', authenticate, authorize('admin', 'laborant', 'chief_doctor'), async (req, res) => {
   try {
     const { status, search } = req.query;
     
@@ -49,7 +49,7 @@ router.get('/', authenticate, authorize('admin', 'laborant'), async (req, res) =
  * Create reagent
  * POST /api/v1/lab-reagents
  */
-router.post('/', authenticate, authorize('admin'), async (req, res) => {
+router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, res) => {
   try {
     console.log('📝 Create reagent request body:', req.body);
     console.log('👤 User:', req.user);
@@ -113,7 +113,7 @@ router.post('/', authenticate, authorize('admin'), async (req, res) => {
  * Update reagent
  * PUT /api/v1/lab-reagents/:id
  */
-router.put('/:id', authenticate, authorize('admin'), async (req, res) => {
+router.put('/:id', authenticate, authorize('admin', 'chief_doctor'), async (req, res) => {
   try {
     const { id } = req.params;
     const { name, country_of_origin, expiry_date, total_tests, total_price, notes } = req.body;
@@ -167,7 +167,7 @@ router.put('/:id', authenticate, authorize('admin'), async (req, res) => {
  * Delete reagent
  * DELETE /api/v1/lab-reagents/:id
  */
-router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
+router.delete('/:id', authenticate, authorize('admin', 'chief_doctor'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -291,7 +291,7 @@ router.post('/use', authenticate, authorize('laborant'), async (req, res) => {
  * Get reagent usage history
  * GET /api/v1/lab-reagents/usage-history
  */
-router.get('/usage-history', authenticate, authorize('admin', 'laborant'), async (req, res) => {
+router.get('/usage-history', authenticate, authorize('admin', 'laborant', 'chief_doctor'), async (req, res) => {
   try {
     const { reagent_id, patient_id, start_date, end_date, limit = 50 } = req.query;
 

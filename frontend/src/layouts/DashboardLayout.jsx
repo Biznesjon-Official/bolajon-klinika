@@ -22,7 +22,7 @@ const DashboardLayout = ({ children }) => {
     { name: t('nav.dashboard'), icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Administrator', 'Manager', 'Menejer'] },
     
     // 2. Qabulxona - Bemorlar qabul qilish
-    { name: t('nav.patients'), icon: 'groups', path: '/patients', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: t('nav.patients'), icon: 'groups', path: '/patients', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'chief_doctor'] },
     { name: t('nav.queue'), icon: 'format_list_numbered', path: '/queue', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor'] },
     
     // 3. Kassa - To'lovlar (receptionist bajaradi)
@@ -36,6 +36,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Xodimlar faoliyati', icon: 'groups', path: '/chief-doctor/staff', roles: ['chief_doctor'] },
     { name: 'Navbatdagi shifokorlar', icon: 'event_available', path: '/chief-doctor/on-duty', roles: ['chief_doctor'] },
     { name: 'Kasalliklar', icon: 'medical_information', path: '/chief-doctor/diseases', roles: ['chief_doctor'] },
+    { name: 'Lab reaktivlar', icon: 'science', path: '/lab-pharmacy', roles: ['chief_doctor'] },
     { name: 'Mening profilim', icon: 'person', path: '/chief-doctor/profile', roles: ['chief_doctor'] },
     
     // 4.6. Navbatdagi shifokorlar (Admin uchun)
@@ -56,7 +57,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Buyurtmalar', icon: 'assignment', path: '/lab/orders', roles: ['Laborant', 'Lab'] },
     { name: 'Namuna olish', icon: 'colorize', path: '/lab/samples', roles: ['Laborant', 'Lab'] },
     { name: 'Mening profilim', icon: 'person', path: '/lab/profile', roles: ['Laborant', 'Lab'] },
-    { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor'] },
+    { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'chief_doctor'] },
     
     // 9. Tozalovchi
     { name: 'Tozalovchi Paneli', icon: 'cleaning_services', path: '/sanitar', roles: ['Tozalovchi', 'Cleaner', 'sanitar'] },
