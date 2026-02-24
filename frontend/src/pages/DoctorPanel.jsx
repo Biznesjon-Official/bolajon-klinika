@@ -480,7 +480,7 @@ const DoctorPanel = () => {
     if (!selectedLabTest) return toast.error('Tahlilni tanlang')
     try {
       await laboratoryService.createOrder({
-        patient_id: labOrderPatient.patient_id,
+        patient_id: labOrderPatient.patient_id || labOrderPatient.patientId || labOrderPatient._id || labOrderPatient.id,
         test_id: selectedLabTest,
         priority: labOrderPriority,
         notes: labOrderNotes
