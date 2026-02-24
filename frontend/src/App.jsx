@@ -31,6 +31,9 @@ const StaffManagementAdvanced = lazy(() => import('./pages/StaffManagementAdvanc
 const Laboratory = lazy(() => import('./pages/Laboratory'));
 const LabResultView = lazy(() => import('./pages/LabResultView'));
 const LaborantPanel = lazy(() => import('./pages/LaborantPanel'));
+const LabOrders = lazy(() => import('./pages/LabOrders'));
+const LabSamples = lazy(() => import('./pages/LabSamples'));
+const LabProfile = lazy(() => import('./pages/LabProfile'));
 const LabPharmacy = lazy(() => import('./pages/LabPharmacy'));
 const NursePanel = lazy(() => import('./pages/NursePanel'));
 const SanitarPanel = lazy(() => import('./pages/SanitarPanel'));
@@ -132,6 +135,9 @@ function AppContent() {
               <Route path="/inpatient" element={<ProtectedRoute><DashboardLayout><Inpatient /></DashboardLayout></ProtectedRoute>} />
               <Route path="/staff" element={<ProtectedRoute><DashboardLayout><StaffManagementAdvanced /></DashboardLayout></ProtectedRoute>} />
               <Route path="/lab" element={<ProtectedRoute><DashboardLayout><LaborantPanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/lab/orders" element={<ProtectedRoute><DashboardLayout><LabOrders /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/lab/samples" element={<ProtectedRoute><DashboardLayout><LabSamples /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/lab/profile" element={<ProtectedRoute><DashboardLayout><LabProfile /></DashboardLayout></ProtectedRoute>} />
               <Route path="/nurse" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/nurse/medicine" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/nurse/calls" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />

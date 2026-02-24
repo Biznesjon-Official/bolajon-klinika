@@ -48,8 +48,11 @@ const DashboardLayout = ({ children }) => {
     { name: 'Boshqa', icon: 'more_horiz', path: '/nurse/more', roles: ['Hamshira', 'Nurse'] },
     
     // 7. Laboratoriya
-    { name: 'Laborant Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab'] },
-    { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Laborant', 'Lab', 'Shifokor', 'Doctor'] },
+    { name: 'Lab Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab'] },
+    { name: 'Buyurtmalar', icon: 'assignment', path: '/lab/orders', roles: ['Laborant', 'Lab'] },
+    { name: 'Namuna olish', icon: 'colorize', path: '/lab/samples', roles: ['Laborant', 'Lab'] },
+    { name: 'Mening profilim', icon: 'person', path: '/lab/profile', roles: ['Laborant', 'Lab'] },
+    { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor'] },
     
     // 9. Tozalovchi
     { name: 'Tozalovchi Paneli', icon: 'cleaning_services', path: '/sanitar', roles: ['Tozalovchi', 'Cleaner', 'sanitar'] },
@@ -65,7 +68,7 @@ const DashboardLayout = ({ children }) => {
     
     // 13. Vazifalar
     { name: 'Vazifalar', icon: 'task_alt', path: '/tasks', roles: ['Admin', 'Administrator'] },
-    { name: 'Mening Vazifalarim', icon: 'task_alt', path: '/my-tasks', roles: ['Shifokor', 'Doctor', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Qabulxona', 'Reception', 'receptionist', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor'] },
+    { name: 'Mening Vazifalarim', icon: 'task_alt', path: '/my-tasks', roles: ['Shifokor', 'Doctor', 'Tozalovchi', 'Cleaner', 'sanitar', 'Qabulxona', 'Reception', 'receptionist', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor'] },
     
     // 14. Aloqa
     { name: t('nav.communications'), icon: 'chat', path: '/communications', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Qabulxona', 'Reception'] },
@@ -79,7 +82,7 @@ const DashboardLayout = ({ children }) => {
     
     // 15. Maoshlar (oxirida)
     { name: 'Maoshlar', icon: 'payments', path: '/payroll', roles: ['Admin', 'Administrator'] },
-    { name: 'Mening Maoshim', icon: 'account_balance_wallet', path: '/my-salary', roles: ['Shifokor', 'Doctor', 'Laborant', 'Lab', 'Tozalovchi', 'Cleaner', 'sanitar', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: 'Mening Maoshim', icon: 'account_balance_wallet', path: '/my-salary', roles: ['Shifokor', 'Doctor', 'Tozalovchi', 'Cleaner', 'sanitar', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'chief_doctor', 'Qabulxona', 'Reception', 'receptionist'] },
     
     // Bemor paneli yashirilgan (hozircha ko'rinmaydigan)
     // { name: 'Bemor Paneli', icon: 'person', path: '/patient-portal', roles: ['Patient', 'Bemor'] },
@@ -99,6 +102,7 @@ const DashboardLayout = ({ children }) => {
 
   const isActive = (path) => {
     if (path === '/nurse') return location.pathname === '/nurse'
+    if (path === '/lab') return location.pathname === '/lab'
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
