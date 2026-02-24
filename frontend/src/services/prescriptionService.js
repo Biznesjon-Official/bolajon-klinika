@@ -83,7 +83,7 @@ export const prescriptionService = {
       align-items: center;
       justify-content: space-between;
       padding-bottom: 12px;
-      border-bottom: 3px solid #2e7d32;
+      border-bottom: 3px solid #000;
       margin-bottom: 0;
     }
     .header-logo { width: 70px; height: 70px; object-fit: contain; }
@@ -91,21 +91,22 @@ export const prescriptionService = {
     .header-center .clinic-name {
       font-size: 22px;
       font-weight: 800;
-      color: #2e7d32;
+      color: #000;
       letter-spacing: 1px;
     }
     .header-center .clinic-sub {
       font-size: 11px;
-      color: #555;
+      color: #333;
       margin-top: 3px;
     }
-    .header-right { text-align: right; font-size: 11px; color: #555; }
-    .header-right div { margin-bottom: 2px; }
+    .header-right { text-align: right; font-size: 11px; color: #333; }
+    .header-right div { margin-bottom: 3px; }
+    .header-right .social { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
 
     /* Patient info */
     .patient-info {
-      background: #e8f5e9;
-      border: 1px solid #a5d6a7;
+      background: #f5f5f5;
+      border: 1px solid #ccc;
       border-top: none;
       padding: 10px 14px;
       margin-bottom: 16px;
@@ -118,19 +119,19 @@ export const prescriptionService = {
     }
     .patient-info .label {
       font-weight: 700;
-      color: #2e7d32;
+      color: #000;
       white-space: nowrap;
       width: 120px;
     }
     .patient-info .value {
       font-weight: 600;
       color: #1a1a1a;
-      border-bottom: 1px solid #81c784;
+      border-bottom: 1px solid #999;
     }
     .rx-number {
       font-size: 13px;
       font-weight: 700;
-      color: #2e7d32;
+      color: #000;
       text-align: right;
     }
 
@@ -138,23 +139,23 @@ export const prescriptionService = {
     .section-title {
       font-size: 14px;
       font-weight: 700;
-      color: #2e7d32;
+      color: #000;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin: 14px 0 8px;
       padding-bottom: 4px;
-      border-bottom: 2px solid #a5d6a7;
+      border-bottom: 2px solid #999;
     }
 
     /* Diagnosis box */
     .diagnosis-box {
-      background: #fff8e1;
-      border: 1px solid #ffe082;
+      background: #f9f9f9;
+      border: 1px solid #ccc;
       border-radius: 4px;
       padding: 10px 14px;
       margin: 8px 0;
     }
-    .diagnosis-box .label { font-weight: 700; color: #e65100; margin-bottom: 4px; }
+    .diagnosis-box .label { font-weight: 700; color: #000; margin-bottom: 4px; }
     .diagnosis-box .value { font-size: 13px; }
 
     /* Disease tags */
@@ -166,13 +167,13 @@ export const prescriptionService = {
       font-size: 12px;
       font-weight: 600;
     }
-    .disease-tag.primary { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
-    .disease-tag.secondary { background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; }
+    .disease-tag.primary { background: #f0f0f0; color: #000; border: 1px solid #999; }
+    .disease-tag.secondary { background: #f0f0f0; color: #000; border: 1px solid #999; }
 
     /* Complaint */
     .complaint-box {
       background: #f5f5f5;
-      border-left: 3px solid #2e7d32;
+      border-left: 3px solid #000;
       padding: 8px 12px;
       margin: 8px 0;
       font-size: 13px;
@@ -187,7 +188,7 @@ export const prescriptionService = {
       font-size: 12px;
     }
     .data-table th {
-      background: #2e7d32;
+      background: #333;
       color: #fff;
       padding: 8px 10px;
       text-align: left;
@@ -202,7 +203,7 @@ export const prescriptionService = {
     }
     .data-table tr.even { background: #fafafa; }
     .data-table tr.odd { background: #fff; }
-    .data-table tr:hover { background: #f1f8e9; }
+    .data-table tr:hover { background: #f0f0f0; }
 
     /* Recommendations */
     .rec-table { width: 100%; border-collapse: collapse; margin: 6px 0; }
@@ -217,7 +218,7 @@ export const prescriptionService = {
     .footer {
       margin-top: 30px;
       padding-top: 15px;
-      border-top: 2px solid #2e7d32;
+      border-top: 2px solid #000;
     }
     .signature-line {
       display: flex;
@@ -259,8 +260,8 @@ export const prescriptionService = {
       font-weight: 600;
       margin: 0 5px;
     }
-    .btn-print { background: #2e7d32; color: #fff; }
-    .btn-print:hover { background: #1b5e20; }
+    .btn-print { background: #333; color: #fff; }
+    .btn-print:hover { background: #111; }
     .btn-close { background: #757575; color: #fff; }
     .btn-close:hover { background: #616161; }
   </style>
@@ -275,8 +276,10 @@ export const prescriptionService = {
       <div class="clinic-sub">Bolalar shifoxonasi</div>
     </div>
     <div class="header-right">
-      <div><strong>Tel:</strong> +998 91 XXX XX XX</div>
-      <div>bolajon.biznesjon.uz</div>
+      <div><strong>Call center:</strong> +998 91 XXX XX XX</div>
+      <div class="social">&#128222; Telegram: @bolajon_klinika</div>
+      <div class="social">&#128247; Instagram: @bolajon_klinika</div>
+      <div class="social">&#128339; Facebook: Bolajon Klinika</div>
     </div>
   </div>
 
@@ -358,7 +361,7 @@ export const prescriptionService = {
       <div class="sig">Dr. ${prescription.doctor_name || 'N/A'}</div>
     </div>
     <div class="footer-info">
-      BOLAJON KLINIKASI &bull; Sog'ligingiz uchun g'amxo'rlik qilamiz!
+      BOLAJON KLINIKASI &bull; Farzandingiz sog'ligi uchun!
     </div>
   </div>
 
