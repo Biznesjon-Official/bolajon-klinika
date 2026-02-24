@@ -456,11 +456,21 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
 
 // Create lab order
 router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor', 'receptionist'), createOrderLimiter, async (req, res, next) => {
-  const session = await mongoose.startSession();
-  
+  let session = null
+  let useTransaction = false
+
   try {
-    await session.startTransaction();
-    
+    // Try to use transaction (requires replica set)
+    try {
+      session = await mongoose.startSession()
+      await session.startTransaction()
+      useTransaction = true
+    } catch (sessionErr) {
+      console.log('Transaction not available, proceeding without:', sessionErr.message)
+      session = null
+      useTransaction = false
+    }
+
     const {
       patient_id,
       doctor_id,
@@ -470,36 +480,41 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
       notes,
       admission_id
     } = req.body;
-    
+
+    console.log('=== CREATE LAB ORDER ===')
+    console.log('Body:', JSON.stringify({ patient_id, test_id, priority, admission_id }))
+    console.log('User:', req.user?.id, req.user?.role_name)
+
     // Validation: Required fields
     if (!patient_id || !test_id) {
-      await session.abortTransaction();
+      if (useTransaction) await session.abortTransaction()
       return res.status(400).json({
         success: false,
         message: `Majburiy maydonlarni to'ldiring. Patient ID: ${patient_id ? 'OK' : 'MISSING'}, Test ID: ${test_id ? 'OK' : 'MISSING'}`
-      });
+      })
     }
-    
+
     // Validation: Check if IDs are valid MongoDB ObjectIds
     if (!mongoose.Types.ObjectId.isValid(patient_id)) {
-      await session.abortTransaction();
+      if (useTransaction) await session.abortTransaction()
       return res.status(400).json({
         success: false,
         message: 'Noto\'g\'ri patient ID formati'
-      });
+      })
     }
-    
+
     if (!mongoose.Types.ObjectId.isValid(test_id)) {
-      await session.abortTransaction();
+      if (useTransaction) await session.abortTransaction()
       return res.status(400).json({
         success: false,
         message: 'Noto\'g\'ri test ID formati'
-      });
+      })
     }
-    
-    // Validation: admission_id format
-    if (admission_id && !mongoose.Types.ObjectId.isValid(admission_id)) {
-      await session.abortTransaction()
+
+    // Validation: admission_id format (skip null/undefined/empty)
+    const cleanAdmissionId = admission_id && admission_id !== 'null' && admission_id !== 'undefined' ? admission_id : null
+    if (cleanAdmissionId && !mongoose.Types.ObjectId.isValid(cleanAdmissionId)) {
+      if (useTransaction) await session.abortTransaction()
       return res.status(400).json({
         success: false,
         message: 'Noto\'g\'ri admission ID formati'
@@ -508,58 +523,58 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
 
     // Validation: Notes length (max 1000 characters)
     if (notes && notes.length > 1000) {
-      await session.abortTransaction();
+      if (useTransaction) await session.abortTransaction()
       return res.status(400).json({
         success: false,
         message: 'Izoh juda uzun (maksimal 1000 belgi)'
-      });
+      })
     }
-    
+
     // Validation: Priority value
-    const validPriorities = ['normal', 'urgent', 'stat'];
+    const validPriorities = ['normal', 'urgent', 'stat']
     if (priority && !validPriorities.includes(priority)) {
-      await session.abortTransaction();
+      if (useTransaction) await session.abortTransaction()
       return res.status(400).json({
         success: false,
         message: `Noto'g'ri priority qiymati. Faqat: ${validPriorities.join(', ')}`
-      });
+      })
     }
-    
+
     // Validation: Check if patient exists
-    const patient = await Patient.findById(patient_id).session(session);
+    const patient = useTransaction ? await Patient.findById(patient_id).session(session) : await Patient.findById(patient_id)
     if (!patient) {
-      await session.abortTransaction();
+      if (useTransaction) await session.abortTransaction()
       return res.status(404).json({
         success: false,
         message: 'Bemor topilmadi'
-      });
+      })
     }
-    
+
     // Get test details
-    const test = await LabTest.findById(test_id).session(session);
+    const test = useTransaction ? await LabTest.findById(test_id).session(session) : await LabTest.findById(test_id)
     if (!test) {
-      await session.abortTransaction();
+      if (useTransaction) await session.abortTransaction()
       return res.status(404).json({
         success: false,
         message: 'Tahlil topilmadi'
-      });
+      })
     }
-    
+
     // Validation: Check if test is active
     if (!test.is_active) {
-      await session.abortTransaction();
+      if (useTransaction) await session.abortTransaction()
       return res.status(400).json({
         success: false,
         message: 'Bu tahlil faol emas'
-      });
+      })
     }
-    
+
     // Create lab order
     const order = new LabOrder({
       patient_id,
       doctor_id: doctor_id || req.user.id,
       laborant_id: laborant_id || null,
-      admission_id: admission_id || null,
+      admission_id: cleanAdmissionId || null,
       test_id: test._id,
       test_type: test.category,
       test_name: test.name,
@@ -568,22 +583,24 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
       notes: notes || '',
       price: test.price,
       status: 'pending'
-    });
-    
-    await order.save({ session });
-    
+    })
+
+    if (useTransaction) {
+      await order.save({ session })
+    } else {
+      await order.save()
+    }
+
     // Create invoice for lab order
-    const Invoice = (await import('../models/Invoice.js')).default;
-    const BillingItem = (await import('../models/BillingItem.js')).default;
-    const Transaction = (await import('../models/Transaction.js')).default;
-    // Patient already imported at the top, no need to re-import
-    
+    const Invoice = (await import('../models/Invoice.js')).default
+    const BillingItem = (await import('../models/BillingItem.js')).default
+
     // Generate invoice number
-    const invoiceCount = await Invoice.countDocuments().session(session);
-    const invoiceNumber = `INV-${Date.now()}-${invoiceCount + 1}`;
-    
+    const invoiceCount = useTransaction ? await Invoice.countDocuments().session(session) : await Invoice.countDocuments()
+    const invoiceNumber = `INV-${Date.now()}-${invoiceCount + 1}`
+
     // Create invoice
-    const invoice = await Invoice.create([{
+    const invoiceData = {
       patient_id,
       invoice_number: invoiceNumber,
       items: [{
@@ -600,47 +617,43 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
       payment_status: 'pending',
       notes: `Laboratoriya tahlili: ${test.name} (${order.order_number})`,
       created_by: req.user.id
-    }], { session });
-    
+    }
+    const invoice = useTransaction ? await Invoice.create([invoiceData], { session }) : [await Invoice.create(invoiceData)]
+
     // Create billing item
-    await BillingItem.create([{
+    const billingData = {
       billing_id: invoice[0]._id,
       service_id: test._id,
       service_name: `Laboratoriya: ${test.name}`,
       quantity: 1,
       unit_price: test.price,
       total_price: test.price
-    }], { session });
-    
+    }
+    if (useTransaction) {
+      await BillingItem.create([billingData], { session })
+    } else {
+      await BillingItem.create(billingData)
+    }
+
     // Update patient balance
-    const balanceResult = await Invoice.aggregate([
-      {
-        $match: { patient_id: new mongoose.Types.ObjectId(patient_id) }
-      },
-      {
-        $group: {
-          _id: null,
-          total_debt: { $sum: '$total_amount' },
-          total_paid: { $sum: '$paid_amount' }
-        }
-      }
-    ]).session(session);
-    
-    const totalDebt = balanceResult[0]?.total_debt || 0;
-    const totalPaid = balanceResult[0]?.total_paid || 0;
-    const calculatedBalance = totalPaid - totalDebt;
-    
-    await Patient.findByIdAndUpdate(
-      patient_id,
-      { 
-        current_balance: calculatedBalance,
-        updated_at: new Date()
-      },
-      { session }
-    );
-    
-    await session.commitTransaction();
-    
+    const balanceAgg = Invoice.aggregate([
+      { $match: { patient_id: new mongoose.Types.ObjectId(patient_id) } },
+      { $group: { _id: null, total_debt: { $sum: '$total_amount' }, total_paid: { $sum: '$paid_amount' } } }
+    ])
+    const balanceResult = useTransaction ? await balanceAgg.session(session) : await balanceAgg
+
+    const totalDebt = balanceResult[0]?.total_debt || 0
+    const totalPaid = balanceResult[0]?.total_paid || 0
+    const calculatedBalance = totalPaid - totalDebt
+
+    if (useTransaction) {
+      await Patient.findByIdAndUpdate(patient_id, { current_balance: calculatedBalance, updated_at: new Date() }, { session })
+    } else {
+      await Patient.findByIdAndUpdate(patient_id, { current_balance: calculatedBalance, updated_at: new Date() })
+    }
+
+    if (useTransaction) await session.commitTransaction()
+
     res.status(201).json({
       success: true,
       message: 'Tahlil buyurtmasi va hisob-faktura yaratildi',
@@ -650,13 +663,17 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
         invoice_id: invoice[0]._id,
         invoice_number: invoiceNumber
       }
-    });
+    })
   } catch (error) {
-    await session.abortTransaction();
-    console.error('Create lab order error:', error);
-    next(error);
+    if (useTransaction && session) {
+      try { await session.abortTransaction() } catch (e) { /* ignore */ }
+    }
+    console.error('Create lab order error:', error)
+    next(error)
   } finally {
-    session.endSession();
+    if (session) {
+      try { session.endSession() } catch (e) { /* ignore */ }
+    }
   }
 });
 
