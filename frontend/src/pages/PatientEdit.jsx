@@ -9,7 +9,7 @@ import DateInput from '../components/DateInput';
 const PatientEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // eslint-disable-line no-unused-vars
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -29,7 +29,7 @@ const PatientEdit = () => {
 
   useEffect(() => {
     loadPatient();
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadPatient = async () => {
     try {

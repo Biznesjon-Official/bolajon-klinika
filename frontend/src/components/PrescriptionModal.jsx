@@ -207,8 +207,8 @@ const PrescriptionModal = ({
         queue_id: patient.id,
         diagnosis: fullDiagnosis,
         complaint: complaint || undefined,
-        disease_id: selectedDisease?._id || undefined,
-        secondary_disease_id: selectedSecondaryDisease?._id || undefined,
+        disease_name: selectedDisease?.name || undefined,
+        secondary_disease_name: selectedSecondaryDisease?.name || undefined,
         selected_diagnoses: allDiagTexts.length > 0 ? allDiagTexts : undefined,
         recommendations: allRecTexts.length > 0 ? allRecTexts : undefined,
         prescription_type: prescriptionType,
@@ -277,18 +277,40 @@ const PrescriptionModal = ({
           </div>
         )}
 
-        {/* Bezovtalik sababi */}
+        {/* Shikoyat */}
         <div>
-          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Bezovtalik sababi
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+            <span className="material-symbols-outlined text-sm align-middle mr-1">record_voice_over</span>
+            Shikoyat
           </label>
           <input
             type="text"
             value={complaint}
             onChange={(e) => setComplaint(e.target.value)}
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+            className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm"
             placeholder="Bemor nimadan shikoyat qilmoqda..."
           />
+        </div>
+
+        {/* Tashxis */}
+        <div>
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+            <span className="material-symbols-outlined text-sm align-middle mr-1">diagnosis</span>
+            Tashxis
+          </label>
+          <input
+            type="text"
+            list="diagnosis-suggestions"
+            value={diagnosis}
+            onChange={(e) => setDiagnosis(e.target.value)}
+            className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            placeholder="Tashxis yozing..."
+          />
+          <datalist id="diagnosis-suggestions">
+            {diagnosisSuggestions.map((d, i) => (
+              <option key={i} value={d} />
+            ))}
+          </datalist>
         </div>
 
         {/* Kasallik va Yondosh kasallik — 2 ustun */}
@@ -447,26 +469,6 @@ const PrescriptionModal = ({
           </div>
         )}
 
-        {/* Tashxis */}
-        <div>
-          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-            <span className="material-symbols-outlined text-sm align-middle mr-1">diagnosis</span>
-            Tashxis
-          </label>
-          <input
-            type="text"
-            list="diagnosis-suggestions"
-            value={diagnosis}
-            onChange={(e) => setDiagnosis(e.target.value)}
-            className="w-full px-3 sm:px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            placeholder="Tashxis yozing..."
-          />
-          <datalist id="diagnosis-suggestions">
-            {diagnosisSuggestions.map((d, i) => (
-              <option key={i} value={d} />
-            ))}
-          </datalist>
-        </div>
 
         {/* Prescription Type */}
         <div>

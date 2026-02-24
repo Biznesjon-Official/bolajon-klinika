@@ -37,7 +37,7 @@ export default function MyTasks() {
     if (isDoctor) {
       loadOnDutyShifts();
     }
-  }, []);
+  }, [isDoctor]);
 
   const loadTasks = async () => {
     try {

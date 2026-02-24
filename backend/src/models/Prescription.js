@@ -23,10 +23,22 @@ const prescriptionSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Queue'
   },
+  complaint: {
+    type: String
+  },
   diagnosis: {
     type: String,
     required: true
   },
+  disease_name: {
+    type: String
+  },
+  secondary_disease_name: {
+    type: String
+  },
+  recommendations: [{
+    type: String
+  }],
   prescription_type: {
     type: String,
     enum: ['REGULAR', 'URGENT', 'CHRONIC'],

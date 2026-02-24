@@ -993,6 +993,12 @@ const PatientProfile = () => {
                                 <p className="text-gray-700 dark:text-gray-300">
                                   <span className="font-medium">Shifokor:</span> Dr. {activity.data.doctor_first_name} {activity.data.doctor_last_name}
                                 </p>
+                                {activity.data.disease_name && (
+                                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                                    <span className="font-medium">Kasallik:</span> {activity.data.disease_name}
+                                    {activity.data.secondary_disease_name && <span className="text-purple-600 dark:text-purple-400"> + {activity.data.secondary_disease_name}</span>}
+                                  </p>
+                                )}
                                 {activity.data.diagnosis && (
                                   <p className="text-gray-600 dark:text-gray-400 mt-1">
                                     <span className="font-medium">Tashxis:</span> {activity.data.diagnosis}
@@ -1181,11 +1187,46 @@ const PatientProfile = () => {
                       </div>
                       
                       <div className="space-y-2 sm:space-y-3">
+                        {prescription.complaint && (
+                          <div>
+                            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Shikoyat:</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{prescription.complaint}</p>
+                          </div>
+                        )}
                         <div>
-                          <p className="text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300">Tashxis:</p>
-                          <p className="text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 break-words">{prescription.diagnosis}</p>
+                          <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Tashxis:</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 break-words">{prescription.diagnosis}</p>
                         </div>
-                        
+                        {(prescription.disease_name || prescription.secondary_disease_name) && (
+                          <div className="flex flex-wrap gap-2">
+                            {prescription.disease_name && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-medium">
+                                <span className="material-symbols-outlined text-sm">coronavirus</span>
+                                {prescription.disease_name}
+                              </span>
+                            )}
+                            {prescription.secondary_disease_name && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg text-xs font-medium">
+                                <span className="material-symbols-outlined text-sm">add_circle</span>
+                                {prescription.secondary_disease_name}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {prescription.recommendations && prescription.recommendations.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1">Maslahatlar:</p>
+                            <ul className="space-y-1">
+                              {prescription.recommendations.map((rec, i) => (
+                                <li key={i} className="flex items-start gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                                  <span className="material-symbols-outlined text-amber-500 text-sm mt-0.5">check_circle</span>
+                                  <span>{rec}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
                         {prescription.medications && prescription.medications.length > 0 && (
                           <div>
                             <p className="text-xs sm:text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">Dorilar:</p>

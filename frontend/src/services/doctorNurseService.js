@@ -29,12 +29,6 @@ const doctorNurseService = {
   getPatientNurse: async (patientId) => {
     const response = await api.get(`/doctor-nurse/patients/${patientId}/nurse`);
     return response.data;
-  },
-
-  // Muolajani yakunlash
-  completeTask: async (taskId, data = {}) => {
-    const response = await api.post(`/nurse/treatments/${taskId}/complete`, data);
-    return response.data;
   }
 };
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import doctorNurseService from '../services/doctorNurseService';
+import nurseService from '../services/nurseService';
 
 export default function TreatmentButton({ patientId, patientName, roomNumber, bedNumber, onTreatmentComplete }) {
   const [showModal, setShowModal] = useState(false);
@@ -106,7 +107,7 @@ export default function TreatmentButton({ patientId, patientName, roomNumber, be
 
   const handleCompleteTreatment = async (treatmentId) => {
     try {
-      const response = await doctorNurseService.completeTask(treatmentId, {
+      const response = await nurseService.completeTreatment(treatmentId, {
         notes: treatmentNotes
       });
       
