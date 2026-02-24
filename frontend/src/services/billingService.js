@@ -9,7 +9,7 @@ const billingService = {
 
   // Get all services
   getServices: async (params = {}) => {
-    const response = await api.get('/services', { params });
+    const response = await api.get('/billing/services', { params });
     return response.data;
   },
 
