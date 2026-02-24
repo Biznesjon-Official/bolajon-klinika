@@ -17,6 +17,10 @@ import PatientLayout from './layouts/PatientLayout';
 const Dashboard = lazy(() => import(/* webpackPrefetch: true */ './pages/Dashboard'));
 const DoctorPanel = lazy(() => import(/* webpackPrefetch: true */ './pages/DoctorPanel'));
 const ChiefDoctorPanel = lazy(() => import(/* webpackPrefetch: true */ './pages/ChiefDoctorPanel'));
+const ChiefDoctorStaff = lazy(() => import('./pages/ChiefDoctorStaff'));
+const ChiefDoctorOnDuty = lazy(() => import('./pages/ChiefDoctorOnDuty'));
+const ChiefDoctorDiseases = lazy(() => import('./pages/ChiefDoctorDiseases'));
+const ChiefDoctorProfile = lazy(() => import('./pages/ChiefDoctorProfile'));
 const OnDutyDoctors = lazy(() => import(/* webpackPrefetch: true */ './pages/OnDutyDoctors'));
 const Patients = lazy(() => import(/* webpackPrefetch: true */ './pages/Patients'));
 const PatientProfile = lazy(() => import('./pages/PatientProfile'));
@@ -121,6 +125,10 @@ function AppContent() {
               <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><Dashboard /></DashboardLayout></ProtectedRoute>} />
               <Route path="/doctor" element={<ProtectedRoute><DashboardLayout><DoctorPanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/chief-doctor" element={<ProtectedRoute><DashboardLayout><ChiefDoctorPanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chief-doctor/staff" element={<ProtectedRoute><DashboardLayout><ChiefDoctorStaff /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chief-doctor/on-duty" element={<ProtectedRoute><DashboardLayout><ChiefDoctorOnDuty /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chief-doctor/diseases" element={<ProtectedRoute><DashboardLayout><ChiefDoctorDiseases /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chief-doctor/profile" element={<ProtectedRoute><DashboardLayout><ChiefDoctorProfile /></DashboardLayout></ProtectedRoute>} />
               <Route path="/on-duty-doctors" element={<ProtectedRoute><DashboardLayout><OnDutyDoctors /></DashboardLayout></ProtectedRoute>} />
               <Route path="/patients" element={<ProtectedRoute><DashboardLayout><Patients /></DashboardLayout></ProtectedRoute>} />
               <Route path="/patients/:id" element={<ProtectedRoute><DashboardLayout><PatientProfile /></DashboardLayout></ProtectedRoute>} />
