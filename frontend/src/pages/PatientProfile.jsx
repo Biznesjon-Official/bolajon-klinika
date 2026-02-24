@@ -410,6 +410,30 @@ const PatientProfile = () => {
     }
   };
 
+  const handleStartQueue = async (queueId) => {
+    try {
+      const response = await queueService.startAppointment(queueId)
+      if (response.success) {
+        showAlert('Qabul boshlandi', 'success', 'Muvaffaqiyatli')
+        loadQueueData()
+      }
+    } catch (error) {
+      showAlert(error.response?.data?.message || 'Xatolik', 'error', 'Xatolik')
+    }
+  }
+
+  const handleCompleteQueue = async (queueId) => {
+    try {
+      const response = await queueService.completeAppointment(queueId)
+      if (response.success) {
+        showAlert('Qabul yakunlandi', 'success', 'Muvaffaqiyatli')
+        loadQueueData()
+      }
+    } catch (error) {
+      showAlert(error.response?.data?.message || 'Xatolik', 'error', 'Xatolik')
+    }
+  }
+
   const handleCancelQueue = async (queueId) => {
     try {
       const response = await queueService.cancelAppointment(queueId, 'Bekor qilindi');
@@ -1718,14 +1742,34 @@ const PatientProfile = () => {
                                   <span className="px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-full text-xs font-semibold">Shoshilinch</span>
                                 )}
                               </div>
-                              {q.status === 'WAITING' && (
-                                <button
-                                  onClick={() => handleCancelQueue(q.id)}
-                                  className="mt-2 sm:mt-0 px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-lg text-sm font-semibold hover:bg-red-200"
-                                >
-                                  Bekor qilish
-                                </button>
-                              )}
+                              <div className="flex items-center gap-2 mt-2 sm:mt-0 flex-wrap">
+                                {isDoctor && q.status === 'WAITING' && (
+                                  <button
+                                    onClick={() => handleStartQueue(q.id)}
+                                    className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-semibold hover:bg-blue-600 flex items-center gap-1"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">play_arrow</span>
+                                    Qabulni boshlash
+                                  </button>
+                                )}
+                                {isDoctor && q.status === 'IN_PROGRESS' && (
+                                  <button
+                                    onClick={() => handleCompleteQueue(q.id)}
+                                    className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-semibold hover:bg-green-600 flex items-center gap-1"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                                    Qabulni yakunlash
+                                  </button>
+                                )}
+                                {q.status === 'WAITING' && (
+                                  <button
+                                    onClick={() => handleCancelQueue(q.id)}
+                                    className="px-3 py-1.5 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-lg text-xs font-semibold hover:bg-red-200"
+                                  >
+                                    Bekor qilish
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>

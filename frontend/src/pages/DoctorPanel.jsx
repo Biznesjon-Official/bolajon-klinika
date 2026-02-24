@@ -236,13 +236,22 @@ const DoctorPanel = () => {
     }
   };
 
-  const handleStartConsultation = (patient) => {
-    setSelectedPatient(patient);
-    setShowPrescriptionModal(true);
-    setDiagnosis('');
-    setPrescriptionType('REGULAR');
-    setNotes('');
-    setMedications([]);
+  const handleStartConsultation = async (patient) => {
+    try {
+      // Queue statusni IN_PROGRESS ga o'zgartirish
+      if (patient.status === 'CALLED') {
+        await queueService.startAppointment(patient.id)
+        loadMyQueue()
+      }
+      setSelectedPatient(patient);
+      setShowPrescriptionModal(true);
+      setDiagnosis('');
+      setPrescriptionType('REGULAR');
+      setNotes('');
+      setMedications([]);
+    } catch (error) {
+      showAlert(t('doctorPanel.errorOccurred'), 'error', t('common.error'))
+    }
   };
 
   const addMedication = () => {
