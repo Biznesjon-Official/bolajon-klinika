@@ -227,37 +227,7 @@ const DoctorPanel = () => {
         return;
       }
 
-      // To'lov holatini tekshirish
-      try {
-        const invoiceResponse = await api.get(`/billing/invoices/patient/${queueItem.patient_id}/unpaid`);
-        
-        if (invoiceResponse.data.success && invoiceResponse.data.data && invoiceResponse.data.data.length > 0) {
-          // To'lanmagan hisob-fakturalar bor
-          const totalUnpaid = invoiceResponse.data.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
-          
-          // Ogohlantirish ko'rsatamiz va tasdiqlash so'raymiz
-          showConfirm(
-            `⚠️ DIQQAT: Bemorning ${totalUnpaid.toLocaleString()} so'm to'lanmagan qarzi bor!\n\nBaribir chaqirasizmi?`,
-            async () => {
-              // Tasdiqlansa, bemorni chaqiramiz
-              await queueService.callPatient(queueId);
-              showAlert(t('doctorPanel.patientCalled'), 'success', t('common.success'));
-              loadMyQueue();
-            },
-            {
-              title: 'To\'lov kerak',
-              type: 'warning',
-              confirmText: 'Ha, chaqirish',
-              cancelText: 'Bekor qilish'
-            }
-          );
-          return;
-        }
-      } catch (invoiceError) {
-        // Xatolik bo'lsa ham davom etamiz
-      }
-
-      // Qarz bo'lmasa yoki xatolik bo'lsa, oddiy chaqiramiz
+      // Bemorni chaqiramiz (to'lov ketishda qilinadi)
       await queueService.callPatient(queueId);
       showAlert(t('doctorPanel.patientCalled'), 'success', t('common.success'));
       loadMyQueue();
@@ -712,85 +682,71 @@ const DoctorPanel = () => {
             <h2 className="text-base sm:text-base sm:text-lg font-bold text-gray-900 dark:text-white">{t('doctorPanel.waitingPatientsList')}</h2>
             <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">{t('doctorPanel.sortedByTime')}</p>
           </div>
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          <div className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {myQueue
               .filter(q => q.status === 'WAITING' || q.status === 'CALLED')
               .sort((a, b) => {
-                // Shoshilinch navbatlar birinchi o'rinda
                 if (a.queue_type === 'URGENT' && b.queue_type !== 'URGENT') return -1;
                 if (a.queue_type !== 'URGENT' && b.queue_type === 'URGENT') return 1;
-                // Keyin navbat raqami bo'yicha
                 return a.queueNumber - b.queueNumber;
               })
               .map((patient, index) => (
-                <div key={patient.id} onClick={() => navigate(`/patients/${patient.patient_id}`)} className={`p-3 sm:p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer ${patient.queue_type === 'URGENT' ? 'bg-red-50 dark:bg-red-900/10 border-l-4 border-red-500' : ''}`}>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-                    <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
-                      <div className={`size-10 sm:size-12 rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-base sm:text-base sm:text-lg flex-shrink-0 ${patient.queue_type === 'URGENT' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'}`}>
-                        {index + 1}
-                      </div>
-                      
-                      <div className="size-10 sm:size-12 bg-primary/10 text-primary rounded-lg sm:rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-                        <span className="text-lg sm:text-lg sm:text-xl font-black">{patient.queueNumber}</span>
-                      </div>
-                      
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white truncate">
-                          {patient.patientName}
-                        </p>
-                        <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
-                          {patient.patientNumber} • {patient.patientPhone}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          <span className="material-symbols-outlined text-xs align-middle mr-1">schedule</span>
-                          {new Date(patient.appointmentTime).toLocaleTimeString('uz-UZ', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
+                <div key={patient.id} onClick={() => navigate(`/patients/${patient.patient_id}`)} className={`p-3 sm:p-4 rounded-xl border-2 hover:shadow-md transition-all cursor-pointer ${
+                  patient.queue_type === 'URGENT'
+                    ? 'bg-red-50 dark:bg-red-900/10 border-red-300 dark:border-red-700'
+                    : patient.status === 'CALLED'
+                    ? 'bg-green-50 dark:bg-green-900/10 border-green-300 dark:border-green-700'
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                }`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`size-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 ${patient.queue_type === 'URGENT' ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400' : 'bg-primary/10 text-primary'}`}>
+                      {patient.queueNumber}
                     </div>
-                    
-                    <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
-                      {patient.queue_type === 'URGENT' && (
-                        <span className="px-2 sm:px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-full text-xs font-semibold whitespace-nowrap flex items-center gap-1">
-                          <span className="material-symbols-outlined text-sm">emergency</span>
-                          Shoshilinch
-                        </span>
-                      )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{patient.patientName}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{patient.patientNumber}</p>
+                    </div>
+                  </div>
 
-                      <span className={`px-2 sm:px-3 py-1 ${getStatusColor(patient.status)} dark:bg-opacity-20 rounded-full text-xs font-semibold whitespace-nowrap`}>
-                        {getStatusText(patient.status)}
-                      </span>
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                      <span className="material-symbols-outlined text-sm">schedule</span>
+                      {new Date(patient.appointmentTime).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    {patient.queue_type === 'URGENT' && (
+                      <span className="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-full text-xs font-semibold">Shoshilinch</span>
+                    )}
+                    <span className={`px-2 py-0.5 ${getStatusColor(patient.status)} rounded-full text-xs font-semibold`}>
+                      {getStatusText(patient.status)}
+                    </span>
+                  </div>
 
+                  <div className="flex gap-2">
+                    {patient.status === 'WAITING' && (
                       <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/patients/${patient.patient_id}`) }}
-                        className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                        title="Bemor profili"
+                        onClick={(e) => { e.stopPropagation(); handleCallPatient(patient.id) }}
+                        className="flex-1 py-2 bg-blue-500 text-white rounded-lg text-xs font-semibold hover:bg-blue-600 flex items-center justify-center gap-1"
                       >
-                        <span className="material-symbols-outlined text-sm">visibility</span>
+                        <span className="material-symbols-outlined text-sm">call</span>
+                        Chaqirish
                       </button>
-
-                      {patient.status === 'WAITING' && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleCallPatient(patient.id) }}
-                          className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 whitespace-nowrap flex items-center gap-1"
-                        >
-                          <span className="material-symbols-outlined text-sm">call</span>
-                          Chaqirish
-                        </button>
-                      )}
-
-                      {patient.status === 'CALLED' && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleStartConsultation(patient) }}
-                          className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 whitespace-nowrap flex items-center gap-1"
-                        >
-                          <span className="material-symbols-outlined text-sm">play_arrow</span>
-                          Qabulni boshlash
-                        </button>
-                      )}
-                    </div>
+                    )}
+                    {patient.status === 'CALLED' && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleStartConsultation(patient) }}
+                        className="flex-1 py-2 bg-green-500 text-white rounded-lg text-xs font-semibold hover:bg-green-600 flex items-center justify-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">play_arrow</span>
+                        Qabulni boshlash
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigate(`/patients/${patient.patient_id}`) }}
+                      className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                      title="Profil"
+                    >
+                      <span className="material-symbols-outlined text-sm">visibility</span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -805,79 +761,63 @@ const DoctorPanel = () => {
             <h2 className="text-base sm:text-base sm:text-lg font-bold text-gray-900 dark:text-white">Qabul jarayonida</h2>
             <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">Hozir qabul qilinayotgan bemorlar</p>
           </div>
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          <div className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {myQueue
               .filter(q => q.status === 'IN_PROGRESS')
               .map((patient) => (
-                <div key={patient.id} className="p-3 sm:p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-500">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-                    <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 sm:gap-3 sm:gap-4">
-                      <div className="size-10 sm:size-12 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="material-symbols-outlined">person</span>
-                      </div>
-                      
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white truncate">
-                          {patient.patientName}
-                        </p>
-                        <p className="text-xs sm:text-sm sm:text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">
-                          {patient.patientNumber} • {patient.patientPhone}
-                        </p>
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-xs">schedule</span>
-                          Qabul boshlangan: {new Date(patient.appointmentTime).toLocaleTimeString('uz-UZ', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
+                <div key={patient.id} className="p-3 sm:p-4 rounded-xl border-2 bg-blue-50 dark:bg-blue-900/10 border-blue-300 dark:border-blue-700">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="size-10 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-outlined">person</span>
                     </div>
-                    
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2 sm:px-3 py-1 bg-purple-100 text-purple-700 dark:bg-opacity-20 rounded-full text-xs font-semibold whitespace-nowrap">
-                        Qabulda
-                      </span>
-
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/patients/${patient.patient_id}`) }}
-                        className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                        title="Bemor profili"
-                      >
-                        <span className="material-symbols-outlined text-sm">visibility</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleStartConsultation(patient)}
-                        className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-600 whitespace-nowrap flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-sm">edit_note</span>
-                        Retsept yozish
-                      </button>
-                      
-                      <button
-                        onClick={() => handleOpenNurseModal(patient)}
-                        className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-semibold hover:bg-orange-600 whitespace-nowrap flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-sm">medical_services</span>
-                        Hamshiraga topshiriq
-                      </button>
-
-                      <button
-                        onClick={() => handleOpenLabOrder(patient)}
-                        className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600 whitespace-nowrap flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-sm">biotech</span>
-                        Tahlil buyurtma
-                      </button>
-
-                      <button
-                        onClick={() => handleCompleteConsultation(patient.id)}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 whitespace-nowrap flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-sm">check_circle</span>
-                        Qabulni yakunlash
-                      </button>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{patient.patientName}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{patient.patientNumber}</p>
                     </div>
+                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-full text-xs font-semibold">Qabulda</span>
+                  </div>
+
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mb-3 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">schedule</span>
+                    Boshlangan: {new Date(patient.appointmentTime).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => navigate(`/patients/${patient.patient_id}`)}
+                      className="py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">visibility</span>
+                      Profil
+                    </button>
+                    <button
+                      onClick={() => handleStartConsultation(patient)}
+                      className="py-2 bg-purple-500 text-white rounded-lg text-xs font-semibold hover:bg-purple-600 flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">edit_note</span>
+                      Retsept
+                    </button>
+                    <button
+                      onClick={() => handleOpenNurseModal(patient)}
+                      className="py-2 bg-orange-500 text-white rounded-lg text-xs font-semibold hover:bg-orange-600 flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">medical_services</span>
+                      Hamshira
+                    </button>
+                    <button
+                      onClick={() => handleOpenLabOrder(patient)}
+                      className="py-2 bg-indigo-500 text-white rounded-lg text-xs font-semibold hover:bg-indigo-600 flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">biotech</span>
+                      Tahlil
+                    </button>
+                    <button
+                      onClick={() => handleCompleteConsultation(patient.id)}
+                      className="col-span-2 py-2 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">check_circle</span>
+                      Qabulni yakunlash
+                    </button>
                   </div>
                 </div>
               ))}

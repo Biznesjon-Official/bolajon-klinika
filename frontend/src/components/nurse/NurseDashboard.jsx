@@ -154,7 +154,7 @@ const NurseDashboard = ({ stats, treatments, onStartTreatment, onCompleteTreatme
             <span className="px-2 py-0.5 bg-black/10 dark:bg-white/10 rounded-full text-xs font-bold">{items.length}</span>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {items.map(t => renderTreatmentCard(t))}
         </div>
       </div>

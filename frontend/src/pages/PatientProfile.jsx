@@ -553,7 +553,7 @@ const PatientProfile = () => {
         <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">person_off</span>
         <p className="text-gray-500">Bemor topilmadi</p>
         <button
-          onClick={() => navigate('/patients')}
+          onClick={() => navigate(-1)}
           className="mt-4 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl"
         >
           Orqaga
@@ -569,7 +569,7 @@ const PatientProfile = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         <button
-          onClick={() => navigate('/patients')}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white self-start"
         >
           <span className="material-symbols-outlined">arrow_back</span>
