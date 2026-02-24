@@ -634,6 +634,33 @@ const PatientProfile = () => {
           )}
           {isDoctor && (
             <>
+              {(() => {
+                const today = new Date().toISOString().split('T')[0]
+                const activeQueue = queueData.find(q => q.created_at?.startsWith(today) && (q.status === 'WAITING' || q.status === 'CALLED'))
+                const inProgressQueue = queueData.find(q => q.created_at?.startsWith(today) && q.status === 'IN_PROGRESS')
+                return (
+                  <>
+                    {activeQueue && (
+                      <button
+                        onClick={() => handleStartQueue(activeQueue.id)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-green-500 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:bg-green-600 flex items-center justify-center gap-2 animate-pulse"
+                      >
+                        <span className="material-symbols-outlined">play_arrow</span>
+                        <span className="hidden sm:inline">Qabulni boshlash</span>
+                      </button>
+                    )}
+                    {inProgressQueue && (
+                      <button
+                        onClick={() => handleCompleteQueue(inProgressQueue.id)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-orange-500 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:bg-orange-600 flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined">check_circle</span>
+                        <span className="hidden sm:inline">Qabulni yakunlash</span>
+                      </button>
+                    )}
+                  </>
+                )
+              })()}
               <button
                 onClick={() => setShowPrescriptionModal(true)}
                 className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
