@@ -621,7 +621,7 @@ router.post('/:id/medical-records',
 
       const record = await MedicalRecord.create({
         patient_id: req.params.id,
-        doctor_id: req.user._id,
+        doctor_id: req.user._id || req.user.id,
         diagnosis_text: diagnosis_text.trim(),
         treatment_plan: treatment_plan?.trim() || '',
         notes: notes?.trim() || ''
