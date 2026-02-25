@@ -18,9 +18,6 @@ router.get('/',
     try {
       const { date, doctor_id, status, patient_id } = req.query;
       
-      console.log('=== GET QUEUE (MongoDB) ===');
-      console.log('Filters:', { date, doctor_id, status });
-      
       // Build query
       let query = {};
       
@@ -66,8 +63,6 @@ router.get('/',
         .sort({ queue_number: 1 })
         .lean();
       
-      console.log('Found queues:', queues.length);
-      
       // Format response
       const queueData = queues.map(q => ({
         id: q._id,
@@ -95,11 +90,10 @@ router.get('/',
         data: queueData
       });
     } catch (error) {
-      console.error('Queue GET error:', error);
       res.status(500).json({
         success: false,
         data: [],
-        message: error.message
+        message: 'Navbatni yuklashda xatolik'
       });
     }
   }
@@ -112,7 +106,6 @@ router.get('/doctors',
   authenticate,
   async (req, res, next) => {
     try {
-      console.log('=== GET /queue/doctors (MongoDB) ===');
       
       // Get all doctors (including chief_doctor)
       const doctors = await Staff.find({
@@ -120,7 +113,6 @@ router.get('/doctors',
         status: 'active'
       }).select('first_name last_name specialization phone').lean();
       
-      console.log('Found doctors:', doctors.length);
       
       // Get today's waiting count for each doctor
       const today = new Date();
@@ -150,14 +142,12 @@ router.get('/doctors',
         })
       );
       
-      console.log('✅ Doctors with counts:', doctorsWithCount.length);
       
       res.json({
         success: true,
         data: doctorsWithCount
       });
     } catch (error) {
-      console.error('❌ Get doctors error:', error);
       res.status(500).json({
         success: false,
         message: 'Shifokorlar ro\'yxatini yuklashda xatolik',
@@ -241,7 +231,6 @@ router.get('/stats',
         }
       });
     } catch (error) {
-      console.error('Get stats error:', error);
       res.json({
         success: true,
         data: { waiting: 0, in_progress: 0, completed: 0, cancelled: 0, total: 0 }
@@ -356,7 +345,6 @@ router.post('/',
         message: 'Bemor navbatga qo\'shildi'
       });
     } catch (error) {
-      console.error('Add to queue error:', error);
       res.status(500).json({
         success: false,
         message: 'Navbatga qo\'shishda xatolik',
@@ -407,13 +395,11 @@ router.put('/:id/call',
             parse_mode: 'Markdown'
           });
           
-          console.log(`✅ Call notification sent to patient: ${patient.first_name} ${patient.last_name}`);
         }
         
         // Keyingi bemorga xabar yuborish (navbat 1 bo'lganida)
         await notifyNextPatient(queue.doctor_id);
       } catch (notifError) {
-        console.error('Notification error:', notifError);
       }
       
       res.json({
@@ -422,11 +408,9 @@ router.put('/:id/call',
         message: 'Bemor chaqirildi'
       });
     } catch (error) {
-      console.error('Call patient error:', error);
       res.status(500).json({
         success: false,
-        message: 'Bemorni chaqirishda xatolik',
-        error: error.message
+        message: 'Bemorni chaqirishda xatolik'
       });
     }
   }
@@ -457,11 +441,9 @@ router.put('/:id/start',
         message: 'Qabul boshlandi'
       });
     } catch (error) {
-      console.error('Start appointment error:', error);
       res.status(500).json({
         success: false,
-        message: 'Qabulni boshlashda xatolik',
-        error: error.message
+        message: 'Qabulni boshlashda xatolik'
       });
     }
   }
@@ -493,11 +475,9 @@ router.put('/:id/complete',
         message: 'Qabul yakunlandi'
       });
     } catch (error) {
-      console.error('Complete appointment error:', error);
       res.status(500).json({
         success: false,
-        message: 'Qabulni yakunlashda xatolik',
-        error: error.message
+        message: 'Qabulni yakunlashda xatolik'
       });
     }
   }
@@ -529,11 +509,9 @@ router.put('/:id/cancel',
         message: 'Navbat o\'chirildi'
       });
     } catch (error) {
-      console.error('Cancel appointment error:', error);
       res.status(500).json({
         success: false,
-        message: 'Navbatni o\'chirishda xatolik',
-        error: error.message
+        message: 'Navbatni o\'chirishda xatolik'
       });
     }
   }
@@ -581,11 +559,9 @@ async function notifyNextPatient(doctorId) {
           parse_mode: 'Markdown'
         });
         
-        console.log(`✅ Next patient notification sent to: ${patient.first_name} ${patient.last_name}`);
       }
     }
   } catch (error) {
-    console.error('Error notifying next patient:', error);
   }
 }
 

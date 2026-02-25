@@ -245,7 +245,6 @@ router.get('/services/categories',
         data: categories
       });
     } catch (error) {
-      console.error('Error in GET /services/categories:', error);
       next(error);
     }
   }
@@ -277,7 +276,6 @@ router.get('/services',
         data: services
       });
     } catch (error) {
-      console.error('Error in GET /services:', error);
       next(error);
     }
   }
@@ -327,16 +325,7 @@ router.post('/invoices',
       let totalAmount = 0;
       const invoiceItems = [];
 
-      console.log('=== CREATE INVOICE DEBUG ===');
-      console.log('Items received:', JSON.stringify(items, null, 2));
-
-      // List all services for debugging
-      const allServices = await Service.find({ is_active: true }).select('_id name price').limit(20);
-      console.log('Available services in DB:', allServices.map(s => ({ id: s._id.toString(), name: s.name, price: s.price })));
-
       for (const item of items) {
-        console.log(`Searching for service with ID: ${item.service_id}`);
-        
         // Avval Service modelida qidirish
         let service = await Service.findOne({ 
           _id: item.service_id, 
@@ -359,10 +348,7 @@ router.post('/invoices',
               base_price: labTest.price,
               category: 'Laboratoriya'
             };
-            console.log(`Lab test found: ${service.name} (${service._id})`);
           }
-        } else {
-          console.log(`Service found: ${service.name} (${service._id})`);
         }
 
         if (!service) {
@@ -988,9 +974,6 @@ router.post('/services',
     try {
       const { name, category, price, description, is_active } = req.body;
       
-      console.log('=== CREATE SERVICE DEBUG ===');
-      console.log('Request body:', req.body);
-      
       if (!name) {
         return res.status(400).json({
           success: false,
@@ -1016,15 +999,12 @@ router.post('/services',
       
       await service.save();
       
-      console.log('Service created:', service);
-      
       res.status(201).json({
         success: true,
         message: 'Xizmat muvaffaqiyatli qo\'shildi',
         data: service
       });
     } catch (error) {
-      console.error('Create service error:', error);
       next(error);
     }
   }
@@ -1038,10 +1018,6 @@ router.put('/services/:id',
   async (req, res, next) => {
     try {
       const { name, category, price, description, is_active } = req.body;
-      
-      console.log('=== UPDATE SERVICE DEBUG ===');
-      console.log('Service ID:', req.params.id);
-      console.log('Request body:', req.body);
       
       const service = await Service.findById(req.params.id);
       
@@ -1060,15 +1036,12 @@ router.put('/services/:id',
       
       await service.save();
       
-      console.log('Service updated:', service);
-      
       res.json({
         success: true,
         message: 'Xizmat muvaffaqiyatli yangilandi',
         data: service
       });
     } catch (error) {
-      console.error('Update service error:', error);
       next(error);
     }
   }
@@ -1098,7 +1071,6 @@ router.delete('/services/:id',
         message: 'Xizmat muvaffaqiyatli o\'chirildi'
       });
     } catch (error) {
-      console.error('Delete service error:', error);
       next(error);
     }
   }

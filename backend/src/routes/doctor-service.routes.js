@@ -26,7 +26,7 @@ router.get('/', authenticate, authorize('admin', 'chief_doctor'), async (req, re
 
     res.json({ success: true, data: doctorServices })
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message })
+    res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
 })
 
@@ -44,7 +44,7 @@ router.get('/doctor/:doctorId', authenticate, async (req, res) => {
 
     res.json({ success: true, data: doctorServices })
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message })
+    res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
 })
 
@@ -60,7 +60,7 @@ router.get('/doctors-list', authenticate, authorize('admin', 'chief_doctor'), as
 
     res.json({ success: true, data: doctors })
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message })
+    res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
 })
 
@@ -76,7 +76,7 @@ router.get('/services-list', authenticate, authorize('admin', 'chief_doctor'), a
 
     res.json({ success: true, data: services })
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message })
+    res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
 })
 
@@ -142,7 +142,7 @@ router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, r
         message: 'Bu doktorga ushbu xizmat allaqachon biriktirilgan'
       })
     }
-    res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message })
+    res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
 })
 
@@ -176,7 +176,7 @@ router.put('/:id', authenticate, authorize('admin', 'chief_doctor'), async (req,
       data: populated
     })
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message })
+    res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
 })
 
@@ -197,7 +197,7 @@ router.delete('/:id', authenticate, authorize('admin', 'chief_doctor'), async (r
 
     res.json({ success: true, message: 'Xizmat olib tashlandi' })
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message })
+    res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
 })
 

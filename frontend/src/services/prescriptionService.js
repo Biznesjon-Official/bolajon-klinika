@@ -37,6 +37,10 @@ export const prescriptionService = {
   // A4 formatda retsept chop etish
   printPrescriptionReceipt: (prescription, patient) => {
     const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      alert('Popup bloklandi. Iltimos popup-blocker ni o\'chiring.')
+      return
+    }
     const logoUrl = window.location.origin + '/image.jpg'
     const now = new Date()
     const dateStr = now.toLocaleDateString('uz-UZ', { year: 'numeric', month: '2-digit', day: '2-digit' })
