@@ -189,8 +189,9 @@ const labPrintService = {
     .header-center { text-align: center; flex: 1; padding: 0 15px; }
     .header-center .clinic-name { font-size: 22px; font-weight: 800; color: #000; letter-spacing: 1px; }
     .header-center .clinic-sub { font-size: 11px; color: #333; margin-top: 3px; }
-    .header-right { text-align: right; font-size: 11px; color: #333; }
-    .header-right div { margin-bottom: 3px; }
+    .header-right { text-align: right; font-size: 11px; color: #555; line-height: 1.5; }
+    .header-right div { margin-bottom: 2px; }
+    .header-right .doc-number { font-weight: 700; color: #000; margin-top: 4px; font-size: 10px; }
     .patient-info {
       background: #f5f5f5;
       border: 1px solid #ccc;
@@ -214,7 +215,7 @@ const labPrintService = {
     .signature-line { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; }
     .signature-line .sig { border-bottom: 1px solid #333; min-width: 200px; padding-bottom: 2px; text-align: center; font-size: 12px; }
     .footer-info { text-align: center; margin-top: 15px; font-size: 10px; color: #888; }
-    .regulation { text-align: right; font-size: 10px; color: #666; margin-bottom: 4px; padding: 4px 0; border-bottom: 1px solid #eee; }
+    .footer-contacts { text-align: center; margin-top: 6px; font-size: 10px; color: #666; }
     @media print { body { padding: 0; margin: 0; } .no-print { display: none !important; } }
     .no-print { text-align: center; margin-top: 20px; padding: 15px; }
     .btn { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin: 0 5px; }
@@ -232,13 +233,13 @@ const labPrintService = {
       <div class="clinic-sub">Болалар шифохонаси &bull; Диагностика ва даволаш маркази</div>
     </div>
     <div class="header-right">
-      <div><strong>Call center:</strong> +998 91 XXX XX XX</div>
-      <div>&#128222; Telegram: @bolajon_klinika</div>
-      <div>&#128247; Instagram: @bolajon_klinika</div>
+      <div><strong>Ўзбекистон Республикаси</strong></div>
+      <div>Соғлиқни сақлаш вазирининг</div>
+      <div>2020 йил 31 декабрдаги</div>
+      <div>№363-сонли буйруғи билан</div>
+      <div>тасдиқланган</div>
+      <div class="doc-number">052-рақамли тиббий ҳужжат шакли</div>
     </div>
-  </div>
-  <div class="regulation">
-    Ўзбекистон Республикаси Соғлиқни сақлаш вазирининг 2020 йил 31 декабрдаги №363-сонли буйруғи билан тасдиқланган 052-рақамли тиббий ҳужжат шакли
   </div>
   <div class="patient-info">${patientInfoHtml}</div>
   <div class="test-title">${getTitle()}</div>
@@ -256,6 +257,13 @@ const labPrintService = {
     </div>
     <div class="footer-info">
       BOLAJON KLINIKASI &bull; Фарзандингиз соғлиғи учун! &bull; Ушбу ҳужжат электрон тарзда яратилган
+    </div>
+    <div class="footer-contacts">
+      <span><svg style="display:inline-block;vertical-align:middle;margin-right:3px" width="12" height="12" viewBox="0 0 24 24" fill="#666"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.21 2.2z"/></svg>+998 91 XXX XX XX</span>
+      <span style="margin:0 8px;color:#ccc">|</span>
+      <span><svg style="display:inline-block;vertical-align:middle;margin-right:3px" width="12" height="12" viewBox="0 0 24 24" fill="#666"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.74 4-1.74 6.67-2.89 8.02-3.45 3.82-1.6 4.62-1.88 5.14-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.01.06.01.24 0 .37z"/></svg>@bolajon_klinika</span>
+      <span style="margin:0 8px;color:#ccc">|</span>
+      <span><svg style="display:inline-block;vertical-align:middle;margin-right:3px" width="12" height="12" viewBox="0 0 24 24" fill="#666"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2m-.2 2A3.6 3.6 0 004 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5M12 7a5 5 0 110 10 5 5 0 010-10m0 2a3 3 0 100 6 3 3 0 000-6z"/></svg>@bolajon_klinika</span>
     </div>
   </div>
   <div class="no-print">
