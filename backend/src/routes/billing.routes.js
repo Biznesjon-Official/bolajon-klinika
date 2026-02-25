@@ -9,6 +9,7 @@ import Transaction from '../models/Transaction.js';
 import Patient from '../models/Patient.js';
 import Staff from '../models/Staff.js';
 import LabTest from '../models/LabTest.js';
+import DoctorService from '../models/DoctorService.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -386,33 +387,52 @@ router.post('/invoices',
         });
       }
 
-      // Calculate revisit discount
+      // Calculate revisit discount (DoctorService dan dinamik)
       let revisitDiscount = 0;
       let revisitDiscountReason = '';
-      
-      if (patient.last_visit_date) {
+
+      if (patient.last_visit_date && doctor_id) {
         const lastVisit = new Date(patient.last_visit_date);
-        lastVisit.setHours(0, 0, 0, 0); // Faqat sanani solishtirish
-        
+        lastVisit.setHours(0, 0, 0, 0);
+
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Faqat sanani solishtirish
-        
+        today.setHours(0, 0, 0, 0);
+
         const daysDiff = Math.floor((today - lastVisit) / (1000 * 60 * 60 * 24));
-        
-        if (daysDiff === 0) {
-          // Bugun allaqachon qabul bo'lgan - 100% chegirma (bepul)
-          revisitDiscount = totalAmount;
-          revisitDiscountReason = `Bugungi qayta qabul - 100% chegirma (BEPUL)`;
-        } else if (daysDiff >= 1 && daysDiff <= 3) {
-          // 1-3 kun: 100% chegirma (bepul, faqat birinchi to'lov)
-          revisitDiscount = totalAmount;
-          revisitDiscountReason = `Qayta qabul (${daysDiff} kun ichida) - 100% chegirma`;
-        } else if (daysDiff >= 4 && daysDiff <= 7) {
-          // 4-7 kun: 50% chegirma
-          revisitDiscount = totalAmount * 0.50;
-          revisitDiscountReason = `Qayta qabul (${daysDiff} kun ichida) - 50% chegirma`;
+
+        // DoctorService dan chegirma qoidalarini olish
+        const firstServiceId = items[0]?.service_id;
+        const doctorServiceConfig = firstServiceId
+          ? await DoctorService.findOne({ doctor_id, service_id: firstServiceId, is_active: true })
+          : null;
+
+        const rules = doctorServiceConfig?.revisit_rules || [
+          { min_days: 0, max_days: 3, discount_percent: 100 },
+          { min_days: 4, max_days: 7, discount_percent: 50 }
+        ];
+
+        for (const rule of rules) {
+          if (daysDiff >= rule.min_days && daysDiff <= rule.max_days) {
+            revisitDiscount = totalAmount * (rule.discount_percent / 100);
+            revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - ${rule.discount_percent}% chegirma`;
+            break;
+          }
         }
-        // 8+ kun: Chegirma yo'q
+      } else if (patient.last_visit_date) {
+        // Fallback: doctor_id yo'q bo'lsa eski hardcoded logika
+        const lastVisit = new Date(patient.last_visit_date);
+        lastVisit.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const daysDiff = Math.floor((today - lastVisit) / (1000 * 60 * 60 * 24));
+
+        if (daysDiff >= 0 && daysDiff <= 3) {
+          revisitDiscount = totalAmount;
+          revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - 100% chegirma`;
+        } else if (daysDiff >= 4 && daysDiff <= 7) {
+          revisitDiscount = totalAmount * 0.50;
+          revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - 50% chegirma`;
+        }
       }
 
       // Apply discount with validation

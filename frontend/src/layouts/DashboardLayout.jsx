@@ -41,6 +41,9 @@ const DashboardLayout = ({ children }) => {
     
     // 4.6. Navbatdagi shifokorlar (Admin uchun)
     { name: 'Navbatdagi shifokorlar', icon: 'event_available', path: '/on-duty-doctors', roles: ['Admin', 'Administrator'] },
+
+    // 4.7. Doktor xizmatlari
+    { name: 'Doktor xizmatlari', icon: 'medical_services', path: '/doctor-services', roles: ['Admin', 'Administrator', 'chief_doctor'] },
     
     // 5. Xonalar - Muolaja
     { name: t('nav.ambulatorRoom'), icon: 'meeting_room', path: '/ambulator', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor', 'Hamshira', 'Nurse'] },
