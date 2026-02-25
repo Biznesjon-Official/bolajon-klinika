@@ -36,7 +36,7 @@ const SpeechTherapistPanel = () => {
         loadSalary()
       ]);
     } catch (error) {
-      console.error('Load data error:', error);
+
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ const SpeechTherapistPanel = () => {
         setAttendance(response.data.data);
       }
     } catch (error) {
-      console.error('Load attendance error:', error);
+
     }
   };
 
@@ -60,7 +60,7 @@ const SpeechTherapistPanel = () => {
         setTodayStats(response.data.data);
       }
     } catch (error) {
-      console.error('Load stats error:', error);
+
     }
   };
 
@@ -68,10 +68,10 @@ const SpeechTherapistPanel = () => {
     try {
       const response = await api.get('/tasks/my-tasks');
       if (response.data.success) {
-        setTasks(response.data.filter(t => t.status !== 'completed'));
+        setTasks(response.data.data.filter(t => t.status !== 'completed'));
       }
     } catch (error) {
-      console.error('Load tasks error:', error);
+
     }
   };
 
@@ -82,7 +82,7 @@ const SpeechTherapistPanel = () => {
         setSalary(response.data.data);
       }
     } catch (error) {
-      console.error('Load salary error:', error);
+
     }
   };
 

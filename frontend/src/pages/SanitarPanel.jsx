@@ -75,7 +75,6 @@ export default function SanitarPanel() {
         }
       }
     } catch (error) {
-      console.error('Load data error:', error);
       if (!silent) toast.error('Xatolik yuz berdi');
       if (error.response?.status === 401) window.location.href = '/login';
     } finally {

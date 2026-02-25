@@ -36,7 +36,7 @@ const MasseurPanel = () => {
         loadSalary()
       ]);
     } catch (error) {
-      console.error('Load data error:', error);
+
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ const MasseurPanel = () => {
         setAttendance(response.data.data);
       }
     } catch (error) {
-      console.error('Load attendance error:', error);
+
     }
   };
 
@@ -60,7 +60,7 @@ const MasseurPanel = () => {
         setTodayStats(response.data.data);
       }
     } catch (error) {
-      console.error('Load stats error:', error);
+
     }
   };
 
@@ -71,7 +71,7 @@ const MasseurPanel = () => {
         setTasks(response.data.data.filter(t => t.status !== 'completed'));
       }
     } catch (error) {
-      console.error('Load tasks error:', error);
+
     }
   };
 
@@ -82,7 +82,7 @@ const MasseurPanel = () => {
         setSalary(response.data.data);
       }
     } catch (error) {
-      console.error('Load salary error:', error);
+
     }
   };
 
