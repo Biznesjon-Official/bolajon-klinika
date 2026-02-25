@@ -65,15 +65,12 @@ export default function TaskManagement() {
 
       if (staffResponse.success) {
         setStaffList(staffResponse.data);
-        console.log('Xodimlar ro\'yxati:', staffResponse.data);
+
       } else {
-        console.log('Xodimlar yuklashda xatolik:', staffResponse);
+
       }
 
     } catch (error) {
-      console.error('Load data error:', error);
-      console.error('Error details:', error.response?.data);
-      
       const errorData = error.response?.data;
       
       if (error.response?.status === 401) {
@@ -92,7 +89,7 @@ export default function TaskManagement() {
     e.preventDefault();
     
     try {
-      console.log('Sending task data:', formData);
+
       const response = await taskService.createTask(formData);
       
       if (response.success) {
@@ -102,8 +99,7 @@ export default function TaskManagement() {
         loadData();
       }
     } catch (error) {
-      console.error('Create task error:', error);
-      console.error('Error response:', error.response?.data);
+
       const errorMessage = error.response?.data?.message || 'Vazifa yaratishda xatolik';
       toast.error(errorMessage);
     }
@@ -121,7 +117,7 @@ export default function TaskManagement() {
         loadData();
       }
     } catch (error) {
-      console.error('Verify task error:', error);
+
       toast.error('Vazifani tasdiqlashda xatolik');
     }
   };
@@ -138,7 +134,7 @@ export default function TaskManagement() {
         loadData();
       }
     } catch (error) {
-      console.error('Reject task error:', error);
+
       toast.error('Vazifani qaytarishda xatolik');
     }
   };
@@ -154,7 +150,7 @@ export default function TaskManagement() {
         loadData();
       }
     } catch (error) {
-      console.error('Delete task error:', error);
+
       toast.error('Vazifani o\'chirishda xatolik');
     }
   };

@@ -50,12 +50,9 @@ router.get('/staff-salaries',
         }))
       });
     } catch (error) {
-      console.error('Get staff salaries error:', error);
-      console.error('Error stack:', error.stack);
       res.status(500).json({
         success: false,
-        message: 'Xatolik yuz berdi',
-        error: error.message
+        message: 'Xatolik yuz berdi'
       });
     }
   }
@@ -142,7 +139,6 @@ router.post('/staff-salaries',
         data: populated
       });
     } catch (error) {
-      console.error('Set staff salary error:', error);
       next(error);
     }
   }
@@ -216,7 +212,6 @@ router.put('/staff-salaries/:id',
         data: salary
       });
     } catch (error) {
-      console.error('Update staff salary error:', error);
       next(error);
     }
   }
@@ -246,7 +241,6 @@ router.delete('/staff-salaries/:id',
         message: 'Maosh muvaffaqiyatli o\'chirildi'
       });
     } catch (error) {
-      console.error('Delete staff salary error:', error);
       next(error);
     }
   }
@@ -271,7 +265,6 @@ router.get('/bonuses',
         data: bonuses
       });
     } catch (error) {
-      console.error('Get bonuses error:', error);
       next(error);
     }
   }
@@ -285,12 +278,9 @@ router.post('/bonuses',
   authorize('admin'),
   async (req, res, next) => {
     try {
-      console.log('📝 Bonus request body:', req.body);
       const { staff_id, amount, reason, bonus_type, month, year, notes } = req.body;
 
-      // Validation
       if (!staff_id) {
-        console.log('❌ Validation failed: staff_id missing');
         return res.status(400).json({
           success: false,
           message: 'Xodim tanlanmagan'
@@ -298,7 +288,6 @@ router.post('/bonuses',
       }
 
       if (!amount || amount <= 0) {
-        console.log('❌ Validation failed: amount invalid', amount);
         return res.status(400).json({
           success: false,
           message: 'Bonus summasi noto\'g\'ri'
@@ -306,7 +295,6 @@ router.post('/bonuses',
       }
 
       if (!reason || reason.trim() === '') {
-        console.log('❌ Validation failed: reason missing');
         return res.status(400).json({
           success: false,
           message: 'Bonus sababi ko\'rsatilmagan'
@@ -314,7 +302,6 @@ router.post('/bonuses',
       }
 
       if (!month || month < 1 || month > 12) {
-        console.log('❌ Validation failed: month invalid', month);
         return res.status(400).json({
           success: false,
           message: 'Oy noto\'g\'ri ko\'rsatilgan'
@@ -322,14 +309,12 @@ router.post('/bonuses',
       }
 
       if (!year || year < 2020) {
-        console.log('❌ Validation failed: year invalid', year);
         return res.status(400).json({
           success: false,
           message: 'Yil noto\'g\'ri ko\'rsatilgan'
         });
       }
 
-      console.log('✅ Validation passed, creating bonus...');
       const bonus = await Bonus.create({
         staff_id,
         amount,
@@ -347,18 +332,15 @@ router.post('/bonuses',
         .populate('approved_by', 'first_name last_name')
         .lean();
 
-      console.log('✅ Bonus created successfully:', populated);
       res.json({
         success: true,
         message: 'Bonus muvaffaqiyatli qo\'shildi',
         data: populated
       });
     } catch (error) {
-      console.error('❌ Add bonus error:', error);
-      console.error('Error details:', error.message);
       res.status(400).json({
         success: false,
-        message: error.message || 'Bonus qo\'shishda xatolik'
+        message: 'Bonus qo\'shishda xatolik'
       });
     }
   }
@@ -383,7 +365,6 @@ router.get('/penalties',
         data: penalties
       });
     } catch (error) {
-      console.error('Get penalties error:', error);
       next(error);
     }
   }
@@ -397,12 +378,9 @@ router.post('/penalties',
   authorize('admin'),
   async (req, res, next) => {
     try {
-      console.log('📝 Penalty request body:', req.body);
       const { staff_id, amount, reason, penalty_type, month, year, notes } = req.body;
 
-      // Validation
       if (!staff_id) {
-        console.log('❌ Validation failed: staff_id missing');
         return res.status(400).json({
           success: false,
           message: 'Xodim tanlanmagan'
@@ -410,7 +388,6 @@ router.post('/penalties',
       }
 
       if (!amount || amount <= 0) {
-        console.log('❌ Validation failed: amount invalid', amount);
         return res.status(400).json({
           success: false,
           message: 'Jarima summasi noto\'g\'ri'
@@ -418,7 +395,6 @@ router.post('/penalties',
       }
 
       if (!reason || reason.trim() === '') {
-        console.log('❌ Validation failed: reason missing');
         return res.status(400).json({
           success: false,
           message: 'Jarima sababi ko\'rsatilmagan'
@@ -426,7 +402,6 @@ router.post('/penalties',
       }
 
       if (!month || month < 1 || month > 12) {
-        console.log('❌ Validation failed: month invalid', month);
         return res.status(400).json({
           success: false,
           message: 'Oy noto\'g\'ri ko\'rsatilgan'
@@ -434,14 +409,12 @@ router.post('/penalties',
       }
 
       if (!year || year < 2020) {
-        console.log('❌ Validation failed: year invalid', year);
         return res.status(400).json({
           success: false,
           message: 'Yil noto\'g\'ri ko\'rsatilgan'
         });
       }
 
-      console.log('✅ Validation passed, creating penalty...');
       const penalty = await Penalty.create({
         staff_id,
         amount,
@@ -459,18 +432,15 @@ router.post('/penalties',
         .populate('approved_by', 'first_name last_name')
         .lean();
 
-      console.log('✅ Penalty created successfully:', populated);
       res.json({
         success: true,
         message: 'Jarima muvaffaqiyatli qo\'shildi',
         data: populated
       });
     } catch (error) {
-      console.error('❌ Add penalty error:', error);
-      console.error('Error details:', error.message);
       res.status(400).json({
         success: false,
-        message: error.message || 'Jarima qo\'shishda xatolik'
+        message: 'Jarima qo\'shishda xatolik'
       });
     }
   }
@@ -511,7 +481,6 @@ router.post('/penalties/:id/approve',
         data: penalty
       });
     } catch (error) {
-      console.error('Approve penalty error:', error);
       next(error);
     }
   }
@@ -543,7 +512,6 @@ router.post('/penalties/:id/reject',
         data: penalty
       });
     } catch (error) {
-      console.error('Reject penalty error:', error);
       next(error);
     }
   }
@@ -636,7 +604,6 @@ router.get('/monthly-payroll',
         }
       });
     } catch (error) {
-      console.error('Get monthly payroll error:', error);
       next(error);
     }
   }
@@ -730,13 +697,12 @@ router.post('/calculate-monthly',
             break;
 
           case 'doctor':
-            // Doctor: Commission from total patient payments
+            // Doctor: Commission from this doctor's patient payments
             const doctorInvoices = await Invoice.aggregate([
               {
                 $match: {
                   created_at: { $gte: startDate, $lte: endDate },
-                  // Assuming doctor_id field exists in Invoice
-                  // If not, we need to link through appointments or queue
+                  'metadata.doctor_id': staff._id
                 }
               },
               {
@@ -904,7 +870,6 @@ router.post('/calculate-monthly',
         data: payrolls
       });
     } catch (error) {
-      console.error('Calculate monthly payroll error:', error);
       next(error);
     }
   }
@@ -942,7 +907,6 @@ router.post('/monthly-payroll/:id/approve',
         data: payroll
       });
     } catch (error) {
-      console.error('Approve payroll error:', error);
       next(error);
     }
   }
@@ -984,7 +948,6 @@ router.post('/monthly-payroll/:id/pay',
         data: payroll
       });
     } catch (error) {
-      console.error('Pay payroll error:', error);
       next(error);
     }
   }
@@ -1041,7 +1004,6 @@ router.get('/staff/:staffId/details',
         }
       });
     } catch (error) {
-      console.error('Get staff details error:', error);
       next(error);
     }
   }
@@ -1074,7 +1036,6 @@ router.get('/my-work-schedule',
         }
       });
     } catch (error) {
-      console.error('Get work schedule error:', error);
       next(error);
     }
   }

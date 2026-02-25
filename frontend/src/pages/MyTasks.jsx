@@ -48,7 +48,7 @@ export default function MyTasks() {
         setTasks(response.data);
       }
     } catch (error) {
-      console.error('Load tasks error:', error);
+
       toast.error('Vazifalarni yuklashda xatolik');
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ export default function MyTasks() {
         setOnDutyShifts(response.data.data);
       }
     } catch (error) {
-      console.error('Load on-duty shifts error:', error);
+
       if (error.response?.status !== 403) {
         toast.error('Navbatdagi smenalarni yuklashda xatolik');
       }
@@ -82,7 +82,7 @@ export default function MyTasks() {
         setTodayAttendance(response.data);
       }
     } catch (error) {
-      console.error('Load attendance error:', error);
+
     }
   };
 
@@ -93,7 +93,7 @@ export default function MyTasks() {
         setWorkSchedule(response.data.data);
       }
     } catch (error) {
-      console.error('Load work schedule error:', error);
+
     }
   };
 
@@ -113,7 +113,7 @@ export default function MyTasks() {
         loadTodayAttendance();
       }
     } catch (error) {
-      console.error('Check in error:', error);
+
       toast.error(error.response?.data?.message || 'Xatolik yuz berdi');
     } finally {
       setCheckingIn(false);
@@ -136,7 +136,7 @@ export default function MyTasks() {
         loadTodayAttendance();
       }
     } catch (error) {
-      console.error('Check out error:', error);
+
       toast.error(error.response?.data?.message || 'Xatolik yuz berdi');
     } finally {
       setCheckingIn(false);
@@ -152,7 +152,7 @@ export default function MyTasks() {
         loadTasks();
       }
     } catch (error) {
-      console.error('Start task error:', error);
+
       toast.error('Vazifani boshlashda xatolik');
     }
   };
@@ -169,7 +169,7 @@ export default function MyTasks() {
         loadTasks();
       }
     } catch (error) {
-      console.error('Complete task error:', error);
+
       toast.error('Vazifani tugatishda xatolik');
     }
   };

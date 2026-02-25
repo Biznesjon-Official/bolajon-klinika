@@ -132,27 +132,21 @@ export default function PayrollManagement() {
         if (staffData.success) setAllStaff(staffData.data);
         if (bonusSettingsData.success) setBonusSettings(bonusSettingsData.data);
       } else if (activeTab === 'penalties') {
-        console.log('🔍 Loading penalties...');
         const [penaltiesData, staffData] = await Promise.all([
           payrollService.getPenalties(),
           staffService.getStaff()
         ]);
-        console.log('📋 Penalties response:', penaltiesData);
-        console.log('👥 Staff response:', staffData);
-        
+
         if (penaltiesData.success) {
-          console.log('✅ Setting penalties:', penaltiesData.data);
           setPenalties(penaltiesData.data);
-        } else {
-          console.error('❌ Penalties data not successful:', penaltiesData);
         }
-        
+
         if (staffData.success) {
           setAllStaff(staffData.data);
         }
       }
     } catch (error) {
-      console.error('Load error:', error);
+
       toast.error('Ma\'lumotlarni yuklashda xatolik');
     } finally {
       setLoading(false);
@@ -174,7 +168,7 @@ export default function PayrollManagement() {
         loadData();
       }
     } catch (error) {
-      console.error('Calculate error:', error);
+
       toast.error('Hisoblashda xatolik');
     } finally {
       setLoading(false);
@@ -240,7 +234,7 @@ export default function PayrollManagement() {
         setAllStaff(staffWithRoleNames);
       }
     } catch (error) {
-      console.error('❌ Load staff error:', error);
+
       toast.error('Xodimlarni yuklashda xatolik');
     }
   };
@@ -313,7 +307,7 @@ export default function PayrollManagement() {
         toast.success('Sozlamalar saqlandi');
       }
     } catch (error) {
-      console.error('Save bonus settings error:', error);
+
       toast.error('Sozlamalarni saqlashda xatolik');
     } finally {
       setSavingBonusSettings(false);
@@ -1776,7 +1770,7 @@ function BonusModal({ staff, onClose, onSuccess }) {
         toast.error(response.message || 'Xatolik yuz berdi');
       }
     } catch (error) {
-      console.error('Bonus add error:', error);
+
       toast.error(error.response?.data?.message || 'Xatolik yuz berdi');
     } finally {
       setLoading(false);
@@ -1917,7 +1911,7 @@ function PenaltyModal({ staff, onClose, onSuccess }) {
         toast.error(response.message || 'Xatolik yuz berdi');
       }
     } catch (error) {
-      console.error('Penalty add error:', error);
+
       toast.error(error.response?.data?.message || 'Xatolik yuz berdi');
     } finally {
       setLoading(false);

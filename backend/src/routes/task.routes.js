@@ -7,11 +7,11 @@ import { sendTaskNotification } from '../services/telegramService.js';
 const router = express.Router();
 
 /**
- * Get all tasks (Admin only) - Main endpoint
+ * Get all tasks
  */
 router.get('/',
   authenticate,
-  authorize('admin', 'doctor'),
+  authorize('admin', 'doctor', 'chief_doctor'),
   async (req, res, next) => {
     try {
       const { status } = req.query;
@@ -28,7 +28,6 @@ router.get('/',
         .sort({ created_at: -1 })
         .lean();
 
-      // Format for frontend
       const formattedTasks = tasks.map(task => ({
         id: task._id,
         title: task.title,
@@ -60,18 +59,17 @@ router.get('/',
         data: formattedTasks
       });
     } catch (error) {
-      console.error('Get all tasks error:', error);
       next(error);
     }
   }
 );
 
 /**
- * Create new task (Admin only)
+ * Create new task
  */
 router.post('/create',
   authenticate,
-  authorize('admin', 'doctor'),
+  authorize('admin', 'doctor', 'chief_doctor'),
   async (req, res, next) => {
     try {
       const { title, description, taskType, priority, assignedTo, dueDate, locationDetails } = req.body;
@@ -83,7 +81,6 @@ router.post('/create',
         });
       }
 
-      // Check if assigned staff exists
       const staff = await Staff.findById(assignedTo);
       if (!staff) {
         return res.status(404).json({
@@ -108,26 +105,14 @@ router.post('/create',
         .populate('created_by', 'first_name last_name')
         .lean();
 
-      // Send Telegram notification to assigned staff
-      console.log('=== SENDING TELEGRAM NOTIFICATION ===');
-      console.log('Staff:', staff.first_name, staff.last_name);
-      console.log('Telegram Chat ID:', staff.telegram_chat_id);
-      console.log('Notifications enabled:', staff.telegram_notifications_enabled);
-      
+      // Send Telegram notification
       if (staff.telegram_chat_id && staff.telegram_notifications_enabled !== false) {
-        const creator = await Staff.findById(req.user.id).select('first_name last_name').lean();
-        const result = await sendTaskNotification(staff, task, creator);
-        console.log('📱 Telegram notification result:', result);
-        
-        if (result.success) {
-          console.log('✅ Telegram notification sent successfully');
-        } else {
-          console.log('❌ Telegram notification failed:', result.error || result.message);
+        try {
+          const creator = await Staff.findById(req.user.id).select('first_name last_name').lean();
+          await sendTaskNotification(staff, task, creator);
+        } catch (_) {
+          // Telegram notification failed silently
         }
-      } else {
-        console.log('⚠️ Staff has no Telegram chat ID or notifications disabled');
-        console.log('   - telegram_chat_id:', staff.telegram_chat_id || 'MISSING');
-        console.log('   - notifications_enabled:', staff.telegram_notifications_enabled);
       }
 
       res.json({
@@ -136,67 +121,6 @@ router.post('/create',
         data: populated
       });
     } catch (error) {
-      console.error('Create task error:', error);
-      next(error);
-    }
-  }
-);
-
-/**
- * Get all tasks (Admin only)
- */
-router.get('/all',
-  authenticate,
-  authorize('admin', 'doctor'),
-  async (req, res, next) => {
-    try {
-      const { status } = req.query;
-
-      const filter = {};
-      if (status) {
-        const statuses = status.split(',');
-        filter.status = { $in: statuses };
-      }
-
-      const tasks = await Task.find(filter)
-        .populate('assigned_to', 'first_name last_name role employee_id')
-        .populate('created_by', 'first_name last_name')
-        .sort({ created_at: -1 })
-        .lean();
-
-      // Format for frontend
-      const formattedTasks = tasks.map(task => ({
-        id: task._id,
-        title: task.title,
-        description: task.description,
-        task_type: task.task_type,
-        priority: task.priority,
-        status: task.status,
-        assigned_to: task.assigned_to?._id || null,
-        first_name: task.assigned_to?.first_name || 'O\'chirilgan',
-        last_name: task.assigned_to?.last_name || 'xodim',
-        role: task.assigned_to?.role || 'unknown',
-        employee_id: task.assigned_to?.employee_id || 'N/A',
-        created_by: task.created_by?._id || null,
-        creator_name: task.created_by ? `${task.created_by.first_name} ${task.created_by.last_name}` : 'O\'chirilgan xodim',
-        due_date: task.due_date,
-        location_details: task.location_details,
-        started_at: task.started_at,
-        completed_at: task.completed_at,
-        verified_at: task.verified_at,
-        completion_notes: task.completion_notes,
-        verification_notes: task.verification_notes,
-        rejection_reason: task.rejection_reason,
-        created_at: task.created_at,
-        updated_at: task.updated_at
-      }));
-
-      res.json({
-        success: true,
-        data: formattedTasks
-      });
-    } catch (error) {
-      console.error('Get all tasks error:', error);
       next(error);
     }
   }
@@ -217,7 +141,6 @@ router.get('/my-tasks',
         .sort({ created_at: -1 })
         .lean();
 
-      // Format for frontend
       const formattedTasks = tasks.map(task => ({
         id: task._id,
         title: task.title,
@@ -243,7 +166,44 @@ router.get('/my-tasks',
         data: formattedTasks
       });
     } catch (error) {
-      console.error('Get my tasks error:', error);
+      next(error);
+    }
+  }
+);
+
+/**
+ * Get staff list
+ */
+router.get('/staff-list',
+  authenticate,
+  authorize('admin', 'doctor', 'chief_doctor'),
+  async (req, res, next) => {
+    try {
+      const { role } = req.query;
+
+      const filter = { status: 'active' };
+      if (role) {
+        filter.role = role.toLowerCase();
+      }
+
+      const staff = await Staff.find(filter)
+        .select('first_name last_name role employee_id')
+        .sort({ first_name: 1 })
+        .lean();
+
+      const formattedStaff = staff.map(s => ({
+        id: s._id,
+        first_name: s.first_name,
+        last_name: s.last_name,
+        role: s.role,
+        employee_id: s.employee_id
+      }));
+
+      res.json({
+        success: true,
+        data: formattedStaff
+      });
+    } catch (error) {
       next(error);
     }
   }
@@ -287,7 +247,6 @@ router.put('/:id/start',
         data: task
       });
     } catch (error) {
-      console.error('Start task error:', error);
       next(error);
     }
   }
@@ -325,7 +284,6 @@ router.put('/:id/complete',
       task.status = 'completed';
       task.completed_at = new Date();
       task.completion_notes = completionNotes || '';
-      // If task was never started, set started_at to now
       if (!task.started_at) {
         task.started_at = new Date();
       }
@@ -337,18 +295,17 @@ router.put('/:id/complete',
         data: task
       });
     } catch (error) {
-      console.error('Complete task error:', error);
       next(error);
     }
   }
 );
 
 /**
- * Verify task (Admin only)
+ * Verify task
  */
 router.put('/:id/verify',
   authenticate,
-  authorize('admin', 'doctor'),
+  authorize('admin', 'doctor', 'chief_doctor'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -381,18 +338,17 @@ router.put('/:id/verify',
         data: task
       });
     } catch (error) {
-      console.error('Verify task error:', error);
       next(error);
     }
   }
 );
 
 /**
- * Reject task (Admin only)
+ * Reject task
  */
 router.put('/:id/reject',
   authenticate,
-  authorize('admin', 'doctor'),
+  authorize('admin', 'doctor', 'chief_doctor'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -433,18 +389,17 @@ router.put('/:id/reject',
         data: task
       });
     } catch (error) {
-      console.error('Reject task error:', error);
       next(error);
     }
   }
 );
 
 /**
- * Delete task (Admin only)
+ * Delete task
  */
 router.delete('/:id',
   authenticate,
-  authorize('admin', 'doctor'),
+  authorize('admin', 'doctor', 'chief_doctor'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -463,46 +418,6 @@ router.delete('/:id',
         message: 'Vazifa o\'chirildi'
       });
     } catch (error) {
-      console.error('Delete task error:', error);
-      next(error);
-    }
-  }
-);
-
-/**
- * Get staff list (Admin only)
- */
-router.get('/staff-list',
-  authenticate,
-  authorize('admin', 'doctor'),
-  async (req, res, next) => {
-    try {
-      const { role } = req.query;
-
-      const filter = { status: 'active' };
-      if (role) {
-        filter.role = role.toLowerCase();
-      }
-
-      const staff = await Staff.find(filter)
-        .select('first_name last_name role employee_id')
-        .sort({ first_name: 1 })
-        .lean();
-
-      const formattedStaff = staff.map(s => ({
-        id: s._id,
-        first_name: s.first_name,
-        last_name: s.last_name,
-        role: s.role,
-        employee_id: s.employee_id
-      }));
-
-      res.json({
-        success: true,
-        data: formattedStaff
-      });
-    } catch (error) {
-      console.error('Get staff list error:', error);
       next(error);
     }
   }
