@@ -1,667 +1,464 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import laboratoryService from '../services/laboratoryService';
-import toast from 'react-hot-toast';
-import logoImage from '/image.jpg';
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import laboratoryService from '../services/laboratoryService'
+import toast from 'react-hot-toast'
+import logoImage from '/image.jpg'
 
 export default function LabResultView() {
-  const { orderId } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [result, setResult] = useState(null);
+  const { orderId } = useParams()
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
+  const [result, setResult] = useState(null)
 
   useEffect(() => {
-    loadResult();
-  }, [orderId]);
+    loadResult()
+  }, [orderId])
 
   const loadResult = async () => {
     try {
-      setLoading(true);
-      const response = await laboratoryService.getOrderResult(orderId);
-      setResult(response.data);
+      setLoading(true)
+      const response = await laboratoryService.getOrderResult(orderId)
+      setResult(response.data)
     } catch (error) {
-      toast.error('Natijani yuklashda xatolik');
-      console.error(error);
+      toast.error('Natijani yuklashda xatolik')
+      console.error(error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = () => window.print()
 
-  const handleDownloadPDF = async () => {
-    try {
-      // Brauzerning print to PDF funksiyasidan foydalanish
-      toast.success('PDF yaratish uchun chop etish oynasida "PDF sifatida saqlash" ni tanlang', { 
-        duration: 5000,
-        id: 'pdf-instruction' 
-      });
-      
-      // Chop etish oynasini ochish
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    } catch (error) {
-      console.error('PDF download error:', error);
-      toast.error('Xatolik yuz berdi', { id: 'pdf-download' });
-    }
-  };
+  const handleDownloadPDF = () => {
+    toast.success('PDF uchun chop etish oynasida "PDF sifatida saqlash" ni tanlang', { duration: 4000 })
+    setTimeout(() => window.print(), 500)
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Natija yuklanmoqda...</p>
+        </div>
       </div>
-    );
+    )
   }
 
   if (!result) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400">Natija topilmadi</p>
-          <button
-            onClick={() => navigate('/laboratory')}
-            className="mt-4 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl"
-          >
+          <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">science</span>
+          <p className="text-lg text-gray-500 mb-4">Natija topilmadi</p>
+          <button onClick={() => navigate(-1)} className="px-6 py-2.5 bg-primary text-white rounded-xl font-semibold">
             Orqaga
           </button>
         </div>
       </div>
-    );
+    )
   }
 
-  const isBiochemistry = result.test_name?.toLowerCase().includes('биохимия') || 
-                         result.test_name?.toLowerCase().includes('biochem');
-  
-  const isBloodTest = result.test_name?.toLowerCase().includes('умумий қон') || 
-                      result.test_name?.toLowerCase().includes('қон таҳлили') ||
-                      result.test_name?.toLowerCase().includes('blood');
-  
-  const isVitaminD = result.test_name?.toLowerCase().includes('витамин д') || 
-                     result.test_name?.toLowerCase().includes('витамин d') ||
-                     result.test_name?.toLowerCase().includes('vitamin d');
-  
-  const isTorch = result.test_name?.toLowerCase().includes('торч') || 
-                  result.test_name?.toLowerCase().includes('torch') ||
-                  result.test_name?.toLowerCase().includes('тorch');
-  
-  const isUrine = result.test_name?.toLowerCase().includes('сийдик') || 
-                  result.test_name?.toLowerCase().includes('сиёдик') ||
-                  result.test_name?.toLowerCase().includes('мочи') ||
-                  result.test_name?.toLowerCase().includes('urine');
-  
-  const isHormone = result.test_name?.toLowerCase().includes('гормон') || 
-                    result.test_name?.toLowerCase().includes('hormone');
-  
-  const isOncomarker = result.test_name?.toLowerCase().includes('онкомаркер') || 
-                       result.test_name?.toLowerCase().includes('oncomarker') ||
-                       result.test_name?.toLowerCase().includes('онко');
-  
-  const isCoagulogram = result.test_name?.toLowerCase().includes('коагулограмма') || 
-                        result.test_name?.toLowerCase().includes('коагуло') ||
-                        result.test_name?.toLowerCase().includes('coagulo');
-  
-  const isLipid = result.test_name?.toLowerCase().includes('липид') || 
-                  result.test_name?.toLowerCase().includes('lipid');
-  
-  const isProcalcitonin = result.test_name?.toLowerCase().includes('прокальцитонин') || 
-                          result.test_name?.toLowerCase().includes('procalcitonin') ||
-                          result.test_name?.toLowerCase().includes('прокал');
-  
-  const isTroponin = result.test_name?.toLowerCase().includes('тропонин') || 
-                     result.test_name?.toLowerCase().includes('troponin') ||
-                     result.test_name?.toLowerCase().includes('тропон');
+  // Test type detection
+  const testName = (result.test_name || '').toLowerCase()
+  const isBiochemistry = testName.includes('биохимия') || testName.includes('biochem')
+  const isBloodTest = testName.includes('умумий қон') || testName.includes('қон таҳлили') || testName.includes('blood')
+  const isVitaminD = testName.includes('витамин д') || testName.includes('витамин d') || testName.includes('vitamin d')
+  const isTorch = testName.includes('торч') || testName.includes('torch')
+  const isUrine = testName.includes('сийдик') || testName.includes('сиёдик') || testName.includes('мочи') || testName.includes('urine')
+  const isHormone = testName.includes('гормон') || testName.includes('hormone')
+  const isOncomarker = testName.includes('онкомаркер') || testName.includes('oncomarker') || testName.includes('онко')
+  const isCoagulogram = testName.includes('коагулограмма') || testName.includes('коагуло') || testName.includes('coagulo')
+  const isLipid = testName.includes('липид') || testName.includes('lipid')
+  const isProcalcitonin = testName.includes('прокальцитонин') || testName.includes('procalcitonin')
+  const isTroponin = testName.includes('тропонин') || testName.includes('troponin')
+
+  // Title based on test type
+  const getTitle = () => {
+    if (isBiochemistry) return 'БИОХИМИК ТАҲЛИЛ'
+    if (isBloodTest) return 'УМУМИЙ ҚОН ТАҲЛИЛИ'
+    if (isVitaminD) return 'АНАЛИЗ КРОВИ НА ВИТАМИН D'
+    if (isTorch) return 'АНАЛИЗ КРОВИ НА ТОРЧ ИНФЕКЦИЯ'
+    if (isUrine) return 'СИЙДИК ТАҲЛИЛИ'
+    if (isHormone) return 'ГОРМОН ТАҲЛИЛИ'
+    if (isOncomarker) return 'АНАЛИЗ КРОВИ НА ОНКОМАРКЕРЫ'
+    if (isCoagulogram) return 'Коагулограмма №'
+    if (isLipid) return 'Липидный спектр №'
+    if (isProcalcitonin) return 'Анализ крови на д-димер, прокальцитонин, ферритин №'
+    if (isTroponin) return 'Анализ крови на Экспресс тест №'
+    return result.test_name?.toUpperCase()
+  }
+
+  // Subtitle for special tests
+  const needsSubtitle = isVitaminD || isTorch || isOncomarker || isProcalcitonin || isTroponin
+  const subtitle = needsSubtitle ? 'Human mindray MR-96A (Иммуноферментный анализ)' : null
+
+  // Table column config based on test type
+  const getColumns = () => {
+    if (isVitaminD || isTorch || isOncomarker || isProcalcitonin || isTroponin || isLipid) {
+      return ['name', 'value', 'normal']
+    }
+    if (isUrine) return ['name', 'value_with_unit']
+    return ['index', 'name', 'value', 'normal', 'unit']
+  }
+
+  const columns = getColumns()
+
+  // Render result value with color
+  const renderValue = (param) => {
+    const isAbnormal = param.is_normal === false
+    return (
+      <span className={`font-semibold text-base ${isAbnormal ? 'text-red-600 font-bold' : 'text-gray-900'}`}>
+        {param.value || '—'}
+      </span>
+    )
+  }
+
+  // Render standard table
+  const renderTable = () => {
+    if (!result.test_results || result.test_results.length === 0) {
+      return (
+        <div className="mb-8 p-6 bg-gray-50 rounded-xl border-2 border-gray-200">
+          <h3 className="font-bold text-lg mb-3">Натижа:</h3>
+          <div className="whitespace-pre-wrap font-mono">{result.result_text || 'Натижа киритилмаган'}</div>
+        </div>
+      )
+    }
+
+    // Special: Urine - 2 tables
+    if (isUrine) {
+      return (
+        <>
+          <table className="w-full border-2 border-gray-800 mb-6">
+            <thead>
+              <tr className="bg-green-50">
+                <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-green-700" colSpan="2">ФИЗИК-КИМЁВИЙ ХОССАСИ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.test_results.slice(0, 5).map((param, i) => (
+                <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="border-2 border-gray-800 px-4 py-2.5 font-bold w-1/2">{param.parameter_name}</td>
+                  <td className="border-2 border-gray-800 px-4 py-2.5 text-center">{renderValue(param)} {param.unit}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <table className="w-full border-2 border-gray-800 mb-8">
+            <thead>
+              <tr className="bg-green-50">
+                <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-green-700" colSpan="2">МИКРОСКОПИЯ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.test_results.slice(5).map((param, i) => (
+                <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <td className="border-2 border-gray-800 px-4 py-2.5 font-bold w-1/2">{param.parameter_name}</td>
+                  <td className="border-2 border-gray-800 px-4 py-2.5 text-center">{renderValue(param)} {param.unit}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )
+    }
+
+    // Special: Vitamin D - custom norma column
+    if (isVitaminD) {
+      return (
+        <table className="w-full border-2 border-gray-800 mb-8">
+          <thead>
+            <tr className="bg-yellow-50">
+              <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-yellow-700">Наименивование анализа</th>
+              <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-yellow-700">Результат</th>
+              <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-yellow-700">Норма</th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.test_results.map((param, i) => (
+              <tr key={i} className="bg-white">
+                <td className="border-2 border-gray-800 px-4 py-3 text-center font-bold">{param.parameter_name}</td>
+                <td className="border-2 border-gray-800 px-4 py-3 text-center">{renderValue(param)}</td>
+                <td className="border-2 border-gray-800 px-4 py-3 text-sm text-blue-600 font-semibold">
+                  <div className="space-y-0.5">
+                    <p>Выраженный дефицит — <b>0,1-9 нг/мл</b></p>
+                    <p>Достаточный уровень — <b>30-100 нг/мл</b></p>
+                    <p>Умеренный дефицит — <b>10-29 нг/мл</b></p>
+                    <p>Возможен токсический эффект — <b>101-200 нг/мл</b></p>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )
+    }
+
+    // Special: Coagulogram - 2 columns layout
+    if (isCoagulogram) {
+      return (
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          {[0, 1].map(col => (
+            <table key={col} className="w-full border-2 border-gray-800">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border-2 border-gray-800 px-3 py-2.5 text-center font-bold text-sm">Таҳлил номи</th>
+                  <th className="border-2 border-gray-800 px-3 py-2.5 text-center font-bold text-sm">Натижа</th>
+                  <th className="border-2 border-gray-800 px-3 py-2.5 text-center font-bold text-sm">Норма</th>
+                  <th className="border-2 border-gray-800 px-3 py-2.5 text-center font-bold text-sm">Ўлчов бирлиги</th>
+                </tr>
+              </thead>
+              <tbody>
+                {result.test_results.map((param, i) => (
+                  <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="border-2 border-gray-800 px-3 py-2 text-center font-bold">{param.parameter_name}</td>
+                    <td className="border-2 border-gray-800 px-3 py-2 text-center">{renderValue(param)}</td>
+                    <td className="border-2 border-gray-800 px-3 py-2 text-center text-blue-600 font-semibold">{param.normal_range}</td>
+                    <td className="border-2 border-gray-800 px-3 py-2 text-center text-blue-600 font-semibold">{param.unit}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ))}
+        </div>
+      )
+    }
+
+    // Determine header style based on test type
+    const headerColor = isBiochemistry ? 'bg-red-50 text-red-700' :
+                        isBloodTest ? 'bg-red-50 text-red-700' :
+                        isTorch ? 'bg-purple-50 text-purple-700' :
+                        isHormone ? 'bg-orange-50 text-orange-700' :
+                        (isOncomarker || isProcalcitonin || isTroponin) ? 'bg-purple-50 text-purple-700' :
+                        'bg-gray-100 text-gray-900'
+
+    // 3-column tables (name, value, normal)
+    if (columns.length === 3) {
+      return (
+        <table className="w-full border-2 border-gray-800 mb-8">
+          <thead>
+            <tr className={headerColor}>
+              <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold">Наименивование анализа</th>
+              <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold">Результат</th>
+              <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold">Норма</th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.test_results.map((param, i) => (
+              <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <td className="border-2 border-gray-800 px-4 py-2.5 font-bold">{param.parameter_name}</td>
+                <td className="border-2 border-gray-800 px-4 py-2.5 text-center">{renderValue(param)}</td>
+                <td className="border-2 border-gray-800 px-4 py-2.5 text-center text-blue-600 font-semibold whitespace-pre-line text-sm">{param.normal_range}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )
+    }
+
+    // Default: 5-column table (index, name, value, normal, unit)
+    return (
+      <table className="w-full border-2 border-gray-800 mb-8">
+        <thead>
+          <tr className={headerColor}>
+            <th className="border-2 border-gray-800 px-3 py-3 text-center font-bold w-[50px]">№</th>
+            <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold">ТАҲЛИЛ НОМИ</th>
+            <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold w-[160px]">НАТИЖА</th>
+            <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-blue-700 w-[140px]">МЕ'ЁР</th>
+            <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-blue-700 w-[130px]">ЎЛЧОВ БИРЛИГИ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {result.test_results.map((param, i) => (
+            <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+              <td className="border-2 border-gray-800 px-3 py-2.5 text-center font-semibold">{i + 1}.</td>
+              <td className="border-2 border-gray-800 px-4 py-2.5 font-bold">{param.parameter_name}</td>
+              <td className="border-2 border-gray-800 px-4 py-2.5 text-center">{renderValue(param)}</td>
+              <td className="border-2 border-gray-800 px-4 py-2.5 text-center text-blue-600 font-semibold whitespace-pre-line text-sm">{param.normal_range}</td>
+              <td className="border-2 border-gray-800 px-4 py-2.5 text-center text-blue-600 font-semibold">{param.unit}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Print tugmalari - faqat ekranda ko'rinadi */}
-      <div className="no-print sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 sm:p-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* Toolbar - no-print */}
+      <div className="no-print sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
-            onClick={() => {
-              console.log('Back button clicked');
-              // Try multiple navigation methods
-              if (window.history.length > 1) {
-                navigate(-1);
-              } else {
-                navigate('/lab');
-              }
-            }}
-            className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2 sm:gap-2 sm:gap-3"
+            onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/lab')}
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2 transition"
           >
-            <span className="material-symbols-outlined">arrow_back</span>
-            Орқага
+            <span className="material-symbols-outlined text-xl">arrow_back</span>
+            <span className="hidden sm:inline">Орқага</span>
           </button>
-          <div className="flex gap-2 sm:gap-3">
+
+          <div className="flex items-center gap-2">
+            {/* Status badge */}
+            <span className={`hidden sm:inline-flex px-3 py-1.5 rounded-full text-xs font-bold ${
+              result.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+            }`}>
+              {result.status === 'completed' ? 'Tayyor' : 'Kutilmoqda'}
+            </span>
+
             <button
               onClick={handleDownloadPDF}
-              className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-blue-500 text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:bg-blue-600 flex items-center gap-2 sm:gap-2 sm:gap-3"
+              className="px-4 py-2 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 flex items-center gap-2 transition"
             >
-              <span className="material-symbols-outlined">download</span>
-              PDF юклаб олиш
+              <span className="material-symbols-outlined text-xl">download</span>
+              <span className="hidden sm:inline">PDF</span>
             </button>
             <button
               onClick={handlePrint}
-              className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
+              className="px-4 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 flex items-center gap-2 transition"
             >
-              <span className="material-symbols-outlined">print</span>
-              Чоп этиш
+              <span className="material-symbols-outlined text-xl">print</span>
+              <span className="hidden sm:inline">Чоп этиш</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Natija - A4 format */}
-      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 print:p-0">
-        <div id="lab-result-content" className="bg-white print:shadow-none shadow-lg rounded-lg sm:rounded-lg sm:rounded-xl print:rounded-none p-4 sm:p-6 lg:p-8 print:p-12">
+      {/* A4 Content */}
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 print:p-0 print:max-w-none">
+        <div className="bg-white print:shadow-none shadow-xl rounded-2xl print:rounded-none p-6 sm:p-8 lg:p-10 print:p-[1cm]">
+
           {/* Header */}
-          <div className="flex items-start justify-between mb-8 pb-6 border-b-2 border-gray-300">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <img 
-                src={logoImage}
-                alt="Bolajon Med Klinikasi Logo" 
-                className="w-20 h-20 object-contain rounded-lg sm:rounded-lg sm:rounded-xl"
-              />
+          <div className="flex items-start justify-between mb-6 pb-5 border-b-2 border-green-600">
+            <div className="flex items-center gap-4">
+              <img src={logoImage} alt="Logo" className="w-20 h-20 object-contain rounded-xl print:w-16 print:h-16" />
               <div>
-                <h1 className="text-xl sm:text-2xl font-black text-gray-900">Bolajon Med Klinikasi</h1>
-                <p className="text-sm sm:text-sm sm:text-base text-gray-600">Диагностика ва даволаш маркази</p>
-                <p className="text-sm sm:text-sm sm:text-base text-gray-600">052- рақамли тиббий хужжат шакли</p>
+                <h1 className="text-2xl font-black text-gray-900">Bolajon Med Klinikasi</h1>
+                <p className="text-sm text-gray-600">Диагностика ва даволаш маркази</p>
+                <p className="text-xs text-gray-500 mt-1">052-рақамли тиббий хужжат шакли</p>
               </div>
             </div>
-            <div className="text-right text-sm sm:text-sm sm:text-base text-gray-600">
-              <p className="font-semibold">Ўзбекистон Республикаси</p>
+            <div className="text-right text-xs text-gray-500 leading-relaxed">
+              <p className="font-semibold text-gray-700">Ўзбекистон Республикаси</p>
               <p>Соғлиқни сақлаш вазирининг</p>
-              <p>2020 йил 31 декабрдаги №363-сонли</p>
-              <p>буйруғи билан тасдиқланган</p>
+              <p>2020 йил 31 декабрдаги</p>
+              <p>№363-сонли буйруғи билан тасдиқланган</p>
             </div>
           </div>
 
-          {/* Title */}
-          <h2 className="text-2xl sm:text-3xl font-black text-center text-green-600 mb-8">
-            {isBiochemistry ? 'БИОХИМИК ТАҲЛИЛ' : 
-             isBloodTest ? 'УМУМИЙ ҚОН ТАҲЛИЛИ' : 
-             isVitaminD ? 'АНАЛИЗ КРОВИ НА ВИТАМИН D' :
-             isTorch ? 'АНАЛИЗ КРОВИ НА ТОРЧ ИНФЕКЦИЯ' :
-             isUrine ? 'СИЙДИК ТАҲЛИЛИ' :
-             isHormone ? 'ГОРМОН ТАҲЛИЛИ' :
-             isOncomarker ? 'АНАЛИЗ КРОВИ НА ОНКОМАРКЕРЫ' :
-             isCoagulogram ? 'Коагулограмма №' :
-             isLipid ? 'Липидный спектр №' :
-             isProcalcitonin ? 'Анализ крови на д-димер, прокальцитонин, ферритин №' :
-             isTroponin ? 'Анализ крови на Экспресс тест №' :
-             result.test_name?.toUpperCase()}
-          </h2>
-          
-          {isCoagulogram && (
-            <p className="text-center text-base sm:text-lg font-bold mb-6">(Humaclot JUNIOR)</p>
-          )}
-          
-          {isProcalcitonin && (
-            <p className="text-center text-red-600 font-bold mb-6">Human mindray MR-96A (Иммуноферментный анализ)</p>
-          )}
-          
-          {isTroponin && (
-            <p className="text-center text-red-600 font-bold mb-6">Human mindray MR-96A (Иммуноферментный анализ)</p>
-          )}
+          {/* Test Title */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-black text-green-700 tracking-wide">{getTitle()}</h2>
+            {subtitle && (
+              <p className="text-sm text-red-600 font-bold mt-1">{subtitle}</p>
+            )}
+            {isCoagulogram && (
+              <p className="text-base font-bold text-gray-700 mt-1">(Humaclot JUNIOR)</p>
+            )}
+          </div>
 
           {/* Patient Info */}
-          {!isCoagulogram ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8 text-sm sm:text-sm sm:text-base">
-              <div>
-                <span className="text-gray-600">Сана:</span>
-                <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[120px]">
+          <div className="bg-gray-50 rounded-xl p-4 mb-6 print:bg-transparent print:p-0 print:mb-4">
+            {!isCoagulogram ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3 text-sm">
+                <div>
+                  <span className="text-gray-500">Сана:</span>
+                  <span className="ml-2 font-bold border-b border-gray-400 inline-block min-w-[120px] pb-0.5">
+                    {new Date(result.order_date).toLocaleDateString('uz-UZ')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Тартиб рақами:</span>
+                  <span className="ml-2 font-bold border-b border-gray-400 inline-block min-w-[120px] pb-0.5">
+                    {result.order_number}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Ёш:</span>
+                  <span className="ml-2 font-bold border-b border-gray-400 inline-block min-w-[80px] pb-0.5">
+                    {result.patient_age ? `${result.patient_age} ёш` : '—'}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="mb-3 text-sm">
+                <span className="text-gray-500">Сана:</span>
+                <span className="ml-2 font-bold border-b border-gray-400 inline-block min-w-[200px] pb-0.5">
                   {new Date(result.order_date).toLocaleDateString('uz-UZ')}
                 </span>
               </div>
-              <div>
-                <span className="text-gray-600">Тартиб рақами:</span>
-                <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[120px]">
-                  {result.order_number}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600">Ёш:</span>
-                <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[120px]">
-                  {result.patient_age ? `${result.patient_age} ёш` : '—'}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-8 text-sm sm:text-sm sm:text-base">
-              <div className="mb-3">
-                <span className="text-gray-600">Сана:</span>
-                <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[200px]">
-                  {new Date(result.order_date).toLocaleDateString('uz-UZ')}
-                </span>
-              </div>
-            </div>
-          )}
+            )}
 
-          <div className="mb-8">
-            <span className="text-gray-600 text-sm sm:text-sm sm:text-base">{isCoagulogram ? 'ИФО:' : 'Фамилияси, Исми:'}</span>
-            <span className="ml-2 font-bold text-base sm:text-lg border-b-2 border-gray-400 inline-block min-w-[400px]">
-              {result.patient_name}
-            </span>
+            <div className="mt-2">
+              <span className="text-gray-500 text-sm">{isCoagulogram ? 'ИФО:' : 'Фамилияси, Исми:'}</span>
+              <span className="ml-2 font-black text-lg border-b-2 border-gray-400 inline-block min-w-[300px] sm:min-w-[400px] pb-0.5">
+                {result.patient_name}
+              </span>
+            </div>
+
+            {isCoagulogram && (
+              <div className="mt-3 space-y-2 text-sm">
+                <div>
+                  <span className="text-gray-500">Туғилган йили:</span>
+                  <span className="ml-2 font-bold border-b border-gray-400 inline-block min-w-[200px] pb-0.5">
+                    {result.patient_birth_year || '—'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Манзил:</span>
+                  <span className="ml-2 font-bold border-b border-gray-400 inline-block min-w-[400px] pb-0.5">
+                    {result.patient_address || '—'}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-          
-          {isCoagulogram && (
-            <>
-              <div className="mb-4">
-                <span className="text-gray-600 text-sm sm:text-sm sm:text-base">Туғилган йили:</span>
-                <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[200px]">
-                  {result.patient_birth_year || '—'}
-                </span>
-              </div>
-              <div className="mb-8">
-                <span className="text-gray-600 text-sm sm:text-sm sm:text-base">Манзил:</span>
-                <span className="ml-2 font-semibold border-b border-gray-400 inline-block min-w-[400px]">
-                  {result.patient_address || '—'}
-                </span>
-              </div>
-            </>
-          )}
 
           {/* Results Table */}
-          {isBiochemistry && result.test_results ? (
-            <div className="overflow-x-auto">
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-red-600">№</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-red-600">ТАҲЛИЛ НОМИ</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">НАТИЖА</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">МЕ'ЁР</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">ЎЛЧОВ БИРЛИГИ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-semibold">{index + 1}.</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">{param.unit}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isBloodTest && result.test_results ? (
-            <div className="overflow-x-auto">
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-3 py-2 sm:py-3 text-center font-bold text-red-600">Показатель</th>
-                    <th className="border-2 border-gray-800 px-3 py-2 sm:py-3 text-center font-bold text-red-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-3 py-2 sm:py-3 text-center font-bold text-red-600">Норма<br/>Erkak | Ayol</th>
-                    <th className="border-2 border-gray-800 px-3 py-2 sm:py-3 text-center font-bold text-red-600">Единица<br/>измерения</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 font-bold text-sm sm:text-sm sm:text-base whitespace-pre-line">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-semibold">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
-                      <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.unit}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isVitaminD && result.test_results ? (
-            <div className="overflow-x-auto">
-              <p className="text-center text-red-600 font-bold mb-4">Human mindray MR-96A (Иммуноферментный анализ)</p>
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-yellow-600">Наименивование анализа</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-yellow-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-yellow-600">Норма</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className="bg-white">
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-sm sm:text-base text-blue-600 font-semibold">
-                        <div className="space-y-1">
-                          <p>Выраженный дефицит-<span className="font-bold">0,1-9нг/мл</span></p>
-                          <p>Достоточный уровень-<span className="font-bold">30-100нг/мл</span></p>
-                          <p>Умеренный дефицит-<span className="font-bold">10-29нг/мл</span></p>
-                          <p>Возможен токсичуский эффект-<span className="font-bold">101-200нг/мл</span></p>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isTorch && result.test_results ? (
-            <div className="overflow-x-auto">
-              <p className="text-center text-red-600 font-bold mb-4">Human mindray MR-96A (Иммуноферментный анализ)</p>
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Наименивование анализа</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Норма(ОП)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className="bg-white">
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold italic">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isUrine && result.test_results ? (
-            <div className="overflow-x-auto">
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-green-600" colSpan="2">ФИЗИК-КИМЁВИЙ ХОССАСИ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.slice(0, 5).map((param, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-bold w-1/2">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold">{param.value || '—'} {param.unit}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold text-green-600" colSpan="2">МИКРОСКОПИЯ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.slice(5).map((param, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 font-bold w-1/2">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold">{param.value || '—'} {param.unit}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isHormone && result.test_results ? (
-            <div className="overflow-x-auto">
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-orange-600">Наименивование анализа</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-orange-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-orange-600">Норма</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-orange-600">Единица измерения</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold whitespace-pre-line">{param.normal_range}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">{param.unit}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isOncomarker && result.test_results ? (
-            <div className="overflow-x-auto">
-              <p className="text-center text-red-600 font-bold mb-4">Human mindray MR-96A (Иммуноферментный анализ)</p>
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">Наименивование анализа</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-red-600">Норма</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold whitespace-pre-line text-sm sm:text-sm sm:text-base">{param.normal_range}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isCoagulogram && result.test_results ? (
-            <div>
-              {/* 2 ta jadval yonma-yon */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-8">
-                {/* Birinchi jadval */}
-                <div>
-                  <table className="w-full border-2 border-gray-800">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Таҳлил номи</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Натижа</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Норма</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Ўлчов бирлиги</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {result.test_results.map((param, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold">{param.parameter_name}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-semibold">{param.value || '—'}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.normal_range}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.unit}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                
-                {/* Ikkinchi jadval (bir xil) */}
-                <div>
-                  <table className="w-full border-2 border-gray-800">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Таҳлил номи</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Натижа</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Норма</th>
-                        <th className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold text-sm sm:text-sm sm:text-base">Ўлчов бирлиги</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {result.test_results.map((param, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-bold">{param.parameter_name}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center font-semibold">{param.value || '—'}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.normal_range}</td>
-                          <td className="border-2 border-gray-800 px-3 py-2 sm:py-2.5 text-center text-blue-600 font-semibold">{param.unit}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          ) : isLipid && result.test_results ? (
-            <div className="overflow-x-auto">
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">Показатель</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">Норма</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-left text-blue-600 font-semibold whitespace-pre-line text-sm sm:text-sm sm:text-base">{param.normal_range}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isProcalcitonin && result.test_results ? (
-            <div className="overflow-x-auto">
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Наименивание анализа</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Норма</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className="bg-white">
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">{param.normal_range}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : isTroponin && result.test_results ? (
-            <div className="overflow-x-auto">
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Наименивание анализа</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Результат</th>
-                    <th className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold text-purple-600">Норма</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className="bg-white">
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-bold">{param.parameter_name}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center font-semibold text-base sm:text-lg">{param.value || '—'}</td>
-                      <td className="border-2 border-gray-800 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-center text-blue-600 font-semibold">{param.normal_range}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : result.test_results && result.test_results.length > 0 ? (
-            /* Xizmat qo'shganda kiritilgan parametrlar jadvali */
-            <div className="overflow-x-auto">
-              <table className="w-full border-2 border-gray-800 mb-8">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border-2 border-gray-800 px-3 py-3 text-center font-bold text-gray-900" style={{ width: '60px' }}>
-                      №
-                    </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-left font-bold text-gray-900">
-                      ТАҲЛИЛ НОМИ
-                    </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-gray-900" style={{ width: '200px' }}>
-                      НАТИЖА
-                    </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-blue-600" style={{ width: '150px' }}>
-                      МЕ'ЁР
-                    </th>
-                    <th className="border-2 border-gray-800 px-4 py-3 text-center font-bold text-blue-600" style={{ width: '150px' }}>
-                      ЎЛЧОВ БИРЛИГИ
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.test_results.map((param, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="border-2 border-gray-800 px-3 py-3 text-center font-semibold">
-                        {index + 1}.
-                      </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-left font-bold uppercase">
-                        {param.parameter_name}
-                      </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center font-semibold text-lg">
-                        {param.value || '—'}
-                      </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold">
-                        {param.normal_range || '—'}
-                      </td>
-                      <td className="border-2 border-gray-800 px-4 py-3 text-center text-blue-600 font-semibold">
-                        {param.unit || '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="mb-8 p-4 sm:p-6 bg-gray-50 rounded-lg sm:rounded-lg sm:rounded-xl border border-gray-300">
-              <h3 className="font-bold text-base sm:text-lg mb-4">Натижа:</h3>
-              <div className="whitespace-pre-wrap font-mono text-sm sm:text-sm sm:text-base">
-                {result.result_text || 'Натижа киритилмаган'}
-              </div>
-            </div>
-          )}
+          <div className="overflow-x-auto">
+            {renderTable()}
+          </div>
 
           {/* Notes */}
           {result.notes && (
-            <div className="mb-8 p-3 sm:p-4 bg-yellow-50 rounded-lg sm:rounded-lg sm:rounded-xl border border-yellow-300">
-              <h3 className="font-bold mb-2">Изоҳлар:</h3>
-              <p className="text-sm sm:text-sm sm:text-base">{result.notes}</p>
+            <div className="mb-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200 print:bg-transparent print:border-gray-300">
+              <p className="font-bold text-sm mb-1 text-yellow-800">Изоҳлар:</p>
+              <p className="text-sm text-gray-700">{result.notes}</p>
             </div>
           )}
 
           {/* Footer */}
-          <div className="mt-12 pt-6 border-t-2 border-gray-300">
+          <div className="mt-10 pt-5 border-t-2 border-gray-300">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-sm sm:text-sm sm:text-base text-gray-600 mb-2">Лаборант:</p>
-                <p className="font-semibold text-base sm:text-lg border-b-2 border-gray-400 inline-block min-w-[250px] pb-1">
+                <p className="text-xs text-gray-500 mb-1">Лаборант:</p>
+                <p className="font-bold border-b-2 border-gray-400 inline-block min-w-[250px] pb-1">
                   {result.laborant_name || '___________________'}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm sm:text-sm sm:text-base text-gray-600">Натижа тасдиқланди:</p>
-                <p className="text-sm sm:text-sm sm:text-base font-semibold">
+                <p className="text-xs text-gray-500 mb-1">Натижа тасдиқланди:</p>
+                <p className="text-sm font-semibold">
                   {result.approved_at ? new Date(result.approved_at).toLocaleString('uz-UZ') : 'Тасдиқланмаган'}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* QR Code placeholder */}
-          <div className="mt-8 text-center text-xs text-gray-500">
-            <p>Ушбу ҳужжат электрон тарзда яратилган ва имзо талаб қилмайди</p>
+          {/* Document note */}
+          <div className="mt-8 text-center">
+            <p className="text-[10px] text-gray-400">Ушбу ҳужжат электрон тарзда яратилган ва имзо талаб қилмайди</p>
           </div>
         </div>
       </div>
 
       <style>{`
         @media print {
-          .no-print {
-            display: none !important;
-          }
-          body {
-            background: white;
-          }
-          @page {
-            size: A4;
-            margin: 1cm;
-          }
+          .no-print { display: none !important; }
+          body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @page { size: A4; margin: 0.5cm; }
+          table { page-break-inside: avoid; }
+          tr { page-break-inside: avoid; }
         }
       `}</style>
     </div>
-  );
+  )
 }
-

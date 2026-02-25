@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { io } from 'socket.io-client';
+import toast from 'react-hot-toast';
 import StatusBadge from '../components/dashboard/StatusBadge';
 import AddPatientModal from '../components/AddPatientModal';
 import { patientService } from '../services/patientService';
@@ -25,6 +27,24 @@ const Patients = () => {
   useEffect(() => {
     loadPatients();
   }, [pagination.page, searchTerm]);
+
+  // Socket: lab natija bildirishnomasi (receptionist uchun)
+  useEffect(() => {
+    const roleName = user?.role_name || user?.role?.name || ''
+    const isReceptionist = ['receptionist', 'Reception', 'Qabulxona'].includes(roleName)
+    if (!isReceptionist) return
+
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001'
+    const socket = io(apiUrl.replace('/api/v1', ''))
+
+    socket.on('lab-result-ready', (data) => {
+      if (data.targetRole === 'receptionist') {
+        toast.success(`Tahlil natijasi tayyor!\n${data.patientName} — ${data.testName}`, { duration: 8000 })
+      }
+    })
+
+    return () => socket.disconnect()
+  }, [])
 
   const loadPatients = async () => {
     try {

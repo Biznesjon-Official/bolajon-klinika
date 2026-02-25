@@ -1427,6 +1427,15 @@ const PatientProfile = () => {
                             <p className="font-semibold text-sm sm:text-sm sm:text-base text-gray-900 dark:text-white break-words">
                               {result.test_name}
                             </p>
+                            {result.status === 'approved' && (
+                              <button
+                                onClick={() => navigate(`/laboratory/result/${result.result_id}`)}
+                                className="p-1.5 text-primary hover:bg-primary/10 rounded-lg"
+                                title="Ko'rish va chop etish"
+                              >
+                                <span className="material-symbols-outlined text-lg">print</span>
+                              </button>
+                            )}
                             <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                               result.is_normal === true ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
                               result.is_normal === false ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' :

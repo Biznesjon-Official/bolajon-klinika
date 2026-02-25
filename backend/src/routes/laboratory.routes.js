@@ -1136,6 +1136,36 @@ router.post('/orders/:id/results', authenticate, authorize('laborant', 'admin'),
       }
     }
     
+    // Send socket notification
+    if (global.io) {
+      const Patient = (await import('../models/Patient.js')).default
+      const patient = await Patient.findById(patientId).select('first_name last_name patient_number')
+      const notifyData = {
+        orderId: existingOrder._id,
+        orderNumber: existingOrder.order_number,
+        patientId: patientId,
+        patientName: patient ? `${patient.first_name} ${patient.last_name}` : '',
+        patientNumber: patient?.patient_number || '',
+        testName: existingOrder.test_name,
+        completedAt: existingOrder.completed_at
+      }
+
+      // Notify doctor if order was created by a doctor
+      if (existingOrder.doctor_id) {
+        global.io.emit('lab-result-ready', {
+          ...notifyData,
+          targetRole: 'doctor',
+          targetUserId: existingOrder.doctor_id.toString()
+        })
+      }
+
+      // Always notify receptionists
+      global.io.emit('lab-result-ready', {
+        ...notifyData,
+        targetRole: 'receptionist'
+      })
+    }
+
     res.json({
       success: true,
       message: 'Natijalar kiritildi',

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { io } from 'socket.io-client';
 import { queueService } from '../services/queueService';
 import { prescriptionService } from '../services/prescriptionService';
 import doctorNurseService from '../services/doctorNurseService';
@@ -89,6 +90,18 @@ const DoctorPanel = () => {
     loadMyQueue();
     loadAvailableMedicines();
     loadAllPatients();
+
+    // Socket: lab natija bildirishnomasi
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const socket = io(apiUrl.replace('/api/v1', ''));
+
+    socket.on('lab-result-ready', (data) => {
+      if (data.targetRole === 'doctor' && data.targetUserId === user?._id) {
+        toast.success(`Tahlil natijasi tayyor!\n${data.patientName} — ${data.testName}`, { duration: 8000 });
+      }
+    });
+
+    return () => socket.disconnect();
   }, []);
 
   useEffect(() => {
