@@ -17,6 +17,7 @@ import api from '../services/api';
 import PrescriptionModal from '../components/PrescriptionModal';
 import doctorNurseService from '../services/doctorNurseService';
 import { laboratoryService } from '../services/laboratoryService';
+import labPrintService from '../services/labPrintService';
 
 const PatientProfile = () => {
   const { id } = useParams();
@@ -1428,13 +1429,42 @@ const PatientProfile = () => {
                               {result.test_name}
                             </p>
                             {result.status === 'approved' && (
-                              <button
-                                onClick={() => navigate(`/laboratory/result/${result.result_id}`)}
-                                className="p-1.5 text-primary hover:bg-primary/10 rounded-lg"
-                                title="Ko'rish va chop etish"
-                              >
-                                <span className="material-symbols-outlined text-lg">print</span>
-                              </button>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => navigate(`/laboratory/result/${result.result_id}`)}
+                                  className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                                  title="Ko'rish"
+                                >
+                                  <span className="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await labPrintService.fetchAndPrint(result.result_id)
+                                    } catch {
+                                      toast.error('Natijani yuklashda xatolik')
+                                    }
+                                  }}
+                                  className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg"
+                                  title="Chop etish"
+                                >
+                                  <span className="material-symbols-outlined text-lg">print</span>
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      toast.success('PDF uchun "PDF sifatida saqlash" ni tanlang', { duration: 3000 })
+                                      await labPrintService.fetchAndPrint(result.result_id)
+                                    } catch {
+                                      toast.error('Natijani yuklashda xatolik')
+                                    }
+                                  }}
+                                  className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                                  title="PDF yuklash"
+                                >
+                                  <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+                                </button>
+                              </div>
                             )}
                             <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                               result.is_normal === true ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
