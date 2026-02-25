@@ -114,9 +114,9 @@ router.get('/doctors',
     try {
       console.log('=== GET /queue/doctors (MongoDB) ===');
       
-      // Get all doctors
+      // Get all doctors (including chief_doctor)
       const doctors = await Staff.find({
-        role: 'doctor',
+        role: { $in: ['doctor', 'chief_doctor'] },
         status: 'active'
       }).select('first_name last_name specialization phone').lean();
       

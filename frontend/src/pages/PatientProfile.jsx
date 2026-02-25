@@ -18,6 +18,7 @@ import PrescriptionModal from '../components/PrescriptionModal';
 import doctorNurseService from '../services/doctorNurseService';
 import { laboratoryService } from '../services/laboratoryService';
 import labPrintService from '../services/labPrintService';
+import toast from 'react-hot-toast';
 
 const PatientProfile = () => {
   const { id } = useParams();

@@ -387,51 +387,46 @@ router.post('/invoices',
         });
       }
 
-      // Calculate revisit discount (DoctorService dan dinamik)
+      // Calculate revisit discount (DoctorService dan dinamik, har bir xizmat alohida)
       let revisitDiscount = 0;
       let revisitDiscountReason = '';
 
-      if (patient.last_visit_date && doctor_id) {
+      if (patient.last_visit_date) {
         const lastVisit = new Date(patient.last_visit_date);
         lastVisit.setHours(0, 0, 0, 0);
-
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
         const daysDiff = Math.floor((today - lastVisit) / (1000 * 60 * 60 * 24));
 
-        // DoctorService dan chegirma qoidalarini olish
-        const firstServiceId = items[0]?.service_id;
-        const doctorServiceConfig = firstServiceId
-          ? await DoctorService.findOne({ doctor_id, service_id: firstServiceId, is_active: true })
-          : null;
-
-        const rules = doctorServiceConfig?.revisit_rules || [
-          { min_days: 0, max_days: 3, discount_percent: 100 },
-          { min_days: 4, max_days: 7, discount_percent: 50 }
-        ];
-
-        for (const rule of rules) {
-          if (daysDiff >= rule.min_days && daysDiff <= rule.max_days) {
-            revisitDiscount = totalAmount * (rule.discount_percent / 100);
-            revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - ${rule.discount_percent}% chegirma`;
-            break;
+        if (doctor_id) {
+          // Har bir xizmat uchun DoctorService dan chegirma
+          for (const invItem of invoiceItems) {
+            const dsConfig = await DoctorService.findOne({
+              doctor_id, service_id: invItem.service_id, is_active: true
+            });
+            const rules = dsConfig?.revisit_rules || [
+              { min_days: 0, max_days: 3, discount_percent: 100 },
+              { min_days: 4, max_days: 7, discount_percent: 50 }
+            ];
+            for (const rule of rules) {
+              if (daysDiff >= rule.min_days && daysDiff <= rule.max_days) {
+                revisitDiscount += invItem.total_price * (rule.discount_percent / 100);
+                break;
+              }
+            }
           }
-        }
-      } else if (patient.last_visit_date) {
-        // Fallback: doctor_id yo'q bo'lsa eski hardcoded logika
-        const lastVisit = new Date(patient.last_visit_date);
-        lastVisit.setHours(0, 0, 0, 0);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const daysDiff = Math.floor((today - lastVisit) / (1000 * 60 * 60 * 24));
-
-        if (daysDiff >= 0 && daysDiff <= 3) {
-          revisitDiscount = totalAmount;
-          revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - 100% chegirma`;
-        } else if (daysDiff >= 4 && daysDiff <= 7) {
-          revisitDiscount = totalAmount * 0.50;
-          revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - 50% chegirma`;
+          if (revisitDiscount > 0) {
+            revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - chegirma`;
+          }
+        } else {
+          // Fallback: doctor_id yo'q — default qoidalar
+          if (daysDiff >= 0 && daysDiff <= 3) {
+            revisitDiscount = totalAmount;
+            revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - 100% chegirma`;
+          } else if (daysDiff >= 4 && daysDiff <= 7) {
+            revisitDiscount = totalAmount * 0.50;
+            revisitDiscountReason = `Qayta qabul (${daysDiff} kun) - 50% chegirma`;
+          }
         }
       }
 
@@ -629,6 +624,34 @@ router.get('/invoices',
     }
   }
 );
+
+/**
+ * Get unpaid invoices for a patient
+ * GET /api/v1/billing/invoices/patient/:patientId/unpaid
+ */
+router.get('/invoices/patient/:patientId/unpaid',
+  authenticate,
+  async (req, res) => {
+    try {
+      const { patientId } = req.params
+
+      const unpaidInvoices = await Invoice.find({
+        patient_id: patientId,
+        payment_status: { $in: ['pending', 'partial'] }
+      })
+        .select('invoice_number total_amount paid_amount discount_amount payment_status created_at')
+        .sort({ created_at: -1 })
+        .lean()
+
+      res.json({ success: true, data: unpaidInvoices })
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'To\'lanmagan hisob-fakturalarni olishda xatolik'
+      })
+    }
+  }
+)
 
 /**
  * Get invoice by ID
@@ -1082,51 +1105,3 @@ router.delete('/services/:id',
 );
 
 export default router;
-
-
-/**
- * Get unpaid invoices for a patient
- * GET /api/v1/invoices/patient/:patientId/unpaid
- */
-router.get('/invoices/patient/:patientId/unpaid',
-  authenticate,
-  async (req, res) => {
-    try {
-      const { patientId } = req.params;
-      
-      console.log('=== GET UNPAID INVOICES ===');
-      console.log('Patient ID:', patientId);
-      console.log('Request from:', req.user?.username || req.user?.email);
-      
-      const unpaidInvoices = await Invoice.find({
-        patient_id: patientId,
-        payment_status: { $in: ['pending', 'partial'] }
-      })
-        .select('invoice_number total_amount paid_amount discount_amount payment_status created_at')
-        .sort({ created_at: -1 })
-        .lean();
-      
-      console.log('Found unpaid invoices:', unpaidInvoices.length);
-      
-      if (unpaidInvoices.length > 0) {
-        console.log('Unpaid invoices details:');
-        unpaidInvoices.forEach(inv => {
-          const unpaid = inv.total_amount - inv.paid_amount;
-          console.log(`  - ${inv.invoice_number}: ${unpaid} so'm (Total: ${inv.total_amount}, Paid: ${inv.paid_amount})`);
-        });
-      }
-      
-      res.json({
-        success: true,
-        data: unpaidInvoices
-      });
-    } catch (error) {
-      console.error('Get unpaid invoices error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'To\'lanmagan hisob-fakturalarni olishda xatolik',
-        error: error.message
-      });
-    }
-  }
-);

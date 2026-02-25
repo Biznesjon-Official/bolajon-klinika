@@ -3,7 +3,7 @@ import api from './api'
 const labPrintService = {
   // Fetch result data and print
   fetchAndPrint: async (resultId) => {
-    const response = await api.get(`/laboratory/orders/${resultId}/results`)
+    const response = await api.get(`/laboratory/orders/${resultId}/result`)
     labPrintService.printResult(response.data.data)
   },
 
@@ -274,6 +274,10 @@ const labPrintService = {
 </html>`
 
     const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      alert('Popup bloklandi. Iltimos popup-blocker ni o\'chiring.')
+      return
+    }
     printWindow.document.write(html)
     printWindow.document.close()
     setTimeout(() => { printWindow.print() }, 300)

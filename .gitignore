@@ -77,3 +77,7 @@ frontend/playwright.config.js
 
 # Misc scripts
 backend/check-roles.js
+frontend/src/pages/_gen.js
+frontend/src/pages/_mkfile.js
+frontend/src/pages/_writer.js
+*.pdf

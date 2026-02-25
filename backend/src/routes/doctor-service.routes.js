@@ -54,7 +54,7 @@ router.get('/doctor/:doctorId', authenticate, async (req, res) => {
  */
 router.get('/doctors-list', authenticate, authorize('admin', 'chief_doctor'), async (req, res) => {
   try {
-    const doctors = await Staff.find({ role: 'doctor', status: 'active' })
+    const doctors = await Staff.find({ role: { $in: ['doctor', 'chief_doctor'] }, status: 'active' })
       .select('first_name last_name specialization')
       .sort({ first_name: 1 })
 
@@ -96,7 +96,7 @@ router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, r
     }
 
     // Check doctor exists
-    const doctor = await Staff.findOne({ _id: doctor_id, role: 'doctor' })
+    const doctor = await Staff.findOne({ _id: doctor_id, role: { $in: ['doctor', 'chief_doctor'] } })
     if (!doctor) {
       return res.status(404).json({ success: false, message: 'Doktor topilmadi' })
     }

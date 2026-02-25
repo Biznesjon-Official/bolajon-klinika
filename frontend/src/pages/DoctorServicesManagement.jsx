@@ -54,7 +54,7 @@ export default function DoctorServicesManagement() {
 
   const handleSubmit = async () => {
     try {
-      if (!form.service_id || !form.custom_price) {
+      if (!form.service_id || form.custom_price === '' || form.custom_price === undefined) {
         return toast.error('Xizmat va narxni tanlang')
       }
 
