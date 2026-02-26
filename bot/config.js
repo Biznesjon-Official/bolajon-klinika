@@ -5,6 +5,9 @@ export const config = {
   // Bot username (deep linking uchun)
   BOT_USERNAME: process.env.BOT_USERNAME || 'klinika_01_bot',
   
+  // Bot API key (backend authentication uchun)
+  BOT_API_KEY: process.env.BOT_API_KEY,
+
   // Backend API URL - environment'dan yoki default
   API_URL: process.env.API_URL || process.env.VITE_API_URL || 'http://localhost:5001/api/v1',
   

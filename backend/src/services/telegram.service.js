@@ -2,12 +2,13 @@ import axios from 'axios';
 import Patient from '../models/Patient.js';
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const TELEGRAM_API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : null;
 
 /**
  * Telegram orqali xabar yuborish
  */
 export async function sendTelegramMessage(chatId, message, options = {}) {
+  if (!TELEGRAM_API) return { success: false, message: 'BOT_TOKEN not configured' };
   try {
     const response = await axios.post(`${TELEGRAM_API}/sendMessage`, {
       chat_id: chatId,

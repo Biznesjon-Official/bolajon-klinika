@@ -8,8 +8,8 @@ const TELEGRAM_API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : nu
  */
 export async function sendTelegramMessage(chatId, message, options = {}) {
   try {
+    if (!TELEGRAM_API) return { success: false, message: 'BOT_TOKEN not configured' };
     if (!chatId) {
-      console.log('⚠️ No chat ID provided, skipping Telegram notification');
       return { success: false, message: 'No chat ID' };
     }
 
@@ -20,11 +20,9 @@ export async function sendTelegramMessage(chatId, message, options = {}) {
       ...options
     });
 
-    console.log('✅ Telegram message sent to chat ID:', chatId);
     return { success: true, data: response.data };
   } catch (error) {
-    console.error('❌ Error sending Telegram message:', error.response?.data || error.message);
-    return { success: false, error: error.message };
+    return { success: false, error: 'Failed to send telegram message' };
   }
 }
 

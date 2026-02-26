@@ -12,6 +12,9 @@ const userSessions = new Map();
 const api = axios.create({
   baseURL: config.API_URL,
   timeout: 10000,
+  headers: {
+    'x-bot-api-key': process.env.BOT_API_KEY
+  }
 });
 
 // API xatoliklarini ushlash
