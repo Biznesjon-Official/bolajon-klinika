@@ -73,6 +73,9 @@ const DashboardLayout = ({ children }) => {
     
     // 12. Xodimlar
     { name: t('nav.staff'), icon: 'badge', path: '/staff', roles: ['Admin', 'Administrator'] },
+
+    // 12.5. Davomat nazorati
+    { name: t('nav.attendance'), icon: 'schedule', path: '/attendance', roles: ['Admin', 'Administrator', 'chief_doctor'] },
     
     // 13. Vazifalar
     { name: 'Vazifalar', icon: 'task_alt', path: '/tasks', roles: ['Admin', 'Administrator'] },

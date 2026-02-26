@@ -23,6 +23,24 @@ const attendanceService = {
   getHistory: async (params) => {
     const response = await api.get('/attendance/history', { params });
     return response.data;
+  },
+
+  // Admin: Get all staff today attendance
+  getAllTodayAttendance: async () => {
+    const response = await api.get('/attendance/all-today');
+    return response.data;
+  },
+
+  // Admin: Get all staff attendance history
+  getAllHistory: async (params) => {
+    const response = await api.get('/attendance/all-history', { params });
+    return response.data;
+  },
+
+  // Admin: Get monthly stats
+  getStats: async (params) => {
+    const response = await api.get('/attendance/stats', { params });
+    return response.data;
   }
 };
 

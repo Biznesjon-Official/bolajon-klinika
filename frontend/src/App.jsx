@@ -54,6 +54,7 @@ const PayrollManagement = lazy(() => import('./pages/PayrollManagement'));
 const MySalary = lazy(() => import('./pages/MySalary'));
 const TaskManagement = lazy(() => import('./pages/TaskManagement'));
 const MyTasks = lazy(() => import('./pages/MyTasks'));
+const AttendanceManagement = lazy(() => import('./pages/AttendanceManagement'));
 const Settings = lazy(() => import('./pages/Settings'));
 const PatientPortal = lazy(() => import('./pages/PatientPortal'));
 const PatientSettings = lazy(() => import('./pages/PatientSettings'));
@@ -164,6 +165,7 @@ function AppContent() {
               <Route path="/expenses" element={<ProtectedRoute><DashboardLayout><Expenses /></DashboardLayout></ProtectedRoute>} />
               <Route path="/payroll" element={<ProtectedRoute><DashboardLayout><PayrollManagement /></DashboardLayout></ProtectedRoute>} />
               <Route path="/my-salary" element={<ProtectedRoute><DashboardLayout><MySalary /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/attendance" element={<ProtectedRoute><DashboardLayout><AttendanceManagement /></DashboardLayout></ProtectedRoute>} />
               <Route path="/tasks" element={<ProtectedRoute><DashboardLayout><TaskManagement /></DashboardLayout></ProtectedRoute>} />
               <Route path="/my-tasks" element={<ProtectedRoute><DashboardLayout><MyTasks /></DashboardLayout></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><DashboardLayout><Settings /></DashboardLayout></ProtectedRoute>} />
