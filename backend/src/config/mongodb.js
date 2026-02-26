@@ -1,8 +1,6 @@
 import mongoose from 'mongoose';
 import { logger } from '../utils/logger.js';
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
 let isConnected = false;
 
 export const connectMongoDB = async () => {
@@ -11,6 +9,7 @@ export const connectMongoDB = async () => {
     return;
   }
 
+  const MONGODB_URI = process.env.MONGODB_URI;
   if (!MONGODB_URI) {
     throw new Error('MONGODB_URI environment variable is not set')
   }
