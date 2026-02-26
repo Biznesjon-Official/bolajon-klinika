@@ -9,7 +9,7 @@ const router = express.Router();
 /**
  * Get all tasks
  */
-router.get('/',
+router.get('/all',
   authenticate,
   authorize('admin', 'doctor', 'chief_doctor'),
   async (req, res, next) => {
