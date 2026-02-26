@@ -41,17 +41,11 @@ export default function MySalary() {
         staffSalaryService.getMyBonuses()
       ]);
 
-      console.log('💰 Salary response:', salaryResponse);
-      console.log('🎁 Bonuses response:', bonusesResponse);
-
       if (salaryResponse.success) {
         setSalaryData(salaryResponse.data);
       }
 
       if (bonusesResponse.success) {
-        console.log('📋 Setting bonuses data:', bonusesResponse.data);
-        console.log('📋 Penalties count:', bonusesResponse.data.penalties?.length);
-        console.log('📋 Penalties:', bonusesResponse.data.penalties);
         setBonusesData(bonusesResponse.data);
       }
 

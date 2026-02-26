@@ -97,10 +97,9 @@ router.get('/dashboard', authenticate, authorize('chief_doctor'), async (req, re
       }
     });
   } catch (error) {
-    console.error('Dashboard error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -166,10 +165,9 @@ router.get('/staff-activity', authenticate, authorize('chief_doctor'), async (re
       data: staffWithActivity
     });
   } catch (error) {
-    console.error('Staff activity error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -208,10 +206,9 @@ router.get('/on-duty-schedule', authenticate, authorize('chief_doctor', 'admin',
       data: schedule
     });
   } catch (error) {
-    console.error('On-duty schedule error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -241,10 +238,9 @@ router.get('/my-shifts', authenticate, authorize('doctor'), async (req, res) => 
       data: myShifts
     });
   } catch (error) {
-    console.error('My shifts error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -302,10 +298,9 @@ router.post('/on-duty-schedule', authenticate, authorize('chief_doctor', 'admin'
       data: populated
     });
   } catch (error) {
-    console.error('Assign on-duty doctor error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -346,10 +341,9 @@ router.put('/on-duty-schedule/:id', authenticate, authorize('chief_doctor', 'adm
       data: populated
     });
   } catch (error) {
-    console.error('Update on-duty doctor error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -375,10 +369,9 @@ router.delete('/on-duty-schedule/:id', authenticate, authorize('chief_doctor', '
       message: 'Schedule deleted successfully'
     });
   } catch (error) {
-    console.error('Delete on-duty doctor error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -402,10 +395,9 @@ router.get('/available-doctors', authenticate, authorize('chief_doctor', 'admin'
       data: doctors
     });
   } catch (error) {
-    console.error('Available doctors error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });

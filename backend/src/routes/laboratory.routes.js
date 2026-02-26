@@ -110,7 +110,6 @@ router.get('/tests', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get lab tests error:', error);
     next(error);
   }
 });
@@ -135,7 +134,6 @@ router.get('/tests/:id', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get lab test error:', error);
     next(error);
   }
 });
@@ -188,7 +186,6 @@ router.post('/tests', authenticate, authorize('admin', 'laborant', 'doctor'), as
       }
     });
   } catch (error) {
-    console.error('Create lab test error:', error);
     next(error);
   }
 });
@@ -243,7 +240,6 @@ router.put('/tests/:id', authenticate, authorize('admin', 'laborant', 'doctor'),
       data: test
     });
   } catch (error) {
-    console.error('Update lab test error:', error);
     next(error);
   }
 });
@@ -265,7 +261,6 @@ router.delete('/tests/:id', authenticate, authorize('admin', 'laborant', 'doctor
       message: 'Tahlil o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete lab test error:', error);
     next(error);
   }
 });
@@ -346,7 +341,6 @@ router.get('/orders', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get lab orders error:', error);
     next(error);
   }
 });
@@ -375,7 +369,6 @@ router.get('/orders/:id', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get lab order error:', error);
     next(error);
   }
 });
@@ -400,16 +393,9 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
     let patientAge = null;
     let patientBirthYear = null;
     
-    console.log('=== PATIENT AGE CALCULATION ===');
-    console.log('Patient ID:', order.patient_id?._id);
-    console.log('Patient name:', order.patient_id?.first_name, order.patient_id?.last_name);
-    console.log('Date of birth:', order.patient_id?.date_of_birth);
-    console.log('Date of birth type:', typeof order.patient_id?.date_of_birth);
     
     if (order.patient_id?.date_of_birth) {
       const birthDate = new Date(order.patient_id.date_of_birth);
-      console.log('Birth date object:', birthDate);
-      console.log('Birth date valid:', !isNaN(birthDate.getTime()));
       
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
@@ -420,10 +406,7 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
       patientAge = age;
       patientBirthYear = birthDate.getFullYear();
       
-      console.log('Calculated age:', patientAge);
-      console.log('Birth year:', patientBirthYear);
     } else {
-      console.log('Date of birth not found!');
     }
     
     res.json({
@@ -449,7 +432,6 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get lab order result error:', error);
     next(error);
   }
 });
@@ -466,7 +448,6 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
       await session.startTransaction()
       useTransaction = true
     } catch (sessionErr) {
-      console.log('Transaction not available, proceeding without:', sessionErr.message)
       session = null
       useTransaction = false
     }
@@ -481,9 +462,6 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
       admission_id
     } = req.body;
 
-    console.log('=== CREATE LAB ORDER ===')
-    console.log('Body:', JSON.stringify({ patient_id, test_id, priority, admission_id }))
-    console.log('User:', req.user?.id, req.user?.role_name)
 
     // Validation: Required fields
     if (!patient_id || !test_id) {
@@ -668,7 +646,6 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
     if (useTransaction && session) {
       try { await session.abortTransaction() } catch (e) { /* ignore */ }
     }
-    console.error('Create lab order error:', error)
     next(error)
   } finally {
     if (session) {
@@ -719,7 +696,6 @@ router.put('/orders/:id/status', authenticate, authorize('admin', 'laborant'), a
       data: order
     });
   } catch (error) {
-    console.error('Update lab order status error:', error);
     next(error);
   }
 });
@@ -768,7 +744,6 @@ router.put('/orders/:id', authenticate, authorize('admin', 'laborant'), async (r
       data: order
     });
   } catch (error) {
-    console.error('Update lab order error:', error);
     next(error);
   }
 });
@@ -790,7 +765,6 @@ router.delete('/orders/:id', authenticate, authorize('admin'), async (req, res, 
       message: 'Tahlil buyurtmasi o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete lab order error:', error);
     next(error);
   }
 });
@@ -913,7 +887,6 @@ router.get('/stats', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get lab stats error:', error);
     next(error);
   }
 });
@@ -979,7 +952,6 @@ router.get('/laborant/stats', authenticate, authorize('laborant', 'admin'), asyn
       }
     });
   } catch (error) {
-    console.error('Get laborant stats error:', error);
     next(error);
   }
 });
@@ -1024,7 +996,6 @@ router.post('/scan-qr', authenticate, authorize('laborant', 'admin'), async (req
       }
     });
   } catch (error) {
-    console.error('Scan QR error:', error);
     next(error);
   }
 });
@@ -1176,7 +1147,6 @@ router.post('/orders/:id/results', authenticate, authorize('laborant', 'admin'),
       }
     });
   } catch (error) {
-    console.error('Submit results error:', error);
     next(error);
   }
 });
@@ -1240,7 +1210,6 @@ router.get('/laborant/history', authenticate, authorize('laborant', 'admin'), as
       data: history
     });
   } catch (error) {
-    console.error('Get laborant history error:', error);
     next(error);
   }
 });
@@ -1257,9 +1226,6 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
 
     const filePath = req.file.path;
     
-    console.log('=== PDF PARSING START (pdfjs-dist) ===');
-    console.log('File path:', filePath);
-    console.log('File size:', req.file.size);
     
     // Import pdfjs-dist
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
@@ -1274,7 +1240,6 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
     });
     
     const pdfDocument = await loadingTask.promise;
-    console.log('PDF loaded, pages:', pdfDocument.numPages);
     
     let allText = '';
     const tableData = [];
@@ -1284,7 +1249,6 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
       const page = await pdfDocument.getPage(pageNum);
       const textContent = await page.getTextContent();
       
-      console.log(`Page ${pageNum} items:`, textContent.items.length);
       
       // Group text items by Y position (rows)
       const rows = {};
@@ -1308,7 +1272,6 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
       // Sort rows by Y position (top to bottom)
       const sortedYPositions = Object.keys(rows).map(Number).sort((a, b) => b - a);
       
-      console.log(`Page ${pageNum} rows:`, sortedYPositions.length);
       
       // Process each row
       sortedYPositions.forEach(y => {
@@ -1317,19 +1280,13 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
         const rowText = rowItems.map(item => item.text).join(' ');
         allText += rowText + '\n';
         
-        console.log('Row:', rowText);
       });
     }
     
-    console.log('=== EXTRACTED TEXT ===');
-    console.log('Total text length:', allText.length);
-    console.log('Text preview:', allText.substring(0, 500));
     
     // Parse table from extracted text
     const lines = allText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     
-    console.log('Total lines:', lines.length);
-    console.log('First 30 lines:', lines.slice(0, 30));
     
     let testName = '';
     let inTable = false;
@@ -1356,7 +1313,6 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
           lowerLine.includes('результат') ||
           lowerLine.includes('норма')) {
         inTable = true;
-        console.log('Table header found at line', i, ':', line);
         continue;
       }
       
@@ -1413,7 +1369,6 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
             }
           }
           
-          console.log('Parsed row:', { parameter, normalRange, unit });
           
           tableData.push({
             parameter: parameter,
@@ -1425,13 +1380,9 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
       }
     }
     
-    console.log('=== PARSED TABLE DATA ===');
-    console.log('Table data count:', tableData.length);
-    console.log('Table data:', JSON.stringify(tableData, null, 2));
     
     // If no table data found, provide empty template
     if (tableData.length === 0) {
-      console.log('No table data found, using template');
       tableData.push(
         { parameter: 'Parametr 1', value: '', unit: '', normalRange: '' },
         { parameter: 'Parametr 2', value: '', unit: '', normalRange: '' },
@@ -1453,27 +1404,21 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
       }
     };
 
-    console.log('=== RESPONSE ===');
-    console.log(JSON.stringify(response, null, 2));
 
     res.json(response);
   } catch (error) {
-    console.error('=== PDF PARSE ERROR ===');
-    console.error('Error:', error);
-    console.error('Error stack:', error.stack);
     
     // Clean up uploaded file on error
     if (req.file && req.file.path) {
       try {
         fs.unlinkSync(req.file.path);
       } catch (unlinkError) {
-        console.error('Error deleting file:', unlinkError);
       }
     }
     
     res.status(500).json({
       success: false,
-      message: 'PDF ni tahlil qilishda xatolik: ' + error.message
+      message: 'Server xatosi'
     });
   }
 });

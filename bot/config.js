@@ -1,6 +1,6 @@
 export const config = {
   // Telegram Bot Token (BotFather'dan olinadi)
-  BOT_TOKEN: process.env.BOT_TOKEN || '8551375038:AAFXDSS0IwrsZsqCIC2_oXXZwVZZWgqSdD4',
+  BOT_TOKEN: process.env.BOT_TOKEN,
   
   // Bot username (deep linking uchun)
   BOT_USERNAME: process.env.BOT_USERNAME || 'klinika_01_bot',

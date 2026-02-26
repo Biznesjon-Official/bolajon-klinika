@@ -12,9 +12,6 @@ router.get('/rooms', authenticate, async (req, res, next) => {
   try {
     const { floor } = req.query;
     
-    console.log('=== GET INPATIENT ROOMS (MongoDB) ===');
-    console.log('Floor:', floor);
-    
     const query = { department: 'inpatient' };
     if (floor) query.floor = parseInt(floor);
     
@@ -67,7 +64,6 @@ router.get('/rooms', authenticate, async (req, res, next) => {
       data: formattedRooms
     });
   } catch (error) {
-    console.error('Get inpatient rooms error:', error);
     next(error);
   }
 });
@@ -76,9 +72,6 @@ router.get('/rooms', authenticate, async (req, res, next) => {
 router.post('/rooms', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const { room_number, floor_number, room_type, daily_rate, bed_count, bed_prices } = req.body;
-    
-    console.log('=== CREATE INPATIENT ROOM (MongoDB) ===');
-    console.log('Data:', { room_number, floor_number, room_type, bed_count, bed_prices });
     
     // Check if room already exists in inpatient department
     const existing = await AmbulatorRoom.findOne({ room_number, department: 'inpatient' });
@@ -118,8 +111,6 @@ router.post('/rooms', authenticate, authorize('admin'), async (req, res, next) =
     }
     await Bed.insertMany(beds);
     
-    console.log('✅ Inpatient room created with', bed_count, 'beds:', room.room_number);
-    
     res.status(201).json({
       success: true,
       message: 'Xona muvaffaqiyatli yaratildi',
@@ -136,7 +127,6 @@ router.post('/rooms', authenticate, authorize('admin'), async (req, res, next) =
       }
     });
   } catch (error) {
-    console.error('Create inpatient room error:', error);
     next(error);
   }
 });
@@ -145,9 +135,6 @@ router.post('/rooms', authenticate, authorize('admin'), async (req, res, next) =
 router.put('/rooms/:id', authenticate, authorize('admin'), async (req, res, next) => {
   try {
     const { room_number, floor_number, room_type, status } = req.body;
-    
-    console.log('=== UPDATE INPATIENT ROOM (MongoDB) ===');
-    console.log('Room ID:', req.params.id);
     
     const room = await AmbulatorRoom.findOne({ _id: req.params.id, department: 'inpatient' });
     
@@ -179,7 +166,6 @@ router.put('/rooms/:id', authenticate, authorize('admin'), async (req, res, next
       }
     });
   } catch (error) {
-    console.error('Update inpatient room error:', error);
     next(error);
   }
 });
@@ -210,7 +196,6 @@ router.delete('/rooms/:id', authenticate, authorize('admin'), async (req, res, n
       message: 'Xona o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete inpatient room error:', error);
     next(error);
   }
 });
@@ -218,8 +203,6 @@ router.delete('/rooms/:id', authenticate, authorize('admin'), async (req, res, n
 // Inpatient stats
 router.get('/stats', authenticate, async (req, res, next) => {
   try {
-    console.log('=== GET INPATIENT STATS (MongoDB) ===');
-    
     const Admission = (await import('../models/Admission.js')).default;
     
     // Xonalar statistikasi - faqat inpatient
@@ -257,7 +240,6 @@ router.get('/stats', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get inpatient stats error:', error);
     next(error);
   }
 });
@@ -304,7 +286,6 @@ router.get('/visual-map', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get inpatient visual map error:', error);
     next(error);
   }
 });
@@ -359,8 +340,6 @@ router.put('/beds/:id/price', authenticate, authorize('admin'), async (req, res,
     bed.daily_price = daily_price;
     await bed.save();
     
-    console.log('✅ Bed price updated:', bed._id, 'New price:', daily_price);
-    
     res.json({
       success: true,
       message: 'Koyka narxi yangilandi',
@@ -371,7 +350,6 @@ router.put('/beds/:id/price', authenticate, authorize('admin'), async (req, res,
       }
     });
   } catch (error) {
-    console.error('Update bed price error:', error);
     next(error);
   }
 });
@@ -404,7 +382,6 @@ router.get('/beds', authenticate, async (req, res, next) => {
       data: beds
     });
   } catch (error) {
-    console.error('Get beds error:', error);
     next(error);
   }
 });
@@ -449,7 +426,6 @@ router.get('/admissions', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get admissions error:', error);
     next(error);
   }
 });

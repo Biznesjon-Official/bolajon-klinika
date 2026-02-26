@@ -7,10 +7,7 @@ const router = express.Router();
 // Barcha xarajatlarni olish (filtrlash bilan)
 router.get('/', authenticate, authorize('Admin', 'Administrator'), async (req, res) => {
   try {
-    console.log('=== GET EXPENSES ===');
-    console.log('User:', req.user);
-    
-    const { 
+    const {
       start_date, 
       end_date, 
       category,
@@ -68,11 +65,9 @@ router.get('/', authenticate, authorize('Admin', 'Administrator'), async (req, r
       }
     });
   } catch (error) {
-    console.error('Get expenses error:', error);
     res.status(500).json({
       success: false,
-      message: 'Xarajatlarni yuklashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -80,9 +75,6 @@ router.get('/', authenticate, authorize('Admin', 'Administrator'), async (req, r
 // Statistika olish
 router.get('/stats', authenticate, authorize('Admin', 'Administrator'), async (req, res) => {
   try {
-    console.log('=== GET EXPENSE STATS ===');
-    console.log('User:', req.user);
-    
     const { month, year } = req.query;
 
     // Umumiy xarajat
@@ -167,11 +159,9 @@ router.get('/stats', authenticate, authorize('Admin', 'Administrator'), async (r
       }
     });
   } catch (error) {
-    console.error('Get expense stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Statistikani yuklashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -210,11 +200,9 @@ router.post('/', authenticate, authorize('Admin', 'Administrator'), async (req, 
       data: populatedExpense
     });
   } catch (error) {
-    console.error('Create expense error:', error);
     res.status(500).json({
       success: false,
-      message: 'Xarajat qo\'shishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -252,11 +240,9 @@ router.put('/:id', authenticate, authorize('Admin', 'Administrator'), async (req
       data: populatedExpense
     });
   } catch (error) {
-    console.error('Update expense error:', error);
     res.status(500).json({
       success: false,
-      message: 'Xarajatni yangilashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -281,11 +267,9 @@ router.delete('/:id', authenticate, authorize('Admin', 'Administrator'), async (
       message: 'Xarajat muvaffaqiyatli o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete expense error:', error);
     res.status(500).json({
       success: false,
-      message: 'Xarajatni o\'chirishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

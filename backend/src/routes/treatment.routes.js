@@ -58,11 +58,9 @@ router.get('/', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get treatment schedules error:', error);
     res.status(500).json({
       success: false,
-      message: 'Muolaja jadvalini olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -98,11 +96,9 @@ router.put('/:id/complete', authenticate, async (req, res) => {
       data: schedule
     });
   } catch (error) {
-    console.error('Complete treatment error:', error);
     res.status(500).json({
       success: false,
-      message: 'Muolajani bajarishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -134,11 +130,9 @@ router.get('/my-today', authenticate, async (req, res) => {
       data: schedules
     });
   } catch (error) {
-    console.error('Get my today treatments error:', error);
     res.status(500).json({
       success: false,
-      message: 'Bugungi muolajalarni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -213,11 +207,9 @@ router.get('/patient/:patientId/schedule', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get patient schedule error:', error);
     res.status(500).json({
       success: false,
-      message: 'Bemor jadvalini olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -255,11 +247,9 @@ router.put('/:id/assign-nurse', authenticate, async (req, res) => {
       data: schedule
     });
   } catch (error) {
-    console.error('Assign nurse error:', error);
     res.status(500).json({
       success: false,
-      message: 'Hamshirani tayinlashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -299,11 +289,9 @@ router.put('/bulk-assign-nurse', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Bulk assign nurse error:', error);
     res.status(500).json({
       success: false,
-      message: 'Hamshiralarni tayinlashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

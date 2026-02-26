@@ -18,15 +18,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     const token = authService.getToken();
-    
-    console.log('=== AUTH CONTEXT INIT ===');
-    console.log('Token:', token ? 'exists' : 'missing');
-    console.log('User:', currentUser ? currentUser.username || currentUser.patient_number : 'missing');
-    
+
     if (currentUser && token) {
       setUser(currentUser);
     }
-    // MUAMMO TUZATILDI: logout() chaqirmaslik
     setLoading(false);
   }, []);
 
@@ -51,8 +46,8 @@ export const AuthProvider = ({ children }) => {
             logout();
           });
         }
-      } catch (error) {
-        console.error('Token check error:', error);
+      } catch (_) {
+        // Token parse error
       }
     };
 
@@ -62,21 +57,9 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   const login = async (username, password, isPatient = false) => {
-    console.log('=== AUTH CONTEXT LOGIN ===');
-    console.log('username:', username);
-    console.log('password:', password ? '***' : 'empty');
-    console.log('isPatient param:', isPatient);
-    console.log('isPatient type:', typeof isPatient);
-    console.log('isPatient === true:', isPatient === true);
-    console.log('isPatient === false:', isPatient === false);
-    console.log('isPatient === undefined:', isPatient === undefined);
-    
-    // Force to boolean - if explicitly true, use true, otherwise false
     const isPatientBool = isPatient === true;
-    console.log('Final isPatientBool:', isPatientBool);
-    
     const result = await authService.login(username, password, isPatientBool);
-    
+
     if (result.success && !result.requires2FA) {
       setUser(result.user);
     }

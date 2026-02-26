@@ -6,7 +6,7 @@ import Patient from '../models/Patient.js';
 import Staff from '../models/Staff.js';
 import TelegramBot from 'node-telegram-bot-api';
 
-const BOT_TOKEN = process.env.BOT_TOKEN || '8551375038:AAFXDSS0IwrsZsqCIC2_oXXZwVZZWgqSdD4';
+const BOT_TOKEN = process.env.BOT_TOKEN;
 
 /**
  * Muolaja vaqti kelgan bemorlar haqida hamshiralarga xabar yuborish

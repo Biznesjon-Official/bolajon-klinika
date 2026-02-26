@@ -174,9 +174,6 @@ router.post('/chat', async (req, res) => {
     const intent = detectIntent(message);
     const response = getRandomResponse(intent);
 
-    // Log for analytics (optional)
-    console.log(`[AI Chatbot] Session: ${sessionId}, Intent: ${intent}, Message: ${message.substring(0, 50)}...`);
-
     res.json({
       success: true,
       message: response,
@@ -185,7 +182,6 @@ router.post('/chat', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('AI Chatbot error:', error);
     res.status(500).json({
       success: false,
       error: 'Serverda xatolik yuz berdi'

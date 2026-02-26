@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
 import { logger } from '../utils/logger.js';
 
-// Use the correct MongoDB URI
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://mironshox:D1WVdeVfthVP1Z2F@cluster0.zthjn1c.mongodb.net/clinic_db?retryWrites=true&w=majority&appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 let isConnected = false;
 
@@ -12,8 +11,9 @@ export const connectMongoDB = async () => {
     return;
   }
 
-  console.log('🔍 Connecting to MongoDB...');
-  console.log('   Using hardcoded URI (temporary)');
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI environment variable is not set')
+  }
 
   try {
     const options = {
@@ -35,7 +35,7 @@ export const connectMongoDB = async () => {
     
     // Log database name
     const dbName = mongoose.connection.db.databaseName;
-    console.log('📦 Connected to database:', dbName);
+    logger.info(`Connected to database: ${dbName}`);
     
     logger.info('✅ MongoDB connected successfully');
     

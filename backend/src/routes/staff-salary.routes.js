@@ -150,11 +150,9 @@ router.get('/my-salary', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get my salary error:', error);
     res.status(500).json({
       success: false,
-      message: 'Maosh ma\'lumotlarini olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -167,8 +165,6 @@ router.get('/my-bonuses', authenticate, async (req, res) => {
   try {
     const staffId = req.user._id || req.user.id;
     
-    console.log('🔍 Getting bonuses/penalties for staff:', staffId);
-    
     // Get bonuses directly from Bonus collection
     const bonusRecords = await Bonus.find({
       staff_id: staffId,
@@ -177,8 +173,6 @@ router.get('/my-bonuses', authenticate, async (req, res) => {
       .sort({ created_at: -1 })
       .lean();
 
-    console.log('✅ Found bonuses:', bonusRecords.length);
-
     // Get penalties directly from Penalty collection (both pending and approved)
     const penaltyRecords = await Penalty.find({
       staff_id: staffId,
@@ -186,8 +180,6 @@ router.get('/my-bonuses', authenticate, async (req, res) => {
     })
       .sort({ created_at: -1 })
       .lean();
-
-    console.log('✅ Found penalties:', penaltyRecords.length);
 
     const bonuses = bonusRecords.map(bonus => ({
       id: bonus._id.toString(),
@@ -209,8 +201,6 @@ router.get('/my-bonuses', authenticate, async (req, res) => {
       year: penalty.year
     }));
 
-    console.log('📦 Returning data:', { bonuses: bonuses.length, penalties: penalties.length });
-
     res.json({
       success: true,
       data: {
@@ -219,11 +209,9 @@ router.get('/my-bonuses', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get my bonuses error:', error);
     res.status(500).json({
       success: false,
-      message: 'Bonus va jarimalarni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -309,11 +297,9 @@ router.get('/my-commissions', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get my commissions error:', error);
     res.status(500).json({
       success: false,
-      message: 'Komissiyalarni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

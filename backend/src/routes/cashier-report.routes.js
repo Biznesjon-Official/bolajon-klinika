@@ -60,11 +60,9 @@ router.get('/',
         totals
       });
     } catch (error) {
-      console.error('Get cashier reports error:', error);
       res.status(500).json({
         success: false,
-        message: 'Xatolik yuz berdi',
-        error: error.message
+        message: 'Server xatosi'
       });
     }
   }
@@ -96,11 +94,9 @@ router.get('/:id',
         data: report
       });
     } catch (error) {
-      console.error('Get cashier report error:', error);
       res.status(500).json({
         success: false,
-        message: 'Xatolik yuz berdi',
-        error: error.message
+        message: 'Server xatosi'
       });
     }
   }
@@ -134,11 +130,9 @@ router.get('/my/reports',
         data: reports
       });
     } catch (error) {
-      console.error('Get my cashier reports error:', error);
       res.status(500).json({
         success: false,
-        message: 'Xatolik yuz berdi',
-        error: error.message
+        message: 'Server xatosi'
       });
     }
   }
@@ -166,7 +160,7 @@ router.get('/today',
 
       res.json({ success: true, data: reports });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'Xatolik yuz berdi', error: error.message });
+      res.status(500).json({ success: false, message: 'Server xatosi' });
     }
   }
 );
@@ -232,11 +226,9 @@ router.get('/today/summary',
         data: summary
       });
     } catch (error) {
-      console.error('Get today summary error:', error);
       res.status(500).json({
         success: false,
-        message: 'Xatolik yuz berdi',
-        error: error.message
+        message: 'Server xatosi'
       });
     }
   }

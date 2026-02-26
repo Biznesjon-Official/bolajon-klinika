@@ -17,7 +17,6 @@ const router = express.Router();
 
 router.get('/rooms', authenticate, async (req, res, next) => {
   try {
-    console.log('=== GET AMBULATOR ROOMS (MongoDB) ===');
     
     const rooms = await AmbulatorRoom.find()
       .populate('current_patient_id', 'patient_number first_name last_name')
@@ -28,7 +27,6 @@ router.get('/rooms', authenticate, async (req, res, next) => {
       .sort({ room_number: 1 })
       .lean();
     
-    console.log('Found rooms:', rooms.length);
     
     // Format response
     const formattedRooms = rooms.map(room => ({
@@ -53,7 +51,6 @@ router.get('/rooms', authenticate, async (req, res, next) => {
     
     res.json({ success: true, data: formattedRooms });
   } catch (error) {
-    console.error('Get rooms error:', error);
     next(error);
   }
 });
@@ -87,8 +84,6 @@ router.post('/generate-qr', authenticate, authorize('admin', 'receptionist'), as
   try {
     const { queue_id } = req.body;
     
-    console.log('=== GENERATE QR (MongoDB) ===');
-    console.log('Queue ID:', queue_id);
     
     // Get queue with patient info
     const queue = await Queue.findById(queue_id)
@@ -120,11 +115,9 @@ router.post('/generate-qr', authenticate, authorize('admin', 'receptionist'), as
     
     await qrTicket.save();
     
-    console.log('✅ QR ticket created:', ticketNumber);
     
     res.status(201).json({ success: true, data: qrTicket });
   } catch (error) {
-    console.error('Generate QR error:', error);
     next(error);
   }
 });
@@ -144,7 +137,6 @@ router.get('/qr-ticket/:queue_id', authenticate, async (req, res, next) => {
     
     res.json({ success: true, data: qrTicket });
   } catch (error) {
-    console.error('Get QR ticket error:', error);
     next(error);
   }
 });
@@ -157,8 +149,6 @@ router.post('/checkin', authenticate, authorize('admin', 'receptionist', 'nurse'
   try {
     const { ticket_number, room_id, action } = req.body;
     
-    console.log('=== CHECKIN/OUT (MongoDB) ===');
-    console.log('Ticket:', ticket_number, 'Room:', room_id, 'Action:', action);
     
     // Find ticket
     const ticket = await AmbulatorQRTicket.findOne({
@@ -204,11 +194,9 @@ router.post('/checkin', authenticate, authorize('admin', 'receptionist', 'nurse'
       ? 'Xona band qilindi' 
       : 'Xona bo\'shatildi va shifokorga xabar yuborildi';
     
-    console.log('✅', message);
     
     res.json({ success: true, message, data: checkinLog });
   } catch (error) {
-    console.error('Checkin error:', error);
     next(error);
   }
 });
@@ -221,8 +209,6 @@ router.post('/patient-call', authenticate, async (req, res, next) => {
   try {
     const { queue_id, room_id, call_type, priority } = req.body;
     
-    console.log('=== PATIENT CALL (MongoDB) ===');
-    console.log('Queue:', queue_id, 'Room:', room_id, 'Type:', call_type);
     
     const patientCall = new AmbulatorPatientCall({
       queue_id,
@@ -233,7 +219,6 @@ router.post('/patient-call', authenticate, async (req, res, next) => {
     
     await patientCall.save();
     
-    console.log('✅ Patient call created');
     
     res.status(201).json({ 
       success: true, 
@@ -241,7 +226,6 @@ router.post('/patient-call', authenticate, async (req, res, next) => {
       data: patientCall 
     });
   } catch (error) {
-    console.error('Patient call error:', error);
     next(error);
   }
 });
@@ -250,8 +234,6 @@ router.get('/patient-calls', authenticate, authorize('admin', 'doctor', 'nurse')
   try {
     const { status } = req.query;
     
-    console.log('=== GET PATIENT CALLS (MongoDB) ===');
-    console.log('Status filter:', status);
     
     const query = {};
     if (status) {
@@ -272,7 +254,6 @@ router.get('/patient-calls', authenticate, authorize('admin', 'doctor', 'nurse')
       .limit(50)
       .lean();
     
-    console.log('Found calls:', calls.length);
     
     // Format response
     const formattedCalls = calls.map(call => ({
@@ -297,7 +278,6 @@ router.get('/patient-calls', authenticate, authorize('admin', 'doctor', 'nurse')
     
     res.json({ success: true, data: formattedCalls });
   } catch (error) {
-    console.error('Get patient calls error:', error);
     next(error);
   }
 });
@@ -320,11 +300,9 @@ router.put('/patient-call/:id/respond', authenticate, authorize('admin', 'doctor
     
     await call.save();
     
-    console.log('✅ Call responded');
     
     res.json({ success: true, message: 'Javob berildi', data: call });
   } catch (error) {
-    console.error('Respond to call error:', error);
     next(error);
   }
 });
@@ -337,8 +315,6 @@ router.get('/doctor-notifications', authenticate, authorize('admin', 'doctor'), 
   try {
     const { is_read } = req.query;
     
-    console.log('=== GET DOCTOR NOTIFICATIONS (MongoDB) ===');
-    console.log('Doctor ID:', req.user.id, 'Is read filter:', is_read);
     
     const query = { doctor_id: req.user.id };
     
@@ -359,7 +335,6 @@ router.get('/doctor-notifications', authenticate, authorize('admin', 'doctor'), 
       .limit(50)
       .lean();
     
-    console.log('Found notifications:', notifications.length);
     
     // Format response
     const formattedNotifications = notifications.map(notif => ({
@@ -381,7 +356,6 @@ router.get('/doctor-notifications', authenticate, authorize('admin', 'doctor'), 
     
     res.json({ success: true, data: formattedNotifications });
   } catch (error) {
-    console.error('Get doctor notifications error:', error);
     next(error);
   }
 });
@@ -401,11 +375,9 @@ router.put('/doctor-notification/:id/read', authenticate, authorize('admin', 'do
     notification.read_at = new Date();
     await notification.save();
     
-    console.log('✅ Notification marked as read');
     
     res.json({ success: true, data: notification });
   } catch (error) {
-    console.error('Mark notification as read error:', error);
     next(error);
   }
 });
@@ -419,7 +391,6 @@ router.get('/doctor-notifications/unread/count', authenticate, authorize('admin'
     
     res.json({ success: true, data: { unread_count: count } });
   } catch (error) {
-    console.error('Get unread count error:', error);
     next(error);
   }
 });
@@ -432,8 +403,6 @@ router.post('/complaints', authenticate, async (req, res, next) => {
   try {
     const { queue_id, room_id, complaint_type, complaint_text, priority } = req.body;
     
-    console.log('=== CREATE COMPLAINT (MongoDB) ===');
-    console.log('Queue:', queue_id, 'Room:', room_id);
     
     const complaint = new AmbulatorComplaint({
       queue_id,
@@ -445,7 +414,6 @@ router.post('/complaints', authenticate, async (req, res, next) => {
     
     await complaint.save();
     
-    console.log('✅ Complaint created');
     
     res.status(201).json({ 
       success: true, 
@@ -453,7 +421,6 @@ router.post('/complaints', authenticate, async (req, res, next) => {
       data: complaint 
     });
   } catch (error) {
-    console.error('Create complaint error:', error);
     next(error);
   }
 });
@@ -462,8 +429,6 @@ router.get('/complaints', authenticate, authorize('admin', 'doctor', 'nurse'), a
   try {
     const { status } = req.query;
     
-    console.log('=== GET COMPLAINTS (MongoDB) ===');
-    console.log('Status filter:', status);
     
     const query = {};
     if (status) {
@@ -485,7 +450,6 @@ router.get('/complaints', authenticate, authorize('admin', 'doctor', 'nurse'), a
       .limit(50)
       .lean();
     
-    console.log('Found complaints:', complaints.length);
     
     // Format response
     const formattedComplaints = complaints.map(comp => ({
@@ -513,7 +477,6 @@ router.get('/complaints', authenticate, authorize('admin', 'doctor', 'nurse'), a
     
     res.json({ success: true, data: formattedComplaints });
   } catch (error) {
-    console.error('Get complaints error:', error);
     next(error);
   }
 });
@@ -535,11 +498,9 @@ router.put('/complaint/:id/acknowledge', authenticate, authorize('admin', 'docto
     
     await complaint.save();
     
-    console.log('✅ Complaint acknowledged');
     
     res.json({ success: true, message: 'Shikoyat qabul qilindi', data: complaint });
   } catch (error) {
-    console.error('Acknowledge complaint error:', error);
     next(error);
   }
 });
@@ -564,11 +525,9 @@ router.put('/complaint/:id/resolve', authenticate, authorize('admin', 'doctor'),
     
     await complaint.save();
     
-    console.log('✅ Complaint resolved');
     
     res.json({ success: true, message: 'Shikoyat hal qilindi', data: complaint });
   } catch (error) {
-    console.error('Resolve complaint error:', error);
     next(error);
   }
 });

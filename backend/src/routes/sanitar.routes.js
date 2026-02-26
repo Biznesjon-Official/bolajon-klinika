@@ -60,11 +60,9 @@ router.get('/dashboard', authenticate, async (req, res) => {
       areas: areas
     });
   } catch (error) {
-    console.error('Get sanitar dashboard error:', error);
     res.status(500).json({
       success: false,
-      message: 'Dashboard ma\'lumotlarini olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -105,11 +103,9 @@ router.get('/tasks', authenticate, async (req, res) => {
       data: transformedTasks
     });
   } catch (error) {
-    console.error('Get sanitar tasks error:', error);
     res.status(500).json({
       success: false,
-      message: 'Topshiriqlarni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -191,11 +187,9 @@ router.get('/rooms', authenticate, async (req, res) => {
       data: rooms
     });
   } catch (error) {
-    console.error('Get rooms error:', error);
     res.status(500).json({
       success: false,
-      message: 'Xonalarni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -254,11 +248,9 @@ router.post('/rooms/:id/start', authenticate, async (req, res) => {
       data: cleaning
     });
   } catch (error) {
-    console.error('Start cleaning error:', error);
     res.status(500).json({
       success: false,
-      message: 'Tozalashni boshlashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -307,11 +299,9 @@ router.post('/rooms/:id/complete', authenticate, async (req, res) => {
       data: cleaning
     });
   } catch (error) {
-    console.error('Complete cleaning error:', error);
     res.status(500).json({
       success: false,
-      message: 'Tozalashni yakunlashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -354,11 +344,9 @@ router.get('/history', authenticate, async (req, res) => {
       data: transformedCleanings
     });
   } catch (error) {
-    console.error('Get history error:', error);
     res.status(500).json({
       success: false,
-      message: 'Tarixni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

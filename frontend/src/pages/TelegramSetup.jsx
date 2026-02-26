@@ -29,7 +29,7 @@ const TelegramSetup = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/v1/telegram-setup/status', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/telegram-setup/status`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -51,7 +51,7 @@ const TelegramSetup = () => {
         try {
           setMigrating(true);
           const token = localStorage.getItem('token');
-          const response = await axios.post('http://localhost:5000/api/v1/telegram-setup/migrate', {}, {
+          const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/telegram-setup/migrate`, {}, {
             headers: { Authorization: `Bearer ${token}` }
           });
           

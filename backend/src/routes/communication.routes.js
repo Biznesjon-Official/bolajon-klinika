@@ -42,7 +42,7 @@ router.get('/',
         }
       });
     } catch (error) {
-      console.error('Get communications error:', error);
+      // error handled by next()
       next(error);
     }
   }
@@ -58,15 +58,8 @@ router.post('/sms/send',
     try {
       const { patient_id, recipient_phone, message, template_id, metadata } = req.body;
 
-      console.log('SMS send request:', {
-        patient_id,
-        recipient_phone,
-        message: message?.substring(0, 50),
-        body: req.body
-      });
 
       if (!patient_id || !message) {
-        console.log('Validation failed:', { patient_id, message });
         return res.status(400).json({
           success: false,
           message: 'Patient ID and message are required'
@@ -83,8 +76,6 @@ router.post('/sms/send',
         // Search by patient_number
         patient = await Patient.findOne({ patient_number: patient_id });
       }
-
-      console.log('Patient found:', patient ? `${patient.first_name} ${patient.last_name}` : 'NOT FOUND');
 
       if (!patient) {
         return res.status(404).json({
@@ -117,7 +108,7 @@ router.post('/sms/send',
         data: communication
       });
     } catch (error) {
-      console.error('Send SMS error:', error);
+      // error handled by next()
       next(error);
     }
   }
@@ -182,7 +173,7 @@ router.post('/telegram/send',
         data: communication
       });
     } catch (error) {
-      console.error('Send Telegram error:', error);
+      // error handled by next()
       next(error);
     }
   }
@@ -230,7 +221,7 @@ router.get('/logs',
         data: formattedLogs
       });
     } catch (error) {
-      console.error('Get logs error:', error);
+      // error handled by next()
       next(error);
     }
   }
@@ -273,7 +264,7 @@ router.get('/stats',
         }
       });
     } catch (error) {
-      console.error('Get stats error:', error);
+      // error handled by next()
       next(error);
     }
   }
@@ -317,7 +308,7 @@ router.delete('/delete-last-3',
         deleted_count: ids.length
       });
     } catch (error) {
-      console.error('Delete last 3 error:', error);
+      // error handled by next()
       next(error);
     }
   }

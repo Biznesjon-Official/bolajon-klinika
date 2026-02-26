@@ -32,7 +32,6 @@ router.get('/stats', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get pharmacy stats error:', error);
     next(error);
   }
 });
@@ -92,7 +91,6 @@ router.get('/medicines/out-of-stock', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get out of stock medicines error:', error);
     next(error);
   }
 });
@@ -102,8 +100,6 @@ router.get('/medicines', authenticate, async (req, res, next) => {
   try {
     const { search = '', floor, category, status } = req.query;
     
-    console.log('=== GET MEDICINES (MongoDB) ===');
-    console.log('Search:', search, 'Floor:', floor, 'Category:', category);
     
     const query = {};
     
@@ -150,7 +146,6 @@ router.get('/medicines', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get medicines error:', error);
     next(error);
   }
 });
@@ -175,7 +170,6 @@ router.get('/medicines/:id', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get medicine error:', error);
     next(error);
   }
 });
@@ -185,13 +179,10 @@ router.post('/medicines', authenticate, authorize('admin'), async (req, res, nex
   try {
     const medicineData = req.body;
     
-    console.log('=== CREATE MEDICINE (MongoDB) ===');
-    console.log('Data:', medicineData);
     
     const medicine = new Medicine(medicineData);
     await medicine.save();
     
-    console.log('✅ Medicine created:', medicine._id);
     
     res.status(201).json({
       success: true,
@@ -202,7 +193,6 @@ router.post('/medicines', authenticate, authorize('admin'), async (req, res, nex
       }
     });
   } catch (error) {
-    console.error('Create medicine error:', error);
     next(error);
   }
 });
@@ -232,7 +222,6 @@ router.put('/medicines/:id', authenticate, authorize('admin'), async (req, res, 
       }
     });
   } catch (error) {
-    console.error('Update medicine error:', error);
     next(error);
   }
 });
@@ -254,7 +243,6 @@ router.delete('/medicines/:id', authenticate, authorize('admin'), async (req, re
       message: 'Dori o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete medicine error:', error);
     next(error);
   }
 });
@@ -293,7 +281,6 @@ router.get('/suppliers', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get suppliers error:', error);
     next(error);
   }
 });
@@ -303,13 +290,10 @@ router.post('/suppliers', authenticate, authorize('admin'), async (req, res, nex
   try {
     const supplierData = req.body;
     
-    console.log('=== CREATE SUPPLIER (MongoDB) ===');
-    console.log('Data:', supplierData);
     
     const supplier = new Supplier(supplierData);
     await supplier.save();
     
-    console.log('✅ Supplier created:', supplier._id);
     
     res.status(201).json({
       success: true,
@@ -320,7 +304,6 @@ router.post('/suppliers', authenticate, authorize('admin'), async (req, res, nex
       }
     });
   } catch (error) {
-    console.error('Create supplier error:', error);
     next(error);
   }
 });
@@ -350,7 +333,6 @@ router.put('/suppliers/:id', authenticate, authorize('admin'), async (req, res, 
       }
     });
   } catch (error) {
-    console.error('Update supplier error:', error);
     next(error);
   }
 });
@@ -372,7 +354,6 @@ router.delete('/suppliers/:id', authenticate, authorize('admin'), async (req, re
       message: 'Dorixona o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete supplier error:', error);
     next(error);
   }
 });
@@ -414,7 +395,6 @@ router.get('/requests', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get requests error:', error);
     next(error);
   }
 });
@@ -436,13 +416,10 @@ router.post('/requests', authenticate, async (req, res, next) => {
       }
     }
     
-    console.log('=== CREATE PHARMACY REQUEST (MongoDB) ===');
-    console.log('Data:', requestData);
     
     const request = new PharmacyRequest(requestData);
     await request.save();
     
-    console.log('✅ Pharmacy request created:', request._id);
     
     res.status(201).json({
       success: true,
@@ -453,7 +430,6 @@ router.post('/requests', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Create request error:', error);
     next(error);
   }
 });
@@ -493,7 +469,6 @@ router.put('/requests/:id', authenticate, authorize('admin'), async (req, res, n
       }
     });
   } catch (error) {
-    console.error('Update request error:', error);
     next(error);
   }
 });
@@ -571,7 +546,6 @@ router.post('/requests/:id/accept', authenticate, authorize('admin'), async (req
       }
     });
   } catch (error) {
-    console.error('Accept request error:', error);
     next(error);
   }
 });
@@ -593,7 +567,6 @@ router.delete('/requests/:id', authenticate, authorize('admin'), async (req, res
       message: 'Buyurtma o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete request error:', error);
     next(error);
   }
 });
@@ -742,7 +715,6 @@ router.post('/medicines/:id/dispense', authenticate, authorize('admin', 'nurse')
       }
     });
   } catch (error) {
-    console.error('Dispense medicine error:', error);
     next(error);
   }
 });
@@ -798,7 +770,6 @@ router.get('/transactions', authenticate, async (req, res, next) => {
       data: transformedTransactions
     });
   } catch (error) {
-    console.error('Get transactions error:', error);
     next(error);
   }
 });
@@ -840,7 +811,6 @@ router.get('/transactions/stats', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get transaction stats error:', error);
     next(error);
   }
 });

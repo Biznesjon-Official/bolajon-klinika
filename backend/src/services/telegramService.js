@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || '8551375038:AAFXDSS0IwrsZsqCIC2_oXXZwVZZWgqSdD4';
-const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-
-console.log('🤖 Telegram Service initialized');
-console.log('📱 Bot Token:', BOT_TOKEN ? 'Present' : 'Missing');
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const TELEGRAM_API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : null;
 
 /**
  * Send message to Telegram user

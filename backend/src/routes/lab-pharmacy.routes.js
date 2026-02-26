@@ -37,7 +37,6 @@ router.get('/reagents', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get reagents error:', error);
     next(error);
   }
 });
@@ -62,7 +61,6 @@ router.get('/reagents/:id', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get reagent error:', error);
     next(error);
   }
 });
@@ -116,7 +114,6 @@ router.post('/reagents', authenticate, authorize('admin', 'laborant'), async (re
       }
     });
   } catch (error) {
-    console.error('Create reagent error:', error);
     next(error);
   }
 });
@@ -147,7 +144,6 @@ router.put('/reagents/:id', authenticate, authorize('admin', 'laborant'), async 
       data: reagent
     });
   } catch (error) {
-    console.error('Update reagent error:', error);
     next(error);
   }
 });
@@ -169,7 +165,6 @@ router.delete('/reagents/:id', authenticate, authorize('admin'), async (req, res
       message: 'Reagent o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete reagent error:', error);
     next(error);
   }
 });
@@ -199,7 +194,6 @@ router.get('/stats', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get stats error:', error);
     next(error);
   }
 });
@@ -223,7 +217,6 @@ router.get('/suppliers', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get suppliers error:', error);
     next(error);
   }
 });
@@ -257,7 +250,6 @@ router.post('/suppliers', authenticate, authorize('admin', 'laborant'), async (r
       data: { id: supplier._id, name: supplier.name }
     });
   } catch (error) {
-    console.error('Create supplier error:', error);
     next(error);
   }
 });
@@ -306,7 +298,6 @@ router.get('/requests', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get requests error:', error);
     next(error);
   }
 });
@@ -344,7 +335,6 @@ router.post('/requests', authenticate, authorize('admin', 'laborant'), async (re
       }
     });
   } catch (error) {
-    console.error('Create request error:', error);
     next(error);
   }
 });
@@ -381,7 +371,6 @@ router.put('/requests/:id/status', authenticate, authorize('admin', 'laborant'),
       data: request
     });
   } catch (error) {
-    console.error('Update request status error:', error);
     next(error);
   }
 });

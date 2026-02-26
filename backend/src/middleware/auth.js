@@ -121,11 +121,6 @@ export const authorize = (...allowedRoles) => {
     // Get user's actual role
     const userRole = req.user.role_name || req.user.role;
     
-    console.log('=== AUTHORIZE CHECK ===');
-    console.log('User role:', userRole);
-    console.log('Allowed roles:', allowedRoles);
-    console.log('User object:', req.user);
-    
     // Check if user's role matches any of the allowed roles (considering aliases)
     const hasPermission = allowedRoles.some(allowedRole => {
       const allowedAliases = roleMapping[allowedRole] || [allowedRole];
@@ -134,8 +129,6 @@ export const authorize = (...allowedRoles) => {
       // Check if any user alias matches any allowed alias
       return userAliases.some(userAlias => allowedAliases.includes(userAlias));
     });
-    
-    console.log('Has permission:', hasPermission);
     
     if (!hasPermission) {
       return next(new AppError('Insufficient permissions', 403));

@@ -122,7 +122,6 @@ router.get('/daily',
         }
       });
     } catch (error) {
-      console.error('Get daily report error:', error);
       next(error);
     }
   }
@@ -404,7 +403,6 @@ router.get('/dashboard',
         }
       });
     } catch (error) {
-      console.error('Get dashboard stats error:', error);
       next(error);
     }
   }
@@ -568,7 +566,6 @@ router.get('/financial',
         }
       });
     } catch (error) {
-      console.error('Get financial report error:', error);
       next(error);
     }
   }
@@ -638,7 +635,6 @@ router.get('/debtors',
         }
       });
     } catch (error) {
-      console.error('Get debtors report error:', error);
       next(error);
     }
   }
@@ -766,7 +762,6 @@ router.get('/patients',
         }
       });
     } catch (error) {
-      console.error('Get patients report error:', error);
       next(error);
     }
   }
@@ -844,7 +839,6 @@ router.get('/services',
         }))
       });
     } catch (error) {
-      console.error('Get services report error:', error);
       next(error);
     }
   }
@@ -1010,7 +1004,6 @@ router.get('/inpatient',
         }
       });
     } catch (error) {
-      console.error('Get inpatient report error:', error);
       next(error);
     }
   }

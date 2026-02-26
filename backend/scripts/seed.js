@@ -28,7 +28,7 @@ import Prescription from '../src/models/Prescription.js'
 import Invoice from '../src/models/Invoice.js'
 import Admission from '../src/models/Admission.js'
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://mironshox:D1WVdeVfthVP1Z2F@cluster0.zthjn1c.mongodb.net/clinic_db?retryWrites=true&w=majority&appName=Cluster0'
+const MONGODB_URI = process.env.MONGODB_URI
 const PASSWORD = 'test123'
 
 // ==================== DATA ====================

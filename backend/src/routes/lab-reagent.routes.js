@@ -36,11 +36,9 @@ router.get('/', authenticate, authorize('admin', 'laborant', 'chief_doctor'), as
       data: reagents
     });
   } catch (error) {
-    console.error('Get reagents error:', error);
     res.status(500).json({
       success: false,
-      message: 'Reaktivlarni yuklashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -51,9 +49,6 @@ router.get('/', authenticate, authorize('admin', 'laborant', 'chief_doctor'), as
  */
 router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, res) => {
   try {
-    console.log('📝 Create reagent request body:', req.body);
-    console.log('👤 User:', req.user);
-    
     const { name, country_of_origin, expiry_date, total_tests, total_price, notes } = req.body;
 
     if (!name || !expiry_date || !total_tests || !total_price) {
@@ -65,16 +60,6 @@ router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, r
 
     // Avtomatik hisoblash: bitta testga qancha tushadi
     const price_per_test = Math.ceil(total_price / total_tests);
-
-    console.log('💊 Creating reagent with data:', {
-      name,
-      country_of_origin,
-      expiry_date,
-      total_tests,
-      total_price,
-      price_per_test,
-      created_by: req.user.id
-    });
 
     const reagent = new LabReagent({
       name,
@@ -99,12 +84,9 @@ router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, r
       data: populatedReagent
     });
   } catch (error) {
-    console.error('❌ Create reagent error:', error);
-    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Reaktiv qo\'shishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -154,11 +136,9 @@ router.put('/:id', authenticate, authorize('admin', 'chief_doctor'), async (req,
       data: populatedReagent
     });
   } catch (error) {
-    console.error('Update reagent error:', error);
     res.status(500).json({
       success: false,
-      message: 'Reaktivni yangilashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -186,11 +166,9 @@ router.delete('/:id', authenticate, authorize('admin', 'chief_doctor'), async (r
       message: 'Reaktiv muvaffaqiyatli o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete reagent error:', error);
     res.status(500).json({
       success: false,
-      message: 'Reaktivni o\'chirishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -278,11 +256,9 @@ router.post('/use', authenticate, authorize('laborant'), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Use reagent error:', error);
     res.status(500).json({
       success: false,
-      message: 'Reaktivni ishlatishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -318,11 +294,9 @@ router.get('/usage-history', authenticate, authorize('admin', 'laborant', 'chief
       data: usages
     });
   } catch (error) {
-    console.error('Get usage history error:', error);
     res.status(500).json({
       success: false,
-      message: 'Foydalanish tarixini yuklashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

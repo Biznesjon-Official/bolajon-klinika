@@ -25,11 +25,9 @@ router.get('/doctor-daily/:doctorId', authenticate, authorize('Admin', 'Administ
       data: stats
     });
   } catch (error) {
-    console.error('Get doctor daily stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Statistikani olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -59,11 +57,9 @@ router.post('/send-doctor-report/:doctorId', authenticate, authorize('Admin', 'A
       data: result
     });
   } catch (error) {
-    console.error('Send doctor report error:', error);
     res.status(500).json({
       success: false,
-      message: 'Hisobotni yuborishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -82,11 +78,9 @@ router.post('/send-all-doctor-reports', authenticate, authorize('Admin', 'Admini
       data: result
     });
   } catch (error) {
-    console.error('Send all doctor reports error:', error);
     res.status(500).json({
       success: false,
-      message: 'Hisobotlarni yuborishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

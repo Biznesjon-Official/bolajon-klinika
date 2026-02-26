@@ -60,7 +60,6 @@ router.get('/', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get staff error:', error);
     next(error);
   }
 });
@@ -86,7 +85,6 @@ router.get('/:id', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get staff error:', error);
     next(error);
   }
 });
@@ -173,7 +171,6 @@ router.post('/', authenticate, authorize('admin', 'doctor'), async (req, res, ne
       }
     });
   } catch (error) {
-    console.error('Create staff error:', error);
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -232,7 +229,6 @@ router.put('/:id', authenticate, authorize('admin', 'doctor'), async (req, res, 
       }
     });
   } catch (error) {
-    console.error('Update staff error:', error);
     next(error);
   }
 });
@@ -254,7 +250,6 @@ router.delete('/:id', authenticate, authorize('admin', 'doctor'), async (req, re
       message: 'Xodim o\'chirildi'
     });
   } catch (error) {
-    console.error('Delete staff error:', error);
     next(error);
   }
 });
@@ -276,7 +271,6 @@ router.get('/roles/list', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get roles error:', error);
     next(error);
   }
 });
@@ -333,11 +327,9 @@ router.get('/my-stats/today', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get my stats error:', error);
     res.status(500).json({
       success: false,
-      message: 'Statistikani olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

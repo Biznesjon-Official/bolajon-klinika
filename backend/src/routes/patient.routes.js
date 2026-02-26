@@ -74,7 +74,6 @@ router.get('/search',
         data: formattedPatients
       });
     } catch (error) {
-      console.error('Search patients error:', error);
       next(error);
     }
   }
@@ -204,7 +203,6 @@ router.get('/',
         }
       });
     } catch (error) {
-      console.error('Get patients error:', error);
       next(error);
     }
   }
@@ -407,7 +405,6 @@ router.get('/:id',
         }
       });
     } catch (error) {
-      console.error('Get patient error:', error);
       next(error);
     }
   }
@@ -510,7 +507,6 @@ router.post('/',
         }
       });
     } catch (error) {
-      console.error('Create patient error:', error);
       next(error);
     }
   }
@@ -558,7 +554,6 @@ router.put('/:id',
         }
       });
     } catch (error) {
-      console.error('Update patient error:', error);
       next(error);
     }
   }
@@ -589,7 +584,6 @@ router.delete('/:id',
         message: 'Bemor o\'chirildi'
       });
     } catch (error) {
-      console.error('Delete patient error:', error);
       next(error);
     }
   }

@@ -21,10 +21,6 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
       // Determine floor based on admission type
       const floor = admissionType === 'inpatient' ? 3 : 2;
       
-      console.log('=== LOADING MEDICINES ===');
-      console.log('Admission type:', admissionType);
-      console.log('Floor:', floor);
-      
       const response = await fetch(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1'}/nurse/medicines?floor=${floor}&admission_type=${admissionType || 'outpatient'}`,
         {
@@ -35,20 +31,13 @@ export default function MedicineSelectionModal({ isOpen, onClose, onConfirm, adm
       );
       
       const data = await response.json();
-      console.log('Medicines response:', data);
-      
+
       if (data.success) {
-        console.log(`✅ Loaded ${data.data.length} medicines from floor ${floor}`);
-        if (data.data.length > 0) {
-          console.log('Sample medicine:', data.data[0]);
-        }
         setMedicines(data.data || []);
       } else {
-        console.error('❌ Failed to load medicines:', data.message);
         toast.error('Dorilarni yuklashda xatolik: ' + (data.message || 'Noma\'lum xatolik'));
       }
     } catch (error) {
-      console.error('Load medicines error:', error);
       toast.error('Dorilarni yuklashda xatolik: ' + error.message);
     } finally {
       setLoading(false);

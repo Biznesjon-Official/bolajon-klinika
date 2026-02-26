@@ -11,8 +11,6 @@ const router = express.Router();
  */
 router.get('/nurses/active', authenticate, async (req, res) => {
   try {
-    console.log('=== GET ACTIVE NURSES ===');
-    
     // Faol hamshiralarni topish - role to'g'ridan-to'g'ri string
     const nurses = await Staff.find({
       role: 'nurse',
@@ -20,8 +18,6 @@ router.get('/nurses/active', authenticate, async (req, res) => {
     })
     .select('first_name last_name full_name specialization phone email')
     .lean();
-    
-    console.log(`✅ Found ${nurses.length} active nurses`);
     
     // Har bir hamshira uchun faol topshiriqlar sonini hisoblash
     const nursesWithWorkload = await Promise.all(
@@ -53,11 +49,9 @@ router.get('/nurses/active', authenticate, async (req, res) => {
       data: nursesWithWorkload
     });
   } catch (error) {
-    console.error('Get active nurses error:', error);
     res.status(500).json({
       success: false,
-      message: 'Hamshiralarni yuklashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -88,11 +82,9 @@ router.get('/nurses/:id/workload', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get nurse workload error:', error);
     res.status(500).json({
       success: false,
-      message: 'Hamshira yuklanganligini olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -117,9 +109,6 @@ router.post('/assign-task', authenticate, async (req, res) => {
       scheduled_time
     } = req.body;
     
-    console.log('=== ASSIGN TASK TO NURSE ===');
-    console.log('Request body:', req.body);
-    
     // Validate required fields
     if (!patient_id || !nurse_id || !task_type) {
       return res.status(400).json({
@@ -139,7 +128,6 @@ router.post('/assign-task', authenticate, async (req, res) => {
       
       if (activeAdmission) {
         finalAdmissionId = activeAdmission._id;
-        console.log('✅ Found active admission:', finalAdmissionId);
       }
     }
     
@@ -162,19 +150,15 @@ router.post('/assign-task', authenticate, async (req, res) => {
     
     await task.save();
     
-    console.log('✅ Task created:', task._id);
-    
     res.json({
       success: true,
       data: task,
       message: 'Topshiriq hamshiraga yuborildi'
     });
   } catch (error) {
-    console.error('Assign task error:', error);
     res.status(500).json({
       success: false,
-      message: 'Topshiriq yuborishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -214,11 +198,9 @@ router.post('/assign-patient', authenticate, async (req, res) => {
       message: 'Bemor hamshiraga biriktirildi'
     });
   } catch (error) {
-    console.error('Assign patient error:', error);
     res.status(500).json({
       success: false,
-      message: 'Bemorni biriktirishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -257,11 +239,9 @@ router.get('/patients/:id/nurse', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get patient nurse error:', error);
     res.status(500).json({
       success: false,
-      message: 'Bemor hamshirasini olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

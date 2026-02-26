@@ -10,14 +10,9 @@ router.get('/patient/:patientId', authenticate, async (req, res) => {
   try {
     const { patientId } = req.params;
     
-    console.log('=== GET SPECIALISTS FOR PATIENT ===');
-    console.log('Patient ID:', patientId);
-    
     // Avval barcha invoice'larni tekshirish
     const allInvoices = await Invoice.find({ patient_id: patientId }).lean();
-    console.log('All invoices for patient:', allInvoices.length);
-    console.log('All invoices:', JSON.stringify(allInvoices, null, 2));
-    
+
     // Invoice'lardan mutaxasis konsultatsiyalarini topish (specialist_type YOKI doctor_name)
     const invoices = await Invoice.find({
       patient_id: patientId,
@@ -26,9 +21,6 @@ router.get('/patient/:patientId', authenticate, async (req, res) => {
         { 'metadata.doctor_name': { $exists: true, $ne: '' } }
       ]
     }).sort({ created_at: -1 }).lean();
-    
-    console.log('Found specialist invoices:', invoices.length);
-    console.log('Specialist invoices:', JSON.stringify(invoices, null, 2));
     
     // Specialist type'ni o'zbekchaga tarjima qilish
     const specialistTypeMap = {
@@ -60,19 +52,15 @@ router.get('/patient/:patientId', authenticate, async (req, res) => {
       };
     });
     
-    console.log('Mapped specialists:', specialists);
-    
     res.json({
       success: true,
       data: specialists
     });
     
   } catch (error) {
-    console.error('Get specialists error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server xatosi',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -125,8 +113,6 @@ router.post('/specialist', authenticate, async (req, res) => {
       admission_id
     };
     
-    console.log('Creating invoice with metadata:', invoiceMetadata);
-    
     const invoice = new Invoice({
       patient_id,
       invoice_number: invoiceNumber,
@@ -148,10 +134,7 @@ router.post('/specialist', authenticate, async (req, res) => {
     });
     
     await invoice.save();
-    console.log('Invoice created:', invoice._id);
-    console.log('Invoice metadata after save:', invoice.metadata);
-    console.log('Invoice full object:', JSON.stringify(invoice.toObject(), null, 2));
-    
+
     // 2. Patient balance yangilash (qarz qo'shish)
     const patient = await Patient.findById(patient_id);
     if (!patient) {
@@ -196,11 +179,9 @@ router.post('/specialist', authenticate, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Assign specialist error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server xatosi',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });

@@ -37,10 +37,9 @@ router.get('/', authenticate, authorize('admin'), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get settings error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -62,10 +61,9 @@ router.get('/bonus', authenticate, authorize('admin'), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get bonus settings error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -111,10 +109,9 @@ router.put('/bonus', authenticate, authorize('admin'), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Update bonus settings error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });
@@ -197,10 +194,9 @@ router.post('/bonus/distribute', authenticate, authorize('admin'), async (req, r
       }
     });
   } catch (error) {
-    console.error('Distribute bonus error:', error);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Server xatosi'
     });
   }
 });

@@ -113,7 +113,6 @@ router.get('/dashboard', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get patient dashboard error:', error);
     next(error);
   }
 });
@@ -145,7 +144,6 @@ router.get('/appointments', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get patient appointments error:', error);
     next(error);
   }
 });
@@ -174,7 +172,6 @@ router.get('/prescriptions', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get patient prescriptions error:', error);
     next(error);
   }
 });
@@ -202,7 +199,6 @@ router.get('/invoices', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get patient invoices error:', error);
     next(error);
   }
 });
@@ -230,7 +226,6 @@ router.get('/lab-tests', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get patient lab tests error:', error);
     next(error);
   }
 });
@@ -272,7 +267,6 @@ router.get('/profile', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get patient profile error:', error);
     next(error);
   }
 });
@@ -308,7 +302,6 @@ router.put('/profile', authenticate, async (req, res, next) => {
       data: patient
     });
   } catch (error) {
-    console.error('Update patient profile error:', error);
     next(error);
   }
 });
@@ -354,7 +347,6 @@ router.put('/password', authenticate, async (req, res, next) => {
       message: 'Parol muvaffaqiyatli o\'zgartirildi'
     });
   } catch (error) {
-    console.error('Change password error:', error);
     next(error);
   }
 });
@@ -395,7 +387,6 @@ router.get('/queue', authenticate, async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Get queue status error:', error);
     next(error);
   }
 });
@@ -427,7 +418,6 @@ router.get('/notifications', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get notifications error:', error);
     next(error);
   }
 });
@@ -459,7 +449,6 @@ router.put('/notifications/:id/read', authenticate, async (req, res, next) => {
       message: 'Bildirishnoma o\'qilgan deb belgilandi'
     });
   } catch (error) {
-    console.error('Mark notification as read error:', error);
     next(error);
   }
 });
@@ -487,7 +476,6 @@ router.get('/lab-results', authenticate, async (req, res, next) => {
       }))
     });
   } catch (error) {
-    console.error('Get lab results error:', error);
     next(error);
   }
 });

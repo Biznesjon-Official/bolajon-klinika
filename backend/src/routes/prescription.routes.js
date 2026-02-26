@@ -24,13 +24,9 @@ router.post('/', authenticate, async (req, res) => {
       nurse_id
     } = req.body;
     
-    console.log('=== CREATE PRESCRIPTION ===');
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
-    console.log('User:', req.user);
     
     // Validate required fields
     if (!patient_id) {
-      console.log('❌ Missing patient_id');
       return res.status(400).json({
         success: false,
         message: 'Bemor ID majburiy'
@@ -38,7 +34,6 @@ router.post('/', authenticate, async (req, res) => {
     }
     
     if (!diagnosis) {
-      console.log('❌ Missing diagnosis');
       return res.status(400).json({
         success: false,
         message: 'Tashxis majburiy'
@@ -46,7 +41,6 @@ router.post('/', authenticate, async (req, res) => {
     }
     
     if (!medications || !Array.isArray(medications) || medications.length === 0) {
-      console.log('❌ Missing or invalid medications');
       return res.status(400).json({
         success: false,
         message: 'Kamida bitta dori kiritish majburiy'
@@ -57,7 +51,6 @@ router.post('/', authenticate, async (req, res) => {
     for (let i = 0; i < medications.length; i++) {
       const med = medications[i];
       if (!med.medication_name) {
-        console.log(`❌ Medication ${i + 1} missing medication_name`);
         return res.status(400).json({
           success: false,
           message: `Dori ${i + 1}: Dori nomi majburiy`
@@ -74,10 +67,8 @@ router.post('/', authenticate, async (req, res) => {
     // Get doctor ID from authenticated user
     const doctorId = req.user._id || req.user.id;
     
-    console.log('Doctor ID:', doctorId);
     
     if (!doctorId) {
-      console.log('❌ Missing doctor ID');
       return res.status(400).json({
         success: false,
         message: 'Shifokor ID topilmadi'
@@ -103,7 +94,6 @@ router.post('/', authenticate, async (req, res) => {
     
     await prescription.save();
     
-    console.log('✅ Prescription created:', prescription._id);
     
     // Create treatment schedules for medications with schedule_times
     try {
@@ -117,7 +107,6 @@ router.post('/', authenticate, async (req, res) => {
         status: 'active' 
       }).lean();
       
-      console.log('Active admission:', admission?._id);
       
       // Get assigned nurse for patient
       let assignedNurseId = nurse_id;
@@ -130,11 +119,9 @@ router.post('/', authenticate, async (req, res) => {
         assignedNurseId = nurseAssignment?.nurse_id;
       }
       
-      console.log('Assigned nurse ID:', assignedNurseId);
       
       // Create schedules for each medication
       for (const med of medications) {
-        console.log('Creating schedule for medication:', med.medication_name);
         
         // Har bir dori uchun hamshirani aniqlash
         // 1. Dori uchun maxsus hamshira
@@ -169,13 +156,9 @@ router.post('/', authenticate, async (req, res) => {
         
         await schedule.save();
         
-        console.log(`✅ ${med.medication_name} uchun TreatmentSchedule yaratildi (Jami: ${totalDoses} marta)${medicationNurseId ? ' - Hamshira tayinlandi' : ''}`);
       }
     } catch (scheduleError) {
-      console.error('Treatment schedule creation error:', scheduleError);
-      console.error('Error stack:', scheduleError.stack);
       // Don't fail the whole request if schedule creation fails
-      console.log('⚠️  Prescription created but treatment schedules failed');
     }
     
     // Return without populate to avoid errors
@@ -200,10 +183,6 @@ router.post('/', authenticate, async (req, res) => {
       message: 'Retsept muvaffaqiyatli yaratildi'
     });
   } catch (error) {
-    console.error('=== CREATE PRESCRIPTION ERROR ===');
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    console.error('Error name:', error.name);
     
     // Mongoose validation error
     if (error.name === 'ValidationError') {
@@ -225,8 +204,7 @@ router.post('/', authenticate, async (req, res) => {
     
     res.status(500).json({
       success: false,
-      message: 'Retsept yaratishda xatolik: ' + error.message,
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -257,11 +235,9 @@ router.get('/patient/:patientId', authenticate, async (req, res) => {
       data: formatted
     });
   } catch (error) {
-    console.error('Get patient prescriptions error:', error);
     res.status(500).json({
       success: false,
-      message: 'Retseptlarni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -289,11 +265,9 @@ router.get('/:id', authenticate, async (req, res) => {
       data: prescription
     });
   } catch (error) {
-    console.error('Get prescription error:', error);
     res.status(500).json({
       success: false,
-      message: 'Retseptni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -352,11 +326,9 @@ router.get('/', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get prescriptions error:', error);
     res.status(500).json({
       success: false,
-      message: 'Retseptlarni olishda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
@@ -395,11 +367,9 @@ router.patch('/:id/status', authenticate, async (req, res) => {
       message: 'Status yangilandi'
     });
   } catch (error) {
-    console.error('Update prescription status error:', error);
     res.status(500).json({
       success: false,
-      message: 'Statusni yangilashda xatolik',
-      error: error.message
+      message: 'Server xatosi'
     });
   }
 });
