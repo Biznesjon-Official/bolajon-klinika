@@ -82,7 +82,7 @@ export default function NewOrderModal({ isOpen, onClose, patients, doctors, test
       onClose()
       onSuccess()
     } catch (error) {
-      toast.error(t('lab.error') + ': ' + (error.response?.data?.message || error.message))
+      toast.error(error.response?.data?.error || error.response?.data?.message || error.message)
     } finally {
       setLoading(false)
     }

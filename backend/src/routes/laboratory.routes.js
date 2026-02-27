@@ -648,7 +648,8 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
     if (useTransaction && session) {
       try { await session.abortTransaction() } catch (e) { /* ignore */ }
     }
-    next(error)
+    console.error('[LAB ORDER ERROR]', error.message, error.stack)
+    return res.status(500).json({ success: false, error: error.message || 'Server xatosi' })
   } finally {
     if (session) {
       try { session.endSession() } catch (e) { /* ignore */ }
