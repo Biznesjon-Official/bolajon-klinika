@@ -234,7 +234,9 @@ router.get('/:id',
       const Invoice = (await import('../models/Invoice.js')).default;
       const Prescription = (await import('../models/Prescription.js')).default;
       const LabOrder = (await import('../models/LabOrder.js')).default;
-      
+      const MedicalRecord = (await import('../models/MedicalRecord.js')).default;
+      const Queue = (await import('../models/Queue.js')).default;
+
       // Get admissions with room, bed, doctor, and nurse info
       const admissions = await Admission.find({ patient_id: patient._id })
         .populate('room_id', 'room_number room_name floor')
@@ -394,6 +396,7 @@ router.get('/:id',
             normal_value_max: '',
             is_normal: lab.results && lab.results.length > 0 ? lab.results[0].is_normal : null,
             status: lab.status === 'completed' ? 'approved' : lab.status,
+            test_id: lab.test_id,
             result_date: lab.completed_at || lab.createdAt,
             technician_first_name: lab.laborant_id?.first_name,
             technician_last_name: lab.laborant_id?.last_name,
@@ -401,7 +404,37 @@ router.get('/:id',
             approved_by_last_name: lab.doctor_id?.last_name,
             approved_at: lab.completed_at
           })),
-          medicalRecords: [] // Can be added later if needed
+          medicalRecords: (await MedicalRecord.find({ patient_id: patient._id })
+            .populate('doctor_id', 'first_name last_name')
+            .sort({ created_at: -1 })
+            .limit(20)
+            .lean()
+          ).map(rec => ({
+            id: rec._id,
+            diagnosis_text: rec.diagnosis_text,
+            treatment_plan: rec.treatment_plan,
+            notes: rec.notes,
+            doctor_first_name: rec.doctor_id?.first_name,
+            doctor_last_name: rec.doctor_id?.last_name,
+            created_at: rec.created_at
+          })),
+          queueHistory: (await Queue.find({ patient_id: patient._id })
+            .populate('doctor_id', 'first_name last_name specialization')
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .lean()
+          ).map(q => ({
+            id: q._id,
+            queue_number: q.queue_number,
+            queue_type: q.queue_type,
+            status: q.status,
+            notes: q.notes,
+            doctor_first_name: q.doctor_id?.first_name,
+            doctor_last_name: q.doctor_id?.last_name,
+            specialization: q.doctor_id?.specialization,
+            created_at: q.createdAt,
+            completed_at: q.completed_at
+          }))
         }
       });
     } catch (error) {
@@ -615,7 +648,7 @@ router.post('/:id/medical-records',
 
       const record = await MedicalRecord.create({
         patient_id: req.params.id,
-        doctor_id: req.user._id || req.user.id,
+        doctor_id: req.user.id,
         diagnosis_text: diagnosis_text.trim(),
         treatment_plan: treatment_plan?.trim() || '',
         notes: notes?.trim() || ''

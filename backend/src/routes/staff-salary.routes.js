@@ -73,7 +73,7 @@ router.get('/my-salary', authenticate, async (req, res) => {
     }
 
     // Calculate bonuses and penalties for this month
-    const thisMonthBonuses = currentPayroll ? parseFloat(currentPayroll.other_bonuses || 0) : 0;
+    const thisMonthBonuses = currentPayroll ? parseFloat(currentPayroll.bonuses || 0) : 0;
     const thisMonthPenalties = currentPayroll ? parseFloat(currentPayroll.penalties || 0) : 0;
 
     // Calculate total for this month
@@ -82,14 +82,14 @@ router.get('/my-salary', authenticate, async (req, res) => {
 
     // Calculate statistics
     const totalEarned = payrollHistory
-      .filter(p => p.payment_status === 'paid')
+      .filter(p => p.status === 'paid')
       .reduce((sum, p) => sum + parseFloat(p.total_salary || 0), 0);
     
-    const monthsWorked = payrollHistory.filter(p => p.payment_status === 'paid').length;
+    const monthsWorked = payrollHistory.filter(p => p.status === 'paid').length;
     const averageSalary = monthsWorked > 0 ? totalEarned / monthsWorked : 0;
 
     // Get last payment
-    const lastPayment = payrollHistory.find(p => p.payment_status === 'paid');
+    const lastPayment = payrollHistory.find(p => p.status === 'paid');
 
     // Calculate next payment (end of current month)
     const nextPaymentDate = new Date(currentYear, currentMonth, 0); // Last day of current month
@@ -98,7 +98,7 @@ router.get('/my-salary', authenticate, async (req, res) => {
     const daysInMonth = monthEnd.getDate();
     const daysPassed = now.getDate();
     const daysRemaining = daysInMonth - daysPassed;
-    const dailyAverage = thisMonthTotal / daysPassed;
+    const dailyAverage = daysPassed > 0 ? thisMonthTotal / daysPassed : 0;
     const estimatedNextPayment = thisMonthTotal + (dailyAverage * daysRemaining);
 
     res.json({
@@ -133,17 +133,17 @@ router.get('/my-salary', authenticate, async (req, res) => {
         nextPayment: {
           date: nextPaymentDate,
           estimatedAmount: estimatedNextPayment,
-          status: currentPayroll ? currentPayroll.payment_status : 'pending'
+          status: currentPayroll ? currentPayroll.status : 'pending'
         },
         history: payrollHistory.map(p => ({
           month: p.month,
           year: p.year,
           base_salary: p.base_salary,
-          service_commissions: p.service_commissions,
-          other_bonuses: p.other_bonuses,
+          service_commission: p.service_commission,
+          bonuses: p.bonuses,
           penalties: p.penalties,
           total_salary: p.total_salary,
-          payment_status: p.payment_status,
+          status: p.status,
           payment_date: p.payment_date,
           payment_method: p.payment_method
         }))

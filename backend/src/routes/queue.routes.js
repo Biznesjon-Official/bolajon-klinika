@@ -379,10 +379,9 @@ router.put('/:id/call',
         const patient = await Patient.findById(queue.patient_id);
         const doctor = await Staff.findById(queue.doctor_id);
         
-        if (patient && patient.telegram_chat_id && doctor) {
-          // Bemorga xabar yuborish - shifokor chaqirdi
+        if (patient && patient.telegram_chat_id && doctor && process.env.BOT_TOKEN) {
           const axios = (await import('axios')).default;
-          const BOT_TOKEN = process.env.BOT_TOKEN || 'your_bot_token_here';
+          const BOT_TOKEN = process.env.BOT_TOKEN;
           
           const message = `🔔 *Sizning navbatingiz keldi!*\n\n` +
             `👨‍⚕️ Shifokor: *${doctor.first_name} ${doctor.last_name}*\n` +
@@ -542,10 +541,9 @@ async function notifyNextPatient(doctorId) {
       const patient = await Patient.findById(nextQueue.patient_id);
       const doctor = await Staff.findById(doctorId);
       
-      if (patient && patient.telegram_chat_id && doctor) {
-        // Telegram orqali xabar yuborish
+      if (patient && patient.telegram_chat_id && doctor && process.env.BOT_TOKEN) {
         const axios = (await import('axios')).default;
-        const BOT_TOKEN = process.env.BOT_TOKEN || 'your_bot_token_here';
+        const BOT_TOKEN = process.env.BOT_TOKEN;
         
         const message = `🎯 *Navbatingiz yaqinlashdi!*\n\n` +
           `👨‍⚕️ Shifokor: *${doctor.first_name} ${doctor.last_name}*\n` +

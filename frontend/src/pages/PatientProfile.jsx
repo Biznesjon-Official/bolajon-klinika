@@ -15,9 +15,11 @@ import PatientQRModal from '../components/PatientQRModal';
 import DateInput from '../components/DateInput';
 import api from '../services/api';
 import PrescriptionModal from '../components/PrescriptionModal';
-import doctorNurseService from '../services/doctorNurseService';
+
 import { laboratoryService } from '../services/laboratoryService';
 import labPrintService from '../services/labPrintService';
+import CompleteTreatmentModal from '../components/nurse/CompleteTreatmentModal';
+import ResultModal from '../components/laboratory/ResultModal';
 import toast from 'react-hot-toast';
 
 const PatientProfile = () => {
@@ -25,9 +27,15 @@ const PatientProfile = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuth();
-  const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role?.name);
+  const roleName = user?.role?.name?.toLowerCase();
+  const isChiefDoctor = user?.role?.name === 'chief_doctor';
+  const isDoctor = user?.role?.name === 'doctor' || isChiefDoctor;
   const isReceptionist = ['receptionist', 'admin', 'super admin'].includes(user?.role?.name);
-  const isNurse = ['nurse', 'hamshira'].includes(user?.role?.name?.toLowerCase());
+  const isNurse = ['nurse', 'hamshira'].includes(roleName);
+  const isLaborant = ['laborant', 'lab'].includes(roleName);
+  const isMasseur = ['masseur', 'massajchi'].includes(roleName);
+  const isSpeechTherapist = ['speech_therapist', 'logoped'].includes(roleName);
+  const isSpecialist = isMasseur || isSpeechTherapist;
 
   const [loading, setLoading] = useState(true);
   const [patient, setPatient] = useState(null);
@@ -39,6 +47,7 @@ const PatientProfile = () => {
   const [assignedSpecialists, setAssignedSpecialists] = useState([]);
   const [treatmentSchedule, setTreatmentSchedule] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [queueHistory, setQueueHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [showQRModal, setShowQRModal] = useState(false);
 
@@ -89,16 +98,17 @@ const PatientProfile = () => {
 
   // Doctor action modals
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
-  const [showNurseModal, setShowNurseModal] = useState(false);
   const [showLabOrderModal, setShowLabOrderModal] = useState(false);
-  const [nurses, setNurses] = useState([]);
-  const [selectedNurse, setSelectedNurse] = useState('');
-  const [nurseTaskData, setNurseTaskData] = useState({
-    task_type: 'medication_administration',
-    medication_name: '', dosage: '', route: 'oral', frequency: '', priority: 'normal', instructions: ''
-  });
   const [labTests, setLabTests] = useState([]);
   const [selectedLabTest, setSelectedLabTest] = useState('');
+
+  // Nurse: treatment complete
+  const [showCompleteTreatmentModal, setShowCompleteTreatmentModal] = useState(false);
+  const [selectedTreatment, setSelectedTreatment] = useState(null);
+
+  // Laborant: result entry
+  const [showLabResultModal, setShowLabResultModal] = useState(false);
+  const [selectedLabOrder, setSelectedLabOrder] = useState(null);
   const [labOrderPriority, setLabOrderPriority] = useState('normal');
   const [labOrderNotes, setLabOrderNotes] = useState('');
 
@@ -154,6 +164,7 @@ const PatientProfile = () => {
 
   useEffect(() => {
     loadPatientData();
+    if (isDoctor || isSpecialist) loadQueueData();
   }, [id]);
 
   useEffect(() => {
@@ -161,9 +172,9 @@ const PatientProfile = () => {
       loadTreatmentSchedule();
     } else if (activeTab === 'specialists') {
       loadAssignedSpecialists();
-    } else if (activeTab === 'queue' && isReceptionist) {
+    } else if (activeTab === 'queue' && (isReceptionist || isSpecialist)) {
       loadQueueData();
-      loadDoctors();
+      if (isReceptionist) loadDoctors();
     } else if (activeTab === 'cashier' && isReceptionist) {
       loadDoctors();
       loadServices();
@@ -176,8 +187,32 @@ const PatientProfile = () => {
       if (response.success) {
         setTreatmentSchedule(response.data);
       }
-    } catch (error) {
-      console.error('Load treatment schedule error:', error);
+    } catch {
+      // silent
+    }
+  };
+
+  // Nurse: muolajani bajarish
+  const handleCompleteTreatment = async (treatmentId, notes) => {
+    try {
+      await treatmentService.completeTreatment(treatmentId, notes);
+      showAlert('Muolaja bajarildi', 'success');
+      setShowCompleteTreatmentModal(false);
+      setSelectedTreatment(null);
+      loadTreatmentSchedule();
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Xatolik', 'error');
+    }
+  };
+
+  // Laborant: lab status o'zgartirish
+  const handleUpdateLabStatus = async (orderId, status) => {
+    try {
+      await laboratoryService.updateOrderStatus(orderId, status);
+      showAlert('Status yangilandi', 'success');
+      loadPatientData();
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Xatolik', 'error');
     }
   };
 
@@ -187,8 +222,8 @@ const PatientProfile = () => {
       if (response.data.success) {
         setAssignedSpecialists(response.data.data || [])
       }
-    } catch (error) {
-      console.error('Load specialists error:', error);
+    } catch {
+      // silent
     }
   };
 
@@ -204,8 +239,8 @@ const PatientProfile = () => {
         setInvoices(response.data.allInvoices || response.data.invoices || []); // Barcha invoicelarni yuklash
         setLabResults(response.data.labResults || []); // labOrders -> labResults
         setAdmissions(response.data.admissions || []);
+        setQueueHistory(response.data.queueHistory || []);
       } else {
-        console.error('Invalid response:', response);
         showAlert('Bemor ma\'lumotlari topilmadi', 'error', 'Xatolik');
       }
       
@@ -215,15 +250,11 @@ const PatientProfile = () => {
         if (prescResponse.success) {
           setPrescriptions(prescResponse.data || []);
         }
-      } catch (error) {
-        console.error('Load prescriptions error:', error);
-        console.error('Error response:', error.response?.data);
+      } catch {
+        // silent
       }
     } catch (error) {
-      console.error('Load patient error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      showAlert(`Xatolik: ${error.response?.data?.error || error.message}`, 'error', 'Xatolik');
+      showAlert('Bemor ma\'lumotlarini yuklashda xatolik', 'error', 'Xatolik');
     } finally {
       setLoading(false);
     }
@@ -239,33 +270,6 @@ const PatientProfile = () => {
       loadPatientData();
     } catch (error) {
       showAlert(error.response?.data?.message || 'Xatolik yuz berdi', 'error');
-    }
-  };
-
-  // Doctor: Hamshiraga topshiriq
-  const handleOpenNurseModal = async () => {
-    setShowNurseModal(true);
-    try {
-      const res = await doctorNurseService.getActiveNurses();
-      setNurses(res.data || []);
-    } catch {
-      setNurses([]);
-    }
-  };
-
-  const handleAssignToNurse = async () => {
-    if (!selectedNurse) return showAlert('Hamshirani tanlang', 'error');
-    try {
-      await doctorNurseService.assignTask({
-        patient_id: id, nurse_id: selectedNurse, ...nurseTaskData
-      });
-      showAlert('Topshiriq yuborildi', 'success');
-      setShowNurseModal(false);
-      setSelectedNurse('');
-      setNurseTaskData({ task_type: 'medication_administration', medication_name: '', dosage: '', route: 'oral', frequency: '', priority: 'normal', instructions: '' });
-      loadPatientData();
-    } catch (err) {
-      showAlert(err.response?.data?.message || 'Xatolik', 'error');
     }
   };
 
@@ -340,8 +344,8 @@ const PatientProfile = () => {
       if (response.success) {
         setQueueData(response.data || []);
       }
-    } catch (error) {
-      console.error('Load queue error:', error);
+    } catch {
+      // silent
     }
   };
 
@@ -351,8 +355,8 @@ const PatientProfile = () => {
       if (response.success) {
         setDoctors(response.data || []);
       }
-    } catch (error) {
-      console.error('Load doctors error:', error);
+    } catch {
+      // silent
     }
   };
 
@@ -362,8 +366,8 @@ const PatientProfile = () => {
       if (response.success) {
         setServices(response.data || []);
       }
-    } catch (error) {
-      console.error('Load services error:', error);
+    } catch {
+      // silent
     }
   };
 
@@ -634,7 +638,16 @@ const PatientProfile = () => {
               </button>
             </>
           )}
-          {isDoctor && (
+          {isChiefDoctor && !isReceptionist && (
+            <button
+              onClick={handleOpenAdmissionModal}
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined">hotel</span>
+              <span className="hidden sm:inline">Yotqizish</span>
+            </button>
+          )}
+          {(isDoctor || isSpecialist) && (
             <>
               {(() => {
                 const today = new Date().toISOString().split('T')[0]
@@ -663,34 +676,31 @@ const PatientProfile = () => {
                   </>
                 )
               })()}
-              <button
-                onClick={() => setShowPrescriptionModal(true)}
-                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined">edit_note</span>
-                <span className="hidden sm:inline">Retsept yozish</span>
-              </button>
-              <button
-                onClick={() => setShowAddRecordModal(true)}
-                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined">diagnosis</span>
-                <span className="hidden sm:inline">Tashxis</span>
-              </button>
-              <button
-                onClick={handleOpenNurseModal}
-                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-orange-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined">medical_services</span>
-                <span className="hidden sm:inline">Hamshiraga topshiriq</span>
-              </button>
-              <button
-                onClick={handleOpenLabOrderModal}
-                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined">biotech</span>
-                <span className="hidden sm:inline">Tahlil buyurtma</span>
-              </button>
+              {isDoctor && (
+                <>
+                  <button
+                    onClick={() => setShowPrescriptionModal(true)}
+                    className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+                  >
+                    <span className="material-symbols-outlined">edit_note</span>
+                    <span className="hidden sm:inline">Retsept yozish</span>
+                  </button>
+                  <button
+                    onClick={() => setShowAddRecordModal(true)}
+                    className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+                  >
+                    <span className="material-symbols-outlined">diagnosis</span>
+                    <span className="hidden sm:inline">Tashxis</span>
+                  </button>
+                  <button
+                    onClick={handleOpenLabOrderModal}
+                    className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+                  >
+                    <span className="material-symbols-outlined">biotech</span>
+                    <span className="hidden sm:inline">Tahlil buyurtma</span>
+                  </button>
+                </>
+              )}
             </>
           )}
           {!isDoctor && !isNurse && (
@@ -799,8 +809,10 @@ const PatientProfile = () => {
               { id: 'lab', label: 'Tahlillar', icon: 'biotech' },
               ...(!isNurse ? [{ id: 'billing', label: 'Moliya', icon: 'payments' }] : []),
               { id: 'admissions', label: 'Yotqizish', icon: 'bed' },
-              ...(isReceptionist ? [
+              ...((isReceptionist || isSpecialist) ? [
                 { id: 'queue', label: 'Navbat', icon: 'queue' },
+              ] : []),
+              ...(isReceptionist ? [
                 { id: 'cashier', label: 'Kassa', icon: 'point_of_sale' }
               ] : [])
             ].map(tab => (
@@ -872,7 +884,25 @@ const PatientProfile = () => {
                     data: lab
                   });
                 });
-                
+
+                // Medical Records
+                medicalRecords.forEach(rec => {
+                  activities.push({
+                    type: 'medical_record',
+                    date: new Date(rec.created_at),
+                    data: rec
+                  });
+                });
+
+                // Queue History
+                queueHistory.forEach(q => {
+                  activities.push({
+                    type: 'queue',
+                    date: new Date(q.created_at),
+                    data: q
+                  });
+                });
+
                 // Vaqt bo'yicha tartiblash (yangi birinchi)
                 activities.sort((a, b) => b.date - a.date);
                 
@@ -901,6 +931,8 @@ const PatientProfile = () => {
                             activity.type === 'admission' ? 'bg-blue-500 border-blue-200' :
                             activity.type === 'discharge' ? 'bg-purple-500 border-purple-200' :
                             activity.type === 'prescription' ? 'bg-orange-500 border-orange-200' :
+                            activity.type === 'medical_record' ? 'bg-teal-500 border-teal-200' :
+                            activity.type === 'queue' ? 'bg-indigo-500 border-indigo-200' :
                             'bg-pink-500 border-pink-200'
                           }`}></div>
                           
@@ -912,12 +944,16 @@ const PatientProfile = () => {
                                   activity.type === 'admission' ? 'text-blue-600' :
                                   activity.type === 'discharge' ? 'text-purple-600' :
                                   activity.type === 'prescription' ? 'text-orange-600' :
+                                  activity.type === 'medical_record' ? 'text-teal-600' :
+                                  activity.type === 'queue' ? 'text-indigo-600' :
                                   'text-pink-600'
                                 }`}>
                                   {activity.type === 'invoice' ? 'receipt' :
                                    activity.type === 'admission' ? 'login' :
                                    activity.type === 'discharge' ? 'logout' :
                                    activity.type === 'prescription' ? 'medication' :
+                                   activity.type === 'medical_record' ? 'clinical_notes' :
+                                   activity.type === 'queue' ? 'queue' :
                                    'biotech'}
                                 </span>
                                 <span className="font-semibold text-gray-900 dark:text-white">
@@ -925,6 +961,8 @@ const PatientProfile = () => {
                                    activity.type === 'admission' ? 'Yotqizildi' :
                                    activity.type === 'discharge' ? 'Chiqarildi' :
                                    activity.type === 'prescription' ? 'Retsept' :
+                                   activity.type === 'medical_record' ? 'Tibbiy yozuv' :
+                                   activity.type === 'queue' ? 'Qabul' :
                                    'Tahlil'}
                                 </span>
                               </div>
@@ -1019,6 +1057,40 @@ const PatientProfile = () => {
                                     activity.data.status === 'completed' ? 'Tayyor' :
                                     activity.data.status === 'pending' ? 'Kutilmoqda' :
                                     'Jarayonda'
+                                  }
+                                </p>
+                              </div>
+                            )}
+
+                            {activity.type === 'medical_record' && (
+                              <div className="text-sm">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-medium">Shifokor:</span> Dr. {activity.data.doctor_first_name} {activity.data.doctor_last_name}
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                                  <span className="font-medium">Tashxis:</span> {activity.data.diagnosis_text}
+                                </p>
+                                {activity.data.treatment_plan && (
+                                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                                    <span className="font-medium">Davolash rejasi:</span> {activity.data.treatment_plan}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            {activity.type === 'queue' && (
+                              <div className="text-sm">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-medium">Mutaxasis:</span> {activity.data.doctor_first_name} {activity.data.doctor_last_name}
+                                  {activity.data.specialization && <span className="text-gray-500"> ({activity.data.specialization})</span>}
+                                </p>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                  <span className="font-medium">Navbat:</span> #{activity.data.queue_number} • {
+                                    activity.data.status === 'COMPLETED' ? 'Yakunlangan' :
+                                    activity.data.status === 'WAITING' ? 'Kutmoqda' :
+                                    activity.data.status === 'IN_PROGRESS' ? 'Qabulda' :
+                                    activity.data.status === 'CANCELLED' ? 'Bekor qilingan' :
+                                    activity.data.status
                                   }
                                 </p>
                               </div>
@@ -1141,6 +1213,16 @@ const PatientProfile = () => {
                                 Retsept: {treatment.prescription.prescription_number}
                                 {treatment.prescription.diagnosis && ` - ${treatment.prescription.diagnosis}`}
                               </div>
+                            )}
+
+                            {isNurse && treatment.status === 'pending' && (
+                              <button
+                                onClick={() => { setSelectedTreatment({ ...treatment, patient_name: `${patient.first_name} ${patient.last_name}` }); setShowCompleteTreatmentModal(true); }}
+                                className="mt-3 w-full px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
+                              >
+                                <span className="material-symbols-outlined text-sm">check_circle</span>
+                                Muolajani bajarish
+                              </button>
                             )}
                           </div>
                         ))}
@@ -1518,6 +1600,37 @@ const PatientProfile = () => {
                               </p>
                             )}
                           </div>
+
+                          {isLaborant && result.status !== 'approved' && (
+                            <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                              <button
+                                onClick={() => {
+                                  setSelectedLabOrder({
+                                    id: result.result_id,
+                                    _id: result.result_id,
+                                    patient_name: `${patient.first_name} ${patient.last_name}`,
+                                    test_name: result.test_name,
+                                    order_number: result.test_code,
+                                    test_id: result.test_id
+                                  });
+                                  setShowLabResultModal(true);
+                                }}
+                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 flex items-center justify-center gap-2"
+                              >
+                                <span className="material-symbols-outlined text-sm">edit_note</span>
+                                Natija kiritish
+                              </button>
+                              {result.status === 'pending' && (
+                                <button
+                                  onClick={() => handleUpdateLabStatus(result.result_id, 'in_progress')}
+                                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 flex items-center justify-center gap-2"
+                                >
+                                  <span className="material-symbols-outlined text-sm">hourglass_top</span>
+                                  Jarayonda
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1822,17 +1935,19 @@ const PatientProfile = () => {
             </div>
           )}
           {/* Queue Tab */}
-          {activeTab === 'queue' && isReceptionist && (
+          {activeTab === 'queue' && (isReceptionist || isSpecialist) && (
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <h3 className="font-bold text-gray-900 dark:text-white">Navbat</h3>
-                <button
-                  onClick={() => { setShowAddQueueModal(true); loadDoctors(); }}
-                  className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined">add</span>
-                  Navbatga qo'shish
-                </button>
+                {isReceptionist && (
+                  <button
+                    onClick={() => { setShowAddQueueModal(true); loadDoctors(); }}
+                    className="px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:opacity-90 flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined">add</span>
+                    Navbatga qo'shish
+                  </button>
+                )}
               </div>
 
               {/* Bugungi navbat */}
@@ -1880,7 +1995,7 @@ const PatientProfile = () => {
                                 )}
                               </div>
                               <div className="flex items-center gap-2 mt-2 sm:mt-0 flex-wrap">
-                                {isDoctor && q.status === 'WAITING' && (
+                                {(isDoctor || isSpecialist) && q.status === 'WAITING' && (
                                   <button
                                     onClick={() => handleStartQueue(q.id)}
                                     className="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-semibold hover:bg-blue-600 flex items-center gap-1"
@@ -1889,7 +2004,7 @@ const PatientProfile = () => {
                                     Qabulni boshlash
                                   </button>
                                 )}
-                                {isDoctor && q.status === 'IN_PROGRESS' && (
+                                {(isDoctor || isSpecialist) && q.status === 'IN_PROGRESS' && (
                                   <button
                                     onClick={() => handleCompleteQueue(q.id)}
                                     className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-semibold hover:bg-green-600 flex items-center gap-1"
@@ -2537,117 +2652,6 @@ const PatientProfile = () => {
         />
       )}
 
-      {/* Nurse Task Modal */}
-      <Modal isOpen={showNurseModal} onClose={() => setShowNurseModal(false)} size="md">
-        <div className="p-6">
-          <h3 className="text-lg font-bold mb-4 dark:text-white">Hamshiraga topshiriq</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Hamshira</label>
-              <select
-                value={selectedNurse}
-                onChange={(e) => setSelectedNurse(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              >
-                <option value="">Tanlang...</option>
-                {nurses.map(n => (
-                  <option key={n._id} value={n._id}>
-                    {n.first_name} {n.last_name} {n.workload !== undefined ? `(${n.workload} ta vazifa)` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Topshiriq turi</label>
-              <select
-                value={nurseTaskData.task_type}
-                onChange={(e) => setNurseTaskData({ ...nurseTaskData, task_type: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              >
-                <option value="medication_administration">Dori berish</option>
-                <option value="patient_care">Bemor parvarishi</option>
-                <option value="vital_signs">Vital belgilar</option>
-                <option value="specimen_collection">Namuna olish</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Dori nomi</label>
-                <input
-                  type="text"
-                  value={nurseTaskData.medication_name}
-                  onChange={(e) => setNurseTaskData({ ...nurseTaskData, medication_name: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="Dori nomi"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Dozasi</label>
-                <input
-                  type="text"
-                  value={nurseTaskData.dosage}
-                  onChange={(e) => setNurseTaskData({ ...nurseTaskData, dosage: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="Masalan: 500mg"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Yo'l</label>
-                <select
-                  value={nurseTaskData.route}
-                  onChange={(e) => setNurseTaskData({ ...nurseTaskData, route: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="oral">Og'iz orqali</option>
-                  <option value="iv">Vena ichiga (IV)</option>
-                  <option value="im">Mushak ichiga (IM)</option>
-                  <option value="sc">Teri ostiga (SC)</option>
-                  <option value="topical">Tashqi</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 dark:text-gray-300">Muhimlik</label>
-                <select
-                  value={nurseTaskData.priority}
-                  onChange={(e) => setNurseTaskData({ ...nurseTaskData, priority: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="normal">Oddiy</option>
-                  <option value="urgent">Shoshilinch</option>
-                  <option value="stat">STAT</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Ko'rsatmalar</label>
-              <textarea
-                value={nurseTaskData.instructions}
-                onChange={(e) => setNurseTaskData({ ...nurseTaskData, instructions: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                rows={2}
-                placeholder="Qo'shimcha ko'rsatmalar..."
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-3 mt-6">
-            <button
-              onClick={() => setShowNurseModal(false)}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
-              Bekor qilish
-            </button>
-            <button
-              onClick={handleAssignToNurse}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:opacity-90"
-            >
-              Topshiriq yuborish
-            </button>
-          </div>
-        </div>
-      </Modal>
-
       {/* Lab Order Modal */}
       <Modal isOpen={showLabOrderModal} onClose={() => setShowLabOrderModal(false)} size="md">
         <div className="p-6">
@@ -2790,6 +2794,22 @@ const PatientProfile = () => {
         title={alertModal.title}
         message={alertModal.message}
         type={alertModal.type}
+      />
+
+      {/* Nurse: Treatment complete modal */}
+      <CompleteTreatmentModal
+        isOpen={showCompleteTreatmentModal}
+        onClose={() => { setShowCompleteTreatmentModal(false); setSelectedTreatment(null); }}
+        treatment={selectedTreatment}
+        onComplete={handleCompleteTreatment}
+      />
+
+      {/* Laborant: Result entry modal */}
+      <ResultModal
+        isOpen={showLabResultModal}
+        onClose={() => { setShowLabResultModal(false); setSelectedLabOrder(null); }}
+        order={selectedLabOrder}
+        onSuccess={() => { setShowLabResultModal(false); setSelectedLabOrder(null); loadPatientData(); }}
       />
     </div>
   );

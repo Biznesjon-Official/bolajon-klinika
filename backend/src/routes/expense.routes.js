@@ -5,7 +5,7 @@ import { authenticate, authorize } from '../middleware/auth.js';
 const router = express.Router();
 
 // Barcha xarajatlarni olish (filtrlash bilan)
-router.get('/', authenticate, authorize('Admin', 'Administrator'), async (req, res) => {
+router.get('/', authenticate, authorize('admin'), async (req, res) => {
   try {
     const {
       start_date, 
@@ -47,7 +47,7 @@ router.get('/', authenticate, authorize('Admin', 'Administrator'), async (req, r
     }
 
     const expenses = await Expense.find(filter)
-      .populate('created_by', 'full_name username')
+      .populate('created_by', 'first_name last_name username')
       .sort({ date: -1 })
       .limit(parseInt(limit))
       .skip(parseInt(skip));
@@ -73,7 +73,7 @@ router.get('/', authenticate, authorize('Admin', 'Administrator'), async (req, r
 });
 
 // Statistika olish
-router.get('/stats', authenticate, authorize('Admin', 'Administrator'), async (req, res) => {
+router.get('/stats', authenticate, authorize('admin'), async (req, res) => {
   try {
     const { month, year } = req.query;
 
@@ -167,7 +167,7 @@ router.get('/stats', authenticate, authorize('Admin', 'Administrator'), async (r
 });
 
 // Yangi xarajat qo'shish
-router.post('/', authenticate, authorize('Admin', 'Administrator'), async (req, res) => {
+router.post('/', authenticate, authorize('admin'), async (req, res) => {
   try {
     const { title, amount, category, description, date, payment_method, receipt_number } = req.body;
 
@@ -192,7 +192,7 @@ router.post('/', authenticate, authorize('Admin', 'Administrator'), async (req, 
     await expense.save();
 
     const populatedExpense = await Expense.findById(expense._id)
-      .populate('created_by', 'full_name username');
+      .populate('created_by', 'first_name last_name username');
 
     res.status(201).json({
       success: true,
@@ -208,7 +208,7 @@ router.post('/', authenticate, authorize('Admin', 'Administrator'), async (req, 
 });
 
 // Xarajatni tahrirlash
-router.put('/:id', authenticate, authorize('Admin', 'Administrator'), async (req, res) => {
+router.put('/:id', authenticate, authorize('admin'), async (req, res) => {
   try {
     const { id } = req.params;
     const { title, amount, category, description, date, payment_method, receipt_number } = req.body;
@@ -232,7 +232,7 @@ router.put('/:id', authenticate, authorize('Admin', 'Administrator'), async (req
     await expense.save();
 
     const populatedExpense = await Expense.findById(expense._id)
-      .populate('created_by', 'full_name username');
+      .populate('created_by', 'first_name last_name username');
 
     res.json({
       success: true,
@@ -248,7 +248,7 @@ router.put('/:id', authenticate, authorize('Admin', 'Administrator'), async (req
 });
 
 // Xarajatni o'chirish
-router.delete('/:id', authenticate, authorize('Admin', 'Administrator'), async (req, res) => {
+router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
   try {
     const { id } = req.params;
 
