@@ -4,6 +4,7 @@ import laboratoryService from '../services/laboratoryService';
 import patientService from '../services/patientService';
 import api from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
+import NewOrderModal from '../components/laboratory/NewOrderModal';
 
 export default function ReceptionPanel() {
   const { user } = useAuth();
@@ -177,7 +178,7 @@ export default function ReceptionPanel() {
 
       {/* Lab Order Modal */}
       {showLabOrderModal && (
-        <LabOrderModal
+        <NewOrderModal
           isOpen={showLabOrderModal}
           onClose={() => setShowLabOrderModal(false)}
           patients={patients}
@@ -186,209 +187,6 @@ export default function ReceptionPanel() {
           onSuccess={handleLabOrderSuccess}
         />
       )}
-    </div>
-  );
-}
-
-// Lab Order Modal Component
-function LabOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess }) {
-  const [formData, setFormData] = useState({
-    patient_id: '',
-    doctor_id: '',
-    test_id: '',
-    priority: 'normal',
-    notes: ''
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!formData.patient_id || !formData.test_id) {
-      toast.error('Bemor va tahlilni tanlang');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await laboratoryService.createOrder(formData);
-      if (response.success) {
-        toast.success(`Buyurtma yaratildi - Hisob-faktura: ${response.data.invoice_number}`);
-      } else {
-        toast.success('Buyurtma muvaffaqiyatli yaratildi!');
-      }
-      onSuccess();
-    } catch (error) {
-      toast.error('Xatolik: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl max-w-xl sm:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-          <div className="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-900 pb-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2 sm:gap-2 sm:gap-3">
-              <span className="material-symbols-outlined text-purple-600">biotech</span>
-              Laboratoriya Buyurtmasi
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-            >
-              <span className="material-symbols-outlined">close</span>
-            </button>
-          </div>
-
-          {/* Bemor */}
-          <div>
-            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Bemor <span className="text-red-500">*</span>
-            </label>
-            <select
-              required
-              value={formData.patient_id}
-              onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
-              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Bemorni tanlang</option>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.first_name} {patient.last_name} - {patient.patient_number}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Laborant */}
-          <div>
-            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Laborant
-            </label>
-            <select
-              value={formData.doctor_id}
-              onChange={(e) => setFormData({ ...formData, doctor_id: e.target.value })}
-              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Laborantni tanlang</option>
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.first_name} {doctor.last_name} - {doctor.specialization}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tahlil */}
-          <div>
-            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Tahlil <span className="text-red-500">*</span>
-            </label>
-            <select
-              required
-              value={formData.test_id}
-              onChange={(e) => setFormData({ ...formData, test_id: e.target.value })}
-              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Tahlilni tanlang</option>
-              {tests.map((test) => (
-                <option key={test.id} value={test.id}>
-                  {test.name} - {test.price?.toLocaleString() || 0} so'm
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Muhimlik */}
-          <div>
-            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Muhimlik darajasi
-            </label>
-            <div className="flex gap-2 sm:gap-3">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, priority: 'normal' })}
-                className={`flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
-                  formData.priority === 'normal'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
-                }`}
-              >
-                Oddiy
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, priority: 'urgent' })}
-                className={`flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
-                  formData.priority === 'urgent'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
-                }`}
-              >
-                Shoshilinch
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, priority: 'stat' })}
-                className={`flex-1 px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all ${
-                  formData.priority === 'stat'
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
-                }`}
-              >
-                Juda shoshilinch
-              </button>
-            </div>
-          </div>
-
-          {/* Izoh */}
-          <div>
-            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Izoh
-            </label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              rows="3"
-              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-              placeholder="Qo'shimcha ma'lumot..."
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 sm:gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg sm:rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700"
-            >
-              Bekor qilish
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-purple-600 text-white rounded-lg sm:rounded-xl font-semibold hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
-            >
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Yuklanmoqda...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined">add</span>
-                  Buyurtma berish
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 }
