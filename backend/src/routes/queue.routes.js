@@ -109,7 +109,7 @@ router.get('/doctors',
       
       // Get all doctors (including chief_doctor)
       const doctors = await Staff.find({
-        role: { $in: ['doctor', 'chief_doctor'] },
+        role: { $in: ['doctor', 'chief_doctor', 'masseur', 'speech_therapist', 'laborant'] },
         status: 'active'
       }).select('first_name last_name specialization phone').lean();
       
