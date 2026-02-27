@@ -37,7 +37,7 @@ const labOrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'sample_collected', 'in_progress', 'completed', 'cancelled'],
+    enum: ['pending', 'sample_collected', 'in_progress', 'completed', 'approved', 'cancelled'],
     default: 'pending'
   },
   priority: {
@@ -64,6 +64,28 @@ const labOrderSchema = new mongoose.Schema({
   completed_at: {
     type: Date
   },
+  analysis_started_at: {
+    type: Date
+  },
+  approved_at: {
+    type: Date
+  },
+  approved_by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Staff'
+  },
+  critical_alert: {
+    type: Boolean,
+    default: false
+  },
+  critical_values: [{
+    parameter_name: String,
+    value: String,
+    critical_type: {
+      type: String,
+      enum: ['low', 'high']
+    }
+  }],
   price: {
     type: Number,
     default: 0
@@ -79,6 +101,16 @@ labOrderSchema.index({ laborant_id: 1 });
 labOrderSchema.index({ status: 1 });
 labOrderSchema.index({ createdAt: -1 });
 labOrderSchema.index({ admission_id: 1 });
+
+// TAT (Turnaround Time) virtual field
+labOrderSchema.virtual('tat_minutes').get(function() {
+  const end = this.approved_at || this.completed_at
+  if (!end || !this.createdAt) return null
+  return Math.round((end - this.createdAt) / 60000)
+})
+
+labOrderSchema.set('toJSON', { virtuals: true })
+labOrderSchema.set('toObject', { virtuals: true })
 
 // Auto-increment order_number
 labOrderSchema.pre('save', async function() {

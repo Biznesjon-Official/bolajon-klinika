@@ -28,6 +28,8 @@ const RoleBasedRedirect = ({ children }) => {
         defaultPath = '/patients'; // Bemorlar - birinchi
       } else if (roleName === 'nurse' || roleName === 'hamshira') {
         defaultPath = '/ambulator'; // Xonalar - birinchi
+      } else if (roleName === 'chef_laborant') {
+        defaultPath = '/chef-laborant'
       } else if (roleName === 'lab' || roleName === 'laborant') {
         defaultPath = '/lab'; // Laborant Dashboard - birinchi
       } else if (roleName === 'cleaner' || roleName === 'tozalovchi') {

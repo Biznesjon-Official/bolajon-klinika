@@ -13,6 +13,7 @@ import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import PatientQRModal from '../components/PatientQRModal';
 import DateInput from '../components/DateInput';
+import LabTrendChart from '../components/laboratory/LabTrendChart';
 import api from '../services/api';
 import PrescriptionModal from '../components/PrescriptionModal';
 
@@ -1493,6 +1494,9 @@ const PatientProfile = () => {
               <div className="flex justify-between items-center">
                 <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-sm sm:text-base">Tahlil natijalari</h3>
               </div>
+
+              {/* Trend Chart */}
+              {patient?.id && <LabTrendChart patientId={patient.id} />}
 
               {labResults.length === 0 ? (
                 <div className="text-center py-12">

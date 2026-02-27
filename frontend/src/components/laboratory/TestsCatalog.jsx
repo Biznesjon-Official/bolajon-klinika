@@ -250,14 +250,18 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm sm:text-sm font-semibold mb-2">Kategoriya</label>
-                  <input
-                    type="text"
+                  <label className="block text-sm sm:text-sm font-semibold mb-2">Kategoriya *</label>
+                  <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-4 sm:px-4 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 border rounded-lg sm:rounded-lg dark:bg-gray-900 dark:border-gray-700"
-                    placeholder="Masalan: Biokimyo, Gematologiya"
-                  />
+                    required
+                  >
+                    <option value="">Kategoriya tanlang...</option>
+                    {['Gematologiya', 'Biokimya', 'Immunologiya', 'Gormonlar', 'Koagulologiya', 'Mikrobiologiya', 'Klinik', 'PCR', 'Onkologiya', 'Parazitologiya', 'Umumiy'].map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {!editingTest && (

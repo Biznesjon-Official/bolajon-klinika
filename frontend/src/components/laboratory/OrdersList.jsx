@@ -36,7 +36,7 @@ export default function OrdersList({ orders, onEnterResult, onRefresh, isAdmin, 
 
   const handleApprove = async (resultId) => {
     try {
-      await laboratoryService.approveResult(resultId);
+      await laboratoryService.approveOrder(resultId);
       toast.success(t('lab.resultApproved'));
       onRefresh();
     } catch (error) {

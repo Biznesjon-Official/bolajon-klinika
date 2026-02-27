@@ -214,8 +214,9 @@ export default function Laboratory() {
 
   const roleName = user?.role?.name || user?.role_name;
   const isAdmin = roleName === 'admin';
-  const isLaborant = roleName === 'laborant';
+  const isLaborant = roleName === 'laborant' || roleName === 'chef_laborant';
   const isDoctor = ['doctor', 'chief_doctor'].includes(roleName);
+  const isChefLaborant = roleName === 'chef_laborant';
   const isReception = roleName === 'receptionist';
 
 
@@ -232,7 +233,7 @@ export default function Laboratory() {
           </p>
         </div>
         
-        {(isAdmin || isDoctor || isReception) && (
+        {(isAdmin || isDoctor || isChefLaborant || isReception) && (
           <button
             onClick={handleNewOrder}
             className="w-full sm:w-auto px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl font-semibold hover:opacity-90 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
@@ -365,7 +366,7 @@ export default function Laboratory() {
             {t('lab.testsCatalog')}
           </button>
         )}
-        {isAdmin && (
+        {(isAdmin || isChefLaborant) && (
           <button
             onClick={() => setActiveTab('pharmacy')}
             className={`px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 font-semibold transition-colors whitespace-nowrap flex items-center gap-2 sm:gap-2 sm:gap-3 ${
@@ -429,7 +430,7 @@ export default function Laboratory() {
         />
       ) : activeTab === 'tests' ? (
         <TestsCatalog tests={tests} onRefresh={loadData} t={t} />
-      ) : activeTab === 'pharmacy' && isAdmin ? (
+      ) : activeTab === 'pharmacy' && (isAdmin || isChefLaborant) ? (
         <LabPharmacy />
       ) : null}
 

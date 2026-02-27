@@ -61,21 +61,9 @@ export const laboratoryService = {
   // NATIJALAR
   // ============================================
   
-  // Natija kiritish
-  createResult: async (data) => {
-    const response = await api.post('/laboratory/results', data);
-    return response.data;
-  },
-  
-  // Natijani tasdiqlash
-  approveResult: async (id) => {
-    const response = await api.put(`/laboratory/results/${id}/approve`);
-    return response.data;
-  },
-  
   // Natijani ko'rish
   getResult: async (orderId) => {
-    const response = await api.get(`/laboratory/results/${orderId}`);
+    const response = await api.get(`/laboratory/orders/${orderId}/result`);
     return response.data;
   },
   
@@ -120,6 +108,40 @@ export const laboratoryService = {
   getCompletedTests: async () => {
     const response = await api.get('/laboratory/laborant/history');
     return response.data;
+  },
+
+  // ============================================
+  // BEMOR TARIXI VA TREND
+  // ============================================
+
+  getPatientHistory: async (patientId) => {
+    const response = await api.get(`/laboratory/patient/${patientId}/history`)
+    return response.data
+  },
+
+  getPatientTrend: async (patientId, parameter) => {
+    const response = await api.get(`/laboratory/patient/${patientId}/trend`, { params: { parameter } })
+    return response.data
+  },
+
+  // ============================================
+  // TAT VA KATEGORIYALAR
+  // ============================================
+
+  getTatStats: async (period = '7d') => {
+    const response = await api.get('/laboratory/stats/tat', { params: { period } })
+    return response.data
+  },
+
+  getCategories: async () => {
+    const response = await api.get('/laboratory/categories')
+    return response.data
+  },
+
+  // Buyurtmani tasdiqlash (approve)
+  approveOrder: async (id) => {
+    const response = await api.put(`/laboratory/orders/${id}/status`, { status: 'approved' })
+    return response.data
   }
 };
 

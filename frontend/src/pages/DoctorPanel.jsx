@@ -101,6 +101,18 @@ const DoctorPanel = () => {
       }
     });
 
+    socket.on('critical-lab-alert', (data) => {
+      if (data.doctor_id === user?._id) {
+        const criticalList = data.critical_values?.map(cv =>
+          `${cv.parameter_name}: ${cv.value} (${cv.critical_type === 'high' ? '↑ YUQORI' : '↓ PAST'})`
+        ).join(', ')
+        toast.error(
+          `🚨 KRITIK QIYMAT!\n${data.patient_name} — ${data.test_name}\n${criticalList}`,
+          { duration: 15000 }
+        )
+      }
+    });
+
     return () => socket.disconnect();
   }, []);
 

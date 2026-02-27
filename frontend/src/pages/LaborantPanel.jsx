@@ -14,6 +14,7 @@ export default function LaborantPanel() {
     recent_results: 0
   })
   const [tests, setTests] = useState([])
+  const [tatStats, setTatStats] = useState([])
 
   useEffect(() => {
     loadData()
@@ -22,13 +23,15 @@ export default function LaborantPanel() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [statsData, testsData] = await Promise.all([
+      const [statsData, testsData, tatData] = await Promise.all([
         laboratoryService.getLaborantStats(),
-        laboratoryService.getTests()
+        laboratoryService.getTests(),
+        laboratoryService.getTatStats('7d').catch(() => ({ success: false }))
       ])
 
       if (statsData.success) setStats(statsData.data)
       if (testsData.success) setTests(testsData.data)
+      if (tatData.success) setTatStats(tatData.data || [])
     } catch (error) {
       console.error('Load data error:', error)
       toast.error('Ma\'lumotlarni yuklashda xatolik')
@@ -89,6 +92,29 @@ export default function LaborantPanel() {
           <p className="text-sm sm:text-base opacity-90">Oxirgi natijalar</p>
         </div>
       </div>
+
+      {/* TAT Stats */}
+      {tatStats.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="material-symbols-outlined text-2xl text-primary">timer</span>
+            <h2 className="text-lg font-bold">TAT statistikasi (7 kun)</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {tatStats.map((t, i) => (
+              <div key={i} className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border">
+                <p className="font-semibold text-sm truncate">{t._id}</p>
+                <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
+                  <span>O'rtacha: <strong className="text-primary">{Math.round(t.avg_tat)} daq</strong></span>
+                  <span>Min: {Math.round(t.min_tat)}</span>
+                  <span>Max: {Math.round(t.max_tat)}</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{t.count} ta tahlil</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">

@@ -40,6 +40,9 @@ const LabOrders = lazy(() => import('./pages/LabOrders'));
 const LabSamples = lazy(() => import('./pages/LabSamples'));
 const LabProfile = lazy(() => import('./pages/LabProfile'));
 const LabPharmacy = lazy(() => import('./pages/LabPharmacy'));
+const ChefLaborantPanel = lazy(() => import('./pages/ChefLaborantPanel'));
+const ChefLaborantOrders = lazy(() => import('./pages/ChefLaborantOrders'));
+const ChefLaborantPerformance = lazy(() => import('./pages/ChefLaborantPerformance'));
 const NursePanel = lazy(() => import('./pages/NursePanel'));
 const SanitarPanel = lazy(() => import('./pages/SanitarPanel'));
 const ReceptionPanel = lazy(() => import('./pages/ReceptionPanel'));
@@ -149,6 +152,10 @@ function AppContent() {
               <Route path="/lab/orders" element={<ProtectedRoute><DashboardLayout><LabOrders /></DashboardLayout></ProtectedRoute>} />
               <Route path="/lab/samples" element={<ProtectedRoute><DashboardLayout><LabSamples /></DashboardLayout></ProtectedRoute>} />
               <Route path="/lab/profile" element={<ProtectedRoute><DashboardLayout><LabProfile /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chef-laborant" element={<ProtectedRoute><DashboardLayout><ChefLaborantPanel /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chef-laborant/orders" element={<ProtectedRoute><DashboardLayout><ChefLaborantOrders /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chef-laborant/performance" element={<ProtectedRoute><DashboardLayout><ChefLaborantPerformance /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chef-laborant/profile" element={<ProtectedRoute><DashboardLayout><LabProfile /></DashboardLayout></ProtectedRoute>} />
               <Route path="/nurse" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/nurse/medicine" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />
               <Route path="/nurse/calls" element={<ProtectedRoute><DashboardLayout><NursePanel /></DashboardLayout></ProtectedRoute>} />

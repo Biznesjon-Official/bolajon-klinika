@@ -60,6 +60,14 @@ const DashboardLayout = ({ children }) => {
     { name: 'Buyurtmalar', icon: 'assignment', path: '/lab/orders', roles: ['Laborant', 'Lab'] },
     { name: 'Namuna olish', icon: 'colorize', path: '/lab/samples', roles: ['Laborant', 'Lab'] },
     { name: 'Mening profilim', icon: 'person', path: '/lab/profile', roles: ['Laborant', 'Lab'] },
+    // 7.5. Bosh laborant
+    { name: 'Bosh Laborant', icon: 'biotech', path: '/chef-laborant', roles: ['chef_laborant'] },
+    { name: 'Barcha buyurtmalar', icon: 'assignment', path: '/chef-laborant/orders', roles: ['chef_laborant'] },
+    { name: 'Laborantlar ishlashi', icon: 'analytics', path: '/chef-laborant/performance', roles: ['chef_laborant'] },
+    { name: 'Testlar katalogi', icon: 'science', path: '/laboratory', roles: ['chef_laborant'] },
+    { name: 'Lab reaktivlar', icon: 'inventory_2', path: '/lab-pharmacy', roles: ['chef_laborant'] },
+    { name: 'Mening profilim', icon: 'person', path: '/chef-laborant/profile', roles: ['chef_laborant'] },
+
     { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'chief_doctor'] },
     
     // 9. Tozalovchi

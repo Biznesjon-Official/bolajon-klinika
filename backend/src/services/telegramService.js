@@ -1,7 +1,9 @@
-import axios from 'axios';
+import axios from 'axios'
+import fs from 'fs'
+import FormData from 'form-data'
 
-const BOT_TOKEN = process.env.BOT_TOKEN;
-const TELEGRAM_API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : null;
+const BOT_TOKEN = process.env.BOT_TOKEN
+const TELEGRAM_API = BOT_TOKEN ? `https://api.telegram.org/bot${BOT_TOKEN}` : null
 
 /**
  * Send message to Telegram user
@@ -72,7 +74,97 @@ ${task.location_details ? `📍 *Manzil:* ${task.location_details}\n` : ''}
   }
 }
 
+/**
+ * Send document (PDF) to Telegram user
+ */
+export async function sendTelegramDocument(chatId, filePath, caption = '') {
+  try {
+    if (!TELEGRAM_API) return { success: false, message: 'BOT_TOKEN not configured' }
+    if (!chatId) return { success: false, message: 'No chat ID' }
+    if (!fs.existsSync(filePath)) return { success: false, message: 'File not found' }
+
+    const form = new FormData()
+    form.append('chat_id', chatId)
+    form.append('document', fs.createReadStream(filePath))
+    if (caption) {
+      form.append('caption', caption)
+      form.append('parse_mode', 'Markdown')
+    }
+
+    const response = await axios.post(`${TELEGRAM_API}/sendDocument`, form, {
+      headers: form.getHeaders()
+    })
+
+    return { success: true, data: response.data }
+  } catch (error) {
+    return { success: false, error: 'Failed to send telegram document' }
+  }
+}
+
+/**
+ * Send lab result notification to patient
+ */
+export async function sendLabResultNotification(patient, testName, pdfPath = null) {
+  try {
+    if (!patient?.telegram_chat_id) return { success: false, message: 'No chat ID' }
+
+    const message = `
+🔬 *Tahlil natijasi tayyor!*
+
+👤 *Bemor:* ${patient.first_name} ${patient.last_name}
+🧪 *Tahlil:* ${testName}
+📅 *Sana:* ${new Date().toLocaleDateString('uz-UZ')}
+
+✅ Natijangiz tayyor. Klinikaga murojaat qiling yoki botda ko'ring.
+    `.trim()
+
+    await sendTelegramMessage(patient.telegram_chat_id, message)
+
+    if (pdfPath) {
+      await sendTelegramDocument(patient.telegram_chat_id, pdfPath, `📄 ${testName} natijasi`)
+    }
+
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: error.message }
+  }
+}
+
+/**
+ * Send critical lab alert to doctor
+ */
+export async function sendCriticalLabAlert(doctor, orderData, criticalValues) {
+  try {
+    if (!doctor?.telegram_chat_id) return { success: false, message: 'No chat ID' }
+
+    const criticalList = criticalValues.map(cv => {
+      const arrow = cv.critical_type === 'high' ? '⬆️ YUQORI' : '⬇️ PAST'
+      return `  • *${cv.parameter_name}:* ${cv.value} — ${arrow}`
+    }).join('\n')
+
+    const message = `
+🚨 *CRITICAL LAB ALERT!*
+
+👤 *Bemor:* ${orderData.patient_name}
+🧪 *Tahlil:* ${orderData.test_name}
+📋 *Buyurtma:* ${orderData.order_number}
+
+⚠️ *Kritik qiymatlar:*
+${criticalList}
+
+🔴 Zudlik bilan tekshiring!
+    `.trim()
+
+    return await sendTelegramMessage(doctor.telegram_chat_id, message)
+  } catch (error) {
+    return { success: false, error: error.message }
+  }
+}
+
 export default {
   sendTelegramMessage,
-  sendTaskNotification
-};
+  sendTaskNotification,
+  sendTelegramDocument,
+  sendLabResultNotification,
+  sendCriticalLabAlert
+}

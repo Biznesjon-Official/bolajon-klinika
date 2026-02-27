@@ -139,7 +139,7 @@ router.get('/tests/:id', authenticate, async (req, res, next) => {
 });
 
 // Create lab test
-router.post('/tests', authenticate, authorize('admin', 'laborant', 'doctor'), async (req, res, next) => {
+router.post('/tests', authenticate, authorize('admin', 'laborant', 'chef_laborant', 'doctor'), async (req, res, next) => {
   try {
     const {
       name,
@@ -191,7 +191,7 @@ router.post('/tests', authenticate, authorize('admin', 'laborant', 'doctor'), as
 });
 
 // Update lab test
-router.put('/tests/:id', authenticate, authorize('admin', 'laborant', 'doctor'), async (req, res, next) => {
+router.put('/tests/:id', authenticate, authorize('admin', 'laborant', 'chef_laborant', 'doctor'), async (req, res, next) => {
   try {
     const {
       name,
@@ -245,7 +245,7 @@ router.put('/tests/:id', authenticate, authorize('admin', 'laborant', 'doctor'),
 });
 
 // Delete lab test
-router.delete('/tests/:id', authenticate, authorize('admin', 'laborant', 'doctor'), async (req, res, next) => {
+router.delete('/tests/:id', authenticate, authorize('admin', 'laborant', 'chef_laborant', 'doctor'), async (req, res, next) => {
   try {
     const test = await LabTest.findByIdAndDelete(req.params.id);
     
@@ -377,11 +377,11 @@ router.get('/orders/:id', authenticate, async (req, res, next) => {
 router.get('/orders/:id/result', authenticate, async (req, res, next) => {
   try {
     const order = await LabOrder.findById(req.params.id)
-      .populate('patient_id', 'first_name last_name patient_number phone date_of_birth')
+      .populate('patient_id', 'first_name last_name patient_number phone date_of_birth address')
       .populate('doctor_id', 'first_name last_name')
       .populate('laborant_id', 'first_name last_name')
       .lean();
-    
+
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -389,14 +389,12 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
       });
     }
 
-    // Calculate patient age and birth year if date_of_birth exists
+    // Calculate patient age and birth year
     let patientAge = null;
     let patientBirthYear = null;
-    
-    
+
     if (order.patient_id?.date_of_birth) {
       const birthDate = new Date(order.patient_id.date_of_birth);
-      
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
@@ -405,10 +403,8 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
       }
       patientAge = age;
       patientBirthYear = birthDate.getFullYear();
-      
-    } else {
     }
-    
+
     res.json({
       success: true,
       data: {
@@ -427,8 +423,13 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
         notes: order.notes,
         order_date: order.createdAt,
         completed_at: order.completed_at,
-        approved_at: order.completed_at,
-        status: order.status
+        approved_at: order.approved_at || order.completed_at,
+        status: order.status,
+        critical_alert: order.critical_alert || false,
+        critical_values: order.critical_values || [],
+        sample_collected_at: order.sample_collected_at,
+        analysis_started_at: order.analysis_started_at,
+        tat_minutes: order.tat_minutes
       }
     });
   } catch (error) {
@@ -437,7 +438,7 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
 });
 
 // Create lab order
-router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor', 'receptionist'), createOrderLimiter, async (req, res, next) => {
+router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor', 'chef_laborant', 'receptionist'), createOrderLimiter, async (req, res, next) => {
   let session = null
   let useTransaction = false
 
@@ -655,7 +656,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
 });
 
 // Update lab order status
-router.put('/orders/:id/status', authenticate, authorize('admin', 'laborant'), async (req, res, next) => {
+router.put('/orders/:id/status', authenticate, authorize('admin', 'laborant', 'chef_laborant'), async (req, res, next) => {
   try {
     const { status, results, laborant_id } = req.body;
     
@@ -670,11 +671,21 @@ router.put('/orders/:id/status', authenticate, authorize('admin', 'laborant'), a
     }
     
     if (status === 'in_progress' && !updateData.laborant_id) {
-      updateData.laborant_id = req.user.id;
+      updateData.laborant_id = req.user.id
+      updateData.analysis_started_at = new Date()
     }
-    
+
+    if (status === 'sample_collected') {
+      updateData.sample_collected_at = new Date()
+    }
+
     if (status === 'completed') {
-      updateData.completed_at = new Date();
+      updateData.completed_at = new Date()
+    }
+
+    if (status === 'approved') {
+      updateData.approved_at = new Date()
+      updateData.approved_by = req.user.id
     }
     
     const order = await LabOrder.findByIdAndUpdate(
@@ -690,18 +701,28 @@ router.put('/orders/:id/status', authenticate, authorize('admin', 'laborant'), a
       });
     }
     
+    // Approved bo'lganda bemorga Telegram notification
+    if (status === 'approved' && order.patient_id) {
+      try {
+        const { sendLabResultNotification } = await import('../services/telegramService.js')
+        await sendLabResultNotification(order.patient_id, order.test_name)
+      } catch {
+        // Telegram xato bo'lsa davom etamiz
+      }
+    }
+
     res.json({
       success: true,
       message: 'Status yangilandi',
       data: order
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-});
+})
 
 // Update lab order
-router.put('/orders/:id', authenticate, authorize('admin', 'laborant'), async (req, res, next) => {
+router.put('/orders/:id', authenticate, authorize('admin', 'laborant', 'chef_laborant'), async (req, res, next) => {
   try {
     const {
       test_type,
@@ -896,7 +917,7 @@ router.get('/stats', authenticate, async (req, res, next) => {
 // ============================================
 
 // Get laborant statistics
-router.get('/laborant/stats', authenticate, authorize('laborant', 'admin'), async (req, res, next) => {
+router.get('/laborant/stats', authenticate, authorize('laborant', 'chef_laborant', 'admin'), async (req, res, next) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -957,7 +978,7 @@ router.get('/laborant/stats', authenticate, authorize('laborant', 'admin'), asyn
 });
 
 // Scan QR code
-router.post('/scan-qr', authenticate, authorize('laborant', 'admin'), async (req, res, next) => {
+router.post('/scan-qr', authenticate, authorize('laborant', 'chef_laborant', 'admin'), async (req, res, next) => {
   try {
     const { qr_code } = req.body;
     
@@ -974,34 +995,71 @@ router.post('/scan-qr', authenticate, authorize('laborant', 'admin'), async (req
       .populate('doctor_id', 'first_name last_name')
       .lean();
     
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: 'Buyurtma topilmadi'
-      });
+    if (order) {
+      return res.json({
+        success: true,
+        type: 'order',
+        data: {
+          id: order._id,
+          order_number: order.order_number,
+          patient_first_name: order.patient_id?.first_name,
+          patient_last_name: order.patient_id?.last_name,
+          patient_number: order.patient_id?.patient_number,
+          test_name: order.test_name,
+          test_type: order.test_type,
+          status: order.status,
+          created_at: order.createdAt
+        }
+      })
     }
-    
-    res.json({
-      success: true,
-      data: {
-        id: order._id,
-        order_number: order.order_number,
-        patient_first_name: order.patient_id?.first_name,
-        patient_last_name: order.patient_id?.last_name,
-        patient_number: order.patient_id?.patient_number,
-        test_name: order.test_name,
-        test_type: order.test_type,
-        status: order.status,
-        created_at: order.createdAt
-      }
-    });
+
+    // Patient number bo'yicha qidirish (P000001)
+    const Patient = (await import('../models/Patient.js')).default
+    const patient = await Patient.findOne({ patient_number: qr_code }).lean()
+    if (patient) {
+      const orders = await LabOrder.find({
+        patient_id: patient._id,
+        status: { $in: ['pending', 'sample_collected', 'in_progress'] }
+      })
+        .populate('doctor_id', 'first_name last_name')
+        .sort({ createdAt: -1 })
+        .lean()
+
+      return res.json({
+        success: true,
+        type: 'patient',
+        data: {
+          patient: {
+            id: patient._id,
+            first_name: patient.first_name,
+            last_name: patient.last_name,
+            patient_number: patient.patient_number
+          },
+          orders: orders.map(o => ({
+            id: o._id,
+            order_number: o.order_number,
+            test_name: o.test_name,
+            test_type: o.test_type,
+            status: o.status,
+            priority: o.priority,
+            doctor_name: o.doctor_id ? `${o.doctor_id.first_name} ${o.doctor_id.last_name}` : '',
+            created_at: o.createdAt
+          }))
+        }
+      })
+    }
+
+    return res.status(404).json({
+      success: false,
+      message: 'Buyurtma yoki bemor topilmadi'
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-});
+})
 
 // Submit test results
-router.post('/orders/:id/results', authenticate, authorize('laborant', 'admin'), async (req, res, next) => {
+router.post('/orders/:id/results', authenticate, authorize('laborant', 'chef_laborant', 'admin'), async (req, res, next) => {
   try {
     const { test_results, notes, reagent_id } = req.body;
     
@@ -1021,15 +1079,60 @@ router.post('/orders/:id/results', authenticate, authorize('laborant', 'admin'),
       });
     }
 
-    const patientId = existingOrder.patient_id;
-    
+    const patientId = existingOrder.patient_id
+
+    // Critical value detection
+    const criticalValues = []
+    if (existingOrder.test_id) {
+      const testInfo = await LabTest.findById(existingOrder.test_id).lean()
+      if (testInfo?.test_parameters) {
+        for (const result of test_results) {
+          const param = testInfo.test_parameters.find(p => p.name === result.parameter_name)
+          if (!param) continue
+          const numValue = parseFloat(String(result.value).replace(',', '.'))
+          if (isNaN(numValue)) continue
+          if (param.critical_low && numValue < parseFloat(param.critical_low)) {
+            criticalValues.push({ parameter_name: result.parameter_name, value: result.value, critical_type: 'low' })
+          }
+          if (param.critical_high && numValue > parseFloat(param.critical_high)) {
+            criticalValues.push({ parameter_name: result.parameter_name, value: result.value, critical_type: 'high' })
+          }
+        }
+      }
+    }
+
     // Update lab order
-    existingOrder.results = test_results;
-    existingOrder.notes = notes || '';
-    existingOrder.status = 'completed';
-    existingOrder.completed_at = new Date();
-    existingOrder.laborant_id = req.user.id;
-    await existingOrder.save();
+    existingOrder.results = test_results
+    existingOrder.notes = notes || ''
+    existingOrder.status = 'completed'
+    existingOrder.completed_at = new Date()
+    existingOrder.laborant_id = req.user.id
+    existingOrder.critical_alert = criticalValues.length > 0
+    existingOrder.critical_values = criticalValues
+    await existingOrder.save()
+
+    // Critical alert: socket + telegram
+    if (criticalValues.length > 0 && existingOrder.doctor_id) {
+      const Patient = (await import('../models/Patient.js')).default
+      const patient = await Patient.findById(patientId).select('first_name last_name patient_number').lean()
+      const alertData = {
+        orderId: existingOrder._id,
+        orderNumber: existingOrder.order_number,
+        patientName: patient ? `${patient.first_name} ${patient.last_name}` : '',
+        patientNumber: patient?.patient_number,
+        testName: existingOrder.test_name,
+        criticalValues,
+        targetRole: 'doctor',
+        targetUserId: existingOrder.doctor_id.toString()
+      }
+      if (global.io) global.io.emit('critical-lab-alert', alertData)
+      try {
+        const { sendCriticalLabAlert } = await import('../services/telegramService.js')
+        if (sendCriticalLabAlert) await sendCriticalLabAlert(existingOrder.doctor_id, alertData, criticalValues)
+      } catch {
+        // Telegram xato bo'lsa davom etamiz
+      }
+    }
 
     // Use reagent if provided
     if (reagent_id) {
@@ -1152,7 +1255,7 @@ router.post('/orders/:id/results', authenticate, authorize('laborant', 'admin'),
 });
 
 // Get completed tests history (for laborant)
-router.get('/laborant/history', authenticate, authorize('laborant', 'admin'), async (req, res, next) => {
+router.get('/laborant/history', authenticate, authorize('laborant', 'chef_laborant', 'admin'), async (req, res, next) => {
   try {
     // Get completed orders grouped by patient
     const completedOrders = await LabOrder.find({
@@ -1422,5 +1525,121 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
     });
   }
 });
+
+// ============================================
+// DMED STANDARTLAR: History, Trend, TAT, Categories
+// ============================================
+
+// Kategoriyalar ro'yxati
+router.get('/categories', authenticate, async (req, res) => {
+  res.json({
+    success: true,
+    data: ['Gematologiya', 'Biokimya', 'Immunologiya', 'Gormonlar', 'Koagulologiya', 'Mikrobiologiya', 'Klinik', 'PCR', 'Onkologiya', 'Parazitologiya', 'Umumiy']
+  })
+})
+
+// Bemor tahlil tarixi
+router.get('/patient/:patientId/history', authenticate, async (req, res, next) => {
+  try {
+    const orders = await LabOrder.find({
+      patient_id: req.params.patientId,
+      status: { $in: ['completed', 'approved'] }
+    })
+      .populate('test_id', 'name category test_parameters')
+      .populate('doctor_id', 'first_name last_name')
+      .populate('laborant_id', 'first_name last_name')
+      .sort({ completed_at: -1 })
+      .lean()
+
+    res.json({ success: true, data: orders })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Bemor parametr trend data
+router.get('/patient/:patientId/trend', authenticate, async (req, res, next) => {
+  try {
+    const { parameter } = req.query
+    if (!parameter) {
+      return res.status(400).json({ success: false, message: 'parameter query kerak' })
+    }
+
+    const orders = await LabOrder.find({
+      patient_id: req.params.patientId,
+      status: { $in: ['completed', 'approved'] },
+      'results.parameter_name': parameter
+    })
+      .select('results completed_at test_name order_number')
+      .sort({ completed_at: 1 })
+      .lean()
+
+    const trendData = orders.map(o => {
+      const result = o.results.find(r => r.parameter_name === parameter)
+      return {
+        date: o.completed_at,
+        value: result?.value,
+        unit: result?.unit,
+        normal_range: result?.normal_range,
+        is_normal: result?.is_normal,
+        order_number: o.order_number,
+        test_name: o.test_name
+      }
+    })
+
+    res.json({ success: true, data: trendData })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// TAT statistika
+router.get('/stats/tat', authenticate, authorize('admin', 'laborant', 'chef_laborant', 'chief_doctor'), async (req, res, next) => {
+  try {
+    const { period = '7d' } = req.query
+    const days = period === '30d' ? 30 : period === '7d' ? 7 : 1
+
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - days)
+
+    const stats = await LabOrder.aggregate([
+      {
+        $match: {
+          status: { $in: ['completed', 'approved'] },
+          completed_at: { $gte: startDate }
+        }
+      },
+      {
+        $project: {
+          tat: { $subtract: [{ $ifNull: ['$approved_at', '$completed_at'] }, '$createdAt'] },
+          test_type: 1,
+          priority: 1
+        }
+      },
+      {
+        $group: {
+          _id: '$test_type',
+          avg_tat: { $avg: '$tat' },
+          min_tat: { $min: '$tat' },
+          max_tat: { $max: '$tat' },
+          count: { $sum: 1 }
+        }
+      }
+    ])
+
+    // ms -> min ga o'tkazish
+    const formatted = stats.map(s => ({
+      test_type: s._id,
+      avg_minutes: Math.round(s.avg_tat / 60000),
+      min_minutes: Math.round(s.min_tat / 60000),
+      max_minutes: Math.round(s.max_tat / 60000),
+      count: s.count
+    }))
+
+    res.json({ success: true, data: formatted })
+  } catch (error) {
+    next(error)
+  }
+})
 
 export default router;

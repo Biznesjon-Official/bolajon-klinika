@@ -22,7 +22,9 @@ export default function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
               name: p.name || p.parameter,
               value: '',
               unit: p.unit || '',
-              normalRange: p.normal_range || p.normalRange || ''
+              normalRange: p.normal_range || p.normalRange || '',
+              critical_low: p.critical_low || '',
+              critical_high: p.critical_high || ''
             }));
             setTestParams(params);
           } else {
@@ -42,6 +44,15 @@ export default function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
     loadTestParams();
   }, [isOpen, order]);
   
+  const isCriticalValue = (param) => {
+    if (!param.value || (!param.critical_low && !param.critical_high)) return null;
+    const numVal = parseFloat(param.value.replace(',', '.'));
+    if (isNaN(numVal)) return null;
+    if (param.critical_low && numVal < parseFloat(param.critical_low.replace(',', '.'))) return 'low';
+    if (param.critical_high && numVal > parseFloat(param.critical_high.replace(',', '.'))) return 'high';
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -156,35 +167,49 @@ export default function ResultModal({ isOpen, onClose, order, onSuccess, t }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {testParams.map((param, index) => (
-                      <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td className="border border-gray-300 dark:border-gray-700 px-3 py-3 text-center text-sm text-gray-900 dark:text-white font-semibold">
-                          {index + 1}.
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-left text-sm font-bold text-gray-900 dark:text-white uppercase">
-                          {param.name}
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-700 px-2 py-2">
-                          <input
-                            type="text"
-                            value={param.value}
-                            onChange={(e) => {
-                              const newParams = [...testParams];
-                              newParams[index].value = e.target.value;
-                              setTestParams(newParams);
-                            }}
-                            className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-sm"
-                            placeholder="Қиймат"
-                          />
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm text-blue-600 dark:text-blue-400 font-semibold">
-                          {param.normalRange}
-                        </td>
-                        <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm text-blue-600 dark:text-blue-400 font-semibold">
-                          {param.unit}
-                        </td>
-                      </tr>
-                    ))}
+                    {testParams.map((param, index) => {
+                      const critical = isCriticalValue(param);
+                      return (
+                        <tr key={index} className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${critical ? 'bg-red-50 dark:bg-red-900/20' : ''}`}>
+                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-3 text-center text-sm text-gray-900 dark:text-white font-semibold">
+                            {index + 1}.
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-left text-sm font-bold text-gray-900 dark:text-white uppercase">
+                            {param.name}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-700 px-2 py-2">
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={param.value}
+                                onChange={(e) => {
+                                  const newParams = [...testParams];
+                                  newParams[index].value = e.target.value;
+                                  setTestParams(newParams);
+                                }}
+                                className={`w-full px-3 py-2.5 border rounded text-center text-sm focus:outline-none focus:ring-2 ${
+                                  critical
+                                    ? 'border-red-500 bg-red-50 text-red-700 focus:ring-red-500'
+                                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-blue-500'
+                                }`}
+                                placeholder="Қиймат"
+                              />
+                              {critical && (
+                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500" title={critical === 'high' ? 'YUQORI' : 'PAST'}>
+                                  <span className="material-symbols-outlined text-base">warning</span>
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm text-blue-600 dark:text-blue-400 font-semibold">
+                            {param.normalRange}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-center text-sm text-blue-600 dark:text-blue-400 font-semibold">
+                            {param.unit}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
