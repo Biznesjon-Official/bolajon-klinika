@@ -684,7 +684,7 @@ const PatientProfile = () => {
                   </button>
                 </>
               )}
-              {(isDoctor || isReceptionist) && (
+              {isDoctor && (
                   <button
                     onClick={handleOpenLabOrderModal}
                     className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
@@ -694,6 +694,15 @@ const PatientProfile = () => {
                   </button>
               )}
             </>
+          )}
+          {isReceptionist && (
+            <button
+              onClick={handleOpenLabOrderModal}
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined">biotech</span>
+              <span className="hidden sm:inline">Tahlil buyurtma</span>
+            </button>
           )}
           {!isDoctor && !isNurse && (
             <button
