@@ -31,8 +31,8 @@ export const errorHandler = (err, req, res, next) => {
     error = new AppError(message, 404);
   }
   
-  // Mongoose duplicate key
-  if (err.code === '23505') {
+  // Mongoose duplicate key (MongoDB: 11000, PostgreSQL: 23505)
+  if (err.code === 11000 || err.code === '23505') {
     const message = 'Duplicate field value entered';
     error = new AppError(message, 400);
   }

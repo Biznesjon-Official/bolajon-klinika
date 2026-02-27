@@ -575,9 +575,8 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
     const Invoice = (await import('../models/Invoice.js')).default
     const BillingItem = (await import('../models/BillingItem.js')).default
 
-    // Generate invoice number
-    const invoiceCount = useTransaction ? await Invoice.countDocuments().session(session) : await Invoice.countDocuments()
-    const invoiceNumber = `INV-${Date.now()}-${invoiceCount + 1}`
+    // Generate unique invoice number (random suffix to avoid parallel request conflicts)
+    const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
 
     // Create invoice
     const invoiceData = {
@@ -648,8 +647,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
     if (useTransaction && session) {
       try { await session.abortTransaction() } catch (e) { /* ignore */ }
     }
-    console.error('[LAB ORDER ERROR]', error.message, error.stack)
-    return res.status(500).json({ success: false, error: error.message || 'Server xatosi' })
+    next(error)
   } finally {
     if (session) {
       try { session.endSession() } catch (e) { /* ignore */ }
