@@ -241,8 +241,8 @@ const QueueManagement = () => {
     try {
       const res = await doctorServiceService.getDoctorServices(doctorId);
       const services = (res.data || []).map(ds => ({
-        _id: ds.service_id?._id || ds._id,
-        name: ds.service_id?.name || 'Noma\'lum xizmat',
+        _id: ds._id,
+        name: ds.service_name || ds.service_id?.name || 'Noma\'lum xizmat',
         price: ds.custom_price || ds.service_id?.price || 0,
         doctorServiceId: ds._id
       }));

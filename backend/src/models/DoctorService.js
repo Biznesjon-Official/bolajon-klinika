@@ -15,7 +15,11 @@ const doctorServiceSchema = new mongoose.Schema({
   service_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Service',
-    required: true
+    default: null
+  },
+  service_name: {
+    type: String,
+    default: ''
   },
   custom_price: {
     type: Number,
@@ -41,7 +45,8 @@ const doctorServiceSchema = new mongoose.Schema({
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 })
 
-doctorServiceSchema.index({ doctor_id: 1, service_id: 1 }, { unique: true })
+doctorServiceSchema.index({ doctor_id: 1, service_id: 1 }, { unique: true, sparse: true })
+doctorServiceSchema.index({ doctor_id: 1, service_name: 1 })
 doctorServiceSchema.index({ doctor_id: 1, is_active: 1 })
 
 const DoctorService = mongoose.model('DoctorService', doctorServiceSchema)

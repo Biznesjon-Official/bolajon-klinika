@@ -4,14 +4,13 @@ import toast from 'react-hot-toast'
 
 export default function DoctorServicesManagement() {
   const [doctors, setDoctors] = useState([])
-  const [services, setServices] = useState([])
   const [selectedDoctor, setSelectedDoctor] = useState('')
   const [doctorServices, setDoctorServices] = useState([])
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editItem, setEditItem] = useState(null)
   const [form, setForm] = useState({
-    service_id: '',
+    service_name: '',
     custom_price: '',
     revisit_rules: [
       { min_days: 0, max_days: 3, discount_percent: 100 },
@@ -29,12 +28,8 @@ export default function DoctorServicesManagement() {
 
   const loadInitialData = async () => {
     try {
-      const [doctorsRes, servicesRes] = await Promise.all([
-        doctorServiceService.getDoctorsList(),
-        doctorServiceService.getServicesList()
-      ])
+      const doctorsRes = await doctorServiceService.getDoctorsList()
       setDoctors(doctorsRes.data || [])
-      setServices(servicesRes.data || [])
     } catch {
       toast.error('Ma\'lumotlarni yuklashda xatolik')
     }
@@ -54,13 +49,13 @@ export default function DoctorServicesManagement() {
 
   const handleSubmit = async () => {
     try {
-      if (!form.service_id || form.custom_price === '' || form.custom_price === undefined) {
-        return toast.error('Xizmat va narxni tanlang')
+      if (!form.service_name?.trim() || form.custom_price === '' || form.custom_price === undefined) {
+        return toast.error('Xizmat nomi va narxni kiriting')
       }
 
       const data = {
         doctor_id: selectedDoctor,
-        service_id: form.service_id,
+        service_name: form.service_name.trim(),
         custom_price: parseFloat(form.custom_price),
         revisit_rules: form.revisit_rules.filter(r => r.discount_percent > 0)
       }
@@ -96,7 +91,7 @@ export default function DoctorServicesManagement() {
   const handleEdit = (item) => {
     setEditItem(item)
     setForm({
-      service_id: item.service_id?._id || '',
+      service_name: item.service_name || item.service_id?.name || '',
       custom_price: item.custom_price || '',
       revisit_rules: item.revisit_rules?.length ? item.revisit_rules : [
         { min_days: 0, max_days: 3, discount_percent: 100 },
@@ -108,7 +103,7 @@ export default function DoctorServicesManagement() {
 
   const resetForm = () => {
     setForm({
-      service_id: '',
+      service_name: '',
       custom_price: '',
       revisit_rules: [
         { min_days: 0, max_days: 3, discount_percent: 100 },
@@ -207,10 +202,8 @@ export default function DoctorServicesManagement() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b-2 border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-3 px-4 text-sm font-bold text-gray-600 dark:text-gray-400">Xizmat</th>
-                    <th className="text-left py-3 px-4 text-sm font-bold text-gray-600 dark:text-gray-400">Kategoriya</th>
-                    <th className="text-right py-3 px-4 text-sm font-bold text-gray-600 dark:text-gray-400">Umumiy narx</th>
-                    <th className="text-right py-3 px-4 text-sm font-bold text-gray-600 dark:text-gray-400">Doktor narxi</th>
+                    <th className="text-left py-3 px-4 text-sm font-bold text-gray-600 dark:text-gray-400">Xizmat nomi</th>
+                    <th className="text-right py-3 px-4 text-sm font-bold text-gray-600 dark:text-gray-400">Narxi</th>
                     <th className="text-left py-3 px-4 text-sm font-bold text-gray-600 dark:text-gray-400">Chegirma qoidalari</th>
                     <th className="text-center py-3 px-4 text-sm font-bold text-gray-600 dark:text-gray-400">Amallar</th>
                   </tr>
@@ -219,11 +212,8 @@ export default function DoctorServicesManagement() {
                   {doctorServices.map((ds) => (
                     <tr key={ds._id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750">
                       <td className="py-3 px-4">
-                        <p className="font-bold text-gray-900 dark:text-white">{ds.service_id?.name}</p>
-                        {ds.service_id?.code && <p className="text-xs text-gray-500">{ds.service_id.code}</p>}
+                        <p className="font-bold text-gray-900 dark:text-white">{ds.service_name || ds.service_id?.name}</p>
                       </td>
-                      <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">{ds.service_id?.category}</td>
-                      <td className="py-3 px-4 text-right text-sm text-gray-500 line-through">{formatPrice(ds.service_id?.price || 0)}</td>
                       <td className="py-3 px-4 text-right font-bold text-green-600">{formatPrice(ds.custom_price)}</td>
                       <td className="py-3 px-4">
                         <div className="space-y-1">
@@ -277,25 +267,16 @@ export default function DoctorServicesManagement() {
             </div>
 
             <div className="p-6 space-y-5">
-              {/* Service select */}
+              {/* Service name input */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Xizmat</label>
-                <select
-                  value={form.service_id}
-                  onChange={(e) => {
-                    const svc = services.find(s => s._id === e.target.value)
-                    setForm({ ...form, service_id: e.target.value, custom_price: svc?.price || form.custom_price })
-                  }}
-                  disabled={!!editItem}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-60"
-                >
-                  <option value="">-- Xizmat tanlang --</option>
-                  {services.map(svc => (
-                    <option key={svc._id} value={svc._id}>
-                      {svc.name} ({svc.category}) — {formatPrice(svc.price)}
-                    </option>
-                  ))}
-                </select>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Xizmat nomi</label>
+                <input
+                  type="text"
+                  value={form.service_name}
+                  onChange={(e) => setForm({ ...form, service_name: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Masalan: Birlamchi konsultatsiya"
+                />
               </div>
 
               {/* Custom price */}

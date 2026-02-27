@@ -86,44 +86,38 @@ router.get('/services-list', authenticate, authorize('admin', 'chief_doctor'), a
  */
 router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, res) => {
   try {
-    const { doctor_id, service_id, custom_price, revisit_rules } = req.body
+    const { doctor_id, service_id, service_name, custom_price, revisit_rules } = req.body
 
-    if (!doctor_id || !service_id || custom_price === undefined) {
-      return res.status(400).json({
-        success: false,
-        message: 'Doktor, xizmat va narx majburiy'
-      })
+    if (!doctor_id || custom_price === undefined) {
+      return res.status(400).json({ success: false, message: 'Doktor va narx majburiy' })
     }
 
-    // Check doctor exists
+    if (!service_id && !service_name) {
+      return res.status(400).json({ success: false, message: 'Xizmat nomi yoki xizmat tanlash majburiy' })
+    }
+
     const doctor = await Staff.findOne({ _id: doctor_id, role: { $in: ['doctor', 'chief_doctor'] } })
     if (!doctor) {
       return res.status(404).json({ success: false, message: 'Doktor topilmadi' })
     }
 
-    // Check service exists
-    const service = await Service.findById(service_id)
-    if (!service) {
-      return res.status(404).json({ success: false, message: 'Xizmat topilmadi' })
-    }
-
-    // Check duplicate
-    const existing = await DoctorService.findOne({ doctor_id, service_id })
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: 'Bu doktorga ushbu xizmat allaqachon biriktirilgan'
-      })
-    }
-
-    const doctorService = new DoctorService({
+    const data = {
       doctor_id,
-      service_id,
       custom_price: parseFloat(custom_price),
       revisit_rules: revisit_rules || undefined,
       created_by: req.user.id
-    })
+    }
 
+    if (service_id) {
+      const service = await Service.findById(service_id)
+      if (!service) return res.status(404).json({ success: false, message: 'Xizmat topilmadi' })
+      data.service_id = service_id
+      data.service_name = service.name
+    } else {
+      data.service_name = service_name.trim()
+    }
+
+    const doctorService = new DoctorService(data)
     await doctorService.save()
 
     const populated = await DoctorService.findById(doctorService._id)
@@ -137,10 +131,7 @@ router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, r
     })
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Bu doktorga ushbu xizmat allaqachon biriktirilgan'
-      })
+      return res.status(400).json({ success: false, message: 'Bu doktorga ushbu xizmat allaqachon biriktirilgan' })
     }
     res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
@@ -153,7 +144,7 @@ router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, r
 router.put('/:id', authenticate, authorize('admin', 'chief_doctor'), async (req, res) => {
   try {
     const { id } = req.params
-    const { custom_price, revisit_rules, is_active } = req.body
+    const { custom_price, revisit_rules, is_active, service_name } = req.body
 
     const doctorService = await DoctorService.findById(id)
     if (!doctorService) {
@@ -163,6 +154,7 @@ router.put('/:id', authenticate, authorize('admin', 'chief_doctor'), async (req,
     if (custom_price !== undefined) doctorService.custom_price = parseFloat(custom_price)
     if (revisit_rules !== undefined) doctorService.revisit_rules = revisit_rules
     if (is_active !== undefined) doctorService.is_active = is_active
+    if (service_name !== undefined) doctorService.service_name = service_name.trim()
 
     await doctorService.save()
 
