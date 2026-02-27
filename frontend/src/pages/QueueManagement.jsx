@@ -6,6 +6,7 @@ import { patientService } from '../services/patientService';
 import doctorNurseService from '../services/doctorNurseService';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import doctorServiceService from '../services/doctorServiceService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -238,8 +239,14 @@ const QueueManagement = () => {
     }
     setLoadingServices(true);
     try {
-      const res = await queueService.getConsultationServices();
-      setConsultationServices(res.data || []);
+      const res = await doctorServiceService.getDoctorServices(doctorId);
+      const services = (res.data || []).map(ds => ({
+        _id: ds.service_id?._id || ds._id,
+        name: ds.service_id?.name || 'Noma\'lum xizmat',
+        price: ds.custom_price || ds.service_id?.price || 0,
+        doctorServiceId: ds._id
+      }));
+      setConsultationServices(services);
     } catch {
       setConsultationServices([]);
     } finally {
