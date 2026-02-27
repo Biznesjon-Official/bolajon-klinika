@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, authorize } from '../middleware/auth.js';
 import TreatmentSchedule from '../models/TreatmentSchedule.js';
 
 const router = express.Router();
@@ -69,7 +69,7 @@ router.get('/', authenticate, async (req, res) => {
  * Complete treatment
  * PUT /api/v1/treatments/:id/complete
  */
-router.put('/:id/complete', authenticate, async (req, res) => {
+router.put('/:id/complete', authenticate, authorize('nurse', 'doctor', 'chief_doctor'), async (req, res) => {
   try {
     const { notes } = req.body;
     const nurseId = req.user._id || req.user.id;

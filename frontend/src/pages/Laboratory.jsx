@@ -354,7 +354,7 @@ export default function Laboratory() {
         >
           {t('lab.orders')}
         </button>
-        {(isAdmin || isLaborant) && (
+        {(isAdmin || isChefLaborant) && (
           <button
             onClick={() => setActiveTab('tests')}
             className={`px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 font-semibold transition-colors whitespace-nowrap ${

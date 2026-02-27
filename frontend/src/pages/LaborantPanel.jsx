@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import laboratoryService from '../services/laboratoryService'
-import TestsCatalog from '../components/laboratory/TestsCatalog'
 import toast, { Toaster } from 'react-hot-toast'
 
 export default function LaborantPanel() {
@@ -158,16 +157,6 @@ export default function LaborantPanel() {
         </a>
       </div>
 
-      {/* Tests Catalog */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div className="p-4 sm:p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="material-symbols-outlined text-2xl text-primary">biotech</span>
-            <h2 className="text-xl sm:text-2xl font-bold">Tahlillar katalogi</h2>
-          </div>
-          <TestsCatalog tests={tests} onRefresh={loadData} />
-        </div>
-      </div>
     </div>
   )
 }

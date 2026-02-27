@@ -3,6 +3,130 @@ import toast from 'react-hot-toast'
 import laboratoryService from '../../services/laboratoryService'
 import api from '../../services/api'
 
+// Pre-built test parameter templates
+const TEST_TEMPLATES = {
+  'CBC': {
+    name: 'Umumiy qon tahlili (OAK)',
+    label: 'Umumiy qon tahlili',
+    parameters: [
+      { parameter: 'WBC — Лейкоциты', unit: '10⁹/л', normalRange: '4.0 — 9.0' },
+      { parameter: 'Lym# — Лимфоциты', unit: '10⁹/л', normalRange: '0.8 — 4.0' },
+      { parameter: 'Mon# — Моноциты', unit: '10⁹/л', normalRange: '0.1 — 1.2' },
+      { parameter: 'Neu# — Нейтрофилы', unit: '10⁹/л', normalRange: '2.0 — 7.0' },
+      { parameter: 'Lym% — Лимфоциты', unit: '%', normalRange: '20.0 — 40.0' },
+      { parameter: 'Mon% — Моноциты', unit: '%', normalRange: '5.0 — 10.0' },
+      { parameter: 'Neu% — Нейтрофилы', unit: '%', normalRange: '50.0 — 70.0' },
+      { parameter: 'RBC — Эритроциты', unit: '10¹²/л', normalRange: '3.9 — 6.0' },
+      { parameter: 'HGB — Гемоглобин (М)', unit: 'г/л', normalRange: '130.0 — 170.0' },
+      { parameter: 'HGB — Гемоглобин (Ж)', unit: 'г/л', normalRange: '120.0 — 150.0' },
+      { parameter: 'HCT — Гематокрит (М)', unit: '%', normalRange: '42.0 — 54.0' },
+      { parameter: 'HCT — Гематокрит (Ж)', unit: '%', normalRange: '35.0 — 45.0' },
+      { parameter: 'MCV — Средний корпускулярный объём эритроцитов', unit: 'фл', normalRange: '80.0 — 95.0' },
+      { parameter: 'MCH — Средний эритроцитарный гемоглобин', unit: 'пг', normalRange: '26.0 — 34.0' },
+      { parameter: 'MCHC — Средняя клеточная концентрация гемоглобина', unit: 'г/л', normalRange: '300.0 — 370.0' },
+      { parameter: 'RDW-CV — Коэффициент вариации ширины распределения эритроцитов', unit: '%', normalRange: '11.5 — 14.5' },
+      { parameter: 'RDW-SD — Стандартное отклонение ширины распределения эритроцитов', unit: 'фл', normalRange: '35.0 — 45.0' },
+      { parameter: 'PLT — Число тромбоцитов', unit: '10⁹/л', normalRange: '180.0 — 320.0' },
+      { parameter: 'MPV — Средний объём тромбоцитов', unit: 'фл', normalRange: '7.0 — 11.0' },
+      { parameter: 'PDW — Ширина распределения тромбоцитов', unit: '', normalRange: '10.0 — 18.0' },
+      { parameter: 'PCT — Тромбокрит', unit: '%', normalRange: '0.1 — 0.4' },
+      { parameter: 'ESR — СОЭ (М)', unit: 'мм/час', normalRange: '2.0 — 10.0' },
+      { parameter: 'ESR — СОЭ (Ж)', unit: 'мм/час', normalRange: '2.0 — 15.0' },
+      { parameter: 'Qon ivish vaqti (boshlanishi)', unit: 'sek', normalRange: '30" — 2\'' },
+      { parameter: 'Qon ivish vaqti (Suxarev usuli, tugashi)', unit: 'sek', normalRange: '3\' — 5\'' },
+    ]
+  },
+  'URINE': {
+    name: 'Umumiy siydik tahlili (OAM)',
+    label: 'Umumiy siydik tahlili',
+    parameters: [
+      { parameter: 'Rangi', unit: '', normalRange: 'Somon sariq' },
+      { parameter: 'Tiniqlik', unit: '', normalRange: 'Tiniq' },
+      { parameter: 'Solishtirma og\'irlik', unit: '', normalRange: '1.010 — 1.025' },
+      { parameter: 'pH', unit: '', normalRange: '5.0 — 7.0' },
+      { parameter: 'Oqsil (Protein)', unit: 'g/L', normalRange: '0 — 0.033' },
+      { parameter: 'Glyukoza', unit: 'mmol/L', normalRange: 'Manfiy' },
+      { parameter: 'Bilirubin', unit: '', normalRange: 'Manfiy' },
+      { parameter: 'Urobilinogen', unit: '', normalRange: 'Norma' },
+      { parameter: 'Ketonlar', unit: '', normalRange: 'Manfiy' },
+      { parameter: 'Nitritlar', unit: '', normalRange: 'Manfiy' },
+      { parameter: 'Leykotsitlar', unit: 'ko\'ruv maydonida', normalRange: '0 — 5' },
+      { parameter: 'Eritrotsitlar', unit: 'ko\'ruv maydonida', normalRange: '0 — 2' },
+      { parameter: 'Epiteliy hujayralari', unit: 'ko\'ruv maydonida', normalRange: '0 — 5' },
+      { parameter: 'Tuzlar', unit: '', normalRange: 'Topilmadi' },
+      { parameter: 'Bakteriyalar', unit: '', normalRange: 'Topilmadi' },
+    ]
+  },
+  'BIOCHEM': {
+    name: 'Biokimyoviy qon tahlili',
+    label: 'Biokimyoviy tahlil',
+    parameters: [
+      { parameter: 'Glyukoza', unit: 'mmol/L', normalRange: '3.3 — 5.5' },
+      { parameter: 'Umumiy oqsil', unit: 'g/L', normalRange: '65 — 85' },
+      { parameter: 'Albumin', unit: 'g/L', normalRange: '35 — 50' },
+      { parameter: 'Umumiy bilirubin', unit: 'mkmol/L', normalRange: '3.4 — 20.5' },
+      { parameter: 'To\'g\'ri bilirubin', unit: 'mkmol/L', normalRange: '0 — 5.1' },
+      { parameter: 'ALT', unit: 'U/L', normalRange: '0 — 40' },
+      { parameter: 'AST', unit: 'U/L', normalRange: '0 — 40' },
+      { parameter: 'Ishqoriy fosfataza (ALP)', unit: 'U/L', normalRange: '40 — 150' },
+      { parameter: 'GGT', unit: 'U/L', normalRange: '0 — 55' },
+      { parameter: 'Kreatinin', unit: 'mkmol/L', normalRange: '44 — 97' },
+      { parameter: 'Mochevina (BUN)', unit: 'mmol/L', normalRange: '2.5 — 8.3' },
+      { parameter: 'Siydik kislotasi', unit: 'mkmol/L', normalRange: '150 — 420' },
+      { parameter: 'Xolesterin (umumiy)', unit: 'mmol/L', normalRange: '3.0 — 5.2' },
+      { parameter: 'Triglitseridlar', unit: 'mmol/L', normalRange: '0.5 — 1.7' },
+      { parameter: 'Temir (Fe)', unit: 'mkmol/L', normalRange: '9.0 — 30.0' },
+      { parameter: 'Kaltsiy (Ca)', unit: 'mmol/L', normalRange: '2.15 — 2.55' },
+      { parameter: 'Kaliy (K)', unit: 'mmol/L', normalRange: '3.5 — 5.0' },
+      { parameter: 'Natriy (Na)', unit: 'mmol/L', normalRange: '136 — 145' },
+    ]
+  },
+  'COAGULATION': {
+    name: 'Koagulogramma',
+    label: 'Koagulogramma',
+    parameters: [
+      { parameter: 'Protrombin vaqti (PT)', unit: 'sek', normalRange: '11 — 15' },
+      { parameter: 'PTI (Protrombin indeksi)', unit: '%', normalRange: '70 — 120' },
+      { parameter: 'INR', unit: '', normalRange: '0.85 — 1.15' },
+      { parameter: 'Fibrinogen', unit: 'g/L', normalRange: '2.0 — 4.0' },
+      { parameter: 'APTT', unit: 'sek', normalRange: '25 — 35' },
+      { parameter: 'Trombin vaqti', unit: 'sek', normalRange: '14 — 21' },
+    ]
+  },
+  'THYROID': {
+    name: 'Tireoid gormonlar',
+    label: 'Qalqonsimon bez',
+    parameters: [
+      { parameter: 'TSH', unit: 'mIU/L', normalRange: '0.4 — 4.0' },
+      { parameter: 'T3 (erkin)', unit: 'pmol/L', normalRange: '3.1 — 6.8' },
+      { parameter: 'T4 (erkin)', unit: 'pmol/L', normalRange: '12 — 22' },
+      { parameter: 'T3 (umumiy)', unit: 'nmol/L', normalRange: '1.2 — 2.7' },
+      { parameter: 'T4 (umumiy)', unit: 'nmol/L', normalRange: '60 — 120' },
+      { parameter: 'Anti-TPO', unit: 'IU/mL', normalRange: '0 — 35' },
+    ]
+  },
+  'COPRO': {
+    name: 'Koprologiya (najas tahlili)',
+    label: 'Koprologiya',
+    parameters: [
+      { parameter: 'Rangi', unit: '', normalRange: 'Jigarrang' },
+      { parameter: 'Konsistensiya', unit: '', normalRange: 'Yumshoq/Shakllangan' },
+      { parameter: 'Hid', unit: '', normalRange: 'Xarakterli' },
+      { parameter: 'pH', unit: '', normalRange: '6.0 — 8.0' },
+      { parameter: 'Shilliq', unit: '', normalRange: 'Topilmadi' },
+      { parameter: 'Qon', unit: '', normalRange: 'Topilmadi' },
+      { parameter: 'Muskul tolalari', unit: '', normalRange: 'Oz miqdorda' },
+      { parameter: 'Yog\' tomchilari', unit: '', normalRange: 'Topilmadi' },
+      { parameter: 'Kraxmal', unit: '', normalRange: 'Topilmadi' },
+      { parameter: 'O\'simlik tolalari', unit: '', normalRange: 'Oz miqdorda' },
+      { parameter: 'Leykotsitlar', unit: 'ko\'ruv maydonida', normalRange: '0 — 5' },
+      { parameter: 'Eritrotsitlar', unit: 'ko\'ruv maydonida', normalRange: 'Topilmadi' },
+      { parameter: 'Parazit tuxumlari', unit: '', normalRange: 'Topilmadi' },
+      { parameter: 'Protozoylar', unit: '', normalRange: 'Topilmadi' },
+    ]
+  },
+}
+
 export default function TestsCatalog({ tests, onRefresh, t }) {
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -18,6 +142,7 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
   const [pdfFile, setPdfFile] = useState(null)
   const [uploadingPdf, setUploadingPdf] = useState(false)
   const [pdfTableData, setPdfTableData] = useState([])
+  const [showTemplateMenu, setShowTemplateMenu] = useState(false)
 
   // Category modal
   const [showCategoryModal, setShowCategoryModal] = useState(false)
@@ -460,29 +585,69 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
 
                 {!editingTest && (
                   <>
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">
-                        Natija varaqasi (PDF)
-                        <span className="text-gray-500 text-xs ml-2">(Ixtiyoriy)</span>
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center">
-                        <input type="file" accept=".pdf" onChange={handlePdfUpload} className="hidden" id="pdf-upload" disabled={uploadingPdf} />
-                        <label htmlFor="pdf-upload" className="cursor-pointer flex flex-col items-center gap-2">
-                          <span className="material-symbols-outlined text-4xl text-gray-400">upload_file</span>
-                          {pdfFile ? (
-                            <div className="text-sm">
-                              <p className="font-semibold text-green-600">{pdfFile.name}</p>
-                              <p className="text-gray-500">PDF yuklandi</p>
-                            </div>
-                          ) : uploadingPdf ? (
-                            <p className="text-sm text-gray-600">Yuklanmoqda...</p>
-                          ) : (
-                            <div className="text-sm text-gray-600">
-                              <p className="font-semibold">PDF natija varaqasini yuklang</p>
-                              <p className="text-xs">Jadval avtomatik ajratib olinadi</p>
-                            </div>
-                          )}
+                    {/* Template & PDF section */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      {/* Template selector */}
+                      <div className="flex-1 relative">
+                        <label className="block text-sm font-semibold mb-2">
+                          Tayyor shablon
+                          <span className="text-gray-500 text-xs ml-2">(Parametrlarni avtomatik to'ldiradi)</span>
                         </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowTemplateMenu(!showTemplateMenu)}
+                          className="w-full px-4 py-2.5 border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 flex items-center justify-center gap-2 font-semibold text-sm transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-lg">description</span>
+                          Shablondan tanlash
+                          <span className="material-symbols-outlined text-sm">{showTemplateMenu ? 'expand_less' : 'expand_more'}</span>
+                        </button>
+                        {showTemplateMenu && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-10 max-h-64 overflow-y-auto">
+                            {Object.entries(TEST_TEMPLATES).map(([key, tmpl]) => (
+                              <button
+                                key={key}
+                                type="button"
+                                onClick={() => {
+                                  setPdfTableData(tmpl.parameters.map(p => ({ ...p })))
+                                  if (!formData.test_name) {
+                                    setFormData(prev => ({ ...prev, test_name: tmpl.name }))
+                                  }
+                                  setShowTemplateMenu(false)
+                                  toast.success(`"${tmpl.label}" shabloni yuklandi — ${tmpl.parameters.length} ta parametr`)
+                                }}
+                                className="w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center justify-between border-b border-gray-100 dark:border-gray-700 last:border-0"
+                              >
+                                <div>
+                                  <p className="font-semibold text-sm text-gray-900 dark:text-white">{tmpl.label}</p>
+                                  <p className="text-xs text-gray-500">{tmpl.parameters.length} ta parametr</p>
+                                </div>
+                                <span className="material-symbols-outlined text-gray-400 text-sm">arrow_forward</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* PDF upload */}
+                      <div className="flex-1">
+                        <label className="block text-sm font-semibold mb-2">
+                          Natija varaqasi (PDF)
+                          <span className="text-gray-500 text-xs ml-2">(Ixtiyoriy)</span>
+                        </label>
+                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-2.5 text-center">
+                          <input type="file" accept=".pdf" onChange={handlePdfUpload} className="hidden" id="pdf-upload" disabled={uploadingPdf} />
+                          <label htmlFor="pdf-upload" className="cursor-pointer flex items-center justify-center gap-2">
+                            <span className="material-symbols-outlined text-2xl text-gray-400">upload_file</span>
+                            {pdfFile ? (
+                              <span className="text-sm font-semibold text-green-600">{pdfFile.name}</span>
+                            ) : uploadingPdf ? (
+                              <span className="text-sm text-gray-600">Yuklanmoqda...</span>
+                            ) : (
+                              <span className="text-sm text-gray-600 font-semibold">PDF yuklash</span>
+                            )}
+                          </label>
+                        </div>
                       </div>
                     </div>
 
@@ -541,8 +706,9 @@ export default function TestsCatalog({ tests, onRefresh, t }) {
                       </div>
                     )}
 
-                    {!pdfFile && pdfTableData.length === 0 && (
-                      <div className="text-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                    {pdfTableData.length === 0 && (
+                      <div className="text-center p-3 border-2 border-dashed border-gray-300 rounded-lg">
+                        <p className="text-xs text-gray-500 mb-2">Yuqoridagi shablondan tanlang yoki qo'lda yarating</p>
                         <button type="button" onClick={() => setPdfTableData([{ parameter: '', value: '', unit: '', normalRange: '' }])}
                           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 mx-auto text-sm">
                           <span className="material-symbols-outlined">add_circle</span>

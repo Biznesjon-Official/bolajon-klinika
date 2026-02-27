@@ -118,6 +118,16 @@ export default function LabOrders() {
   }
 
   // Check if value is critical
+  const isNormalValue = (param) => {
+    if (!param.value || !param.normalRange) return null
+    const numVal = parseFloat(param.value.replace(',', '.'))
+    if (isNaN(numVal)) return null
+    const match = param.normalRange.match(/([\d.]+)\s*[—–-]\s*([\d.]+)/)
+    if (!match) return null
+    const [, low, high] = match
+    return numVal >= parseFloat(low) && numVal <= parseFloat(high)
+  }
+
   const isCriticalValue = (param) => {
     if (!param.value || (!param.critical_low && !param.critical_high)) return null
     const numVal = parseFloat(param.value.replace(',', '.'))
@@ -477,8 +487,16 @@ export default function LabOrders() {
                         <tbody>
                           {testParams.map((param, index) => {
                             const critical = isCriticalValue(param)
+                            const normal = !critical ? isNormalValue(param) : null
+                            const rowClass = critical
+                              ? 'bg-red-50 dark:bg-red-900/20'
+                              : normal === true
+                                ? 'bg-green-50 dark:bg-green-900/10'
+                                : normal === false
+                                  ? 'bg-yellow-50 dark:bg-yellow-900/10'
+                                  : ''
                             return (
-                              <tr key={index} className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${critical ? 'bg-red-50 dark:bg-red-900/20' : ''}`}>
+                              <tr key={index} className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${rowClass}`}>
                                 <td className="border border-gray-300 dark:border-gray-700 px-3 py-3 text-center text-sm font-semibold">{index + 1}.</td>
                                 <td className="border border-gray-300 dark:border-gray-700 px-4 py-3 text-left text-sm font-bold uppercase whitespace-pre-line">{param.name}</td>
                                 <td className="border border-gray-300 dark:border-gray-700 px-2 py-2">
@@ -494,7 +512,11 @@ export default function LabOrders() {
                                       className={`w-full px-3 py-2.5 border rounded text-center text-sm focus:outline-none focus:ring-2 ${
                                         critical
                                           ? 'border-red-500 bg-red-50 text-red-700 focus:ring-red-500'
-                                          : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                                          : normal === true
+                                            ? 'border-green-400 bg-green-50 text-green-800 focus:ring-green-400'
+                                            : normal === false
+                                              ? 'border-yellow-400 bg-yellow-50 text-yellow-800 focus:ring-yellow-400'
+                                              : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
                                       }`}
                                       placeholder="Qiymat"
                                     />

@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, authorize } from '../middleware/auth.js';
 import Prescription from '../models/Prescription.js';
 
 const router = express.Router();
@@ -8,7 +8,7 @@ const router = express.Router();
  * Create prescription
  * POST /api/v1/prescriptions
  */
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, authorize('doctor', 'chief_doctor'), async (req, res) => {
   try {
     const {
       patient_id,

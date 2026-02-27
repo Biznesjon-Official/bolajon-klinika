@@ -2,9 +2,9 @@ import { useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import laboratoryService from '../../services/laboratoryService'
 
-export default function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t }) {
+export default function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t, preselectedPatientId }) {
   const [formData, setFormData] = useState({
-    patient_id: '',
+    patient_id: preselectedPatientId || '',
     doctor_id: '',
     priority: 'normal',
     notes: ''
@@ -107,19 +107,28 @@ export default function NewOrderModal({ isOpen, onClose, patients, doctors, test
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {t('lab.patient')} <span className="text-red-500">*</span>
             </label>
-            <select
-              required
-              value={formData.patient_id}
-              onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            >
-              <option value="">{t('lab.selectPatient')}</option>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.first_name} {patient.last_name} - {patient.patient_number}
-                </option>
-              ))}
-            </select>
+            {preselectedPatientId ? (
+              <div className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg text-sm font-semibold">
+                {(() => {
+                  const p = patients.find(p => (p.id || p._id) === preselectedPatientId)
+                  return p ? `${p.first_name} ${p.last_name}${p.patient_number ? ' - ' + p.patient_number : ''}` : 'Bemor tanlangan'
+                })()}
+              </div>
+            ) : (
+              <select
+                required
+                value={formData.patient_id}
+                onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              >
+                <option value="">{t('lab.selectPatient')}</option>
+                {patients.map((patient) => (
+                  <option key={patient.id} value={patient.id}>
+                    {patient.first_name} {patient.last_name} - {patient.patient_number}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Shifokor */}

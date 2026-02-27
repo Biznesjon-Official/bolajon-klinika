@@ -8,6 +8,7 @@ import doctorNurseService from '../services/doctorNurseService';
 import pharmacyService from '../services/pharmacyService';
 import api from '../services/api';
 import { laboratoryService } from '../services/laboratoryService';
+import NewOrderModal from '../components/laboratory/NewOrderModal';
 import { patientService } from '../services/patientService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
@@ -43,9 +44,7 @@ const DoctorPanel = () => {
   // Lab order
   const [showLabOrderModal, setShowLabOrderModal] = useState(false)
   const [labTests, setLabTests] = useState([])
-  const [selectedLabTest, setSelectedLabTest] = useState('')
-  const [labOrderPriority, setLabOrderPriority] = useState('normal')
-  const [labOrderNotes, setLabOrderNotes] = useState('')
+  const [labDoctors, setLabDoctors] = useState([])
   const [labOrderPatient, setLabOrderPatient] = useState(null)
 
   // Prescription form
@@ -494,30 +493,22 @@ const DoctorPanel = () => {
   // Lab order handlers
   const handleOpenLabOrder = async (patient) => {
     setLabOrderPatient(patient)
-    setShowLabOrderModal(true)
     try {
-      const res = await laboratoryService.getTests()
-      setLabTests(res.data || [])
-    } catch { setLabTests([]) }
-  }
-
-  const handleCreateLabOrder = async () => {
-    if (!selectedLabTest) return toast.error('Tahlilni tanlang')
-    try {
-      await laboratoryService.createOrder({
-        patient_id: labOrderPatient.patient_id || labOrderPatient.patientId || labOrderPatient._id || labOrderPatient.id,
-        test_id: selectedLabTest,
-        priority: labOrderPriority,
-        notes: labOrderNotes
-      })
-      toast.success('Tahlil buyurtma yaratildi')
-      setShowLabOrderModal(false)
-      setSelectedLabTest('')
-      setLabOrderNotes('')
-      setLabOrderPriority('normal')
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Xatolik')
+      const [testsRes, staffRes] = await Promise.all([
+        laboratoryService.getTests(),
+        api.get('/staff')
+      ])
+      setLabTests(testsRes.data || [])
+      const allStaff = staffRes.data.data || staffRes.data
+      setLabDoctors(allStaff.filter(s =>
+        s.role_name === 'laborant' || s.role_name === 'Laborant' ||
+        (s.role && (s.role.name === 'laborant' || s.role.name === 'Laborant'))
+      ))
+    } catch {
+      setLabTests([])
+      setLabDoctors([])
     }
+    setShowLabOrderModal(true)
   }
 
   const handleCompleteConsultation = async (queueId) => {
@@ -953,59 +944,23 @@ const DoctorPanel = () => {
       </div>
 
       {/* Lab Order Modal */}
-      <Modal isOpen={showLabOrderModal} onClose={() => setShowLabOrderModal(false)} title="Tahlil buyurtma berish">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tahlil turi</label>
-            <select
-              value={selectedLabTest}
-              onChange={(e) => setSelectedLabTest(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="">Tanlang...</option>
-              {labTests.map(test => (
-                <option key={test.id || test._id} value={test.id || test._id}>{test.name} — {test.price?.toLocaleString()} so'm</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Muhimlik</label>
-            <select
-              value={labOrderPriority}
-              onChange={(e) => setLabOrderPriority(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <option value="normal">Oddiy</option>
-              <option value="urgent">Shoshilinch</option>
-              <option value="stat">STAT (Zudlik bilan)</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Izoh</label>
-            <textarea
-              value={labOrderNotes}
-              onChange={(e) => setLabOrderNotes(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              rows={3}
-              placeholder="Qo'shimcha izoh..."
-            />
-          </div>
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={() => setShowLabOrderModal(false)}
-              className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
-            >
-              Bekor qilish
-            </button>
-            <button
-              onClick={handleCreateLabOrder}
-              className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
-            >
-              Buyurtma berish
-            </button>
-          </div>
-        </div>
-      </Modal>
+      {showLabOrderModal && (
+        <NewOrderModal
+          isOpen={showLabOrderModal}
+          onClose={() => setShowLabOrderModal(false)}
+          patients={labOrderPatient ? [{
+            id: labOrderPatient.patient_id || labOrderPatient.patientId || labOrderPatient._id || labOrderPatient.id,
+            first_name: labOrderPatient.first_name || labOrderPatient.patientName?.split(' ')[0] || '',
+            last_name: labOrderPatient.last_name || labOrderPatient.patientName?.split(' ').slice(1).join(' ') || '',
+            patient_number: labOrderPatient.patient_number || ''
+          }] : []}
+          doctors={labDoctors}
+          tests={labTests}
+          onSuccess={() => { setShowLabOrderModal(false) }}
+          t={t}
+          preselectedPatientId={labOrderPatient?.patient_id || labOrderPatient?.patientId || labOrderPatient?._id || labOrderPatient?.id}
+        />
+      )}
 
       {/* Alert Modal */}
       <AlertModal

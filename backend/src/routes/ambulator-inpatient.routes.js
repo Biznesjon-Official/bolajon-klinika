@@ -419,7 +419,7 @@ router.get('/admissions', authenticate, async (req, res, next) => {
   }
 });
 
-router.post('/admissions', authenticate, async (req, res, next) => {
+router.post('/admissions', authenticate, authorize('admin', 'chief_doctor', 'receptionist'), async (req, res, next) => {
   try {
     const { patient_id, room_id, bed_number, diagnosis, notes } = req.body;
     
@@ -619,7 +619,7 @@ router.post('/admissions', authenticate, async (req, res, next) => {
   }
 });
 
-router.post('/admissions/:id/discharge', authenticate, async (req, res, next) => {
+router.post('/admissions/:id/discharge', authenticate, authorize('admin', 'chief_doctor', 'receptionist'), async (req, res, next) => {
   try {
     
     const Admission = (await import('../models/Admission.js')).default;

@@ -18,6 +18,7 @@ import api from '../services/api';
 import PrescriptionModal from '../components/PrescriptionModal';
 
 import { laboratoryService } from '../services/laboratoryService';
+import NewOrderModal from '../components/laboratory/NewOrderModal';
 import labPrintService from '../services/labPrintService';
 import CompleteTreatmentModal from '../components/nurse/CompleteTreatmentModal';
 import ResultModal from '../components/laboratory/ResultModal';
@@ -101,7 +102,7 @@ const PatientProfile = () => {
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [showLabOrderModal, setShowLabOrderModal] = useState(false);
   const [labTests, setLabTests] = useState([]);
-  const [selectedLabTest, setSelectedLabTest] = useState('');
+  const [labDoctors, setLabDoctors] = useState([]);
 
   // Nurse: treatment complete
   const [showCompleteTreatmentModal, setShowCompleteTreatmentModal] = useState(false);
@@ -110,8 +111,6 @@ const PatientProfile = () => {
   // Laborant: result entry
   const [showLabResultModal, setShowLabResultModal] = useState(false);
   const [selectedLabOrder, setSelectedLabOrder] = useState(null);
-  const [labOrderPriority, setLabOrderPriority] = useState('normal');
-  const [labOrderNotes, setLabOrderNotes] = useState('');
 
   const showAlert = (message, type = 'info', title = '') => {
     setAlertModal({ isOpen: true, title, message, type });
@@ -276,33 +275,23 @@ const PatientProfile = () => {
 
   // Doctor: Lab buyurtma
   const handleOpenLabOrderModal = async () => {
-    setShowLabOrderModal(true);
     try {
-      const res = await laboratoryService.getTests();
-      setLabTests(res.data || []);
+      const [testsRes, staffRes] = await Promise.all([
+        laboratoryService.getTests(),
+        api.get('/staff')
+      ])
+      setLabTests(testsRes.data || [])
+      const allStaff = staffRes.data.data || staffRes.data
+      const laborants = allStaff.filter(s =>
+        s.role_name === 'laborant' || s.role_name === 'Laborant' ||
+        (s.role && (s.role.name === 'laborant' || s.role.name === 'Laborant'))
+      )
+      setLabDoctors(laborants)
     } catch {
-      setLabTests([]);
+      setLabTests([])
+      setLabDoctors([])
     }
-  };
-
-  const handleCreateLabOrder = async () => {
-    if (!selectedLabTest) return showAlert('Tahlilni tanlang', 'error');
-    try {
-      const activeAdmission = admissions.find(a => a.display_status === 'ACTIVE')
-      await laboratoryService.createOrder({
-        patient_id: id, test_id: selectedLabTest,
-        priority: labOrderPriority, notes: labOrderNotes,
-        admission_id: activeAdmission?._id || activeAdmission?.id || null
-      });
-      showAlert('Tahlil buyurtma yaratildi', 'success');
-      setShowLabOrderModal(false);
-      setSelectedLabTest('');
-      setLabOrderNotes('');
-      setLabOrderPriority('normal');
-      loadPatientData();
-    } catch (err) {
-      showAlert(err.response?.data?.message || 'Xatolik', 'error');
-    }
+    setShowLabOrderModal(true)
   };
 
   // Discharge functions
@@ -693,6 +682,9 @@ const PatientProfile = () => {
                     <span className="material-symbols-outlined">diagnosis</span>
                     <span className="hidden sm:inline">Tashxis</span>
                   </button>
+                </>
+              )}
+              {(isDoctor || isReceptionist) && (
                   <button
                     onClick={handleOpenLabOrderModal}
                     className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
@@ -700,7 +692,6 @@ const PatientProfile = () => {
                     <span className="material-symbols-outlined">biotech</span>
                     <span className="hidden sm:inline">Tahlil buyurtma</span>
                   </button>
-                </>
               )}
             </>
           )}
@@ -2657,64 +2648,18 @@ const PatientProfile = () => {
       )}
 
       {/* Lab Order Modal */}
-      <Modal isOpen={showLabOrderModal} onClose={() => setShowLabOrderModal(false)} size="md">
-        <div className="p-6">
-          <h3 className="text-lg font-bold mb-4 dark:text-white">Tahlil buyurtma qilish</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Tahlil turi</label>
-              <select
-                value={selectedLabTest}
-                onChange={(e) => setSelectedLabTest(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              >
-                <option value="">Tanlang...</option>
-                {labTests.map(test => (
-                  <option key={test.id || test._id} value={test.id || test._id}>
-                    {test.name} {test.price ? `— ${test.price?.toLocaleString()} so'm` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Muhimlik</label>
-              <select
-                value={labOrderPriority}
-                onChange={(e) => setLabOrderPriority(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              >
-                <option value="normal">Oddiy</option>
-                <option value="urgent">Shoshilinch</option>
-                <option value="stat">STAT</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1 dark:text-gray-300">Izoh</label>
-              <textarea
-                value={labOrderNotes}
-                onChange={(e) => setLabOrderNotes(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                rows={2}
-                placeholder="Qo'shimcha izoh..."
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-3 mt-6">
-            <button
-              onClick={() => setShowLabOrderModal(false)}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
-              Bekor qilish
-            </button>
-            <button
-              onClick={handleCreateLabOrder}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:opacity-90"
-            >
-              Buyurtma berish
-            </button>
-          </div>
-        </div>
-      </Modal>
+      {showLabOrderModal && (
+        <NewOrderModal
+          isOpen={showLabOrderModal}
+          onClose={() => setShowLabOrderModal(false)}
+          patients={patient ? [patient] : []}
+          doctors={labDoctors}
+          tests={labTests}
+          onSuccess={() => { setShowLabOrderModal(false); loadPatientData() }}
+          t={t}
+          preselectedPatientId={id}
+        />
+      )}
 
       {/* Discharge Modal */}
       <Modal isOpen={showDischargeModal} onClose={() => { setShowDischargeModal(false); setBillingSummary(null) }}>

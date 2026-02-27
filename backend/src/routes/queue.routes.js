@@ -420,6 +420,7 @@ router.put('/:id/call',
  */
 router.put('/:id/start',
   authenticate,
+  authorize('doctor', 'chief_doctor', 'masseur', 'speech_therapist'),
   async (req, res, next) => {
     try {
       const queue = await Queue.findById(req.params.id);
@@ -453,6 +454,7 @@ router.put('/:id/start',
  */
 router.put('/:id/complete',
   authenticate,
+  authorize('doctor', 'chief_doctor', 'masseur', 'speech_therapist'),
   async (req, res, next) => {
     try {
       const queue = await Queue.findById(req.params.id);

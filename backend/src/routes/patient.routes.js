@@ -395,14 +395,20 @@ router.get('/:id',
             normal_value_min: '',
             normal_value_max: '',
             is_normal: lab.results && lab.results.length > 0 ? lab.results[0].is_normal : null,
-            status: lab.status === 'completed' ? 'approved' : lab.status,
+            status: lab.status,
             test_id: lab.test_id,
             result_date: lab.completed_at || lab.createdAt,
             technician_first_name: lab.laborant_id?.first_name,
             technician_last_name: lab.laborant_id?.last_name,
             approved_by_first_name: lab.doctor_id?.first_name,
             approved_by_last_name: lab.doctor_id?.last_name,
-            approved_at: lab.completed_at
+            approved_at: lab.approved_at || lab.completed_at,
+            critical_alert: lab.critical_alert || false,
+            critical_values: lab.critical_values || [],
+            results: lab.results || [],
+            sample_collected_at: lab.sample_collected_at,
+            analysis_started_at: lab.analysis_started_at,
+            tat_minutes: lab.tat_minutes
           })),
           medicalRecords: (await MedicalRecord.find({ patient_id: patient._id })
             .populate('doctor_id', 'first_name last_name')
@@ -627,6 +633,7 @@ router.delete('/:id',
  */
 router.post('/:id/medical-records',
   authenticate,
+  authorize('doctor', 'chief_doctor'),
   async (req, res, next) => {
     try {
       const { diagnosis_text, treatment_plan, notes } = req.body
