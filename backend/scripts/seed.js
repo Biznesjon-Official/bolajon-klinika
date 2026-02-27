@@ -19,6 +19,7 @@ import Staff from '../src/models/Staff.js'
 import Patient from '../src/models/Patient.js'
 import Service from '../src/models/Service.js'
 import ServiceCategory from '../src/models/ServiceCategory.js'
+import LabCategory from '../src/models/LabCategory.js'
 import Medicine from '../src/models/Medicine.js'
 import LabTest from '../src/models/LabTest.js'
 import AmbulatorRoom from '../src/models/AmbulatorRoom.js'
@@ -61,6 +62,8 @@ const staffData = [
   // Speech Therapists - 2
   { username: 'speech1', first_name: 'Barno', last_name: 'Kamalova', role: 'speech_therapist', phone: '+998901000017', department: 'Logopediya', salary: 3500000, shift: 'morning' },
   { username: 'speech2', first_name: 'Kamola', last_name: 'Rahimova', role: 'speech_therapist', phone: '+998901000018', department: 'Logopediya', salary: 3500000, shift: 'evening' },
+  // Chef Laborant - 1
+  { username: 'chef_laborant', first_name: 'Jamshid', last_name: 'Bosh Laborant', role: 'chef_laborant', phone: '+998901000019', department: 'Laboratoriya', specialization: 'Klinik laboratoriya', salary: 6000000, shift: 'morning' },
 ]
 
 const patientData = [
@@ -303,18 +306,26 @@ async function seed() {
     })))
     console.log(`   ✅ ${medicines.length} ta dori yaratildi`)
 
-    // 8. Lab Tests
-    console.log('\n8. Laboratoriya testlari yaratilmoqda...')
+    // 8. Lab Categories
+    console.log('\n8. Lab kategoriyalari yaratilmoqda...')
+    const labCategoryNames = [...new Set(labTestData.map(t => t.category))]
+    const labCategories = await LabCategory.insertMany(
+      labCategoryNames.map(name => ({ name, is_active: true }))
+    )
+    console.log(`   ✅ ${labCategories.length} ta lab kategoriya yaratildi`)
+
+    // 9. Lab Tests
+    console.log('\n9. Laboratoriya testlari yaratilmoqda...')
     const labTests = await LabTest.insertMany(labTestData)
     console.log(`   ✅ ${labTests.length} ta test yaratildi`)
 
-    // 9. Rooms
-    console.log('\n9. Xonalar yaratilmoqda...')
+    // 10. Rooms
+    console.log('\n10. Xonalar yaratilmoqda...')
     const rooms = await AmbulatorRoom.insertMany(roomData)
     console.log(`   ✅ ${rooms.length} ta xona yaratildi`)
 
-    // 10. Beds
-    console.log('\n10. Karavotlar yaratilmoqda...')
+    // 11. Beds
+    console.log('\n11. Karavotlar yaratilmoqda...')
     const bedDocs = []
     for (const room of rooms) {
       const bedCount = room.department === 'inpatient' ? room.capacity : 1
@@ -331,8 +342,8 @@ async function seed() {
     const beds = await Bed.insertMany(bedDocs)
     console.log(`   ✅ ${beds.length} ta karavot yaratildi`)
 
-    // 11. Queues (5 ta - bemorlar navbatda)
-    console.log('\n11. Navbatlar yaratilmoqda...')
+    // 12. Queues (5 ta - bemorlar navbatda)
+    console.log('\n12. Navbatlar yaratilmoqda...')
     const queueDocs = [
       { patient_id: patients[0]._id, doctor_id: doctors[0]._id, queue_number: 1, queue_type: 'NORMAL', status: 'WAITING' },
       { patient_id: patients[1]._id, doctor_id: doctors[0]._id, queue_number: 2, queue_type: 'NORMAL', status: 'WAITING' },
@@ -343,7 +354,7 @@ async function seed() {
     const queues = await Queue.insertMany(queueDocs)
     console.log(`   ✅ ${queues.length} ta navbat yaratildi`)
 
-    // 12. Prescriptions (3 ta)
+    // 13. Prescriptions (3 ta)
     console.log('\n12. Retseptlar yaratilmoqda...')
     const prescriptions = []
     const prescData = [
@@ -380,7 +391,7 @@ async function seed() {
     }
     console.log(`   ✅ ${prescriptions.length} ta retsept yaratildi`)
 
-    // 13. Invoices (3 ta)
+    // 14. Invoices (3 ta)
     console.log('\n13. Hisob-fakturalar yaratilmoqda...')
     const invoiceDocs = [
       {
@@ -435,7 +446,7 @@ async function seed() {
     const invoices = await Invoice.insertMany(invoiceDocs)
     console.log(`   ✅ ${invoices.length} ta hisob-faktura yaratildi`)
 
-    // 14. Admissions (2 ta)
+    // 15. Admissions (2 ta)
     console.log('\n14. Statsionar qabullar yaratilmoqda...')
     const inpatientRooms = rooms.filter(r => r.department === 'inpatient')
     const inpatientBeds = beds.filter(b => inpatientRooms.some(r => r._id.equals(b.room_id)))
@@ -486,6 +497,7 @@ async function seed() {
     console.log(`  Kategoriyalar:${categories.length} ta`)
     console.log(`  Xizmatlar:    ${services.length} ta`)
     console.log(`  Dorilar:      ${medicines.length} ta`)
+    console.log(`  Lab kategoriya:${labCategories.length} ta`)
     console.log(`  Lab testlar:  ${labTests.length} ta`)
     console.log(`  Xonalar:      ${rooms.length} ta`)
     console.log(`  Karavotlar:   ${beds.length} ta`)

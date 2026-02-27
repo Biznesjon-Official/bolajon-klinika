@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import { authenticate, authorize } from '../middleware/auth.js';
 import LabOrder from '../models/LabOrder.js';
 import LabTest from '../models/LabTest.js';
+import LabCategory from '../models/LabCategory.js';
 import Patient from '../models/Patient.js';
 import Staff from '../models/Staff.js';
 import mongoose from 'mongoose';
@@ -1531,11 +1532,73 @@ router.post('/parse-pdf', authenticate, upload.single('pdf'), async (req, res, n
 // ============================================
 
 // Kategoriyalar ro'yxati
+// ============ KATEGORIYA CRUD ============
+
+// GET all categories
 router.get('/categories', authenticate, async (req, res) => {
-  res.json({
-    success: true,
-    data: ['Gematologiya', 'Biokimya', 'Immunologiya', 'Gormonlar', 'Koagulologiya', 'Mikrobiologiya', 'Klinik', 'PCR', 'Onkologiya', 'Parazitologiya', 'Umumiy']
-  })
+  try {
+    const categories = await LabCategory.find({ is_active: true }).sort('name')
+    res.json({ success: true, data: categories })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+})
+
+// POST create category
+router.post('/categories', authenticate, authorize('admin', 'chef_laborant'), async (req, res) => {
+  try {
+    const { name, description } = req.body
+    if (!name) return res.status(400).json({ success: false, message: 'Kategoriya nomi majburiy' })
+
+    const exists = await LabCategory.findOne({ name: name.trim() })
+    if (exists) return res.status(400).json({ success: false, message: 'Bu kategoriya allaqachon mavjud' })
+
+    const category = await LabCategory.create({ name: name.trim(), description })
+    res.status(201).json({ success: true, data: category })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+})
+
+// PUT update category
+router.put('/categories/:id', authenticate, authorize('admin', 'chef_laborant'), async (req, res) => {
+  try {
+    const { name, description, is_active } = req.body
+    const category = await LabCategory.findById(req.params.id)
+    if (!category) return res.status(404).json({ success: false, message: 'Kategoriya topilmadi' })
+
+    // Update test category names if name changed
+    if (name && name.trim() !== category.name) {
+      await LabTest.updateMany({ category: category.name }, { category: name.trim() })
+    }
+
+    if (name) category.name = name.trim()
+    if (description !== undefined) category.description = description
+    if (is_active !== undefined) category.is_active = is_active
+    await category.save()
+
+    res.json({ success: true, data: category })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+})
+
+// DELETE category
+router.delete('/categories/:id', authenticate, authorize('admin', 'chef_laborant'), async (req, res) => {
+  try {
+    const category = await LabCategory.findById(req.params.id)
+    if (!category) return res.status(404).json({ success: false, message: 'Kategoriya topilmadi' })
+
+    const testCount = await LabTest.countDocuments({ category: category.name })
+    if (testCount > 0) {
+      return res.status(400).json({ success: false, message: `Bu kategoriyada ${testCount} ta test mavjud. Avval testlarni o'chiring yoki boshqa kategoriyaga ko'chiring` })
+    }
+
+    await LabCategory.findByIdAndDelete(req.params.id)
+    res.json({ success: true, message: 'Kategoriya o\'chirildi' })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
 })
 
 // Bemor tahlil tarixi

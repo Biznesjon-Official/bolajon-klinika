@@ -138,6 +138,21 @@ export const laboratoryService = {
     return response.data
   },
 
+  createCategory: async (data) => {
+    const response = await api.post('/laboratory/categories', data)
+    return response.data
+  },
+
+  updateCategory: async (id, data) => {
+    const response = await api.put(`/laboratory/categories/${id}`, data)
+    return response.data
+  },
+
+  deleteCategory: async (id) => {
+    const response = await api.delete(`/laboratory/categories/${id}`)
+    return response.data
+  },
+
   // Buyurtmani tasdiqlash (approve)
   approveOrder: async (id) => {
     const response = await api.put(`/laboratory/orders/${id}/status`, { status: 'approved' })

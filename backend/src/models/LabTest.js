@@ -15,8 +15,7 @@ const labTestSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    trim: true,
-    enum: ['Gematologiya', 'Biokimya', 'Immunologiya', 'Gormonlar', 'Koagulologiya', 'Mikrobiologiya', 'Klinik', 'PCR', 'Onkologiya', 'Parazitologiya', 'Umumiy']
+    trim: true
   },
   description: {
     type: String,
