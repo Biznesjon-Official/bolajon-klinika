@@ -11,9 +11,7 @@ const PROCEDURE_TYPES = [
 
 const emptyProcForm = {
   name: '',
-  procedure_type: '',
   price: '',
-  is_cups_based: false,
   is_active: true
 }
 
@@ -24,7 +22,7 @@ export default function ProceduresManagement() {
   const [selectedCat, setSelectedCat] = useState(null)
   const [showCatModal, setShowCatModal] = useState(false)
   const [editCat, setEditCat] = useState(null)
-  const [catForm, setCatForm] = useState({ name: '', description: '' })
+  const [catForm, setCatForm] = useState({ name: '', description: '', procedure_type: '' })
   const [catSaving, setCatSaving] = useState(false)
   const [deleteCatConfirm, setDeleteCatConfirm] = useState(null)
 
@@ -79,13 +77,14 @@ export default function ProceduresManagement() {
 
   const openEditCat = (cat) => {
     setEditCat(cat)
-    setCatForm({ name: cat.name, description: cat.description || '' })
+    setCatForm({ name: cat.name, description: cat.description || '', procedure_type: cat.procedure_type || '' })
     setShowCatModal(true)
   }
 
   const handleSaveCat = async (e) => {
     e.preventDefault()
     if (!catForm.name.trim()) return toast.error('Nom majburiy')
+    if (!catForm.procedure_type) return toast.error('Muolaja turini tanlang')
     try {
       setCatSaving(true)
       if (editCat) {
@@ -127,38 +126,31 @@ export default function ProceduresManagement() {
     setEditProc(proc)
     setProcForm({
       name: proc.name || '',
-      procedure_type: proc.procedure_type || '',
       price: proc.is_cups_based ? proc.price_per_cup : proc.price,
-      is_cups_based: proc.is_cups_based || false,
       is_active: proc.is_active
     })
     setShowProcModal(true)
   }
 
-  const handleTypeChange = (val) => {
-    const isCups = val === 'xijoma'
-    setProcForm(f => ({ ...f, procedure_type: val, is_cups_based: isCups }))
-  }
-
   const handleSaveProc = async (e) => {
     e.preventDefault()
     if (!procForm.name.trim()) return toast.error('Nom majburiy')
-    if (!procForm.procedure_type) return toast.error('Turini tanlang')
     if (!selectedCat) return toast.error('Avval bo\'lim tanlang')
 
+    const isCups = selectedCat.procedure_type === 'xijoma'
     const priceVal = parseFloat(procForm.price) || 0
     const payload = {
       name: procForm.name.trim(),
       category: 'Muolaja',
       procedure_category_id: selectedCat._id,
-      procedure_type: procForm.procedure_type,
-      is_cups_based: procForm.is_cups_based,
+      procedure_type: selectedCat.procedure_type,
+      is_cups_based: isCups,
       is_active: procForm.is_active,
       price: priceVal,
-      ...(procForm.is_cups_based ? { price_per_cup: priceVal } : { price_per_cup: null })
+      ...(isCups ? { price_per_cup: priceVal } : { price_per_cup: null })
     }
 
-    if (procForm.is_cups_based && !priceVal) return toast.error('1 idish narxini kiriting')
+    if (isCups && !priceVal) return toast.error('1 idish narxini kiriting')
 
     try {
       setProcSaving(true)
@@ -239,14 +231,9 @@ export default function ProceduresManagement() {
                       <p className={`font-semibold text-sm truncate ${selectedCat?._id === cat._id ? 'text-primary' : 'text-gray-900 dark:text-white'}`}>
                         {cat.name}
                       </p>
-                      {cat.description && (
-                        <p className="text-xs text-gray-400 truncate">{cat.description}</p>
-                      )}
-                      <span className={`inline-block text-xs px-1.5 py-0.5 rounded-full mt-0.5 ${
-                        cat.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
-                      }`}>
-                        {cat.is_active ? 'Faol' : 'Nofaol'}
-                      </span>
+                      <p className="text-xs text-gray-400 truncate">
+                        {PROCEDURE_TYPES.find(t => t.value === cat.procedure_type)?.label || '—'}
+                      </p>
                     </div>
                     <div className="flex gap-1 ml-2 flex-shrink-0">
                       <button
@@ -386,9 +373,22 @@ export default function ProceduresManagement() {
                   value={catForm.name}
                   onChange={e => setCatForm(f => ({ ...f, name: e.target.value }))}
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                  placeholder="Masalan: Terapiya, Ortopediya..."
+                  placeholder="Masalan: Ukol bo'limi, Xijoma..."
                   autoFocus
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Muolaja turi *</label>
+                <select
+                  value={catForm.procedure_type}
+                  onChange={e => setCatForm(f => ({ ...f, procedure_type: e.target.value }))}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">Turni tanlang</option>
+                  {PROCEDURE_TYPES.map(t => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tavsif</label>
@@ -428,6 +428,11 @@ export default function ProceduresManagement() {
               </button>
             </div>
             <form onSubmit={handleSaveProc} className="p-4 space-y-3">
+              <div className="text-xs text-gray-400 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2">
+                Tur: <span className="font-medium text-gray-700 dark:text-gray-300">
+                  {PROCEDURE_TYPES.find(t => t.value === selectedCat?.procedure_type)?.label || '—'}
+                </span>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom *</label>
                 <input
@@ -440,21 +445,8 @@ export default function ProceduresManagement() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Muolaja turi *</label>
-                <select
-                  value={procForm.procedure_type}
-                  onChange={e => handleTypeChange(e.target.value)}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                >
-                  <option value="">Turni tanlang</option>
-                  {PROCEDURE_TYPES.map(t => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {procForm.is_cups_based ? '1 idish narxi (so\'m) *' : 'Narx (so\'m)'}
+                  {selectedCat?.procedure_type === 'xijoma' ? '1 idish narxi (so\'m) *' : 'Narx (so\'m) *'}
                 </label>
                 <input
                   type="number"
@@ -464,7 +456,7 @@ export default function ProceduresManagement() {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                   placeholder="0"
                 />
-                {procForm.is_cups_based && (
+                {selectedCat?.procedure_type === 'xijoma' && (
                   <p className="text-xs text-gray-400 mt-1">Jami = idish soni × 1 idish narxi</p>
                 )}
               </div>

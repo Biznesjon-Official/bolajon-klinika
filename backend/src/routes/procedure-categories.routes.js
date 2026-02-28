@@ -18,13 +18,14 @@ router.get('/', authenticate, async (req, res, next) => {
 // POST create category
 router.post('/', authenticate, authorize('admin', 'receptionist'), async (req, res, next) => {
   try {
-    const { name, description } = req.body
+    const { name, description, procedure_type } = req.body
     if (!name?.trim()) return res.status(400).json({ success: false, message: 'Nom majburiy' })
+    if (!procedure_type) return res.status(400).json({ success: false, message: 'Tur majburiy' })
 
     const exists = await ProcedureCategory.findOne({ name: name.trim() })
     if (exists) return res.status(400).json({ success: false, message: 'Bu nom allaqachon mavjud' })
 
-    const category = await ProcedureCategory.create({ name: name.trim(), description: description?.trim() || '' })
+    const category = await ProcedureCategory.create({ name: name.trim(), description: description?.trim() || '', procedure_type })
     res.status(201).json({ success: true, data: category })
   } catch (error) {
     next(error)
@@ -34,12 +35,13 @@ router.post('/', authenticate, authorize('admin', 'receptionist'), async (req, r
 // PUT update category
 router.put('/:id', authenticate, authorize('admin', 'receptionist'), async (req, res, next) => {
   try {
-    const { name, description, is_active } = req.body
+    const { name, description, procedure_type, is_active } = req.body
     const category = await ProcedureCategory.findById(req.params.id)
     if (!category) return res.status(404).json({ success: false, message: 'Bo\'lim topilmadi' })
 
     if (name) category.name = name.trim()
     if (description !== undefined) category.description = description.trim()
+    if (procedure_type) category.procedure_type = procedure_type
     if (is_active !== undefined) category.is_active = is_active
     await category.save()
 
