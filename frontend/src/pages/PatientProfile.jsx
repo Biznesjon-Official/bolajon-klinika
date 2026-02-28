@@ -211,7 +211,7 @@ const PatientProfile = () => {
   };
 
   const getProcedureTotal = () =>
-    selectedProcedures.reduce((sum, p) => sum + (p.service.price * p.quantity), 0);
+    selectedProcedures.reduce((sum, p) => sum + ((parseFloat(p.service.price) || 0) * (p.quantity || 1)), 0);
 
   const handleSubmitProcedures = async () => {
     if (selectedProcedures.length === 0) return toast.error('Kamida 1 ta muolaja tanlang');
@@ -228,14 +228,8 @@ const PatientProfile = () => {
       toast.success('Muolaja biriktirildi va billing yaratildi');
       setShowProcedureModal(false);
       loadPatientData();
-      // Print procedure receipt and create ambulator procedures
       if (res.success && res.data) {
-        const invoiceData = res.data;
-        billingService.printProcedureReceipt(invoiceData, `${patient.first_name} ${patient.last_name}`);
-        // Auto-create ambulator procedure records
-        try {
-          await api.post('/ambulator/procedures/create-from-invoice', { invoice_id: invoiceData._id || invoiceData.id });
-        } catch { /* silent */ }
+        billingService.printProcedureReceipt(res.data, `${patient.first_name} ${patient.last_name}`);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
