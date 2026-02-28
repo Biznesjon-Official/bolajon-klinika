@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import staffService from '../services/staffService';
+import payrollService from '../services/payrollService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -9,12 +10,21 @@ import DateInput from '../components/DateInput';
 
 const StaffManagementAdvanced = () => {
   const { t } = useTranslation();
-  
+
+  const [activeTab, setActiveTab] = useState('xodimlar') // 'xodimlar' | 'maoshlar'
+
   const [loading, setLoading] = useState(true);
   const [staff, setStaff] = useState([]);
   const [roles, setRoles] = useState([]);
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  // Payroll states
+  const [payrollLoading, setPayrollLoading] = useState(false)
+  const [payrollCalcLoading, setPayrollCalcLoading] = useState(false)
+  const [monthlyPayroll, setMonthlyPayroll] = useState([])
+  const [payrollMonth, setPayrollMonth] = useState(new Date().getMonth() + 1)
+  const [payrollYear, setPayrollYear] = useState(new Date().getFullYear())
   
   // Alert and Confirm modals
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
@@ -59,6 +69,45 @@ const StaffManagementAdvanced = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'maoshlar') loadPayroll()
+  }, [activeTab, payrollMonth, payrollYear])
+
+  const loadPayroll = async () => {
+    try {
+      setPayrollLoading(true)
+      const res = await payrollService.getMonthlyPayroll({ month: payrollMonth, year: payrollYear })
+      setMonthlyPayroll(res.data || [])
+    } catch {
+      setMonthlyPayroll([])
+    } finally {
+      setPayrollLoading(false)
+    }
+  }
+
+  const handleCalculatePayroll = async () => {
+    try {
+      setPayrollCalcLoading(true)
+      await payrollService.calculateMonthly({ month: payrollMonth, year: payrollYear })
+      await loadPayroll()
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Hisoblashda xatolik', 'error', 'Xatolik')
+    } finally {
+      setPayrollCalcLoading(false)
+    }
+  }
+
+  const handlePayPayroll = async (payrollId) => {
+    showConfirm('Maoshni to\'langan deb belgilamoqchimisiz?', async () => {
+      try {
+        await payrollService.payPayroll(payrollId, { payment_method: 'cash' })
+        await loadPayroll()
+      } catch (err) {
+        showAlert(err.response?.data?.message || 'Xatolik', 'error', 'Xatolik')
+      }
+    }, { title: 'Maosh to\'lash', confirmText: 'To\'lash' })
+  }
 
   // Role nomlarini o'zbekchaga mapping qilish
   const getRoleDisplayName = (roleName) => {
@@ -313,30 +362,61 @@ Iltimos, bu ma'lumotlarni saqlang!
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">Xodimlar boshqaruvi</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Jami: {staff.length} ta xodim
-          </p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Jami: {staff.length} ta xodim</p>
         </div>
-        <button
-          onClick={() => openStaffModal()}
-          className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 flex items-center gap-2 sm:gap-2 sm:gap-3"
-        >
-          <span className="material-symbols-outlined">add</span>
-          Xodim qo'shish
-        </button>
+        {activeTab === 'xodimlar' && (
+          <button
+            onClick={() => openStaffModal()}
+            className="px-4 py-2 sm:py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined">add</span>
+            Xodim qo'shish
+          </button>
+        )}
+        {activeTab === 'maoshlar' && (
+          <button
+            onClick={handleCalculatePayroll}
+            disabled={payrollCalcLoading}
+            className="px-4 py-2 sm:py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 flex items-center gap-2 disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined">calculate</span>
+            {payrollCalcLoading ? 'Hisoblanmoqda...' : 'Hisoblash'}
+          </button>
+        )}
       </div>
 
+      {/* Tab buttons */}
+      <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-fit">
+        {[
+          { key: 'xodimlar', label: 'Xodimlar', icon: 'badge' },
+          { key: 'maoshlar', label: 'Maoshlar', icon: 'payments' }
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === tab.key
+                ? 'bg-white dark:bg-gray-700 text-primary shadow'
+                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            <span className="material-symbols-outlined text-base">{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── XODIMLAR TAB ── */}
+      {activeTab === 'xodimlar' && (<>
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4">
-        <div className="grid grid-cols-1 md:grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 sm:p-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Lavozim
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Lavozim</label>
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl"
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
             >
               <option value="all">Barchasi</option>
               {roles.map(role => (
@@ -344,15 +424,12 @@ Iltimos, bu ma'lumotlarni saqlang!
               ))}
             </select>
           </div>
-
           <div>
-            <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Holat
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Holat</label>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl"
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
             >
               <option value="all">Barchasi</option>
               <option value="active">Faol</option>
@@ -363,7 +440,7 @@ Iltimos, bu ma'lumotlarni saqlang!
       </div>
 
       {/* Staff List */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
         {filteredStaff.length === 0 ? (
           <div className="p-12 text-center">
             <span className="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-700 mb-4">
@@ -480,6 +557,111 @@ Iltimos, bu ma'lumotlarni saqlang!
           </div>
         )}
       </div>
+      </>)}
+
+      {/* ── MAOSHLAR TAB ── */}
+      {activeTab === 'maoshlar' && (
+        <div className="space-y-4">
+          {/* Month/year selector */}
+          <div className="flex items-center gap-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3">
+            <span className="material-symbols-outlined text-gray-400">calendar_month</span>
+            <select
+              value={payrollMonth}
+              onChange={e => setPayrollMonth(Number(e.target.value))}
+              className="px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
+            >
+              {['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'].map((m, i) => (
+                <option key={i+1} value={i+1}>{m}</option>
+              ))}
+            </select>
+            <select
+              value={payrollYear}
+              onChange={e => setPayrollYear(Number(e.target.value))}
+              className="px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
+            >
+              {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <span className="text-sm text-gray-400 ml-2">{monthlyPayroll.length} ta yozuv</span>
+          </div>
+
+          {/* Payroll table */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+            {payrollLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : monthlyPayroll.length === 0 ? (
+              <div className="text-center py-16 text-gray-400">
+                <span className="material-symbols-outlined text-5xl mb-3">payments</span>
+                <p className="text-sm">Bu oy uchun maosh hisoblangan emas</p>
+                <button
+                  onClick={handleCalculatePayroll}
+                  disabled={payrollCalcLoading}
+                  className="mt-3 text-sm text-primary hover:underline disabled:opacity-50"
+                >
+                  Hisoblash tugmasini bosing
+                </button>
+              </div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold">Xodim</th>
+                    <th className="px-4 py-3 text-left font-semibold">Lavozim</th>
+                    <th className="px-4 py-3 text-right font-semibold">Asosiy maosh</th>
+                    <th className="px-4 py-3 text-right font-semibold">Bonus</th>
+                    <th className="px-4 py-3 text-right font-semibold">Jarima</th>
+                    <th className="px-4 py-3 text-right font-semibold">Jami</th>
+                    <th className="px-4 py-3 text-center font-semibold">Holat</th>
+                    <th className="px-4 py-3 text-center font-semibold">Amal</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                  {monthlyPayroll.map(p => (
+                    <tr key={p._id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
+                        {p.staff_id?.first_name} {p.staff_id?.last_name}
+                      </td>
+                      <td className="px-4 py-3 text-gray-500">{getRoleDisplayName(p.staff_id?.role)}</td>
+                      <td className="px-4 py-3 text-right">{formatCurrency(p.base_salary)}</td>
+                      <td className="px-4 py-3 text-right text-green-600">
+                        {p.total_bonuses > 0 ? `+${formatCurrency(p.total_bonuses)}` : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-right text-red-500">
+                        {p.total_penalties > 0 ? `-${formatCurrency(p.total_penalties)}` : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-white">
+                        {formatCurrency(p.net_salary)}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                          p.status === 'paid'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : p.status === 'approved'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {p.status === 'paid' ? 'To\'langan' : p.status === 'approved' ? 'Tasdiqlangan' : 'Kutilmoqda'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {p.status !== 'paid' && (
+                          <button
+                            onClick={() => handlePayPayroll(p._id)}
+                            className="px-3 py-1 bg-primary text-white rounded-lg text-xs font-semibold hover:opacity-90"
+                          >
+                            To'lash
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Staff Modal */}
       <Modal 
