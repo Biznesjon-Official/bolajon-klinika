@@ -1014,7 +1014,7 @@ router.post('/services',
   authenticate,
   async (req, res, next) => {
     try {
-      const { name, category, price, description, is_active, procedure_type, is_cups_based, price_per_cup } = req.body;
+      const { name, category, price, description, is_active, procedure_type, is_cups_based, price_per_cup, procedure_category_id } = req.body;
 
       if (!name) {
         return res.status(400).json({
@@ -1047,7 +1047,8 @@ router.post('/services',
         is_active: is_active !== undefined ? is_active : true,
         procedure_type: procedure_type || null,
         is_cups_based: is_cups_based || false,
-        price_per_cup: price_per_cup ? parseFloat(price_per_cup) : null
+        price_per_cup: price_per_cup ? parseFloat(price_per_cup) : null,
+        procedure_category_id: procedure_category_id || null
       });
       
       await service.save();
@@ -1070,7 +1071,7 @@ router.put('/services/:id',
   authenticate,
   async (req, res, next) => {
     try {
-      const { name, category, price, description, is_active, procedure_type, is_cups_based, price_per_cup } = req.body;
+      const { name, category, price, description, is_active, procedure_type, is_cups_based, price_per_cup, procedure_category_id } = req.body;
 
       const service = await Service.findById(req.params.id);
 
@@ -1089,6 +1090,7 @@ router.put('/services/:id',
       if (procedure_type !== undefined) service.procedure_type = procedure_type || null;
       if (is_cups_based !== undefined) service.is_cups_based = is_cups_based;
       if (price_per_cup !== undefined) service.price_per_cup = price_per_cup ? parseFloat(price_per_cup) : null;
+      if (procedure_category_id !== undefined) service.procedure_category_id = procedure_category_id || null;
       
       await service.save();
       
