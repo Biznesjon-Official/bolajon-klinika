@@ -258,8 +258,8 @@ const StaffManagementAdvanced = () => {
       // Shifokor uchun qo'shimcha validatsiya
       const selectedRole = roles.find(r => r.id === parseInt(staffForm.role_id));
       if (selectedRole?.name === 'doctor') {
-        if (!staffForm.specialization || !staffForm.license_number) {
-          showAlert('Shifokor uchun mutaxassislik va litsenziya raqami majburiy', 'warning', 'Ogohlantirish');
+        if (!staffForm.license_number) {
+          showAlert('Shifokor uchun litsenziya raqami majburiy', 'warning', 'Ogohlantirish');
           return;
         }
       }
@@ -767,8 +767,8 @@ Iltimos, bu ma'lumotlarni saqlang!
               <div className="group">
                 <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
-                    <span className="material-symbols-outlined text-sm sm:text-base">badge</span>
-                    Lavozim <span className="text-red-500">*</span>
+                    <span className="material-symbols-outlined text-sm sm:text-base">shield_person</span>
+                    Tizim roli <span className="text-red-500">*</span>
                   </span>
                 </label>
                 <select
@@ -776,11 +776,27 @@ Iltimos, bu ma'lumotlarni saqlang!
                   onChange={(e) => setStaffForm({ ...staffForm, role_id: e.target.value })}
                   className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
                 >
-                  <option value="">Lavozimni tanlang</option>
+                  <option value="">Rolni tanlang</option>
                   {roles.map(role => (
                     <option key={role.id} value={role.id}>{role.display_name}</option>
                   ))}
                 </select>
+              </div>
+
+              <div className="group">
+                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                    <span className="material-symbols-outlined text-sm sm:text-base">badge</span>
+                    Lavozim nomi
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={staffForm.specialization}
+                  onChange={(e) => setStaffForm({ ...staffForm, specialization: e.target.value })}
+                  className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                  placeholder="Masalan: Pediatr, Nevropatolog..."
+                />
               </div>
             </div>
           )}
@@ -866,47 +882,26 @@ Iltimos, bu ma'lumotlarni saqlang!
                 </div>
               </div>
 
-              {/* Mutaxassislik va litsenziya - faqat tibbiy xodimlar uchun */}
+              {/* Litsenziya raqami - faqat doctor uchun */}
               {(() => {
                 const selectedRole = roles.find(r => r.id === parseInt(staffForm.role_id));
                 const roleName = selectedRole?.name || '';
-                const needsSpecialization = ['doctor', 'nurse', 'laborant'].includes(roleName);
-                
-                return needsSpecialization && (
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="group">
-                      <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
-                          <span className="material-symbols-outlined text-sm sm:text-base">medical_services</span>
-                          Mutaxassislik {roleName === 'doctor' && <span className="text-red-500">*</span>}
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        value={staffForm.specialization}
-                        onChange={(e) => setStaffForm({ ...staffForm, specialization: e.target.value })}
-                        className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
-                        placeholder={roleName === 'doctor' ? 'Masalan: Kardiolog' : roleName === 'nurse' ? 'Masalan: Operatsion hamshira' : roleName === 'laborant' ? 'Masalan: Klinik laborant' : 'Mutaxassislik'}
-                        required={roleName === 'doctor'}
-                      />
-                    </div>
-
-                    <div className="group">
-                      <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
-                          <span className="material-symbols-outlined text-sm sm:text-base">verified</span>
-                          Litsenziya raqami {roleName === 'doctor' && <span className="text-red-500">*</span>}
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        value={staffForm.license_number}
-                        onChange={(e) => setStaffForm({ ...staffForm, license_number: e.target.value })}
-                        className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
-                        placeholder="LIC-12345"
-                        required={roleName === 'doctor'}
-                      />
-                    </div>
+                return roleName === 'doctor' && (
+                  <div className="group">
+                    <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
+                        <span className="material-symbols-outlined text-sm sm:text-base">verified</span>
+                        Litsenziya raqami <span className="text-red-500">*</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={staffForm.license_number}
+                      onChange={(e) => setStaffForm({ ...staffForm, license_number: e.target.value })}
+                      className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
+                      placeholder="LIC-12345"
+                      required
+                    />
                   </div>
                 );
               })()}

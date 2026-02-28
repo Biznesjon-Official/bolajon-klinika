@@ -149,7 +149,7 @@ export default function NursePanel() {
       case 'dashboard':
         return <NurseDashboard stats={stats} treatments={treatments} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} />
       case 'medicine-cabinet':
-        return <NurseMedicineCabinet medicines={medicines} onDispense={setDispenseMedicine} />
+        return <NurseMedicineCabinet medicines={medicines} onDispense={setDispenseMedicine} onRefresh={refresh} />
       case 'calls':
         return <NurseCalls calls={calls} onAcceptCall={handleAcceptCall} />
       case 'more':
