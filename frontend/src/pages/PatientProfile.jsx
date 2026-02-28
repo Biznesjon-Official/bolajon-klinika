@@ -216,12 +216,12 @@ const PatientProfile = () => {
     if (selectedProcedures.length === 0) return toast.error('Kamida 1 ta muolaja tanlang');
     try {
       setProcedureSubmitting(true);
-      const paidAmt = parseFloat(procedurePaidAmount) || 0;
+      const total = getProcedureTotal();
       const res = await billingService.createInvoice({
         patient_id: id,
         items: selectedProcedures.map(p => ({ service_id: p.service._id, quantity: p.quantity })),
-        paid_amount: paidAmt,
-        payment_method: paidAmt > 0 ? procedurePayMethod : null,
+        paid_amount: total,
+        payment_method: 'cash',
         notes: 'Muolaja'
       });
       toast.success('Muolaja biriktirildi va billing yaratildi');
@@ -529,24 +529,18 @@ const PatientProfile = () => {
       if (prescriptionIdParam) queuePayload.prescription_id = prescriptionIdParam
       const response = await queueService.addToQueue(queuePayload);
       if (response.success) {
-        // If invoice returned and paid amount > 0, process payment
+        // Auto-pay full amount
         const invoice = response.invoice;
-        const paidAmt = parseFloat(queuePaidAmount) || 0;
-        if (invoice && paidAmt > 0) {
+        if (invoice && invoice.total_amount > 0) {
           try {
             await billingService.addPayment(invoice._id, {
-              amount: paidAmt,
-              payment_method: queuePayMethod
+              amount: invoice.total_amount,
+              payment_method: 'cash'
             });
-            // Re-fetch invoice with paid amount for receipt
-            const updatedInvoice = {
-              ...invoice,
-              paid_amount: paidAmt
-            };
+            const updatedInvoice = { ...invoice, paid_amount: invoice.total_amount };
             const selectedDoctor = doctors.find(d => d.id === queueForm.doctor_id);
             const doctorName = selectedDoctor ? `${selectedDoctor.first_name} ${selectedDoctor.last_name}` : '';
-            const patientFullName = `${patient.first_name} ${patient.last_name}`;
-            billingService.printQueueReceipt(updatedInvoice, patientFullName, doctorName, response.data?.queue_number || '');
+            billingService.printQueueReceipt(updatedInvoice, `${patient.first_name} ${patient.last_name}`, doctorName, response.data?.queue_number || '');
           } catch {
             // Payment error — still continue
           }
@@ -652,6 +646,8 @@ const PatientProfile = () => {
     }
     try {
       setSubmitting(true);
+      const total = invoiceItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0)
+      const discountAmt = total * invoiceDiscount / 100
       const response = await billingService.createInvoice({
         patient_id: id,
         doctor_id: invoiceDoctor || undefined,
@@ -660,7 +656,9 @@ const PatientProfile = () => {
           quantity: item.quantity,
           ...(item.custom_price !== undefined && { custom_price: item.custom_price })
         })),
-        discount_amount: invoiceItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0) * invoiceDiscount / 100,
+        discount_amount: discountAmt,
+        paid_amount: total - discountAmt,
+        payment_method: 'cash',
         notes: ''
       });
       if (response.success) {
@@ -2542,40 +2540,6 @@ const PatientProfile = () => {
             />
           </div>
 
-          {/* Payment section */}
-          {selectedServices.length > 0 && (
-            <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl space-y-3">
-              <p className="text-sm font-bold text-green-700 dark:text-green-400">To'lov qabul qilish</p>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">To'lov summasi</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={queuePaidAmount}
-                    onChange={(e) => setQueuePaidAmount(e.target.value)}
-                    placeholder="0"
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">To'lov usuli</label>
-                  <select
-                    value={queuePayMethod}
-                    onChange={(e) => setQueuePayMethod(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="cash">Naqd</option>
-                    <option value="card">Karta</option>
-                    <option value="transfer">O'tkazma</option>
-                  </select>
-                </div>
-              </div>
-              {parseFloat(queuePaidAmount) > 0 && (
-                <p className="text-xs text-green-600 dark:text-green-400">Chek avtomatik chiqariladi</p>
-              )}
-            </div>
-          )}
 
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={() => setShowAddQueueModal(false)}
@@ -3231,26 +3195,6 @@ const PatientProfile = () => {
                   </div>
                 </div>
               )}
-
-              <div className="flex gap-2">
-                <select
-                  value={procedurePayMethod}
-                  onChange={e => setProcedurePayMethod(e.target.value)}
-                  className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                >
-                  <option value="cash">Naqd</option>
-                  <option value="card">Karta</option>
-                  <option value="transfer">O'tkazma</option>
-                </select>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="To'lov summasi (ixtiyoriy)"
-                  value={procedurePaidAmount}
-                  onChange={e => setProcedurePaidAmount(e.target.value)}
-                  className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                />
-              </div>
 
               <div className="flex gap-3">
                 <button
