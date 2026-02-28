@@ -150,13 +150,12 @@ router.get('/stats',
       const formatMethodBreakdown = (rows) => {
         const breakdown = {
           cash: 0,
-          card: 0,
-          transfer: 0
+          click: 0,
+          humo: 0,
+          uzcard: 0
         };
         rows.forEach(row => {
-          if (row._id && breakdown.hasOwnProperty(row._id)) {
-            breakdown[row._id] = row.total;
-          }
+          if (row._id) breakdown[row._id] = (breakdown[row._id] || 0) + row.total;
         });
         return breakdown;
       };

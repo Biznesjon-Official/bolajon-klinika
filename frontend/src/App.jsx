@@ -31,6 +31,7 @@ const PatientPrescriptions = lazy(() => import('./pages/PatientPrescriptions'));
 const Queue = lazy(() => import(/* webpackPrefetch: true */ './pages/Queue'));
 const QueueManagement = lazy(() => import(/* webpackPrefetch: true */ './pages/QueueManagement'));
 const CashierAdvanced = lazy(() => import('./pages/CashierAdvanced'));
+const ReceptionCashier = lazy(() => import('./pages/ReceptionCashier'));
 const Invoices = lazy(() => import('./pages/Invoices'));
 const Inpatient = lazy(() => import('./pages/Inpatient'));
 const StaffManagementAdvanced = lazy(() => import('./pages/StaffManagementAdvanced'));
@@ -146,6 +147,7 @@ function AppContent() {
               <Route path="/queue/simple" element={<ProtectedRoute><DashboardLayout><Queue /></DashboardLayout></ProtectedRoute>} />
               <Route path="/ambulator" element={<ProtectedRoute><DashboardLayout><AmbulatorRoom /></DashboardLayout></ProtectedRoute>} />
               <Route path="/cashier" element={<ProtectedRoute><DashboardLayout><CashierAdvanced /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/reception-cashier" element={<ProtectedRoute><DashboardLayout><ReceptionCashier /></DashboardLayout></ProtectedRoute>} />
               <Route path="/cashier/advanced" element={<ProtectedRoute><DashboardLayout><CashierAdvanced /></DashboardLayout></ProtectedRoute>} />
               <Route path="/invoices" element={<ProtectedRoute><DashboardLayout><Invoices /></DashboardLayout></ProtectedRoute>} />
               <Route path="/inpatient" element={<ProtectedRoute><DashboardLayout><Inpatient /></DashboardLayout></ProtectedRoute>} />

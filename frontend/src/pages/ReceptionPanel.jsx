@@ -286,7 +286,7 @@ export default function ReceptionPanel() {
           </a>
 
           <a
-            href="/cashier"
+            href="/reception-cashier"
             className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-green-200 dark:border-green-800"
           >
             <span className="material-symbols-outlined text-5xl text-green-600">payments</span>
