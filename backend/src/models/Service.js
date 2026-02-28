@@ -32,6 +32,19 @@ const serviceSchema = new mongoose.Schema({
   code: {
     type: String,
     trim: true
+  },
+  procedure_type: {
+    type: String,
+    enum: ['ukol', 'kapelnitsa', 'massaj', 'xijoma'],
+    default: null
+  },
+  is_cups_based: {
+    type: Boolean,
+    default: false
+  },
+  price_per_cup: {
+    type: Number,
+    default: null
   }
 }, {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }

@@ -122,10 +122,22 @@
     </style>
   </head>
   <body>
-    <!-- Add fonts-loaded class immediately to prevent FOUC -->
+    <!-- Add fonts-loaded class only after Material Symbols font is ready -->
     <script>
-      // Immediately add fonts-loaded class to prevent text flash
-      document.documentElement.classList.add('fonts-loaded');
+      if ('fonts' in document) {
+        var checkFont = setInterval(function() {
+          if (document.fonts.check('24px "Material Symbols Outlined"')) {
+            document.documentElement.classList.add('fonts-loaded')
+            clearInterval(checkFont)
+          }
+        }, 100)
+        setTimeout(function() {
+          document.documentElement.classList.add('fonts-loaded')
+          clearInterval(checkFont)
+        }, 5000)
+      } else {
+        document.documentElement.classList.add('fonts-loaded')
+      }
     </script>
     
     <!-- Instant loading feedback -->

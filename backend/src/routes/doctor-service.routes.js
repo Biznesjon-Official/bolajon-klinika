@@ -114,7 +114,19 @@ router.post('/', authenticate, authorize('admin', 'chief_doctor'), async (req, r
       data.service_id = service_id
       data.service_name = service.name
     } else {
-      data.service_name = service_name.trim()
+      // Auto-create or find a Service record so billing can reference it
+      const name = service_name.trim()
+      let linkedService = await Service.findOne({ name, category: 'Konsultatsiya' })
+      if (!linkedService) {
+        linkedService = await Service.create({
+          name,
+          category: 'Konsultatsiya',
+          price: parseFloat(custom_price),
+          is_active: true
+        })
+      }
+      data.service_id = linkedService._id
+      data.service_name = name
     }
 
     const doctorService = new DoctorService(data)
