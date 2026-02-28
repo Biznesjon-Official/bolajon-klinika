@@ -18,96 +18,60 @@ const DashboardLayout = ({ children }) => {
   };
 
   const navigation = [
-    // 1. Bosh sahifa (faqat Admin va Manager uchun)
-    { name: t('nav.dashboard'), icon: 'dashboard', path: '/dashboard', roles: ['Admin', 'Administrator', 'Manager', 'Menejer'] },
-    
-    // 2. Qabulxona - Bemorlar qabul qilish
-    { name: t('nav.patients'), icon: 'groups', path: '/patients', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'chief_doctor'] },
-    { name: t('nav.queue'), icon: 'format_list_numbered', path: '/queue', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor'] },
-    
-    // 3. Kassa - To'lovlar (receptionist bajaradi)
-    { name: t('nav.cashier'), icon: 'payments', path: '/cashier', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist'] },
-    
-    // 4. Shifokor paneli
-    { name: t('nav.doctorPanel'), icon: 'medical_services', path: '/doctor', roles: ['Shifokor', 'Doctor'] },
-    
-    // 4.5. Bosh shifokor paneli
+    // ── Admin ──────────────────────────────────────────────
+    { name: t('nav.dashboard'), icon: 'dashboard', path: '/dashboard', roles: ['admin', 'Admin', 'Administrator'] },
+    { name: t('nav.patients'), icon: 'groups', path: '/patients', roles: ['admin', 'Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'chief_doctor'] },
+    { name: t('nav.staff'), icon: 'badge', path: '/staff', roles: ['admin', 'Admin', 'Administrator'] },
+    { name: t('nav.attendance'), icon: 'schedule', path: '/attendance', roles: ['admin', 'Admin', 'Administrator', 'chief_doctor'] },
+    { name: 'Navbatdagi shifokorlar', icon: 'event_available', path: '/on-duty-doctors', roles: ['admin', 'Admin', 'Administrator'] },
+    { name: 'Doktor xizmatlari', icon: 'medical_services', path: '/doctor-services', roles: ['admin', 'Admin', 'Administrator', 'chief_doctor'] },
+    { name: 'Muolajalar', icon: 'vaccines', path: '/procedures', roles: ['admin', 'Admin', 'Administrator'] },
+    { name: 'Lab reaktivlar', icon: 'science', path: '/lab-pharmacy', roles: ['admin', 'Admin', 'Administrator', 'chief_doctor', 'chef_laborant'] },
+    { name: 'Dori shkafi', icon: 'medication', path: '/nurse/medicine', roles: ['admin', 'Admin', 'Administrator', 'Hamshira', 'Nurse', 'nurse'] },
+    { name: t('nav.ambulatorRoom'), icon: 'meeting_room', path: '/ambulator', roles: ['admin', 'Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor', 'doctor', 'Hamshira', 'Nurse', 'nurse'] },
+    { name: 'Statsionar', icon: 'bed', path: '/inpatient', roles: ['admin', 'Admin', 'Administrator', 'Shifokor', 'Doctor', 'doctor', 'Hamshira', 'Nurse', 'nurse', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: 'Vazifalar', icon: 'task_alt', path: '/tasks', roles: ['admin', 'Admin', 'Administrator'] },
+
+    // ── Qabulxona ──────────────────────────────────────────
+    { name: t('nav.queue'), icon: 'format_list_numbered', path: '/queue', roles: ['Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor', 'doctor'] },
+    { name: t('nav.cashier'), icon: 'payments', path: '/cashier', roles: ['Qabulxona', 'Reception', 'receptionist'] },
+
+    // ── Shifokor ───────────────────────────────────────────
+    { name: t('nav.doctorPanel'), icon: 'medical_services', path: '/doctor', roles: ['Shifokor', 'Doctor', 'doctor'] },
+    { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Shifokor', 'Doctor', 'doctor', 'chief_doctor'] },
+    { name: 'Mening Vazifalarim', icon: 'task_alt', path: '/my-tasks', roles: ['Shifokor', 'Doctor', 'doctor', 'Qabulxona', 'Reception', 'receptionist', 'sanitar', 'masseur', 'speech_therapist'] },
+    { name: 'Mening Maoshim', icon: 'account_balance_wallet', path: '/my-salary', roles: ['Shifokor', 'Doctor', 'doctor', 'sanitar', 'masseur', 'speech_therapist', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: t('nav.communications'), icon: 'chat', path: '/communications', roles: ['Shifokor', 'Doctor', 'doctor', 'Qabulxona', 'Reception', 'receptionist'] },
+
+    // ── Bosh shifokor ──────────────────────────────────────
     { name: 'Bosh shifokor', icon: 'medical_information', path: '/chief-doctor', roles: ['chief_doctor'] },
     { name: 'Xodimlar faoliyati', icon: 'groups', path: '/chief-doctor/staff', roles: ['chief_doctor'] },
     { name: 'Navbatdagi shifokorlar', icon: 'event_available', path: '/chief-doctor/on-duty', roles: ['chief_doctor'] },
     { name: 'Kasalliklar', icon: 'medical_information', path: '/chief-doctor/diseases', roles: ['chief_doctor'] },
-    { name: 'Lab reaktivlar', icon: 'science', path: '/lab-pharmacy', roles: ['chief_doctor'] },
     { name: 'Mening profilim', icon: 'person', path: '/chief-doctor/profile', roles: ['chief_doctor'] },
-    
-    // 4.6. Navbatdagi shifokorlar (Admin uchun)
-    { name: 'Navbatdagi shifokorlar', icon: 'event_available', path: '/on-duty-doctors', roles: ['Admin', 'Administrator'] },
 
-    // 4.7. Doktor xizmatlari
-    { name: 'Doktor xizmatlari', icon: 'medical_services', path: '/doctor-services', roles: ['Admin', 'Administrator', 'chief_doctor'] },
+    // ── Hamshira ───────────────────────────────────────────
+    { name: 'Hamshira Dashboard', icon: 'dashboard', path: '/nurse', roles: ['Hamshira', 'Nurse', 'nurse'] },
+    { name: 'Chaqiruvlar', icon: 'notifications', path: '/nurse/calls', roles: ['Hamshira', 'Nurse', 'nurse'] },
+    { name: 'Boshqa', icon: 'more_horiz', path: '/nurse/more', roles: ['Hamshira', 'Nurse', 'nurse'] },
 
-    // 4.8. Muolajalar boshqaruvi
-    { name: 'Muolajalar', icon: 'vaccines', path: '/procedures', roles: ['Admin', 'Administrator'] },
-    
-    // 5. Xonalar - Muolaja
-    { name: t('nav.ambulatorRoom'), icon: 'meeting_room', path: '/ambulator', roles: ['Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor', 'Hamshira', 'Nurse'] },
-    { name: 'Statsionar', icon: 'bed', path: '/inpatient', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Hamshira', 'Nurse', 'Qabulxona', 'Reception', 'receptionist'] },
-    
-    // 6. Hamshira paneli
-    { name: 'Hamshira Dashboard', icon: 'dashboard', path: '/nurse', roles: ['Hamshira', 'Nurse'] },
-    { name: 'Dori shkafi', icon: 'medical_services', path: '/nurse/medicine', roles: ['Hamshira', 'Nurse'] },
-    { name: 'Chaqiruvlar', icon: 'notifications', path: '/nurse/calls', roles: ['Hamshira', 'Nurse'] },
-    { name: 'Boshqa', icon: 'more_horiz', path: '/nurse/more', roles: ['Hamshira', 'Nurse'] },
-    
-    // 7. Laboratoriya
-    { name: 'Lab Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab'] },
-    { name: 'Buyurtmalar', icon: 'assignment', path: '/lab/orders', roles: ['Laborant', 'Lab'] },
-    { name: 'Namuna olish', icon: 'colorize', path: '/lab/samples', roles: ['Laborant', 'Lab'] },
-    { name: 'Mening profilim', icon: 'person', path: '/lab/profile', roles: ['Laborant', 'Lab'] },
-    // 7.5. Bosh laborant
+    // ── Laborant ───────────────────────────────────────────
+    { name: 'Lab Dashboard', icon: 'science', path: '/lab', roles: ['Laborant', 'Lab', 'laborant'] },
+    { name: 'Buyurtmalar', icon: 'assignment', path: '/lab/orders', roles: ['Laborant', 'Lab', 'laborant'] },
+    { name: 'Namuna olish', icon: 'colorize', path: '/lab/samples', roles: ['Laborant', 'Lab', 'laborant'] },
+    { name: 'Mening profilim', icon: 'person', path: '/lab/profile', roles: ['Laborant', 'Lab', 'laborant'] },
+
+    // ── Bosh laborant ──────────────────────────────────────
     { name: 'Bosh Laborant', icon: 'biotech', path: '/chef-laborant', roles: ['chef_laborant'] },
     { name: 'Barcha buyurtmalar', icon: 'assignment', path: '/chef-laborant/orders', roles: ['chef_laborant'] },
     { name: 'Laborantlar ishlashi', icon: 'analytics', path: '/chef-laborant/performance', roles: ['chef_laborant'] },
     { name: 'Testlar katalogi', icon: 'science', path: '/laboratory', roles: ['chef_laborant'] },
-    { name: 'Lab reaktivlar', icon: 'inventory_2', path: '/lab-pharmacy', roles: ['chef_laborant'] },
     { name: 'Mening profilim', icon: 'person', path: '/chef-laborant/profile', roles: ['chef_laborant'] },
 
-    { name: 'Laboratoriya', icon: 'biotech', path: '/laboratory', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'chief_doctor'] },
-    
-    // 9. Tozalovchi
+    // ── Boshqa rollar ──────────────────────────────────────
     { name: 'Tozalovchi Paneli', icon: 'cleaning_services', path: '/sanitar', roles: ['Tozalovchi', 'Cleaner', 'sanitar'] },
-    
-    // 10. Massajchi
     { name: 'Massajchi Paneli', icon: 'spa', path: '/masseur', roles: ['Massajchi', 'Masseur', 'masseur'] },
-    
-    // 11. Logoped
     { name: 'Logoped Paneli', icon: 'record_voice_over', path: '/speech-therapist', roles: ['Logoped', 'SpeechTherapist', 'speech_therapist'] },
-    
-    // 12. Xodimlar
-    { name: t('nav.staff'), icon: 'badge', path: '/staff', roles: ['Admin', 'Administrator'] },
-
-    // 12.5. Davomat nazorati
-    { name: t('nav.attendance'), icon: 'schedule', path: '/attendance', roles: ['Admin', 'Administrator', 'chief_doctor'] },
-    
-    // 13. Vazifalar
-    { name: 'Vazifalar', icon: 'task_alt', path: '/tasks', roles: ['Admin', 'Administrator'] },
-    { name: 'Mening Vazifalarim', icon: 'task_alt', path: '/my-tasks', roles: ['Shifokor', 'Doctor', 'Tozalovchi', 'Cleaner', 'sanitar', 'Qabulxona', 'Reception', 'receptionist', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist'] },
-    
-    // 14. Aloqa
-    { name: t('nav.communications'), icon: 'chat', path: '/communications', roles: ['Admin', 'Administrator', 'Shifokor', 'Doctor', 'Qabulxona', 'Reception'] },
-    
-    // 13. Hisobotlar
-    { name: t('nav.reports'), icon: 'bar_chart', path: '/reports', roles: ['Admin', 'Administrator', 'Manager', 'Menejer'] },
-    { name: 'Kasir Hisobotlari', icon: 'receipt_long', path: '/cashier-reports', roles: ['Admin', 'Administrator'] },
-    
-    // 14. Xarajatlar
-    { name: 'Xarajatlar', icon: 'receipt_long', path: '/expenses', roles: ['Admin', 'Administrator'] },
-    
-    // 15. Maoshlar (oxirida)
-    { name: 'Maoshlar', icon: 'payments', path: '/payroll', roles: ['Admin', 'Administrator'] },
-    { name: 'Mening Maoshim', icon: 'account_balance_wallet', path: '/my-salary', roles: ['Shifokor', 'Doctor', 'Tozalovchi', 'Cleaner', 'sanitar', 'Massajchi', 'Masseur', 'masseur', 'Logoped', 'SpeechTherapist', 'speech_therapist', 'Qabulxona', 'Reception', 'receptionist'] },
-    
-    // Bemor paneli yashirilgan (hozircha ko'rinmaydigan)
-    // { name: 'Bemor Paneli', icon: 'person', path: '/patient-portal', roles: ['Patient', 'Bemor'] },
   ];
 
   // Role'ga qarab menu filtrlash
