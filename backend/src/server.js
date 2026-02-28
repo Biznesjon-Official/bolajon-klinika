@@ -69,6 +69,7 @@ import attendanceRoutes from './routes/attendance.routes.js';
 import labReagentRoutes from './routes/lab-reagent.routes.js';
 import chiefDoctorRoutes from './routes/chief-doctor.routes.js';
 import chefLaborantRoutes from './routes/chef-laborant.routes.js';
+import procedureCategoriesRoutes from './routes/procedure-categories.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 import cashierReportRoutes from './routes/cashier-report.routes.js';
 import diseaseRoutes from './routes/disease.routes.js';
@@ -198,6 +199,7 @@ app.use(`/api/${API_VERSION}/settings`, settingsRoutes);
 app.use(`/api/${API_VERSION}/cashier-reports`, cashierReportRoutes);
 app.use(`/api/${API_VERSION}/diseases`, diseaseRoutes);
 app.use(`/api/${API_VERSION}/doctor-services`, doctorServiceRoutes);
+app.use(`/api/${API_VERSION}/procedure-categories`, procedureCategoriesRoutes);
 
 // WebSocket for real-time updates
 io.on('connection', (socket) => {

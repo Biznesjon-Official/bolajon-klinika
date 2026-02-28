@@ -9,277 +9,405 @@ const PROCEDURE_TYPES = [
   { value: 'xijoma', label: 'Xijoma' }
 ]
 
-const emptyForm = {
+const emptyProcForm = {
   name: '',
   procedure_type: '',
   price: '',
-  price_per_cup: '',
   is_cups_based: false,
   is_active: true
 }
 
 export default function ProceduresManagement() {
+  // Categories (bo'limlar)
+  const [categories, setCategories] = useState([])
+  const [catLoading, setCatLoading] = useState(true)
+  const [selectedCat, setSelectedCat] = useState(null)
+  const [showCatModal, setShowCatModal] = useState(false)
+  const [editCat, setEditCat] = useState(null)
+  const [catForm, setCatForm] = useState({ name: '', description: '' })
+  const [catSaving, setCatSaving] = useState(false)
+  const [deleteCatConfirm, setDeleteCatConfirm] = useState(null)
+
+  // Procedures
   const [procedures, setProcedures] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showModal, setShowModal] = useState(false)
-  const [editItem, setEditItem] = useState(null)
-  const [form, setForm] = useState(emptyForm)
-  const [saving, setSaving] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [procLoading, setProcLoading] = useState(false)
+  const [showProcModal, setShowProcModal] = useState(false)
+  const [editProc, setEditProc] = useState(null)
+  const [procForm, setProcForm] = useState(emptyProcForm)
+  const [procSaving, setProcSaving] = useState(false)
+  const [deleteProcConfirm, setDeleteProcConfirm] = useState(null)
+
+  useEffect(() => { fetchCategories() }, [])
 
   useEffect(() => {
-    fetchProcedures()
-  }, [])
+    if (selectedCat) fetchProcedures(selectedCat._id)
+    else setProcedures([])
+  }, [selectedCat])
 
-  const fetchProcedures = async () => {
+  const fetchCategories = async () => {
     try {
-      setLoading(true)
-      const res = await servicesService.getServices({ category: 'Muolaja' })
+      setCatLoading(true)
+      const res = await servicesService.getProcedureCategories()
+      setCategories(res.data || [])
+      // Auto-select first
+      if (!selectedCat && res.data?.length > 0) setSelectedCat(res.data[0])
+    } catch {
+      toast.error('Bo\'limlarni yuklashda xatolik')
+    } finally {
+      setCatLoading(false)
+    }
+  }
+
+  const fetchProcedures = async (catId) => {
+    try {
+      setProcLoading(true)
+      const res = await servicesService.getProceduresByCategory(catId)
       setProcedures(res.data || [])
     } catch {
       toast.error('Muolajalarni yuklashda xatolik')
     } finally {
-      setLoading(false)
+      setProcLoading(false)
     }
   }
 
-  const openAdd = () => {
-    setEditItem(null)
-    setForm(emptyForm)
-    setShowModal(true)
+  // ── Category CRUD ──────────────────────────────────────
+  const openAddCat = () => {
+    setEditCat(null)
+    setCatForm({ name: '', description: '' })
+    setShowCatModal(true)
   }
 
-  const openEdit = (item) => {
-    setEditItem(item)
-    setForm({
-      name: item.name || '',
-      procedure_type: item.procedure_type || '',
-      price: item.is_cups_based ? item.price_per_cup : item.price,
-      price_per_cup: item.price_per_cup || '',
-      is_cups_based: item.is_cups_based || false,
-      is_active: item.is_active
+  const openEditCat = (cat) => {
+    setEditCat(cat)
+    setCatForm({ name: cat.name, description: cat.description || '' })
+    setShowCatModal(true)
+  }
+
+  const handleSaveCat = async (e) => {
+    e.preventDefault()
+    if (!catForm.name.trim()) return toast.error('Nom majburiy')
+    try {
+      setCatSaving(true)
+      if (editCat) {
+        await servicesService.updateProcedureCategory(editCat._id, catForm)
+        toast.success('Bo\'lim yangilandi')
+      } else {
+        await servicesService.createProcedureCategory(catForm)
+        toast.success('Bo\'lim qo\'shildi')
+      }
+      setShowCatModal(false)
+      await fetchCategories()
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Xatolik')
+    } finally {
+      setCatSaving(false)
+    }
+  }
+
+  const handleDeleteCat = async (cat) => {
+    try {
+      await servicesService.deleteProcedureCategory(cat._id)
+      toast.success('Bo\'lim o\'chirildi')
+      setDeleteCatConfirm(null)
+      if (selectedCat?._id === cat._id) setSelectedCat(null)
+      await fetchCategories()
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'O\'chirishda xatolik')
+    }
+  }
+
+  // ── Procedure CRUD ─────────────────────────────────────
+  const openAddProc = () => {
+    setEditProc(null)
+    setProcForm(emptyProcForm)
+    setShowProcModal(true)
+  }
+
+  const openEditProc = (proc) => {
+    setEditProc(proc)
+    setProcForm({
+      name: proc.name || '',
+      procedure_type: proc.procedure_type || '',
+      price: proc.is_cups_based ? proc.price_per_cup : proc.price,
+      is_cups_based: proc.is_cups_based || false,
+      is_active: proc.is_active
     })
-    setShowModal(true)
+    setShowProcModal(true)
   }
 
   const handleTypeChange = (val) => {
     const isCups = val === 'xijoma'
-    setForm(f => ({ ...f, procedure_type: val, is_cups_based: isCups }))
+    setProcForm(f => ({ ...f, procedure_type: val, is_cups_based: isCups }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSaveProc = async (e) => {
     e.preventDefault()
-    if (!form.name.trim()) return toast.error('Nom majburiy')
-    if (!form.procedure_type) return toast.error('Muolaja turini tanlang')
+    if (!procForm.name.trim()) return toast.error('Nom majburiy')
+    if (!procForm.procedure_type) return toast.error('Turini tanlang')
+    if (!selectedCat) return toast.error('Avval bo\'lim tanlang')
 
-    const priceVal = parseFloat(form.price) || 0
+    const priceVal = parseFloat(procForm.price) || 0
     const payload = {
-      name: form.name.trim(),
+      name: procForm.name.trim(),
       category: 'Muolaja',
-      procedure_type: form.procedure_type,
-      is_cups_based: form.is_cups_based,
-      is_active: form.is_active
+      procedure_category_id: selectedCat._id,
+      procedure_type: procForm.procedure_type,
+      is_cups_based: procForm.is_cups_based,
+      is_active: procForm.is_active,
+      price: priceVal,
+      ...(procForm.is_cups_based ? { price_per_cup: priceVal } : { price_per_cup: null })
     }
 
-    if (form.is_cups_based) {
-      if (!priceVal) return toast.error('1 idish narxini kiriting')
-      payload.price_per_cup = priceVal
-      payload.price = priceVal
-    } else {
-      payload.price = priceVal
-      payload.price_per_cup = null
-    }
+    if (procForm.is_cups_based && !priceVal) return toast.error('1 idish narxini kiriting')
 
     try {
-      setSaving(true)
-      if (editItem) {
-        await servicesService.updateService(editItem._id, payload)
+      setProcSaving(true)
+      if (editProc) {
+        await servicesService.updateService(editProc._id, payload)
         toast.success('Muolaja yangilandi')
       } else {
         await servicesService.createService(payload)
         toast.success('Muolaja qo\'shildi')
       }
-      setShowModal(false)
-      fetchProcedures()
-    } catch {
-      toast.error('Saqlashda xatolik')
+      setShowProcModal(false)
+      fetchProcedures(selectedCat._id)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Saqlashda xatolik')
     } finally {
-      setSaving(false)
+      setProcSaving(false)
     }
   }
 
-  const handleDelete = async (id) => {
+  const handleDeleteProc = async (proc) => {
     try {
-      await servicesService.deleteService(id)
+      await servicesService.deleteService(proc._id)
       toast.success('Muolaja o\'chirildi')
-      setDeleteConfirm(null)
-      fetchProcedures()
-    } catch {
-      toast.error('O\'chirishda xatolik')
+      setDeleteProcConfirm(null)
+      fetchProcedures(selectedCat._id)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Xatolik')
     }
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Muolajalar</h1>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition"
-        >
-          <span className="material-symbols-outlined text-sm">add</span>
-          Muolaja qo'shish
-        </button>
+    <div className="p-4 sm:p-6 h-full">
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Muolajalar boshqaruvi</h1>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : procedures.length === 0 ? (
-        <div className="text-center py-20 text-gray-500 dark:text-gray-400">
-          Hozircha muolajalar yo'q
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-              <tr>
-                <th className="px-4 py-3 text-left">Nom</th>
-                <th className="px-4 py-3 text-left">Tur</th>
-                <th className="px-4 py-3 text-right">Narx</th>
-                <th className="px-4 py-3 text-center">Holat</th>
-                <th className="px-4 py-3 text-center">Amallar</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {procedures.map(item => (
-                <tr key={item._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{item.name}</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300 capitalize">
-                    {PROCEDURE_TYPES.find(t => t.value === item.procedure_type)?.label || item.procedure_type || '—'}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-900 dark:text-white">
-                    {item.is_cups_based
-                      ? <span>{item.price_per_cup?.toLocaleString()} <span className="text-xs text-gray-400">/ idish</span></span>
-                      : `${item.price?.toLocaleString()} so'm`
-                    }
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                      item.is_active
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                    }`}>
-                      {item.is_active ? 'Faol' : 'Nofaol'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex items-center justify-center gap-2">
+      <div className="flex gap-4 h-[calc(100vh-180px)]">
+        {/* ── LEFT: Bo'limlar ── */}
+        <div className="w-72 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl shadow flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="font-bold text-gray-900 dark:text-white">Bo'limlar</h2>
+            <button
+              onClick={openAddCat}
+              className="p-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
+              title="Bo'lim qo'shish"
+            >
+              <span className="material-symbols-outlined text-base">add</span>
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {catLoading ? (
+              <div className="flex justify-center py-10">
+                <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : categories.length === 0 ? (
+              <div className="text-center py-10 px-4">
+                <span className="material-symbols-outlined text-4xl text-gray-300 mb-2">category</span>
+                <p className="text-sm text-gray-400">Bo'limlar yo'q</p>
+                <button
+                  onClick={openAddCat}
+                  className="mt-3 text-sm text-primary hover:underline"
+                >Birinchi bo'limni qo'shing</button>
+              </div>
+            ) : (
+              <ul className="py-1">
+                {categories.map(cat => (
+                  <li
+                    key={cat._id}
+                    onClick={() => setSelectedCat(cat)}
+                    className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors ${
+                      selectedCat?._id === cat._id
+                        ? 'bg-primary/10 dark:bg-primary/20 border-l-4 border-primary'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border-l-4 border-transparent'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className={`font-semibold text-sm truncate ${selectedCat?._id === cat._id ? 'text-primary' : 'text-gray-900 dark:text-white'}`}>
+                        {cat.name}
+                      </p>
+                      {cat.description && (
+                        <p className="text-xs text-gray-400 truncate">{cat.description}</p>
+                      )}
+                      <span className={`inline-block text-xs px-1.5 py-0.5 rounded-full mt-0.5 ${
+                        cat.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {cat.is_active ? 'Faol' : 'Nofaol'}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 ml-2 flex-shrink-0">
                       <button
-                        onClick={() => openEdit(item)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"
-                        title="Tahrirlash"
+                        onClick={(e) => { e.stopPropagation(); openEditCat(cat) }}
+                        className="p-1 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition"
                       >
-                        <span className="material-symbols-outlined text-base">edit</span>
+                        <span className="material-symbols-outlined text-sm">edit</span>
                       </button>
                       <button
-                        onClick={() => setDeleteConfirm(item)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"
-                        title="O'chirish"
+                        onClick={(e) => { e.stopPropagation(); setDeleteCatConfirm(cat) }}
+                        className="p-1 text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition"
                       >
-                        <span className="material-symbols-outlined text-base">delete</span>
+                        <span className="material-symbols-outlined text-sm">delete</span>
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-      )}
 
-      {/* Add/Edit Modal */}
-      {showModal && (
+        {/* ── RIGHT: Muolajalar ── */}
+        <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow flex flex-col overflow-hidden">
+          {!selectedCat ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+              <span className="material-symbols-outlined text-5xl mb-3">vaccines</span>
+              <p>Chap tarafdan bo'lim tanlang</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-700">
+                <div>
+                  <h2 className="font-bold text-gray-900 dark:text-white">{selectedCat.name}</h2>
+                  <p className="text-xs text-gray-400">{procedures.length} ta muolaja</p>
+                </div>
+                <button
+                  onClick={openAddProc}
+                  className="flex items-center gap-1.5 bg-primary text-white px-3 py-2 rounded-lg hover:bg-primary/90 transition text-sm font-semibold"
+                >
+                  <span className="material-symbols-outlined text-sm">add</span>
+                  Muolaja qo'shish
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                {procLoading ? (
+                  <div className="flex justify-center py-12">
+                    <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : procedures.length === 0 ? (
+                  <div className="text-center py-16 text-gray-400">
+                    <span className="material-symbols-outlined text-5xl mb-3">vaccines</span>
+                    <p className="text-sm">Bu bo'limda muolajalar yo'q</p>
+                    <button
+                      onClick={openAddProc}
+                      className="mt-3 text-sm text-primary hover:underline"
+                    >Birinchi muolajani qo'shing</button>
+                  </div>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 sticky top-0">
+                      <tr>
+                        <th className="px-5 py-3 text-left font-semibold">Nom</th>
+                        <th className="px-4 py-3 text-left font-semibold">Tur</th>
+                        <th className="px-4 py-3 text-right font-semibold">Narx</th>
+                        <th className="px-4 py-3 text-center font-semibold">Holat</th>
+                        <th className="px-4 py-3 text-center font-semibold">Amallar</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {procedures.map(proc => (
+                        <tr key={proc._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                          <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{proc.name}</td>
+                          <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                            {PROCEDURE_TYPES.find(t => t.value === proc.procedure_type)?.label || proc.procedure_type || '—'}
+                          </td>
+                          <td className="px-4 py-3 text-right text-gray-900 dark:text-white">
+                            {proc.is_cups_based
+                              ? <span>{proc.price_per_cup?.toLocaleString()} <span className="text-xs text-gray-400">/ idish</span></span>
+                              : `${proc.price?.toLocaleString()} so'm`
+                            }
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                              proc.is_active
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                            }`}>
+                              {proc.is_active ? 'Faol' : 'Nofaol'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => openEditProc(proc)}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition"
+                              >
+                                <span className="material-symbols-outlined text-base">edit</span>
+                              </button>
+                              <button
+                                onClick={() => setDeleteProcConfirm(proc)}
+                                className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"
+                              >
+                                <span className="material-symbols-outlined text-base">delete</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Category Modal ── */}
+      {showCatModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {editItem ? 'Muolajani tahrirlash' : 'Yangi muolaja'}
+                {editCat ? 'Bo\'limni tahrirlash' : 'Yangi bo\'lim'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <button onClick={() => setShowCatModal(false)} className="text-gray-400 hover:text-gray-600">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-
-            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+            <form onSubmit={handleSaveCat} className="p-4 space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom *</label>
                 <input
                   type="text"
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Muolaja nomi"
+                  value={catForm.name}
+                  onChange={e => setCatForm(f => ({ ...f, name: e.target.value }))}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="Masalan: Terapiya, Ortopediya..."
+                  autoFocus
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Muolaja turi *</label>
-                <select
-                  value={form.procedure_type}
-                  onChange={e => handleTypeChange(e.target.value)}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="">Turni tanlang</option>
-                  {PROCEDURE_TYPES.map(t => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {form.is_cups_based ? '1 idish narxi (so\'m) *' : 'Narx (so\'m) *'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tavsif</label>
                 <input
-                  type="number"
-                  min="0"
-                  value={form.price}
-                  onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="0"
+                  type="text"
+                  value={catForm.description}
+                  onChange={e => setCatForm(f => ({ ...f, description: e.target.value }))}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="Ixtiyoriy..."
                 />
-                {form.is_cups_based && (
-                  <p className="text-xs text-gray-400 mt-1">Jami narx = idish soni × 1 idish narxi</p>
-                )}
               </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, is_active: !f.is_active }))}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${form.is_active ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}
-                >
-                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${form.is_active ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                </button>
-                <span className="text-sm text-gray-700 dark:text-gray-300">Faol</span>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                >
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setShowCatModal(false)}
+                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm">
                   Bekor qilish
                 </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition"
-                >
-                  {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+                <button type="submit" disabled={catSaving}
+                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition text-sm font-semibold">
+                  {catSaving ? 'Saqlanmoqda...' : 'Saqlash'}
                 </button>
               </div>
             </form>
@@ -287,25 +415,122 @@ export default function ProceduresManagement() {
         </div>
       )}
 
-      {/* Delete Confirm */}
-      {deleteConfirm && (
+      {/* ── Procedure Modal ── */}
+      {showProcModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">O'chirishni tasdiqlang</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              <strong>{deleteConfirm.name}</strong> muolajasi o'chirilsinmi?
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {editProc ? 'Muolajani tahrirlash' : `Yangi muolaja — ${selectedCat?.name}`}
+              </h2>
+              <button onClick={() => setShowProcModal(false)} className="text-gray-400 hover:text-gray-600">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <form onSubmit={handleSaveProc} className="p-4 space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom *</label>
+                <input
+                  type="text"
+                  value={procForm.name}
+                  onChange={e => setProcForm(f => ({ ...f, name: e.target.value }))}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="Muolaja nomi"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Muolaja turi *</label>
+                <select
+                  value={procForm.procedure_type}
+                  onChange={e => handleTypeChange(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">Turni tanlang</option>
+                  {PROCEDURE_TYPES.map(t => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {procForm.is_cups_based ? '1 idish narxi (so\'m) *' : 'Narx (so\'m)'}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={procForm.price}
+                  onChange={e => setProcForm(f => ({ ...f, price: e.target.value }))}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="0"
+                />
+                {procForm.is_cups_based && (
+                  <p className="text-xs text-gray-400 mt-1">Jami = idish soni × 1 idish narxi</p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setProcForm(f => ({ ...f, is_active: !f.is_active }))}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${procForm.is_active ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${procForm.is_active ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
+                <span className="text-sm text-gray-700 dark:text-gray-300">Faol</span>
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setShowProcModal(false)}
+                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm">
+                  Bekor qilish
+                </button>
+                <button type="submit" disabled={procSaving}
+                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition text-sm font-semibold">
+                  {procSaving ? 'Saqlanmoqda...' : 'Saqlash'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete category confirm ── */}
+      {deleteCatConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm p-5">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Bo'limni o'chirish</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+              <strong>{deleteCatConfirm.name}</strong> bo'limi o'chirilsinmi?
+              Ichidagi muolajalar bo'lsa, avval ularni o'chirish kerak.
             </p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-              >
+              <button onClick={() => setDeleteCatConfirm(null)}
+                className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm">
                 Bekor qilish
               </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm._id)}
-                className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition"
-              >
+              <button onClick={() => handleDeleteCat(deleteCatConfirm)}
+                className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition text-sm font-semibold">
+                O'chirish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete procedure confirm ── */}
+      {deleteProcConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm p-5">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Muolajani o'chirish</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+              <strong>{deleteProcConfirm.name}</strong> o'chirilsinmi?
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteProcConfirm(null)}
+                className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm">
+                Bekor qilish
+              </button>
+              <button onClick={() => handleDeleteProc(deleteProcConfirm)}
+                className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition text-sm font-semibold">
                 O'chirish
               </button>
             </div>

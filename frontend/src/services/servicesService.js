@@ -65,6 +65,28 @@ export const servicesService = {
       console.error('Get categories error:', error);
       throw error;
     }
+  },
+
+  // Procedure categories (bo'limlar)
+  getProcedureCategories: async () => {
+    const res = await api.get('/procedure-categories');
+    return res.data;
+  },
+  createProcedureCategory: async (data) => {
+    const res = await api.post('/procedure-categories', data);
+    return res.data;
+  },
+  updateProcedureCategory: async (id, data) => {
+    const res = await api.put(`/procedure-categories/${id}`, data);
+    return res.data;
+  },
+  deleteProcedureCategory: async (id) => {
+    const res = await api.delete(`/procedure-categories/${id}`);
+    return res.data;
+  },
+  getProceduresByCategory: async (categoryId) => {
+    const res = await api.get(`/procedure-categories/${categoryId}/procedures`);
+    return res.data;
   }
 };
 

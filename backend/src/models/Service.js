@@ -33,6 +33,11 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  procedure_category_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ProcedureCategory',
+    default: null
+  },
   procedure_type: {
     type: String,
     enum: ['ukol', 'kapelnitsa', 'massaj', 'xijoma'],
