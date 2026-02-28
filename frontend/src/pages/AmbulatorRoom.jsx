@@ -1170,20 +1170,6 @@ export default function AmbulatorRoom() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Soatlik narx (BEPUL) (so'm)
-                </label>
-                <input
-                  type="number"
-                  required
-                  value={roomForm.hourly_rate}
-                  onChange={(e) => setRoomForm({ ...roomForm, hourly_rate: parseInt(e.target.value) })}
-                  className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
-                  placeholder="0"
-                  step="10000"
-                />
-              </div>
 
               {!editingRoom && (
                 <div>
@@ -1197,9 +1183,11 @@ export default function AmbulatorRoom() {
                     max="10"
                     value={roomForm.bed_count}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      if (!isNaN(value) && value >= 1 && value <= 10) {
-                        setRoomForm({ ...roomForm, bed_count: value });
+                      const raw = e.target.value
+                      if (raw === '') return setRoomForm({ ...roomForm, bed_count: '' })
+                      const value = parseInt(raw)
+                      if (!isNaN(value) && value >= 0 && value <= 10) {
+                        setRoomForm({ ...roomForm, bed_count: value })
                       }
                     }}
                     className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"

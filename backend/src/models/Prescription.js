@@ -89,6 +89,10 @@ const prescriptionSchema = new mongoose.Schema({
   },
   expiry_date: {
     type: Date
+  },
+  queue_created: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }

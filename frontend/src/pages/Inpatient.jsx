@@ -1144,7 +1144,12 @@ export default function Inpatient() {
                   type="number"
                   required
                   value={roomForm.daily_rate}
-                  onChange={(e) => setRoomForm({ ...roomForm, daily_rate: parseInt(e.target.value) })}
+                  onChange={(e) => {
+                    const raw = e.target.value
+                    if (raw === '') return setRoomForm({ ...roomForm, daily_rate: '' })
+                    const value = parseInt(raw)
+                    if (!isNaN(value)) setRoomForm({ ...roomForm, daily_rate: value })
+                  }}
                   className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"
                   placeholder="200000"
                   step="10000"
@@ -1163,9 +1168,11 @@ export default function Inpatient() {
                     max="10"
                     value={roomForm.bed_count}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      if (!isNaN(value) && value >= 1 && value <= 10) {
-                        setRoomForm({ ...roomForm, bed_count: value });
+                      const raw = e.target.value
+                      if (raw === '') return setRoomForm({ ...roomForm, bed_count: '' })
+                      const value = parseInt(raw)
+                      if (!isNaN(value) && value >= 0 && value <= 10) {
+                        setRoomForm({ ...roomForm, bed_count: value })
                       }
                     }}
                     className="w-full px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-lg sm:rounded-xl focus:border-primary focus:outline-none dark:bg-gray-700 dark:text-white"

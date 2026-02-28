@@ -1,13 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import laboratoryService from '../services/laboratoryService';
 import patientService from '../services/patientService';
+import { prescriptionService } from '../services/prescriptionService';
 import api from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
 import NewOrderModal from '../components/laboratory/NewOrderModal';
 
 export default function ReceptionPanel() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [urgentPending, setUrgentPending] = useState([]);
+  const [urgentLoading, setUrgentLoading] = useState(false);
+
+  const loadUrgentPending = async () => {
+    try {
+      setUrgentLoading(true)
+      const res = await prescriptionService.getUrgentPending()
+      if (res.success) setUrgentPending(res.data || [])
+    } catch {
+      // silently fail
+    } finally {
+      setUrgentLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadUrgentPending()
+    const interval = setInterval(loadUrgentPending, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
   const [stats] = useState({
     todayPatients: 0,
     waitingQueue: 0,
@@ -113,6 +137,70 @@ export default function ReceptionPanel() {
           <h3 className="text-sm sm:text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">Bugungi tushum (so'm)</h3>
         </div>
       </div>
+
+      {/* Muolaja kutayotganlar */}
+      {urgentPending.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-red-200 dark:border-red-800">
+          <div className="p-4 sm:p-6 border-b border-red-100 dark:border-red-900/30">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+                <span className="material-symbols-outlined">emergency</span>
+                Muolaja kutayotganlar
+                <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full text-sm font-bold">{urgentPending.length}</span>
+              </h2>
+              <button onClick={loadUrgentPending} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <span className={`material-symbols-outlined ${urgentLoading ? 'animate-spin' : ''}`}>refresh</span>
+              </button>
+            </div>
+          </div>
+          <div className="p-4 sm:p-6 grid gap-3 sm:gap-4">
+            {urgentPending.map(rx => (
+              <div key={rx._id} className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {rx.patient_id?.first_name} {rx.patient_id?.last_name}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">
+                        {rx.patient_id?.patient_number}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Doktor: {rx.doctor_id?.first_name} {rx.doctor_id?.last_name}
+                    </p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                      <span className="font-semibold">Tashxis:</span> {rx.diagnosis}
+                    </p>
+                    {rx.medications?.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {rx.medications.slice(0, 3).map((med, i) => (
+                          <span key={i} className="text-xs px-2 py-0.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300">
+                            {med.medication_name} {med.dosage && `(${med.dosage})`}
+                          </span>
+                        ))}
+                        {rx.medications.length > 3 && (
+                          <span className="text-xs text-gray-500">+{rx.medications.length - 3}</span>
+                        )}
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(rx.issued_date).toLocaleString('uz-UZ')}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/patients/${rx.patient_id?._id}?prescription_id=${rx._id}`)}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <span className="material-symbols-outlined" style={{fontSize:'18px'}}>queue</span>
+                    Navbatga qo'shish
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700">

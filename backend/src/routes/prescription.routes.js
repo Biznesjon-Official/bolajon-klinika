@@ -210,6 +210,34 @@ router.post('/', authenticate, authorize('doctor', 'chief_doctor'), async (req, 
 });
 
 /**
+ * Get urgent pending prescriptions (for reception)
+ * GET /api/v1/prescriptions/urgent-pending
+ */
+router.get('/urgent-pending', authenticate, authorize('receptionist', 'admin', 'chief_doctor'), async (req, res) => {
+  try {
+    const prescriptions = await Prescription.find({
+      prescription_type: 'URGENT',
+      status: 'active',
+      queue_created: { $ne: true }
+    })
+      .populate('patient_id', 'first_name last_name patient_number phone')
+      .populate('doctor_id', 'first_name last_name specialization')
+      .sort({ issued_date: -1 })
+      .lean()
+
+    res.json({
+      success: true,
+      data: prescriptions
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server xatosi'
+    })
+  }
+})
+
+/**
  * Get patient prescriptions
  * GET /api/v1/prescriptions/patient/:patientId
  */

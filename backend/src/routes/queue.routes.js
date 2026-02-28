@@ -247,7 +247,7 @@ router.post('/',
   authorize('admin', 'receptionist'),
   async (req, res, next) => {
     try {
-      const { patient_id, doctor_id, queue_type = 'NORMAL', notes, service_ids } = req.body;
+      const { patient_id, doctor_id, queue_type = 'NORMAL', notes, service_ids, prescription_id } = req.body;
 
       if (!patient_id || !doctor_id) {
         return res.status(400).json({
@@ -337,6 +337,16 @@ router.post('/',
 
       const queue = new Queue(queueData);
       await queue.save();
+
+      // Update prescription queue_created flag
+      if (prescription_id) {
+        try {
+          const Prescription = (await import('../models/Prescription.js')).default
+          await Prescription.findByIdAndUpdate(prescription_id, { queue_created: true })
+        } catch (e) {
+          // Don't fail queue creation
+        }
+      }
 
       res.status(201).json({
         success: true,

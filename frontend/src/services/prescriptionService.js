@@ -34,6 +34,17 @@ export const prescriptionService = {
     }
   },
 
+  // Urgent pending prescriptions (for reception)
+  getUrgentPending: async () => {
+    try {
+      const response = await api.get('/prescriptions/urgent-pending')
+      return response.data
+    } catch (error) {
+      console.error('Get urgent pending error:', error)
+      throw error
+    }
+  },
+
   // A4 formatda retsept chop etish
   printPrescriptionReceipt: (prescription, patient) => {
     const printWindow = window.open('', '_blank')
@@ -419,6 +430,7 @@ export const prescriptionService = {
 ${meds}
 <hr>
 ${prescription.notes ? `<p class="note">${prescription.notes}</p><hr>` : ''}
+${prescription.prescription_type === 'URGENT' ? '<p class="center" style="font-weight:bold;margin:6px 0;font-size:13px">* QABULXONAGA MUROJAAT QILING *</p><hr>' : ''}
 <p class="center note">* Retsept bo'yicha</p>
 <div class="no-print"><button onclick="window.print()">Chop etish</button> <button onclick="window.close()">Yopish</button></div>
 </body></html>`)
