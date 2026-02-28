@@ -28,8 +28,8 @@ const DashboardLayout = ({ children }) => {
     { name: 'Muolajalar', icon: 'vaccines', path: '/procedures', roles: ['admin', 'Admin', 'Administrator'] },
     { name: 'Lab reaktivlar', icon: 'science', path: '/lab-pharmacy', roles: ['admin', 'Admin', 'Administrator', 'chief_doctor', 'chef_laborant'] },
     { name: 'Dori shkafi', icon: 'medication', path: '/nurse/medicine', roles: ['admin', 'Admin', 'Administrator', 'Hamshira', 'Nurse', 'nurse'] },
-    { name: t('nav.ambulatorRoom'), icon: 'meeting_room', path: '/ambulator', roles: ['admin', 'Admin', 'Administrator', 'Qabulxona', 'Reception', 'receptionist', 'Shifokor', 'Doctor', 'doctor', 'Hamshira', 'Nurse', 'nurse'] },
-    { name: 'Statsionar', icon: 'bed', path: '/inpatient', roles: ['admin', 'Admin', 'Administrator', 'Shifokor', 'Doctor', 'doctor', 'Hamshira', 'Nurse', 'nurse', 'Qabulxona', 'Reception', 'receptionist'] },
+    { name: t('nav.ambulatorRoom'), icon: 'meeting_room', path: '/ambulator', roles: ['admin', 'Admin', 'Administrator', 'Shifokor', 'Doctor', 'doctor', 'Hamshira', 'Nurse', 'nurse'] },
+    { name: 'Statsionar', icon: 'bed', path: '/inpatient', roles: ['admin', 'Admin', 'Administrator', 'Shifokor', 'Doctor', 'doctor', 'Hamshira', 'Nurse', 'nurse'] },
     { name: 'Vazifalar', icon: 'task_alt', path: '/tasks', roles: ['admin', 'Admin', 'Administrator'] },
 
     // ── Qabulxona ──────────────────────────────────────────
