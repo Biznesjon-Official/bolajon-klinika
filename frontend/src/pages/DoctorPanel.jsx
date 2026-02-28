@@ -10,8 +10,7 @@ import api from '../services/api';
 import { laboratoryService } from '../services/laboratoryService';
 import NewOrderModal from '../components/laboratory/NewOrderModal';
 import { patientService } from '../services/patientService'
-import ambulatorInpatientService from '../services/ambulatorInpatientService'
-import inpatientRoomService from '../services/inpatientRoomService';
+;
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -42,14 +41,6 @@ const DoctorPanel = () => {
     medication_name: '',
     dosage: ''
   });
-
-  // Admit modal
-  const [showAdmitModal, setShowAdmitModal] = useState(false)
-  const [admitType, setAdmitType] = useState('ambulator') // 'ambulator' | 'inpatient'
-  const [admitPatient, setAdmitPatient] = useState(null)
-  const [admitRooms, setAdmitRooms] = useState([])
-  const [admitSelectedBed, setAdmitSelectedBed] = useState(null)
-  const [admitSubmitting, setAdmitSubmitting] = useState(false)
 
   // Urgent diagnosis modal
   const [showUrgentModal, setShowUrgentModal] = useState(false)
@@ -530,43 +521,6 @@ const DoctorPanel = () => {
     setShowLabOrderModal(true)
   }
 
-  const handleOpenAdmitModal = async (patient, type) => {
-    setAdmitPatient(patient)
-    setAdmitType(type)
-    setAdmitSelectedBed(null)
-    setAdmitRooms([])
-    setShowAdmitModal(true)
-    try {
-      const res = type === 'ambulator'
-        ? await ambulatorInpatientService.getRooms()
-        : await inpatientRoomService.getRooms()
-      if (res.success) setAdmitRooms(res.data)
-    } catch {
-      toast.error('Xonalar yuklanmadi')
-    }
-  }
-
-  const handleSubmitAdmit = async () => {
-    if (!admitSelectedBed) return toast.error('Koyka tanlang')
-    try {
-      setAdmitSubmitting(true)
-      const data = {
-        patient_id: admitPatient.patient_id,
-        room_id: admitSelectedBed.room_id,
-        bed_number: admitSelectedBed.bed_number
-      }
-      const res = await ambulatorInpatientService.createAdmission(data)
-      if (res.success) {
-        toast.success(`${admitPatient.patientName} ${admitType === 'ambulator' ? 'ambulatorga' : 'statsionarga'} yotqizildi`)
-        setShowAdmitModal(false)
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Xatolik yuz berdi')
-    } finally {
-      setAdmitSubmitting(false)
-    }
-  }
-
   const handleOpenUrgentModal = (patient) => {
     setUrgentPatient(patient)
     setUrgentComplaint('')
@@ -932,20 +886,6 @@ const DoctorPanel = () => {
                       Tezkor tashxis (kichik chek)
                     </button>
                     <button
-                      onClick={() => handleOpenAdmitModal(patient, 'ambulator')}
-                      className="py-2 bg-teal-500 text-white rounded-lg text-xs font-semibold hover:bg-teal-600 flex items-center justify-center gap-1"
-                    >
-                      <span className="material-symbols-outlined text-sm">bed</span>
-                      Amb. yotqizish
-                    </button>
-                    <button
-                      onClick={() => handleOpenAdmitModal(patient, 'inpatient')}
-                      className="py-2 bg-blue-500 text-white rounded-lg text-xs font-semibold hover:bg-blue-600 flex items-center justify-center gap-1"
-                    >
-                      <span className="material-symbols-outlined text-sm">local_hospital</span>
-                      Stat. yotqizish
-                    </button>
-                    <button
                       onClick={() => handleOpenNurseModal(patient)}
                       className="py-2 bg-orange-500 text-white rounded-lg text-xs font-semibold hover:bg-orange-600 flex items-center justify-center gap-1"
                     >
@@ -1083,79 +1023,6 @@ const DoctorPanel = () => {
           t={t}
           preselectedPatientId={labOrderPatient?.patient_id || labOrderPatient?.patientId || labOrderPatient?._id || labOrderPatient?.id}
         />
-      )}
-
-      {/* Yotqizish Modal */}
-      {showAdmitModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <h2 className="text-lg font-black text-blue-600">
-                {admitType === 'ambulator' ? 'Ambulatorga yotqizish' : 'Statsionarga yotqizish'}
-              </h2>
-              <button onClick={() => setShowAdmitModal(false)} className="text-gray-400 hover:text-gray-600">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              {admitPatient && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
-                  <p className="font-bold text-sm">{admitPatient.patientName}</p>
-                  <p className="text-xs text-gray-500">{admitPatient.patientNumber}</p>
-                </div>
-              )}
-              {admitRooms.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-4">Yuklanmoqda...</p>
-              ) : (
-                <div className="space-y-3">
-                  {admitRooms.map(room => (
-                    <div key={room.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-3">
-                      <p className="font-semibold text-sm mb-2">
-                        Xona {room.room_number}
-                        {room.room_name ? ` — ${room.room_name}` : ''}
-                        <span className="ml-2 text-xs text-gray-400">({room.available_beds}/{room.total_beds} bo'sh)</span>
-                      </p>
-                      <div className="grid grid-cols-4 gap-2">
-                        {room.beds?.map(bed => (
-                          <button
-                            key={bed.id}
-                            disabled={bed.bed_status !== 'available'}
-                            onClick={() => setAdmitSelectedBed({ room_id: room.id, bed_number: bed.bed_number })}
-                            className={`py-2 rounded-lg text-xs font-semibold border-2 transition-colors ${
-                              admitSelectedBed?.room_id === room.id && admitSelectedBed?.bed_number === bed.bed_number
-                                ? 'bg-blue-500 border-blue-500 text-white'
-                                : bed.band_status !== 'available'
-                                ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 cursor-not-allowed'
-                                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-blue-400'
-                            }`}
-                          >
-                            {bed.bed_number}
-                            {bed.bed_status !== 'available' ? ' ✕' : ''}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAdmitModal(false)}
-                  className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm"
-                >Bekor qilish</button>
-                <button
-                  type="button"
-                  onClick={handleSubmitAdmit}
-                  disabled={admitSubmitting || !admitSelectedBed}
-                  className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {admitSubmitting ? 'Yuklanmoqda...' : 'Yotqizish'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* Tezkor tashxis Modal */}
