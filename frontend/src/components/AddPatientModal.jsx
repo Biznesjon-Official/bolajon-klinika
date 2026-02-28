@@ -4,6 +4,7 @@ import Modal from './Modal';
 import { patientService } from '../services/patientService';
 import PhoneInput from './PhoneInput';
 import YearInput from './YearInput';
+import AddressInput, { saveAddress } from './AddressInput';
 
 const AddPatientModal = ({ isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation();
@@ -88,7 +89,10 @@ const AddPatientModal = ({ isOpen, onClose, onSuccess }) => {
       console.log('Sending patient data:', patientData);
       
       await patientService.createPatient(patientData);
-      
+
+      // Save address to localStorage for future autocomplete
+      if (formData.address?.trim()) saveAddress(formData.address)
+
       onSuccess();
       handleClose();
     } catch (error) {
@@ -310,13 +314,11 @@ const AddPatientModal = ({ isOpen, onClose, onSuccess }) => {
                   {t('patients.address')}
                   <span className="ml-2 text-xs text-gray-500 font-normal">(ixtiyoriy)</span>
                 </label>
-                <textarea
+                <AddressInput
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  rows="3"
-                  placeholder="Toshkent sh., Yunusobod t., Amir Temur ko'chasi 123"
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl input-focus text-gray-900 dark:text-white placeholder-gray-400 resize-none"
-                ></textarea>
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl input-focus text-gray-900 dark:text-white placeholder-gray-400"
+                />
               </div>
               
               <div>
