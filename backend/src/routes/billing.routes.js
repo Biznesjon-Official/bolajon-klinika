@@ -35,7 +35,7 @@ const createInvoiceSchema = Joi.object({
       quantity: Joi.number().integer().min(1).default(1)
     })
   ).min(1).required(),
-  payment_method: Joi.string().valid('cash', 'card', 'transfer').allow(null),
+  payment_method: Joi.string().valid('cash', 'click', 'humo', 'uzcard').allow(null),
   paid_amount: Joi.number().min(0).default(0),
   discount_amount: Joi.number().min(0).default(0),
   notes: Joi.string().allow('', null),
@@ -44,7 +44,7 @@ const createInvoiceSchema = Joi.object({
 
 const addPaymentSchema = Joi.object({
   amount: Joi.number().min(0).required(),
-  payment_method: Joi.string().valid('cash', 'card', 'transfer').required(),
+  payment_method: Joi.string().valid('cash', 'click', 'humo', 'uzcard').required(),
   reference_number: Joi.string().allow('', null),
   notes: Joi.string().allow('', null)
 });

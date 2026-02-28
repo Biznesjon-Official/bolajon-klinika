@@ -71,6 +71,7 @@ const PatientProfile = () => {
   const [invoiceItems, setInvoiceItems] = useState([]);
   const [invoiceDoctor, setInvoiceDoctor] = useState('');
   const [invoiceDiscount, setInvoiceDiscount] = useState(0);
+  const [invoicePayMethod, setInvoicePayMethod] = useState('cash');
   const [paymentForm, setPaymentForm] = useState({ amount: '', method: 'cash', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [consultationServices, setConsultationServices] = useState([]);
@@ -221,7 +222,7 @@ const PatientProfile = () => {
         patient_id: id,
         items: selectedProcedures.map(p => ({ service_id: p.service._id, quantity: p.quantity })),
         paid_amount: total,
-        payment_method: 'cash',
+        payment_method: procedurePayMethod,
         notes: 'Muolaja'
       });
       toast.success('Muolaja biriktirildi va billing yaratildi');
@@ -535,7 +536,7 @@ const PatientProfile = () => {
           try {
             await billingService.addPayment(invoice._id, {
               amount: invoice.total_amount,
-              payment_method: 'cash'
+              payment_method: queuePayMethod
             });
             const updatedInvoice = { ...invoice, paid_amount: invoice.total_amount };
             const selectedDoctor = doctors.find(d => d.id === queueForm.doctor_id);
@@ -658,7 +659,7 @@ const PatientProfile = () => {
         })),
         discount_amount: discountAmt,
         paid_amount: total - discountAmt,
-        payment_method: 'cash',
+        payment_method: invoicePayMethod,
         notes: ''
       });
       if (response.success) {
@@ -2541,6 +2542,14 @@ const PatientProfile = () => {
           </div>
 
 
+          <div className="grid grid-cols-4 gap-2">
+            {[{v:'cash',l:'Naqd'},{v:'click',l:'Click'},{v:'humo',l:'Humo'},{v:'uzcard',l:'Uzcard'}].map(m => (
+              <button key={m.v} type="button" onClick={() => setQueuePayMethod(m.v)}
+                className={`py-2 rounded-lg text-sm font-semibold border-2 transition-colors ${queuePayMethod === m.v ? 'bg-primary border-primary text-white' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'}`}
+              >{m.l}</button>
+            ))}
+          </div>
+
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={() => setShowAddQueueModal(false)}
               className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200">
@@ -2684,8 +2693,16 @@ const PatientProfile = () => {
             </div>
           )}
 
+          <div className="grid grid-cols-4 gap-2">
+            {[{v:'cash',l:'Naqd'},{v:'click',l:'Click'},{v:'humo',l:'Humo'},{v:'uzcard',l:'Uzcard'}].map(m => (
+              <button key={m.v} type="button" onClick={() => setInvoicePayMethod(m.v)}
+                className={`py-2 rounded-lg text-sm font-semibold border-2 transition-colors ${invoicePayMethod === m.v ? 'bg-primary border-primary text-white' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'}`}
+              >{m.l}</button>
+            ))}
+          </div>
+
           <div className="flex gap-2 pt-2">
-            <button type="button" onClick={() => { setShowNewInvoiceModal(false); setInvoiceItems([]); setInvoiceDiscount(0); }}
+            <button type="button" onClick={() => { setShowNewInvoiceModal(false); setInvoiceItems([]); setInvoiceDiscount(0); setInvoicePayMethod('cash'); }}
               className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200">
               Bekor qilish
             </button>
@@ -2720,8 +2737,9 @@ const PatientProfile = () => {
             <div className="flex gap-2">
               {[
                 { value: 'cash', label: 'Naqd', icon: 'payments' },
-                { value: 'card', label: 'Karta', icon: 'credit_card' },
-                { value: 'transfer', label: "O'tkazma", icon: 'swap_horiz' }
+                { value: 'click', label: 'Click', icon: 'smartphone' },
+                { value: 'humo', label: 'Humo', icon: 'credit_card' },
+                { value: 'uzcard', label: 'Uzcard', icon: 'credit_card' }
               ].map(method => (
                 <button key={method.value} type="button"
                   onClick={() => setPaymentForm({ ...paymentForm, method: method.value })}
@@ -3195,6 +3213,14 @@ const PatientProfile = () => {
                   </div>
                 </div>
               )}
+
+              <div className="grid grid-cols-4 gap-2">
+                {[{v:'cash',l:'Naqd'},{v:'click',l:'Click'},{v:'humo',l:'Humo'},{v:'uzcard',l:'Uzcard'}].map(m => (
+                  <button key={m.v} type="button" onClick={() => setProcedurePayMethod(m.v)}
+                    className={`py-2 rounded-lg text-xs font-semibold border-2 transition-colors ${procedurePayMethod === m.v ? 'bg-teal-600 border-teal-600 text-white' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'}`}
+                  >{m.l}</button>
+                ))}
+              </div>
 
               <div className="flex gap-3">
                 <button
