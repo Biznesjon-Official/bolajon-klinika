@@ -35,7 +35,7 @@ const PatientProfile = () => {
   const roleName = user?.role?.name?.toLowerCase();
   const isChiefDoctor = user?.role?.name === 'chief_doctor';
   const isDoctor = user?.role?.name === 'doctor' || isChiefDoctor;
-  const isReceptionist = ['receptionist', 'admin', 'super admin'].includes(user?.role?.name);
+  const isReceptionist = ['receptionist', 'reception', 'qabulxona', 'registrator', 'admin', 'super admin'].includes(roleName);
   const isNurse = ['nurse', 'hamshira'].includes(roleName);
   const isLaborant = ['laborant', 'lab'].includes(roleName);
   const isMasseur = ['masseur', 'massajchi'].includes(roleName);
