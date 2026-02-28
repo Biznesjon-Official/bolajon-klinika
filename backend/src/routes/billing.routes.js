@@ -359,8 +359,10 @@ router.post('/invoices',
           });
         }
 
-        // Use base_price if available, otherwise use price
-        const servicePrice = service.base_price || service.price || 0;
+        // Use custom_price (doctor-specific) > base_price > price
+        const servicePrice = item.custom_price !== undefined
+          ? parseFloat(item.custom_price)
+          : (service.base_price || service.price || 0);
         const itemTotal = servicePrice * (item.quantity || 1);
         totalAmount += itemTotal;
 
@@ -635,6 +637,46 @@ router.get('/invoices/patient/:patientId/unpaid',
         success: false,
         message: 'To\'lanmagan hisob-fakturalarni olishda xatolik'
       })
+    }
+  }
+)
+
+/**
+ * Get invoice by invoice_number (for QR scan in Ambulator)
+ * GET /api/v1/billing/invoices/by-number/:invoiceNumber
+ */
+router.get('/invoices/by-number/:invoiceNumber',
+  authenticate,
+  async (req, res) => {
+    try {
+      const { invoiceNumber } = req.params
+      const invoice = await Invoice.findOne({ invoice_number: invoiceNumber })
+        .populate('patient_id', 'first_name last_name phone patient_number')
+        .lean()
+
+      if (!invoice) {
+        return res.status(404).json({ success: false, message: 'Hisob-faktura topilmadi' })
+      }
+
+      // Load ambulator procedures for this invoice
+      let procedures = []
+      try {
+        const AmbulatorProcedure = (await import('../models/AmbulatorProcedure.js')).default
+        procedures = await AmbulatorProcedure.find({ invoice_id: invoice._id }).lean()
+      } catch {}
+
+      res.json({
+        success: true,
+        data: {
+          ...invoice,
+          id: invoice._id,
+          patient_name: invoice.patient_id ? `${invoice.patient_id.first_name} ${invoice.patient_id.last_name}` : '',
+          patient_number: invoice.patient_id?.patient_number,
+          procedures
+        }
+      })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Xatolik: ' + error.message })
     }
   }
 )
@@ -972,15 +1014,15 @@ router.post('/services',
   authenticate,
   async (req, res, next) => {
     try {
-      const { name, category, price, description, is_active } = req.body;
-      
+      const { name, category, price, description, is_active, procedure_type, is_cups_based, price_per_cup } = req.body;
+
       if (!name) {
         return res.status(400).json({
           success: false,
           message: 'Xizmat nomi majburiy'
         });
       }
-      
+
       // Price can be 0 or any number
       if (price === undefined || price === null || price === '') {
         return res.status(400).json({
@@ -988,13 +1030,24 @@ router.post('/services',
           message: 'Xizmat narxi majburiy (0 bo\'lishi mumkin)'
         });
       }
-      
+
+      // Xijoma uchun price_per_cup majburiy
+      if (is_cups_based && (price_per_cup === undefined || price_per_cup === null || price_per_cup === '')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Xijoma uchun 1 idish narxi majburiy'
+        });
+      }
+
       const service = new Service({
         name,
         category: category || 'Umumiy',
         price: parseFloat(price) || 0,
         description: description || '',
-        is_active: is_active !== undefined ? is_active : true
+        is_active: is_active !== undefined ? is_active : true,
+        procedure_type: procedure_type || null,
+        is_cups_based: is_cups_based || false,
+        price_per_cup: price_per_cup ? parseFloat(price_per_cup) : null
       });
       
       await service.save();
@@ -1017,22 +1070,25 @@ router.put('/services/:id',
   authenticate,
   async (req, res, next) => {
     try {
-      const { name, category, price, description, is_active } = req.body;
-      
+      const { name, category, price, description, is_active, procedure_type, is_cups_based, price_per_cup } = req.body;
+
       const service = await Service.findById(req.params.id);
-      
+
       if (!service) {
         return res.status(404).json({
           success: false,
           message: 'Xizmat topilmadi'
         });
       }
-      
+
       if (name) service.name = name;
       if (category) service.category = category;
       if (price !== undefined && price !== null && price !== '') service.price = parseFloat(price) || 0;
       if (description !== undefined) service.description = description;
       if (is_active !== undefined) service.is_active = is_active;
+      if (procedure_type !== undefined) service.procedure_type = procedure_type || null;
+      if (is_cups_based !== undefined) service.is_cups_based = is_cups_based;
+      if (price_per_cup !== undefined) service.price_per_cup = price_per_cup ? parseFloat(price_per_cup) : null;
       
       await service.save();
       

@@ -67,6 +67,12 @@ export default function AmbulatorRoom() {
   const [treatmentNotification, setTreatmentNotification] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
+  // QR scan / procedure tracking
+  const [invoiceSearch, setInvoiceSearch] = useState('');
+  const [invoiceData, setInvoiceData] = useState(null);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const [procedureUpdating, setProcedureUpdating] = useState({});
+
   const showConfirm = (message, onConfirm, options = {}) => {
     setConfirmModal({ 
       isOpen: true, 
@@ -315,6 +321,51 @@ export default function AmbulatorRoom() {
       toast.error('Xatolik: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSearchInvoice = async (num) => {
+    const q = (num || invoiceSearch).trim();
+    if (!q) return;
+    setInvoiceLoading(true);
+    setInvoiceData(null);
+    try {
+      const res = await ambulatorInpatientService.getProceduresByInvoice(q);
+      if (res.success) {
+        setInvoiceData(res.data);
+      } else {
+        toast.error('Chek topilmadi');
+      }
+    } catch {
+      toast.error('Chek topilmadi yoki xatolik');
+    } finally {
+      setInvoiceLoading(false);
+    }
+  };
+
+  const handleStartProc = async (procId) => {
+    setProcedureUpdating(prev => ({ ...prev, [procId]: 'starting' }));
+    try {
+      await ambulatorInpatientService.startProcedure(procId);
+      await handleSearchInvoice(invoiceData?.invoice?.invoice_number || invoiceSearch);
+      toast.success('Muolaja boshlandi');
+    } catch {
+      toast.error('Xatolik');
+    } finally {
+      setProcedureUpdating(prev => { const n = { ...prev }; delete n[procId]; return n; });
+    }
+  };
+
+  const handleCompleteProc = async (procId) => {
+    setProcedureUpdating(prev => ({ ...prev, [procId]: 'completing' }));
+    try {
+      await ambulatorInpatientService.completeProcedure(procId);
+      await handleSearchInvoice(invoiceData?.invoice?.invoice_number || invoiceSearch);
+      toast.success('Muolaja yakunlandi');
+    } catch {
+      toast.error('Xatolik');
+    } finally {
+      setProcedureUpdating(prev => { const n = { ...prev }; delete n[procId]; return n; });
     }
   };
 
@@ -709,7 +760,8 @@ export default function AmbulatorRoom() {
         <div className="border-b border-gray-200 dark:border-gray-700">
           <div className="flex gap-3 sm:gap-4 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8">
             {[
-              { id: 'map', label: 'Koykalar Xaritasi', icon: 'map' }
+              { id: 'map', label: 'Koykalar Xaritasi', icon: 'map' },
+              { id: 'qrscan', label: 'Chek Skanerlash', icon: 'qr_code_scanner' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -923,6 +975,137 @@ export default function AmbulatorRoom() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* QR Scan Tab */}
+          {activeTab === 'qrscan' && (
+            <div className="space-y-4">
+              {/* Search panel */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                <h3 className="font-bold text-blue-800 dark:text-blue-300 mb-3 flex items-center gap-2">
+                  <span className="material-symbols-outlined">qr_code_scanner</span>
+                  Chek raqamini skanerlash
+                </h3>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={invoiceSearch}
+                    onChange={(e) => setInvoiceSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearchInvoice()}
+                    placeholder="Chek raqamini kiriting (INV-...)"
+                    className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => handleSearchInvoice()}
+                    disabled={invoiceLoading}
+                    className="px-4 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {invoiceLoading ? (
+                      <span className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <span className="material-symbols-outlined text-sm">search</span>
+                    )}
+                    Izlash
+                  </button>
+                </div>
+              </div>
+
+              {/* Invoice + Procedures */}
+              {invoiceData && (
+                <div className="space-y-4">
+                  {/* Patient + payment info */}
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="font-bold text-lg text-gray-900 dark:text-white">{invoiceData.invoice?.patient_name}</p>
+                        <p className="text-sm text-gray-500">#{invoiceData.invoice?.patient_number}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        invoiceData.invoice?.payment_status === 'paid'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                          : invoiceData.invoice?.payment_status === 'partial'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {invoiceData.invoice?.payment_status === 'paid' ? '✓ To\'langan' :
+                         invoiceData.invoice?.payment_status === 'partial' ? '⚠ Qisman' : '✗ To\'lanmagan'}
+                      </span>
+                    </div>
+                    <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
+                      <span>Jami: <b>{(invoiceData.invoice?.total_amount || 0).toLocaleString()} so'm</b></span>
+                      <span>To'landi: <b>{(invoiceData.invoice?.paid_amount || 0).toLocaleString()} so'm</b></span>
+                    </div>
+                  </div>
+
+                  {/* Procedures list */}
+                  <div>
+                    <h4 className="font-bold text-gray-900 dark:text-white mb-3">Muolajalar</h4>
+                    {invoiceData.procedures?.length === 0 ? (
+                      <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <span className="material-symbols-outlined text-4xl text-gray-300 mb-2">vaccines</span>
+                        <p className="text-gray-500 text-sm">Muolajalar topilmadi</p>
+                        <p className="text-xs text-gray-400 mt-1">Muolaja cheki qayta yarating</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {invoiceData.procedures.map((proc) => (
+                          <div key={proc._id} className={`bg-white dark:bg-gray-800 rounded-xl border-2 p-4 ${
+                            proc.status === 'completed' ? 'border-green-300 dark:border-green-700' :
+                            proc.status === 'in_progress' ? 'border-blue-300 dark:border-blue-700' :
+                            'border-gray-200 dark:border-gray-700'
+                          }`}>
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <p className="font-bold text-gray-900 dark:text-white">{proc.service_name}</p>
+                                {proc.quantity > 1 && <p className="text-xs text-gray-500">× {proc.quantity}</p>}
+                              </div>
+                              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                proc.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
+                                proc.status === 'in_progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' :
+                                'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                              }`}>
+                                {proc.status === 'completed' ? 'Bajarildi' :
+                                 proc.status === 'in_progress' ? 'Jarayonda' : 'Kutilmoqda'}
+                              </span>
+                            </div>
+                            {proc.status !== 'completed' && (
+                              <div className="flex gap-2">
+                                {proc.status === 'pending' && (
+                                  <button
+                                    onClick={() => handleStartProc(proc._id)}
+                                    disabled={!!procedureUpdating[proc._id]}
+                                    className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">play_arrow</span>
+                                    Boshlash
+                                  </button>
+                                )}
+                                {proc.status === 'in_progress' && (
+                                  <button
+                                    onClick={() => handleCompleteProc(proc._id)}
+                                    disabled={!!procedureUpdating[proc._id]}
+                                    className="flex-1 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                                    Tugatish
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                            {proc.status === 'completed' && proc.completed_at && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Bajarildi: {new Date(proc.completed_at).toLocaleString('uz-UZ')}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

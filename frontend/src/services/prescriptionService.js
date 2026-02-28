@@ -385,6 +385,45 @@ export const prescriptionService = {
     printWindow.document.write(html)
     printWindow.document.close()
     setTimeout(() => { printWindow.print() }, 300)
+  },
+
+  // Small printer format (58/80mm) for urgent prescriptions
+  printSmallPrescription: (prescription, patient) => {
+    const win = window.open('', '_blank', 'width=400,height=500')
+    if (!win) return
+    const now = new Date()
+    const dateStr = now.toLocaleDateString('uz-UZ')
+    const meds = (prescription.medications || []).filter(m => m.medication_name).map((med, i) =>
+      `<p>${i + 1}. <b>${med.medication_name}</b> ${med.dosage || ''}<br>&nbsp;&nbsp;&nbsp;${med.instructions || med.frequency || ''}</p>`
+    ).join('')
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  @page{size:80mm auto;margin:4mm}
+  body{font-family:monospace;font-size:12px;width:72mm;margin:0}
+  h2{text-align:center;font-size:13px;margin:0 0 4px}
+  p{margin:2px 0}
+  hr{border:none;border-top:1px dashed #000;margin:5px 0}
+  .center{text-align:center}
+  .note{font-size:10px;font-style:italic}
+  .no-print{text-align:center;margin-top:10px}
+  @media print{.no-print{display:none}}
+</style>
+</head><body>
+<h2>BOLAJON KLINIKASI</h2>
+<p class="center">Dr: ${prescription.doctor_name || ''}</p>
+<p class="center">Bemor: <b>${patient.first_name || ''} ${patient.last_name || ''}</b></p>
+<p class="center">${dateStr}</p>
+<hr>
+<p><b>Tashxis:</b> ${prescription.diagnosis || ''}</p>
+<hr>
+${meds}
+<hr>
+${prescription.notes ? `<p class="note">${prescription.notes}</p><hr>` : ''}
+<p class="center note">* Retsept bo'yicha</p>
+<div class="no-print"><button onclick="window.print()">Chop etish</button> <button onclick="window.close()">Yopish</button></div>
+</body></html>`)
+    win.document.close()
+    setTimeout(() => win.print(), 300)
   }
 }
 

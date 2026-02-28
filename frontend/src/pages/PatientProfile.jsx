@@ -7,6 +7,8 @@ import { prescriptionService } from '../services/prescriptionService';
 import treatmentService from '../services/treatmentService';
 import { queueService } from '../services/queueService';
 import billingService from '../services/billingService';
+import servicesService from '../services/servicesService';
+import doctorServiceService from '../services/doctorServiceService';
 import ambulatorInpatientService from '../services/ambulatorInpatientService';
 import inpatientRoomService from '../services/inpatientRoomService';
 import Modal from '../components/Modal';
@@ -63,6 +65,8 @@ const PatientProfile = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
   const [queueForm, setQueueForm] = useState({ doctor_id: '', queue_type: 'NORMAL', notes: '' });
+  const [queuePaidAmount, setQueuePaidAmount] = useState('');
+  const [queuePayMethod, setQueuePayMethod] = useState('cash');
   const [invoiceItems, setInvoiceItems] = useState([]);
   const [invoiceDoctor, setInvoiceDoctor] = useState('');
   const [invoiceDiscount, setInvoiceDiscount] = useState(0);
@@ -71,6 +75,7 @@ const PatientProfile = () => {
   const [consultationServices, setConsultationServices] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(false);
+  const [invoiceDoctorServices, setInvoiceDoctorServices] = useState([]); // Doctor's configured services for invoice
 
   // Modals
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
@@ -112,8 +117,77 @@ const PatientProfile = () => {
   const [showLabResultModal, setShowLabResultModal] = useState(false);
   const [selectedLabOrder, setSelectedLabOrder] = useState(null);
 
+  // Procedure assignment
+  const [showProcedureModal, setShowProcedureModal] = useState(false);
+  const [procedureList, setProcedureList] = useState([]);
+  const [selectedProcedures, setSelectedProcedures] = useState([]); // [{service, quantity}]
+  const [procedurePayMethod, setProcedurePayMethod] = useState('cash');
+  const [procedurePaidAmount, setProcedurePaidAmount] = useState('');
+  const [procedureSubmitting, setProcedureSubmitting] = useState(false);
+
   const showAlert = (message, type = 'info', title = '') => {
     setAlertModal({ isOpen: true, title, message, type });
+  };
+
+  const openProcedureModal = async () => {
+    setSelectedProcedures([]);
+    setProcedurePayMethod('cash');
+    setProcedurePaidAmount('');
+    setShowProcedureModal(true);
+    try {
+      const res = await servicesService.getServices({ category: 'Muolaja', is_active: 'true' });
+      setProcedureList(res.data || []);
+    } catch {
+      toast.error('Muolajalarni yuklashda xatolik');
+    }
+  };
+
+  const toggleProcedure = (service) => {
+    setSelectedProcedures(prev => {
+      const exists = prev.find(p => p.service._id === service._id);
+      if (exists) return prev.filter(p => p.service._id !== service._id);
+      return [...prev, { service, quantity: 1 }];
+    });
+  };
+
+  const updateProcedureQty = (serviceId, qty) => {
+    setSelectedProcedures(prev =>
+      prev.map(p => p.service._id === serviceId ? { ...p, quantity: Math.max(1, parseInt(qty) || 1) } : p)
+    );
+  };
+
+  const getProcedureTotal = () =>
+    selectedProcedures.reduce((sum, p) => sum + (p.service.price * p.quantity), 0);
+
+  const handleSubmitProcedures = async () => {
+    if (selectedProcedures.length === 0) return toast.error('Kamida 1 ta muolaja tanlang');
+    try {
+      setProcedureSubmitting(true);
+      const paidAmt = parseFloat(procedurePaidAmount) || 0;
+      const res = await billingService.createInvoice({
+        patient_id: id,
+        items: selectedProcedures.map(p => ({ service_id: p.service._id, quantity: p.quantity })),
+        paid_amount: paidAmt,
+        payment_method: paidAmt > 0 ? procedurePayMethod : null,
+        notes: 'Muolaja'
+      });
+      toast.success('Muolaja biriktirildi va billing yaratildi');
+      setShowProcedureModal(false);
+      loadPatientData();
+      // Print procedure receipt and create ambulator procedures
+      if (res.success && res.data) {
+        const invoiceData = res.data;
+        billingService.printProcedureReceipt(invoiceData, `${patient.first_name} ${patient.last_name}`);
+        // Auto-create ambulator procedure records
+        try {
+          await api.post('/ambulator/procedures/create-from-invoice', { invoice_id: invoiceData._id || invoiceData.id });
+        } catch { /* silent */ }
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
+    } finally {
+      setProcedureSubmitting(false);
+    }
   };
 
   const loadAdmissionRooms = async (dept) => {
@@ -367,8 +441,15 @@ const PatientProfile = () => {
     if (!doctorId) { setConsultationServices([]); return }
     setLoadingServices(true)
     try {
-      const res = await queueService.getConsultationServices()
-      setConsultationServices(res.data || [])
+      // Load doctor's configured services from admin panel (DoctorService model)
+      const res = await doctorServiceService.getDoctorServices(doctorId)
+      const mapped = (res.data || []).map(ds => ({
+        _id: ds.service_id?._id || ds.service_id,
+        name: ds.service_name,
+        price: ds.custom_price,
+        doctor_service_id: ds._id
+      }))
+      setConsultationServices(mapped)
     } catch { setConsultationServices([]) }
     finally { setLoadingServices(false) }
   }
@@ -392,12 +473,37 @@ const PatientProfile = () => {
         service_ids: selectedServices
       });
       if (response.success) {
+        // If invoice returned and paid amount > 0, process payment
+        const invoice = response.invoice;
+        const paidAmt = parseFloat(queuePaidAmount) || 0;
+        if (invoice && paidAmt > 0) {
+          try {
+            await billingService.addPayment(invoice._id, {
+              amount: paidAmt,
+              payment_method: queuePayMethod
+            });
+            // Re-fetch invoice with paid amount for receipt
+            const updatedInvoice = {
+              ...invoice,
+              paid_amount: paidAmt
+            };
+            const selectedDoctor = doctors.find(d => d.id === queueForm.doctor_id);
+            const doctorName = selectedDoctor ? `${selectedDoctor.first_name} ${selectedDoctor.last_name}` : '';
+            const patientFullName = `${patient.first_name} ${patient.last_name}`;
+            billingService.printQueueReceipt(updatedInvoice, patientFullName, doctorName, response.data?.queue_number || '');
+          } catch {
+            // Payment error — still continue
+          }
+        }
         showAlert('Bemor navbatga qo\'shildi', 'success', 'Muvaffaqiyatli');
         setShowAddQueueModal(false);
         setQueueForm({ doctor_id: '', queue_type: 'NORMAL', notes: '' });
+        setQueuePaidAmount('');
+        setQueuePayMethod('cash');
         setSelectedServices([]);
         setConsultationServices([]);
         loadQueueData();
+        loadPatientData();
       }
     } catch (error) {
       showAlert(error.response?.data?.message || 'Xatolik yuz berdi', 'error', 'Xatolik');
@@ -465,7 +571,9 @@ const PatientProfile = () => {
         service_id: serviceId,
         description: service.name,
         quantity: 1,
-        unit_price: parseFloat(service.price) || 0,
+        unit_price: parseFloat(service.custom_price || service.price) || 0,
+        // custom_price is sent to billing API to override Service.price with doctor's price
+        custom_price: service.custom_price !== undefined ? parseFloat(service.custom_price) : undefined,
         discount_percentage: 0
       }]);
     }
@@ -491,7 +599,11 @@ const PatientProfile = () => {
       const response = await billingService.createInvoice({
         patient_id: id,
         doctor_id: invoiceDoctor || undefined,
-        items: invoiceItems,
+        items: invoiceItems.map(item => ({
+          service_id: item.service_id,
+          quantity: item.quantity,
+          ...(item.custom_price !== undefined && { custom_price: item.custom_price })
+        })),
         discount_amount: invoiceItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0) * invoiceDiscount / 100,
         notes: ''
       });
@@ -501,6 +613,7 @@ const PatientProfile = () => {
         setInvoiceItems([]);
         setInvoiceDoctor('');
         setInvoiceDiscount(0);
+        setInvoiceDoctorServices([]);
         loadPatientData();
       }
     } catch (error) {
@@ -696,13 +809,22 @@ const PatientProfile = () => {
             </>
           )}
           {isReceptionist && (
-            <button
-              onClick={handleOpenLabOrderModal}
-              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined">biotech</span>
-              <span className="hidden sm:inline">Tahlil buyurtma</span>
-            </button>
+            <>
+              <button
+                onClick={handleOpenLabOrderModal}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">biotech</span>
+                <span className="hidden sm:inline">Tahlil buyurtma</span>
+              </button>
+              <button
+                onClick={openProcedureModal}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">vaccines</span>
+                <span className="hidden sm:inline">Muolaja</span>
+              </button>
+            </>
           )}
           {!isDoctor && !isNurse && (
             <button
@@ -2358,6 +2480,42 @@ const PatientProfile = () => {
               placeholder="Qo'shimcha izoh..."
             />
           </div>
+
+          {/* Payment section */}
+          {selectedServices.length > 0 && (
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl space-y-3">
+              <p className="text-sm font-bold text-green-700 dark:text-green-400">To'lov qabul qilish</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">To'lov summasi</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={queuePaidAmount}
+                    onChange={(e) => setQueuePaidAmount(e.target.value)}
+                    placeholder="0"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">To'lov usuli</label>
+                  <select
+                    value={queuePayMethod}
+                    onChange={(e) => setQueuePayMethod(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="cash">Naqd</option>
+                    <option value="card">Karta</option>
+                    <option value="transfer">O'tkazma</option>
+                  </select>
+                </div>
+              </div>
+              {parseFloat(queuePaidAmount) > 0 && (
+                <p className="text-xs text-green-600 dark:text-green-400">Chek avtomatik chiqariladi</p>
+              )}
+            </div>
+          )}
+
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={() => setShowAddQueueModal(false)}
               className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-semibold hover:bg-gray-200">
@@ -2380,7 +2538,16 @@ const PatientProfile = () => {
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Shifokor (ixtiyoriy)</label>
             <select
               value={invoiceDoctor}
-              onChange={(e) => setInvoiceDoctor(e.target.value)}
+              onChange={async (e) => {
+                const docId = e.target.value
+                setInvoiceDoctor(docId)
+                setInvoiceDoctorServices([])
+                if (!docId) return
+                try {
+                  const res = await doctorServiceService.getDoctorServices(docId)
+                  setInvoiceDoctorServices(res.data || [])
+                } catch { setInvoiceDoctorServices([]) }
+              }}
               className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Tanlang...</option>
@@ -2389,6 +2556,35 @@ const PatientProfile = () => {
               ))}
             </select>
           </div>
+
+          {/* Doctor's configured consultation services */}
+          {invoiceDoctor && invoiceDoctorServices.length > 0 && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Shifokor konsultatsiya xizmatlari
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+                {invoiceDoctorServices.map(ds => (
+                  <button
+                    type="button"
+                    key={ds._id}
+                    onClick={() => addServiceToInvoice({
+                      _id: ds.service_id?._id || ds.service_id,
+                      id: ds.service_id?._id || ds.service_id,
+                      name: ds.service_name,
+                      price: ds.custom_price,
+                      base_price: ds.custom_price,
+                      custom_price: ds.custom_price
+                    })}
+                    className="p-2.5 bg-white dark:bg-gray-800 rounded-lg text-left hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors border border-blue-100 dark:border-blue-800"
+                  >
+                    <p className="font-semibold text-gray-900 dark:text-white text-xs">{ds.service_name}</p>
+                    <p className="text-blue-600 font-bold text-sm mt-0.5">{(ds.custom_price || 0).toLocaleString()} so'm</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Xizmatlar</label>
@@ -2769,6 +2965,128 @@ const PatientProfile = () => {
         order={selectedLabOrder}
         onSuccess={() => { setShowLabResultModal(false); setSelectedLabOrder(null); loadPatientData(); }}
       />
+
+      {/* Procedure Assignment Modal */}
+      {showProcedureModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Muolaja biriktirish</h2>
+              <button onClick={() => setShowProcedureModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {/* Procedure list */}
+            <div className="overflow-y-auto flex-1 p-4 space-y-2">
+              {procedureList.length === 0 ? (
+                <p className="text-center text-gray-400 py-8">Muolajalar topilmadi</p>
+              ) : procedureList.map(service => {
+                const selected = selectedProcedures.find(p => p.service._id === service._id);
+                return (
+                  <div
+                    key={service._id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${
+                      selected
+                        ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    }`}
+                    onClick={() => toggleProcedure(service)}
+                  >
+                    <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${selected ? 'bg-teal-600' : 'border-2 border-gray-300 dark:border-gray-600'}`}>
+                      {selected && <span className="material-symbols-outlined text-white" style={{fontSize:'14px'}}>check</span>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 dark:text-white text-sm">{service.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {service.is_cups_based
+                          ? `${service.price?.toLocaleString()} so'm / idish`
+                          : `${service.price?.toLocaleString()} so'm`
+                        }
+                        {service.procedure_type && <span className="ml-2 capitalize text-teal-600">({service.procedure_type})</span>}
+                      </p>
+                    </div>
+                    {selected && (
+                      <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                        <button
+                          className="w-7 h-7 rounded bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-gray-300"
+                          onClick={() => updateProcedureQty(service._id, selected.quantity - 1)}
+                        >−</button>
+                        <input
+                          type="number"
+                          min="1"
+                          value={selected.quantity}
+                          onChange={e => updateProcedureQty(service._id, e.target.value)}
+                          className="w-12 text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm py-0.5"
+                        />
+                        <button
+                          className="w-7 h-7 rounded bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-200 hover:bg-gray-300"
+                          onClick={() => updateProcedureQty(service._id, selected.quantity + 1)}
+                        >+</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer: total + payment */}
+            <div className="border-t border-gray-200 dark:border-gray-700 p-4 flex-shrink-0 space-y-3">
+              {selectedProcedures.length > 0 && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 space-y-1">
+                  {selectedProcedures.map(p => (
+                    <div key={p.service._id} className="flex justify-between text-sm text-gray-700 dark:text-gray-300">
+                      <span>{p.service.name} × {p.quantity}{p.service.is_cups_based ? ' idish' : ''}</span>
+                      <span className="font-medium">{(p.service.price * p.quantity).toLocaleString()} so'm</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between font-bold text-gray-900 dark:text-white pt-1 border-t border-gray-200 dark:border-gray-600">
+                    <span>Jami</span>
+                    <span>{getProcedureTotal().toLocaleString()} so'm</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <select
+                  value={procedurePayMethod}
+                  onChange={e => setProcedurePayMethod(e.target.value)}
+                  className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                >
+                  <option value="cash">Naqd</option>
+                  <option value="card">Karta</option>
+                  <option value="transfer">O'tkazma</option>
+                </select>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="To'lov summasi (ixtiyoriy)"
+                  value={procedurePaidAmount}
+                  onChange={e => setProcedurePaidAmount(e.target.value)}
+                  className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowProcedureModal(false)}
+                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={handleSubmitProcedures}
+                  disabled={procedureSubmitting || selectedProcedures.length === 0}
+                  className="flex-1 bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50 transition text-sm font-semibold"
+                >
+                  {procedureSubmitting ? 'Saqlanmoqda...' : 'Biriktirish'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

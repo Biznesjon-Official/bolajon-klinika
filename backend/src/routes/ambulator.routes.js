@@ -6,6 +6,8 @@ import AmbulatorCheckinLog from '../models/AmbulatorCheckinLog.js';
 import AmbulatorPatientCall from '../models/AmbulatorPatientCall.js';
 import AmbulatorDoctorNotification from '../models/AmbulatorDoctorNotification.js';
 import AmbulatorComplaint from '../models/AmbulatorComplaint.js';
+import AmbulatorProcedure from '../models/AmbulatorProcedure.js';
+import Invoice from '../models/Invoice.js';
 import Queue from '../models/Queue.js';
 import Patient from '../models/Patient.js';
 
@@ -531,5 +533,111 @@ router.put('/complaint/:id/resolve', authenticate, authorize('admin', 'doctor'),
     next(error);
   }
 });
+
+// ============================================
+// AMBULATOR PROCEDURES (muolaja tracking)
+// ============================================
+
+/**
+ * Create procedures from invoice (called after muolaja invoice created)
+ * POST /ambulator/procedures/create-from-invoice
+ */
+router.post('/procedures/create-from-invoice', authenticate, async (req, res, next) => {
+  try {
+    const { invoice_id } = req.body
+    const invoice = await Invoice.findById(invoice_id).lean()
+    if (!invoice) return res.status(404).json({ success: false, message: 'Invoice topilmadi' })
+
+    const procedures = (invoice.items || []).map(item => ({
+      invoice_id: invoice._id,
+      invoice_number: invoice.invoice_number,
+      patient_id: invoice.patient_id,
+      service_name: item.description || '',
+      quantity: item.quantity || 1,
+      status: 'pending'
+    }))
+
+    const created = await AmbulatorProcedure.insertMany(procedures)
+    res.json({ success: true, data: created })
+  } catch (error) {
+    next(error)
+  }
+})
+
+/**
+ * Get procedures by invoice number
+ * GET /ambulator/procedures/by-invoice/:invoiceNumber
+ */
+router.get('/procedures/by-invoice/:invoiceNumber', authenticate, async (req, res, next) => {
+  try {
+    const { invoiceNumber } = req.params
+    const procedures = await AmbulatorProcedure.find({ invoice_number: invoiceNumber })
+      .populate('nurse_id', 'first_name last_name')
+      .lean()
+
+    // Also get invoice and patient info
+    const invoice = await Invoice.findOne({ invoice_number: invoiceNumber })
+      .populate('patient_id', 'first_name last_name phone patient_number')
+      .lean()
+
+    res.json({
+      success: true,
+      data: {
+        procedures,
+        invoice: invoice ? {
+          id: invoice._id,
+          invoice_number: invoice.invoice_number,
+          total_amount: invoice.total_amount,
+          paid_amount: invoice.paid_amount,
+          payment_status: invoice.payment_status,
+          patient_name: invoice.patient_id ? `${invoice.patient_id.first_name} ${invoice.patient_id.last_name}` : '',
+          patient_number: invoice.patient_id?.patient_number,
+          patient_id: invoice.patient_id?._id
+        } : null
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+/**
+ * Start a procedure
+ * PATCH /ambulator/procedures/:id/start
+ */
+router.patch('/procedures/:id/start', authenticate, async (req, res, next) => {
+  try {
+    const procedure = await AmbulatorProcedure.findById(req.params.id)
+    if (!procedure) return res.status(404).json({ success: false, message: 'Muolaja topilmadi' })
+
+    procedure.status = 'in_progress'
+    procedure.started_at = new Date()
+    procedure.nurse_id = req.user.id
+    await procedure.save()
+
+    res.json({ success: true, data: procedure })
+  } catch (error) {
+    next(error)
+  }
+})
+
+/**
+ * Complete a procedure
+ * PATCH /ambulator/procedures/:id/complete
+ */
+router.patch('/procedures/:id/complete', authenticate, async (req, res, next) => {
+  try {
+    const procedure = await AmbulatorProcedure.findById(req.params.id)
+    if (!procedure) return res.status(404).json({ success: false, message: 'Muolaja topilmadi' })
+
+    procedure.status = 'completed'
+    procedure.completed_at = new Date()
+    await procedure.save()
+
+    res.json({ success: true, data: procedure })
+  } catch (error) {
+    next(error)
+  }
+})
 
 export default router;

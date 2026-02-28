@@ -41,6 +41,14 @@ const DoctorPanel = () => {
     dosage: ''
   });
 
+  // Urgent diagnosis modal
+  const [showUrgentModal, setShowUrgentModal] = useState(false)
+  const [urgentPatient, setUrgentPatient] = useState(null)
+  const [urgentDiagnosis, setUrgentDiagnosis] = useState('')
+  const [urgentNotes, setUrgentNotes] = useState('')
+  const [urgentMeds, setUrgentMeds] = useState([{ name: '', amount: '', when: 'ertalab/kechqurun' }])
+  const [urgentSubmitting, setUrgentSubmitting] = useState(false)
+
   // Lab order
   const [showLabOrderModal, setShowLabOrderModal] = useState(false)
   const [labTests, setLabTests] = useState([])
@@ -511,6 +519,52 @@ const DoctorPanel = () => {
     setShowLabOrderModal(true)
   }
 
+  const handleOpenUrgentModal = (patient) => {
+    setUrgentPatient(patient)
+    setUrgentDiagnosis('')
+    setUrgentNotes('')
+    setUrgentMeds([{ name: '', amount: '', when: 'ertalab/kechqurun' }])
+    setShowUrgentModal(true)
+  }
+
+  const handleSubmitUrgent = async () => {
+    if (!urgentDiagnosis.trim()) return showAlert('Tashxis kiriting', 'warning', 'Ogohlantirish')
+    try {
+      setUrgentSubmitting(true)
+      const medications = urgentMeds.filter(m => m.name.trim()).map(m => ({
+        medication_name: m.name,
+        dosage: m.amount,
+        frequency: m.when,
+        duration_days: 1,
+        instructions: m.when,
+        is_urgent: true
+      }))
+      const data = {
+        patient_id: urgentPatient.patient_id,
+        queue_id: urgentPatient.id,
+        diagnosis: urgentDiagnosis,
+        prescription_type: 'URGENT',
+        medications,
+        notes: urgentNotes
+      }
+      const res = await prescriptionService.createPrescription(data)
+      if (res.success) {
+        // Print small format
+        prescriptionService.printSmallPrescription(
+          { ...data, prescription_number: res.data?.prescription_number, doctor_name: user?.full_name || user?.username },
+          { first_name: urgentPatient.patientName?.split(' ')[0] || '', last_name: urgentPatient.patientName?.split(' ').slice(1).join(' ') || '' }
+        )
+        setShowUrgentModal(false)
+        showAlert('Tezkor tashxis saqlandi va chek chiqarildi', 'success', 'Muvaffaqiyatli')
+        loadMyQueue()
+      }
+    } catch (err) {
+      showAlert(err.response?.data?.message || 'Xatolik', 'error', 'Xatolik')
+    } finally {
+      setUrgentSubmitting(false)
+    }
+  }
+
   const handleCompleteConsultation = async (queueId) => {
     try {
       showConfirm(
@@ -820,7 +874,14 @@ const DoctorPanel = () => {
                       className="py-2 bg-purple-500 text-white rounded-lg text-xs font-semibold hover:bg-purple-600 flex items-center justify-center gap-1"
                     >
                       <span className="material-symbols-outlined text-sm">edit_note</span>
-                      Retsept
+                      Retsept (A4)
+                    </button>
+                    <button
+                      onClick={() => handleOpenUrgentModal(patient)}
+                      className="col-span-2 py-2 bg-red-500 text-white rounded-lg text-xs font-semibold hover:bg-red-600 flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">bolt</span>
+                      Tezkor tashxis (kichik chek)
                     </button>
                     <button
                       onClick={() => handleOpenNurseModal(patient)}
@@ -960,6 +1021,101 @@ const DoctorPanel = () => {
           t={t}
           preselectedPatientId={labOrderPatient?.patient_id || labOrderPatient?.patientId || labOrderPatient?._id || labOrderPatient?.id}
         />
+      )}
+
+      {/* Tezkor tashxis Modal */}
+      {showUrgentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h2 className="text-lg font-black text-red-600">Tezkor tashxis</h2>
+              <button onClick={() => setShowUrgentModal(false)} className="text-gray-400 hover:text-gray-600">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              {urgentPatient && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
+                  <p className="font-bold text-sm">{urgentPatient.patientName}</p>
+                  <p className="text-xs text-gray-500">{urgentPatient.patientNumber}</p>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-semibold mb-1">Tashxis *</label>
+                <input
+                  type="text"
+                  value={urgentDiagnosis}
+                  onChange={(e) => setUrgentDiagnosis(e.target.value)}
+                  placeholder="Masalan: ORVI, Angina..."
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm"
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-semibold">Dorilar</label>
+                  <button
+                    type="button"
+                    onClick={() => setUrgentMeds(prev => [...prev, { name: '', amount: '', when: 'ertalab/kechqurun' }])}
+                    className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200"
+                  >+ Qo'shish</button>
+                </div>
+                <div className="space-y-2">
+                  {urgentMeds.map((med, i) => (
+                    <div key={i} className="grid grid-cols-3 gap-2 items-center">
+                      <input
+                        type="text"
+                        value={med.name}
+                        onChange={(e) => { const m = [...urgentMeds]; m[i].name = e.target.value; setUrgentMeds(m) }}
+                        placeholder="Dori nomi"
+                        className="col-span-1 px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-xs focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={med.amount}
+                        onChange={(e) => { const m = [...urgentMeds]; m[i].amount = e.target.value; setUrgentMeds(m) }}
+                        placeholder="Miqdori"
+                        className="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-xs focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={med.when}
+                        onChange={(e) => { const m = [...urgentMeds]; m[i].when = e.target.value; setUrgentMeds(m) }}
+                        placeholder="Qachon"
+                        className="px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-xs focus:outline-none"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1">Izoh (ixtiyoriy)</label>
+                <textarea
+                  value={urgentNotes}
+                  onChange={(e) => setUrgentNotes(e.target.value)}
+                  rows="2"
+                  placeholder="Qo'shimcha ko'rsatmalar..."
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none resize-none"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowUrgentModal(false)}
+                  className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm"
+                >Bekor qilish</button>
+                <button
+                  type="button"
+                  onClick={handleSubmitUrgent}
+                  disabled={urgentSubmitting}
+                  className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-semibold text-sm hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-sm">print</span>
+                  {urgentSubmitting ? 'Saqlanmoqda...' : 'Saqlash va chiqarish'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Alert Modal */}

@@ -107,6 +107,27 @@ const ambulatorInpatientService = {
   resolveComplaint: async (complaintId, notes) => {
     const response = await api.post(`/ambulator-inpatient/complaints/${complaintId}/resolve`, { notes });
     return response.data;
+  },
+
+  // Procedure tracking
+  getProceduresByInvoice: async (invoiceNumber) => {
+    const response = await api.get(`/ambulator/procedures/by-invoice/${invoiceNumber}`);
+    return response.data;
+  },
+
+  startProcedure: async (id) => {
+    const response = await api.patch(`/ambulator/procedures/${id}/start`);
+    return response.data;
+  },
+
+  completeProcedure: async (id) => {
+    const response = await api.patch(`/ambulator/procedures/${id}/complete`);
+    return response.data;
+  },
+
+  getInvoiceByNumber: async (invoiceNumber) => {
+    const response = await api.get(`/billing/invoices/by-number/${invoiceNumber}`);
+    return response.data;
   }
 };
 
