@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import laboratoryService from '../services/laboratoryService';
 import patientService from '../services/patientService';
 import { prescriptionService } from '../services/prescriptionService';
+import ambulatorInpatientService from '../services/ambulatorInpatientService';
+import inpatientRoomService from '../services/inpatientRoomService';
 import api from '../services/api';
 import toast, { Toaster } from 'react-hot-toast';
 import NewOrderModal from '../components/laboratory/NewOrderModal';
@@ -38,6 +40,67 @@ export default function ReceptionPanel() {
     completedToday: 0,
     totalRevenue: 0
   });
+
+  // Admit modal state
+  const [showAdmitModal, setShowAdmitModal] = useState(false)
+  const [admitType, setAdmitType] = useState('ambulator')
+  const [admitRooms, setAdmitRooms] = useState([])
+  const [admitSelectedBed, setAdmitSelectedBed] = useState(null)
+  const [admitPatientSearch, setAdmitPatientSearch] = useState('')
+  const [admitPatientResults, setAdmitPatientResults] = useState([])
+  const [admitSelectedPatient, setAdmitSelectedPatient] = useState(null)
+  const [admitSubmitting, setAdmitSubmitting] = useState(false)
+
+  const handleOpenAdmitModal = async (type) => {
+    setAdmitType(type)
+    setAdmitSelectedBed(null)
+    setAdmitSelectedPatient(null)
+    setAdmitPatientSearch('')
+    setAdmitPatientResults([])
+    setAdmitRooms([])
+    setShowAdmitModal(true)
+    try {
+      const res = type === 'ambulator'
+        ? await ambulatorInpatientService.getRooms()
+        : await inpatientRoomService.getRooms()
+      if (res.success) setAdmitRooms(res.data)
+    } catch {
+      toast.error('Xonalar yuklanmadi')
+    }
+  }
+
+  const handleAdmitPatientSearch = async (val) => {
+    setAdmitPatientSearch(val)
+    setAdmitSelectedPatient(null)
+    if (val.length < 2) { setAdmitPatientResults([]); return }
+    try {
+      const res = await patientService.getPatients({ search: val, limit: 5 })
+      setAdmitPatientResults(res.data || [])
+    } catch {
+      setAdmitPatientResults([])
+    }
+  }
+
+  const handleSubmitAdmit = async () => {
+    if (!admitSelectedPatient) return toast.error('Bemor tanlang')
+    if (!admitSelectedBed) return toast.error('Koyka tanlang')
+    try {
+      setAdmitSubmitting(true)
+      const res = await ambulatorInpatientService.createAdmission({
+        patient_id: admitSelectedPatient._id,
+        room_id: admitSelectedBed.room_id,
+        bed_number: admitSelectedBed.bed_number
+      })
+      if (res.success) {
+        toast.success(`${admitSelectedPatient.first_name} ${admitSelectedPatient.last_name} ${admitType === 'ambulator' ? 'ambulatorga' : 'statsionarga'} yotqizildi`)
+        setShowAdmitModal(false)
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Xatolik yuz berdi')
+    } finally {
+      setAdmitSubmitting(false)
+    }
+  }
 
   // Lab order modal state
   const [showLabOrderModal, setShowLabOrderModal] = useState(false);
@@ -261,8 +324,115 @@ export default function ReceptionPanel() {
             <span className="material-symbols-outlined text-5xl text-teal-600">account_balance_wallet</span>
             <span className="font-semibold text-gray-900 dark:text-white">Mening Maoshim</span>
           </a>
+
+          <button
+            onClick={() => handleOpenAdmitModal('ambulator')}
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-teal-200 dark:border-teal-800"
+          >
+            <span className="material-symbols-outlined text-5xl text-teal-600">bed</span>
+            <span className="font-semibold text-gray-900 dark:text-white">Ambulatorga yotqizish</span>
+          </button>
+
+          <button
+            onClick={() => handleOpenAdmitModal('inpatient')}
+            className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg sm:rounded-xl hover:shadow-lg transition-all border-2 border-blue-200 dark:border-blue-800"
+          >
+            <span className="material-symbols-outlined text-5xl text-blue-600">local_hospital</span>
+            <span className="font-semibold text-gray-900 dark:text-white">Statsionarga yotqizish</span>
+          </button>
         </div>
       </div>
+
+      {/* Yotqizish Modal */}
+      {showAdmitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h2 className="text-lg font-black text-blue-600">
+                {admitType === 'ambulator' ? 'Ambulatorga yotqizish' : 'Statsionarga yotqizish'}
+              </h2>
+              <button onClick={() => setShowAdmitModal(false)} className="text-gray-400 hover:text-gray-600">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              {/* Patient search */}
+              <div className="relative">
+                <label className="block text-sm font-semibold mb-1">Bemor *</label>
+                <input
+                  type="text"
+                  value={admitSelectedPatient ? `${admitSelectedPatient.first_name} ${admitSelectedPatient.last_name}` : admitPatientSearch}
+                  onChange={(e) => handleAdmitPatientSearch(e.target.value)}
+                  placeholder="Ism yoki raqam..."
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                {admitPatientResults.length > 0 && !admitSelectedPatient && (
+                  <div className="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg mt-1">
+                    {admitPatientResults.map(p => (
+                      <button
+                        key={p._id}
+                        onClick={() => { setAdmitSelectedPatient(p); setAdmitPatientResults([]) }}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                      >
+                        <span className="font-semibold">{p.first_name} {p.last_name}</span>
+                        <span className="ml-2 text-gray-400 text-xs">{p.patient_number}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Rooms & beds */}
+              {admitRooms.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-4">Yuklanmoqda...</p>
+              ) : (
+                <div className="space-y-3">
+                  {admitRooms.map(room => (
+                    <div key={room.id} className="border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+                      <p className="font-semibold text-sm mb-2">
+                        Xona {room.room_number}
+                        {room.room_name ? ` — ${room.room_name}` : ''}
+                        <span className="ml-2 text-xs text-gray-400">({room.available_beds}/{room.total_beds} bo'sh)</span>
+                      </p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {room.beds?.map(bed => (
+                          <button
+                            key={bed.id}
+                            disabled={bed.bed_status !== 'available'}
+                            onClick={() => setAdmitSelectedBed({ room_id: room.id, bed_number: bed.bed_number })}
+                            className={`py-2 rounded-lg text-xs font-semibold border-2 transition-colors ${
+                              admitSelectedBed?.room_id === room.id && admitSelectedBed?.bed_number === bed.bed_number
+                                ? 'bg-blue-500 border-blue-500 text-white'
+                                : bed.bed_status !== 'available'
+                                ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 cursor-not-allowed'
+                                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                            }`}
+                          >
+                            {bed.bed_number}{bed.bed_status !== 'available' ? ' ✕' : ''}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <button onClick={() => setShowAdmitModal(false)} className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm">
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={handleSubmitAdmit}
+                  disabled={admitSubmitting || !admitSelectedBed || !admitSelectedPatient}
+                  className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {admitSubmitting ? 'Yuklanmoqda...' : 'Yotqizish'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Lab Order Modal */}
       {showLabOrderModal && (

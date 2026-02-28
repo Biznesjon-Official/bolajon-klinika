@@ -256,13 +256,13 @@ const PatientProfile = () => {
     }
   }
 
-  const handleOpenAdmissionModal = () => {
+  const handleOpenAdmissionModal = (type = 'ambulator') => {
     setShowAdmissionModal(true)
-    setAdmissionDepartment('ambulator')
+    setAdmissionDepartment(type)
     setAdmissionForm({ diagnosis: '', notes: '' })
     setSelectedRoom('')
     setSelectedBed('')
-    loadAdmissionRooms('ambulator')
+    loadAdmissionRooms(type)
   }
 
   const handleCreateAdmission = async () => {
@@ -789,22 +789,38 @@ const PatientProfile = () => {
                 <span className="hidden sm:inline">To'lov qilish</span>
               </button>
               <button
-                onClick={handleOpenAdmissionModal}
+                onClick={() => handleOpenAdmissionModal('ambulator')}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">bed</span>
+                <span className="hidden sm:inline">Amb. yotqizish</span>
+              </button>
+              <button
+                onClick={() => handleOpenAdmissionModal('inpatient')}
                 className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
               >
-                <span className="material-symbols-outlined">hotel</span>
-                <span className="hidden sm:inline">Yotqizish</span>
+                <span className="material-symbols-outlined">local_hospital</span>
+                <span className="hidden sm:inline">Stat. yotqizish</span>
               </button>
             </>
           )}
           {isChiefDoctor && !isReceptionist && (
-            <button
-              onClick={handleOpenAdmissionModal}
-              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined">hotel</span>
-              <span className="hidden sm:inline">Yotqizish</span>
-            </button>
+            <>
+              <button
+                onClick={() => handleOpenAdmissionModal('ambulator')}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">bed</span>
+                <span className="hidden sm:inline">Amb. yotqizish</span>
+              </button>
+              <button
+                onClick={() => handleOpenAdmissionModal('inpatient')}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-600 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">local_hospital</span>
+                <span className="hidden sm:inline">Stat. yotqizish</span>
+              </button>
+            </>
           )}
           {(isDoctor || isSpecialist) && (
             <>

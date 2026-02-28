@@ -419,7 +419,7 @@ router.get('/admissions', authenticate, async (req, res, next) => {
   }
 });
 
-router.post('/admissions', authenticate, authorize('admin', 'chief_doctor', 'receptionist'), async (req, res, next) => {
+router.post('/admissions', authenticate, authorize('admin', 'chief_doctor', 'receptionist', 'doctor'), async (req, res, next) => {
   try {
     const { patient_id, room_id, bed_number, diagnosis, notes } = req.body;
     
