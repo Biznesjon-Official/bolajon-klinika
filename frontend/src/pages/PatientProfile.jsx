@@ -53,6 +53,7 @@ const PatientProfile = () => {
   const [assignedSpecialists, setAssignedSpecialists] = useState([]);
   const [treatmentSchedule, setTreatmentSchedule] = useState(null);
   const [ambulatorProcedures, setAmbulatorProcedures] = useState([]);
+  const [currentRoom, setCurrentRoom] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [queueHistory, setQueueHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
@@ -375,6 +376,7 @@ const PatientProfile = () => {
         setAdmissions(response.data.admissions || []);
         setQueueHistory(response.data.queueHistory || []);
         setAmbulatorProcedures(response.data.ambulatorProcedures || []);
+        setCurrentRoom(response.data.current_room || null);
       } else {
         showAlert('Bemor ma\'lumotlari topilmadi', 'error', 'Xatolik');
       }
@@ -973,6 +975,16 @@ const PatientProfile = () => {
                 </p>
               </div>
             </div>
+
+            {/* Current ambulatory room badge */}
+            {currentRoom && (
+              <div className="mt-3 flex items-center gap-2 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-lg px-3 py-2 w-fit">
+                <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 text-lg">meeting_room</span>
+                <span className="text-sm font-semibold text-teal-800 dark:text-teal-200">
+                  Ambulator xona: {currentRoom.room_number} — {currentRoom.room_name}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1289,6 +1301,20 @@ const PatientProfile = () => {
           {activeTab === 'treatments' && (
             <div className="space-y-3 sm:space-y-4">
 
+              {/* Current ambulatory room banner */}
+              {currentRoom && (
+                <div className="flex items-center gap-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-xl px-4 py-3">
+                  <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 text-2xl">meeting_room</span>
+                  <div>
+                    <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">Joriy ambulator xona</p>
+                    <p className="font-bold text-teal-800 dark:text-teal-200 text-sm">
+                      {currentRoom.room_number} — {currentRoom.room_name}
+                      {currentRoom.floor && <span className="font-normal text-xs ml-2">({currentRoom.floor}-qavat)</span>}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Ambulatory Procedures (from billing) */}
               {ambulatorProcedures.length > 0 && (
                 <div>
@@ -1300,6 +1326,7 @@ const PatientProfile = () => {
                           <p className="font-semibold text-gray-900 dark:text-white text-sm">{proc.service_name}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             Miqdor: {proc.quantity} • #{proc.invoice_number}
+                            {proc.room_number && <span className="ml-1 text-teal-600 dark:text-teal-400">• Xona: {proc.room_number}</span>}
                             {proc.nurse_first_name && ` • Hamshira: ${proc.nurse_first_name} ${proc.nurse_last_name}`}
                           </p>
                           <p className="text-xs text-gray-400 dark:text-gray-500">{formatDate(proc.created_at)}</p>
