@@ -11,6 +11,7 @@ import Staff from '../models/Staff.js';
 import LabTest from '../models/LabTest.js';
 import DoctorService from '../models/DoctorService.js';
 import AmbulatorProcedure from '../models/AmbulatorProcedure.js';
+import AmbulatorRoom from '../models/AmbulatorRoom.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -40,7 +41,8 @@ const createInvoiceSchema = Joi.object({
   paid_amount: Joi.number().min(0).default(0),
   discount_amount: Joi.number().min(0).default(0),
   notes: Joi.string().allow('', null),
-  doctor_id: Joi.string().allow(null)
+  doctor_id: Joi.string().allow(null),
+  room_id: Joi.string().allow(null)
 });
 
 const addPaymentSchema = Joi.object({
@@ -301,7 +303,7 @@ router.post('/invoices',
 
       await session.startTransaction();
 
-      const { patient_id, items, payment_method, paid_amount, discount_amount, notes, doctor_id } = req.body;
+      const { patient_id, items, payment_method, paid_amount, discount_amount, notes, doctor_id, room_id } = req.body;
 
       // Get patient to check last visit
       const patient = await Patient.findById(patient_id);
@@ -509,9 +511,19 @@ router.post('/invoices',
           patient_id,
           service_name: item.service_name,
           quantity: item.quantity || 1,
-          status: 'pending'
+          status: 'pending',
+          ...(room_id ? { bed_id: room_id } : {})
         }))
         await AmbulatorProcedure.insertMany(ambulatorProcedures, { session })
+
+        // Assign patient to ambulatory room if provided
+        if (room_id && mongoose.Types.ObjectId.isValid(room_id)) {
+          await AmbulatorRoom.findByIdAndUpdate(
+            room_id,
+            { status: 'occupied', current_patient_id: patient_id },
+            { session }
+          )
+        }
       }
 
       // Create transaction if payment made

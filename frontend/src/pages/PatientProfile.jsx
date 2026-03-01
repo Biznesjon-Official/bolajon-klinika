@@ -10,6 +10,7 @@ import billingService from '../services/billingService';
 import servicesService from '../services/servicesService';
 import doctorServiceService from '../services/doctorServiceService';
 import ambulatorInpatientService from '../services/ambulatorInpatientService';
+import ambulatorService from '../services/ambulatorService';
 import inpatientRoomService from '../services/inpatientRoomService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
@@ -133,6 +134,8 @@ const PatientProfile = () => {
   const [procedurePayMethod, setProcedurePayMethod] = useState('cash');
   const [procedurePaidAmount, setProcedurePaidAmount] = useState('');
   const [procedureSubmitting, setProcedureSubmitting] = useState(false);
+  const [availableRooms, setAvailableRooms] = useState([]);
+  const [selectedRoomId, setSelectedRoomId] = useState('');
 
   const showAlert = (message, type = 'info', title = '') => {
     setAlertModal({ isOpen: true, title, message, type });
@@ -187,10 +190,15 @@ const PatientProfile = () => {
     setSelectedProcedures([]);
     setProcedurePayMethod('cash');
     setProcedurePaidAmount('');
+    setSelectedRoomId('');
     setShowProcedureModal(true);
     try {
-      const res = await servicesService.getServices({ category: 'Muolaja', is_active: 'true' });
-      setProcedureList(res.data || []);
+      const [svcRes, roomRes] = await Promise.all([
+        servicesService.getServices({ category: 'Muolaja', is_active: 'true' }),
+        ambulatorService.getRooms()
+      ]);
+      setProcedureList(svcRes.data || []);
+      setAvailableRooms((roomRes.data || []).filter(r => r.status === 'available'));
     } catch {
       toast.error('Muolajalarni yuklashda xatolik');
     }
@@ -223,7 +231,8 @@ const PatientProfile = () => {
         items: selectedProcedures.map(p => ({ service_id: p.service._id, quantity: p.quantity })),
         paid_amount: total,
         payment_method: procedurePayMethod,
-        notes: 'Muolaja'
+        notes: 'Muolaja',
+        ...(selectedRoomId ? { room_id: selectedRoomId } : {})
       });
       toast.success('Muolaja biriktirildi va billing yaratildi');
       setShowProcedureModal(false);
@@ -3231,6 +3240,26 @@ const PatientProfile = () => {
                   </div>
                 </div>
               )}
+
+              {/* Room selection */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                  Xona biriktirish
+                  {availableRooms.length === 0 && <span className="ml-1 text-yellow-500">(bo'sh xona yo'q)</span>}
+                </label>
+                <select
+                  value={selectedRoomId}
+                  onChange={e => setSelectedRoomId(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
+                >
+                  <option value="">— Xona tanlanmagan —</option>
+                  {availableRooms.map(r => (
+                    <option key={r.id} value={r.id}>
+                      {r.room_number} — {r.room_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div className="grid grid-cols-4 gap-2">
                 {[{v:'cash',l:'Naqd'},{v:'click',l:'Click'},{v:'humo',l:'Humo'},{v:'uzcard',l:'Uzcard'}].map(m => (
