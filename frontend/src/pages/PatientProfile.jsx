@@ -3284,10 +3284,11 @@ const PatientProfile = () => {
                   >
                     <option value="">— Xona —</option>
                     {procedureRooms.map(r => {
-                      const availBeds = (r.beds || []).filter(b => b.status === 'available').length
+                      const availBeds = (r.beds || []).filter(b => b.bed_status === 'available').length
+                      const totalBeds = (r.beds || []).length
                       return (
-                        <option key={r._id || r.id} value={r._id || r.id} disabled={availBeds === 0}>
-                          {r.room_number} ({availBeds} bo'sh)
+                        <option key={r._id || r.id} value={r._id || r.id}>
+                          Xona {r.room_number} ({availBeds}/{totalBeds} bo'sh)
                         </option>
                       )
                     })}
@@ -3303,10 +3304,9 @@ const PatientProfile = () => {
                   >
                     <option value="">— Ko'yka —</option>
                     {(procedureRooms.find(r => (r._id || r.id) === selectedProcRoomId)?.beds || [])
-                      .filter(b => b.status === 'available')
                       .map(b => (
-                        <option key={b._id || b.bed_number} value={b.bed_number}>
-                          Ko'yka #{b.bed_number}
+                        <option key={b.id || b.bed_number} value={b.bed_number} disabled={b.bed_status !== 'available'}>
+                          Ko'yka #{b.bed_number} {b.bed_status !== 'available' ? '(band)' : ''}
                         </option>
                       ))}
                   </select>

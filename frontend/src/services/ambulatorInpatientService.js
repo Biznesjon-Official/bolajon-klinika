@@ -109,6 +109,12 @@ const ambulatorInpatientService = {
     return response.data;
   },
 
+  // Get all ambulatory procedures (for nurse)
+  getAmbulatorProcedures: async (status = 'pending,in_progress') => {
+    const response = await api.get('/ambulator/procedures', { params: { status } })
+    return response.data
+  },
+
   // Procedure tracking
   getProceduresByInvoice: async (invoiceNumber) => {
     const response = await api.get(`/ambulator/procedures/by-invoice/${invoiceNumber}`);

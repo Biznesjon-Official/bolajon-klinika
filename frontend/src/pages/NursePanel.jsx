@@ -5,6 +5,7 @@ import useNurseData from '../hooks/useNurseData'
 import nurseService from '../services/nurseService'
 import communicationService from '../services/communicationService'
 import pharmacyService from '../services/pharmacyService'
+import ambulatorInpatientService from '../services/ambulatorInpatientService'
 import toast from 'react-hot-toast'
 
 // Page components
@@ -40,11 +41,30 @@ export default function NursePanel() {
   const [dispenseMedicine, setDispenseMedicine] = useState(null)
   const [messagePatient, setMessagePatient] = useState(null)
   const [inpatients, setInpatients] = useState([])
+  const [ambulatorProcs, setAmbulatorProcs] = useState([])
+  const [ambulatorLoading, setAmbulatorLoading] = useState(false)
 
   // Load inpatients for dispense modal
   useEffect(() => {
     loadInpatients().then(setInpatients)
   }, [loadInpatients])
+
+  // Load ambulatory procedures
+  const loadAmbulatorProcs = async () => {
+    setAmbulatorLoading(true)
+    try {
+      const res = await ambulatorInpatientService.getAmbulatorProcedures('pending,in_progress')
+      if (res.success) setAmbulatorProcs(res.data || [])
+    } catch {
+      // ignore
+    } finally {
+      setAmbulatorLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadAmbulatorProcs()
+  }, [])
 
   // Handlers
   const handleStartTreatment = async (treatment) => {
@@ -121,6 +141,24 @@ export default function NursePanel() {
     }
   }
 
+  const handleStartAmbulatorProc = async (id) => {
+    try {
+      const res = await ambulatorInpatientService.startProcedure(id)
+      if (res.success) { toast.success('Muolaja boshlandi'); loadAmbulatorProcs() }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Xatolik')
+    }
+  }
+
+  const handleCompleteAmbulatorProc = async (id) => {
+    try {
+      const res = await ambulatorInpatientService.completeProcedure(id)
+      if (res.success) { toast.success('Muolaja yakunlandi'); loadAmbulatorProcs() }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Xatolik')
+    }
+  }
+
   // Status helpers
   const getStatusColor = (status) => {
     const colors = { pending: 'bg-yellow-100 text-yellow-700', in_progress: 'bg-blue-100 text-blue-700', completed: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-700' }
@@ -147,7 +185,7 @@ export default function NursePanel() {
   const renderTab = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <NurseDashboard stats={stats} treatments={treatments} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} />
+        return <NurseDashboard stats={stats} treatments={treatments} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} ambulatorProcs={ambulatorProcs} ambulatorLoading={ambulatorLoading} onStartAmbulatorProc={handleStartAmbulatorProc} onCompleteAmbulatorProc={handleCompleteAmbulatorProc} />
       case 'medicine-cabinet':
         return <NurseMedicineCabinet medicines={medicines} onDispense={setDispenseMedicine} onRefresh={refresh} />
       case 'calls':

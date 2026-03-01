@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-const NurseDashboard = ({ stats, treatments, onStartTreatment, onCompleteTreatment, getStatusColor, getStatusText }) => {
+const NurseDashboard = ({ stats, treatments, onStartTreatment, onCompleteTreatment, getStatusColor, getStatusText, ambulatorProcs = [], ambulatorLoading, onStartAmbulatorProc, onCompleteAmbulatorProc }) => {
   // Group treatments by time
   const grouped = useMemo(() => {
     const now = new Date()
@@ -185,6 +185,68 @@ const NurseDashboard = ({ stats, treatments, onStartTreatment, onCompleteTreatme
           <p className="text-2xl sm:text-4xl font-black">{stats.active_calls}</p>
           <p className="text-xs sm:text-sm opacity-90">Faol chaqiruvlar</p>
         </div>
+      </div>
+
+      {/* Ambulatory procedures */}
+      <div className="space-y-3">
+        <h3 className="text-lg sm:text-xl font-bold">Ambulator muolajalar</h3>
+        {ambulatorLoading ? (
+          <p className="text-sm text-gray-500">Yuklanmoqda...</p>
+        ) : ambulatorProcs.length === 0 ? (
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center">
+            <span className="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600 block mb-2">medical_services</span>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Kutilayotgan ambulator muolajalar yo'q</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {ambulatorProcs.map(proc => (
+              <div key={proc.id || proc._id} className={`p-4 rounded-xl border-2 ${
+                proc.status === 'in_progress'
+                  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+              }`}>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 dark:text-white truncate">{proc.patient_name}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 font-semibold">{proc.service_name}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-xs font-semibold shrink-0 ml-2 ${getStatusColor(proc.status)}`}>
+                    {getStatusText(proc.status)}
+                  </span>
+                </div>
+                {(proc.room_number || proc.bed_number) && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    <span className="material-symbols-outlined text-sm align-middle mr-1">meeting_room</span>
+                    {proc.room_number ? `Xona ${proc.room_number}` : ''}{proc.bed_number ? ` · Ko'yka #${proc.bed_number}` : ''}
+                  </p>
+                )}
+                {proc.invoice_number && (
+                  <p className="text-xs text-gray-400 mb-2">Hisob: {proc.invoice_number}</p>
+                )}
+                <div className="flex gap-2">
+                  {proc.status === 'pending' && (
+                    <button
+                      onClick={() => onStartAmbulatorProc(proc.id || proc._id)}
+                      className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs font-bold flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">play_arrow</span>
+                      Boshlash
+                    </button>
+                  )}
+                  {proc.status === 'in_progress' && (
+                    <button
+                      onClick={() => onCompleteAmbulatorProc(proc.id || proc._id)}
+                      className="flex-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-xs font-bold flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">check_circle</span>
+                      Yakunlash
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Treatments by time groups */}

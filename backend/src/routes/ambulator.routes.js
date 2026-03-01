@@ -7,6 +7,7 @@ import AmbulatorPatientCall from '../models/AmbulatorPatientCall.js';
 import AmbulatorDoctorNotification from '../models/AmbulatorDoctorNotification.js';
 import AmbulatorComplaint from '../models/AmbulatorComplaint.js';
 import AmbulatorProcedure from '../models/AmbulatorProcedure.js';
+import Bed from '../models/Bed.js';
 import Invoice from '../models/Invoice.js';
 import Queue from '../models/Queue.js';
 import Patient from '../models/Patient.js';
@@ -565,6 +566,49 @@ router.post('/procedures/create-from-invoice', authenticate, async (req, res, ne
 })
 
 /**
+ * Get all ambulatory procedures (for nurse panel)
+ * GET /ambulator/procedures?status=pending,in_progress
+ */
+router.get('/procedures', authenticate, async (req, res, next) => {
+  try {
+    const { status } = req.query
+    const filter = status
+      ? { status: { $in: status.split(',') } }
+      : { status: { $in: ['pending', 'in_progress'] } }
+
+    const procedures = await AmbulatorProcedure.find(filter)
+      .populate('patient_id', 'first_name last_name patient_number')
+      .populate('nurse_id', 'first_name last_name')
+      .populate({ path: 'bed_id', populate: { path: 'room_id', select: 'room_number room_name' } })
+      .sort({ createdAt: 1 })
+      .lean()
+
+    res.json({
+      success: true,
+      data: procedures.map(p => ({
+        id: p._id,
+        service_name: p.service_name,
+        quantity: p.quantity,
+        status: p.status,
+        invoice_number: p.invoice_number,
+        patient_id: p.patient_id?._id,
+        patient_name: p.patient_id ? `${p.patient_id.first_name} ${p.patient_id.last_name}` : '',
+        patient_number: p.patient_id?.patient_number,
+        room_number: p.bed_id?.room_id?.room_number,
+        room_name: p.bed_id?.room_id?.room_name,
+        bed_number: p.bed_number,
+        nurse_name: p.nurse_id ? `${p.nurse_id.first_name} ${p.nurse_id.last_name}` : null,
+        started_at: p.started_at,
+        completed_at: p.completed_at,
+        created_at: p.createdAt
+      }))
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+/**
  * Get procedures by invoice number
  * GET /ambulator/procedures/by-invoice/:invoiceNumber
  */
@@ -633,6 +677,28 @@ router.patch('/procedures/:id/complete', authenticate, async (req, res, next) =>
     procedure.status = 'completed'
     procedure.completed_at = new Date()
     await procedure.save()
+
+    // Free up the bed if assigned
+    if (procedure.bed_id) {
+      await Bed.findByIdAndUpdate(procedure.bed_id, {
+        status: 'available',
+        $unset: { current_patient_id: 1, current_admission_id: 1 }
+      })
+      // Check if all procedures for this patient are done, then free room
+      const remaining = await AmbulatorProcedure.countDocuments({
+        patient_id: procedure.patient_id,
+        status: { $in: ['pending', 'in_progress'] }
+      })
+      if (remaining === 0 && procedure.bed_id) {
+        const bed = await Bed.findById(procedure.bed_id).lean()
+        if (bed?.room_id) {
+          await AmbulatorRoom.findByIdAndUpdate(bed.room_id, {
+            status: 'available',
+            $unset: { current_patient_id: 1 }
+          })
+        }
+      }
+    }
 
     res.json({ success: true, data: procedure })
   } catch (error) {
