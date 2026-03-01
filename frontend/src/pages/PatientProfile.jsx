@@ -1320,6 +1320,43 @@ const PatientProfile = () => {
                 </div>
               )}
 
+              {/* Prescription medications shown as procedure cards */}
+              {prescriptions.length > 0 && prescriptions.some(p => p.medications?.length > 0) && (
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base mb-2">Retsept dorilar</h3>
+                  <div className="space-y-2">
+                    {prescriptions.flatMap(presc =>
+                      (presc.medications || []).map((med, i) => (
+                        <div key={`${presc.id}-${i}`} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center justify-between">
+                          <div className="flex-1 min-w-0 mr-2">
+                            <p className="font-semibold text-gray-900 dark:text-white text-sm">{med.medication_name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {med.dosage && <span>Doza: {med.dosage}</span>}
+                              {med.frequency_per_day && <span> • Kuniga {med.frequency_per_day}x</span>}
+                              {med.duration_days && <span> • {med.duration_days} kun</span>}
+                            </p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                              {presc.diagnosis && <span>{presc.diagnosis} • </span>}
+                              {presc.doctor_first_name && <span>Dr. {presc.doctor_first_name} {presc.doctor_last_name} • </span>}
+                              {formatDate(presc.issued_date || presc.created_at)}
+                            </p>
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap flex-shrink-0 ${
+                            presc.prescription_type === 'URGENT' ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' :
+                            presc.prescription_type === 'CHRONIC' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400' :
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                          }`}>
+                            {presc.prescription_type === 'URGENT' ? 'Shoshilinch' :
+                             presc.prescription_type === 'CHRONIC' ? 'Surunkali' : 'Oddiy'}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <hr className="my-4 border-gray-200 dark:border-gray-700" />
+                </div>
+              )}
+
               {/* Ambulatory Procedures (from billing) */}
               {ambulatorProcedures.length > 0 && (
                 <div>
