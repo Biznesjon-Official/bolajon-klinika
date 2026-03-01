@@ -9,6 +9,7 @@
     "start": "node src/server.js",
     "migrate": "node src/database/migrate.js",
     "seed": "node scripts/seed.js",
+    "seed:services": "node src/seeds/services.seed.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:unit": "jest __tests__/laboratory.test.js",

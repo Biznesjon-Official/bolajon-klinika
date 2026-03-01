@@ -28,7 +28,8 @@
       "Bash(tail:*)",
       "mcp__ide__getDiagnostics",
       "Bash(cd /c/Users/User/Desktop/Bolajon_klinik && git push origin main 2>&1)",
-      "Bash(cd /c/Users/User/Desktop/Bolajon_klinik && git add frontend/src/pages/QueueManagement.jsx frontend/src/layouts/DashboardLayout.jsx && git commit -m \"$\\(cat <<'EOF'\nfeat: Add lab order button to queue patient rows for doctors\n\n- Add Tahlil buyurtma button per patient in queue \\(CALLED/IN_PROGRESS\\)\n- Add lab order modal with test selection, priority, notes\n- Remove Bemorlar page from doctor sidebar \\(navbat yetarli\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git push origin main 2>&1)"
+      "Bash(cd /c/Users/User/Desktop/Bolajon_klinik && git add frontend/src/pages/QueueManagement.jsx frontend/src/layouts/DashboardLayout.jsx && git commit -m \"$\\(cat <<'EOF'\nfeat: Add lab order button to queue patient rows for doctors\n\n- Add Tahlil buyurtma button per patient in queue \\(CALLED/IN_PROGRESS\\)\n- Add lab order modal with test selection, priority, notes\n- Remove Bemorlar page from doctor sidebar \\(navbat yetarli\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" && git push origin main 2>&1)",
+      "Bash(node:*)"
     ]
   }
 }

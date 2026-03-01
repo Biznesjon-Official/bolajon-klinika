@@ -10,6 +10,7 @@ import Patient from '../models/Patient.js';
 import Staff from '../models/Staff.js';
 import LabTest from '../models/LabTest.js';
 import DoctorService from '../models/DoctorService.js';
+import AmbulatorProcedure from '../models/AmbulatorProcedure.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -460,7 +461,14 @@ router.post('/invoices',
         payment_status: paymentStatus,
         payment_method,
         notes: revisitDiscountReason ? `${revisitDiscountReason}${notes ? '. ' + notes : ''}` : notes,
-        created_by: req.user.id
+        created_by: req.user.id,
+        // Embed items for quick display (without extra DB join)
+        items: invoiceItems.map(item => ({
+          description: item.service_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: item.total_price
+        }))
       };
 
       // Add doctor_id to metadata if provided
@@ -492,6 +500,19 @@ router.post('/invoices',
       }));
       
       await BillingItem.insertMany(billingItemsData, { session });
+
+      // Create AmbulatorProcedure records so nurses can see and execute procedures
+      if (notes === 'Muolaja') {
+        const ambulatorProcedures = invoiceItems.map(item => ({
+          invoice_id: invoice[0]._id,
+          invoice_number: invoiceNumber,
+          patient_id,
+          service_name: item.service_name,
+          quantity: item.quantity || 1,
+          status: 'pending'
+        }))
+        await AmbulatorProcedure.insertMany(ambulatorProcedures, { session })
+      }
 
       // Create transaction if payment made
       if (paidAmt > 0) {

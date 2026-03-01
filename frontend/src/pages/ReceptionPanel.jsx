@@ -105,29 +105,15 @@ export default function ReceptionPanel() {
   // Lab order modal state
   const [showLabOrderModal, setShowLabOrderModal] = useState(false);
   const [patients, setPatients] = useState([]);
-  const [doctors, setDoctors] = useState([]);
   const [tests, setTests] = useState([]);
 
   const handleNewLabOrder = async () => {
     try {
-      // Load patients, doctors and tests
-      const [patientsRes, staffRes, testsRes] = await Promise.all([
+      const [patientsRes, testsRes] = await Promise.all([
         patientService.getPatients(),
-        api.get('/staff'),
         laboratoryService.getTests({ is_active: true })
       ]);
-      
       setPatients(patientsRes.data);
-      
-      // Filter laborants
-      const allStaff = staffRes.data.data || staffRes.data;
-      const laborants = allStaff.filter(staff => 
-        staff.role_name === 'laborant' || 
-        staff.role_name === 'Laborant' ||
-        (staff.role && (staff.role.name === 'laborant' || staff.role.name === 'Laborant'))
-      );
-      setDoctors(laborants);
-      
       setTests(testsRes.data);
       setShowLabOrderModal(true);
     } catch (error) {
@@ -440,7 +426,6 @@ export default function ReceptionPanel() {
           isOpen={showLabOrderModal}
           onClose={() => setShowLabOrderModal(false)}
           patients={patients}
-          doctors={doctors}
           tests={tests}
           onSuccess={handleLabOrderSuccess}
         />

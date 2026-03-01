@@ -2,10 +2,9 @@ import { useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import laboratoryService from '../../services/laboratoryService'
 
-export default function NewOrderModal({ isOpen, onClose, patients, doctors, tests, onSuccess, t, preselectedPatientId }) {
+export default function NewOrderModal({ isOpen, onClose, patients, tests, onSuccess, t, preselectedPatientId }) {
   const [formData, setFormData] = useState({
     patient_id: preselectedPatientId || '',
-    doctor_id: '',
     priority: 'normal',
     notes: ''
   })
@@ -129,25 +128,6 @@ export default function NewOrderModal({ isOpen, onClose, patients, doctors, test
                 ))}
               </select>
             )}
-          </div>
-
-          {/* Shifokor */}
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              {t('lab.doctor')}
-            </label>
-            <select
-              value={formData.doctor_id}
-              onChange={(e) => setFormData({ ...formData, doctor_id: e.target.value })}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            >
-              <option value="">{t('lab.selectDoctor')}</option>
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.first_name} {doctor.last_name} - {doctor.specialization}
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Tahlillar tanlash */}

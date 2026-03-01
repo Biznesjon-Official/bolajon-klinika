@@ -236,6 +236,7 @@ router.get('/:id',
       const LabOrder = (await import('../models/LabOrder.js')).default;
       const MedicalRecord = (await import('../models/MedicalRecord.js')).default;
       const Queue = (await import('../models/Queue.js')).default;
+      const AmbulatorProcedure = (await import('../models/AmbulatorProcedure.js')).default;
 
       // Get admissions with room, bed, doctor, and nurse info
       const admissions = await Admission.find({ patient_id: patient._id })
@@ -325,6 +326,13 @@ router.get('/:id',
         .limit(10)
         .lean();
       
+      // Get ambulatory procedures (assigned via billing)
+      const ambulatorProcedures = await AmbulatorProcedure.find({ patient_id: patient._id })
+        .populate('nurse_id', 'first_name last_name')
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean()
+
       // Get lab results
       const labResults = await LabOrder.find({ patient_id: patient._id })
         .populate('doctor_id', 'first_name last_name')
@@ -367,13 +375,20 @@ router.get('/:id',
           patient: formattedPatient,
           admissions: formattedAdmissions,
           invoices: formattedInvoices, // Oxirgi 10 ta invoice
-          allInvoices: invoices.map(inv => ({ // Barcha invoicelar (qarz hisoblash uchun)
+          allInvoices: invoices.map(inv => ({
             id: inv._id,
             invoice_number: inv.invoice_number,
             total_amount: inv.total_amount,
             paid_amount: inv.paid_amount,
             payment_status: inv.payment_status || inv.status,
-            created_at: inv.created_at
+            payment_method: inv.payment_method,
+            created_at: inv.created_at,
+            notes: inv.notes,
+            items: inv.items || [],
+            services: inv.services || [],
+            metadata: inv.metadata || {},
+            created_by_name: inv.created_by ? `${inv.created_by.first_name} ${inv.created_by.last_name}` : null,
+            doctor_name: inv.metadata?.doctor_name || null
           })),
           prescriptions: prescriptions.map(presc => ({
             id: presc._id,
@@ -440,6 +455,18 @@ router.get('/:id',
             specialization: q.doctor_id?.specialization,
             created_at: q.createdAt,
             completed_at: q.completed_at
+          })),
+          ambulatorProcedures: ambulatorProcedures.map(p => ({
+            id: p._id,
+            service_name: p.service_name,
+            quantity: p.quantity,
+            status: p.status,
+            invoice_number: p.invoice_number,
+            nurse_first_name: p.nurse_id?.first_name,
+            nurse_last_name: p.nurse_id?.last_name,
+            started_at: p.started_at,
+            completed_at: p.completed_at,
+            created_at: p.createdAt
           }))
         }
       });

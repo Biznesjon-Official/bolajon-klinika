@@ -54,7 +54,6 @@ const DoctorPanel = () => {
   // Lab order
   const [showLabOrderModal, setShowLabOrderModal] = useState(false)
   const [labTests, setLabTests] = useState([])
-  const [labDoctors, setLabDoctors] = useState([])
   const [labOrderPatient, setLabOrderPatient] = useState(null)
 
   // Prescription form
@@ -504,19 +503,10 @@ const DoctorPanel = () => {
   const handleOpenLabOrder = async (patient) => {
     setLabOrderPatient(patient)
     try {
-      const [testsRes, staffRes] = await Promise.all([
-        laboratoryService.getTests(),
-        api.get('/staff')
-      ])
+      const testsRes = await laboratoryService.getTests()
       setLabTests(testsRes.data || [])
-      const allStaff = staffRes.data.data || staffRes.data
-      setLabDoctors(allStaff.filter(s =>
-        s.role_name === 'laborant' || s.role_name === 'Laborant' ||
-        (s.role && (s.role.name === 'laborant' || s.role.name === 'Laborant'))
-      ))
     } catch {
       setLabTests([])
-      setLabDoctors([])
     }
     setShowLabOrderModal(true)
   }
@@ -1017,7 +1007,6 @@ const DoctorPanel = () => {
             last_name: labOrderPatient.last_name || labOrderPatient.patientName?.split(' ').slice(1).join(' ') || '',
             patient_number: labOrderPatient.patient_number || ''
           }] : []}
-          doctors={labDoctors}
           tests={labTests}
           onSuccess={() => { setShowLabOrderModal(false) }}
           t={t}

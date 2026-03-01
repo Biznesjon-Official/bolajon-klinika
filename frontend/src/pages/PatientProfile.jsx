@@ -51,6 +51,7 @@ const PatientProfile = () => {
   const [admissions, setAdmissions] = useState([]);
   const [assignedSpecialists, setAssignedSpecialists] = useState([]);
   const [treatmentSchedule, setTreatmentSchedule] = useState(null);
+  const [ambulatorProcedures, setAmbulatorProcedures] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [queueHistory, setQueueHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
@@ -109,7 +110,6 @@ const PatientProfile = () => {
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
   const [showLabOrderModal, setShowLabOrderModal] = useState(false);
   const [labTests, setLabTests] = useState([]);
-  const [labDoctors, setLabDoctors] = useState([]);
 
   // Nurse: treatment complete
   const [showCompleteTreatmentModal, setShowCompleteTreatmentModal] = useState(false);
@@ -229,7 +229,10 @@ const PatientProfile = () => {
       setShowProcedureModal(false);
       loadPatientData();
       if (res.success && res.data) {
-        billingService.printProcedureReceipt(res.data, `${patient.first_name} ${patient.last_name}`);
+        billingService.printProcedureReceipt(
+          { ...res.data.invoice, items: res.data.items },
+          `${patient.first_name} ${patient.last_name}`
+        );
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
@@ -362,6 +365,7 @@ const PatientProfile = () => {
         setLabResults(response.data.labResults || []); // labOrders -> labResults
         setAdmissions(response.data.admissions || []);
         setQueueHistory(response.data.queueHistory || []);
+        setAmbulatorProcedures(response.data.ambulatorProcedures || []);
       } else {
         showAlert('Bemor ma\'lumotlari topilmadi', 'error', 'Xatolik');
       }
@@ -398,20 +402,10 @@ const PatientProfile = () => {
   // Doctor: Lab buyurtma
   const handleOpenLabOrderModal = async () => {
     try {
-      const [testsRes, staffRes] = await Promise.all([
-        laboratoryService.getTests(),
-        api.get('/staff')
-      ])
+      const testsRes = await laboratoryService.getTests()
       setLabTests(testsRes.data || [])
-      const allStaff = staffRes.data.data || staffRes.data
-      const laborants = allStaff.filter(s =>
-        s.role_name === 'laborant' || s.role_name === 'Laborant' ||
-        (s.role && (s.role.name === 'laborant' || s.role.name === 'Laborant'))
-      )
-      setLabDoctors(laborants)
     } catch {
       setLabTests([])
-      setLabDoctors([])
     }
     setShowLabOrderModal(true)
   };
@@ -1285,6 +1279,37 @@ const PatientProfile = () => {
           {/* Treatment Schedule Tab */}
           {activeTab === 'treatments' && (
             <div className="space-y-3 sm:space-y-4">
+
+              {/* Ambulatory Procedures (from billing) */}
+              {ambulatorProcedures.length > 0 && (
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base mb-2">Biriktirilgan muolajalar</h3>
+                  <div className="space-y-2">
+                    {ambulatorProcedures.map(proc => (
+                      <div key={proc.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm">{proc.service_name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Miqdor: {proc.quantity} • #{proc.invoice_number}
+                            {proc.nurse_first_name && ` • Hamshira: ${proc.nurse_first_name} ${proc.nurse_last_name}`}
+                          </p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">{formatDate(proc.created_at)}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                          proc.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
+                          proc.status === 'in_progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' :
+                          'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                        }`}>
+                          {proc.status === 'completed' ? 'Bajarildi' :
+                           proc.status === 'in_progress' ? 'Jarayonda' : 'Kutilmoqda'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <hr className="my-4 border-gray-200 dark:border-gray-700" />
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3">
                 <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-sm sm:text-base">Kunlik muolaja jadvali</h3>
                 <DateInput
@@ -3018,7 +3043,6 @@ const PatientProfile = () => {
           isOpen={showLabOrderModal}
           onClose={() => setShowLabOrderModal(false)}
           patients={patient ? [patient] : []}
-          doctors={labDoctors}
           tests={labTests}
           onSuccess={() => { setShowLabOrderModal(false); loadPatientData() }}
           t={t}
