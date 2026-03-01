@@ -6,7 +6,7 @@ const procedureCategorySchema = new mongoose.Schema({
   procedure_type: {
     type: String,
     enum: ['ukol', 'kapelnitsa', 'massaj', 'xijoma'],
-    required: true
+    default: null
   },
   is_active: { type: Boolean, default: true }
 }, {
