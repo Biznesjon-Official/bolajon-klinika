@@ -313,46 +313,8 @@ const PrescriptionModal = ({
           </datalist>
         </div>
 
-        {/* Kasallik va Yondosh kasallik — 2 ustun */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Asosiy kasallik */}
-          <div className="relative">
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-              <span className="material-symbols-outlined text-sm align-middle mr-1">coronavirus</span>
-              Kasallik
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={diseaseSearch}
-                onChange={(e) => { setDiseaseSearch(e.target.value); setShowDiseaseDropdown(true); if (!e.target.value) { setSelectedDisease(null); setSelectedRecommendations([]) } }}
-                onFocus={() => setShowDiseaseDropdown(true)}
-                onBlur={() => setTimeout(() => setShowDiseaseDropdown(false), 200)}
-                className={`w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all ${selectedDisease ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}
-                placeholder="Qidirish..."
-              />
-              {selectedDisease && (
-                <button type="button" onClick={() => { setSelectedDisease(null); setDiseaseSearch(''); setSelectedRecommendations([]) }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500">
-                  <span className="material-symbols-outlined text-lg">close</span>
-                </button>
-              )}
-            </div>
-            {showDiseaseDropdown && diseaseSearch && !selectedDisease && filteredDiseases.length > 0 && (
-              <div className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl max-h-52 overflow-y-auto">
-                {filteredDiseases.map(d => (
-                  <button key={d._id} type="button" onClick={() => handleSelectDisease(d)}
-                    className="w-full text-left px-3 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm border-b border-gray-100 dark:border-gray-700 last:border-0 transition-colors">
-                    <span className="font-semibold text-gray-900 dark:text-white">{d.name}</span>
-                    {d.category && <span className="ml-2 text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 rounded">{d.category}</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Yondosh kasallik */}
-          <div className="relative">
+        {/* Yondosh kasallik */}
+        <div className="relative">
             <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               <span className="material-symbols-outlined text-sm align-middle mr-1">add_circle</span>
               Yondosh kasallik <span className="text-xs text-gray-400 font-normal">(ixtiyoriy)</span>
@@ -385,36 +347,15 @@ const PrescriptionModal = ({
                 ))}
               </div>
             )}
-          </div>
         </div>
 
         {/* Maslahatlar bo'limi */}
-        {(selectedDisease || selectedSecondaryDisease || selectedRecommendations.length > 0 || selectedSecondaryRecommendations.length > 0) && (
+        {(selectedSecondaryDisease || selectedSecondaryRecommendations.length > 0) && (
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
             <div className="flex items-center gap-2 mb-3">
               <span className="material-symbols-outlined text-amber-600">tips_and_updates</span>
               <h4 className="text-sm font-bold text-amber-800 dark:text-amber-300">Maslahatlar</h4>
             </div>
-
-            {/* Asosiy kasallik maslahatlar */}
-            {selectedDisease?.recommendations?.length > 0 && (
-              <div className="mb-3">
-                <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-2">{selectedDisease.name}:</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  {selectedDisease.recommendations.map((r, i) => (
-                    <label key={`p-${i}`} className={`flex items-start gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-all text-sm ${
-                      selectedRecommendations.includes(r.text)
-                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-200'
-                        : 'bg-white/60 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800'
-                    }`}>
-                      <input type="checkbox" checked={selectedRecommendations.includes(r.text)} onChange={() => toggleRecommendationCheck(r.text)}
-                        className="w-4 h-4 accent-amber-500 rounded mt-0.5 flex-shrink-0" />
-                      <span className="leading-snug">{r.text}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Yondosh kasallik maslahatlar */}
             {selectedSecondaryDisease?.recommendations?.length > 0 && (
