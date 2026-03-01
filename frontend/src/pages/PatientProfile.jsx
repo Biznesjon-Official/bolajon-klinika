@@ -135,8 +135,9 @@ const PatientProfile = () => {
   const [procedurePayMethod, setProcedurePayMethod] = useState('cash');
   const [procedurePaidAmount, setProcedurePaidAmount] = useState('');
   const [procedureSubmitting, setProcedureSubmitting] = useState(false);
-  const [availableRooms, setAvailableRooms] = useState([]);
-  const [selectedRoomId, setSelectedRoomId] = useState('');
+  const [procedureRooms, setProcedureRooms] = useState([]);
+  const [selectedProcRoomId, setSelectedProcRoomId] = useState('');
+  const [selectedProcBedNum, setSelectedProcBedNum] = useState('');
 
   const showAlert = (message, type = 'info', title = '') => {
     setAlertModal({ isOpen: true, title, message, type });
@@ -191,15 +192,16 @@ const PatientProfile = () => {
     setSelectedProcedures([]);
     setProcedurePayMethod('cash');
     setProcedurePaidAmount('');
-    setSelectedRoomId('');
+    setSelectedProcRoomId('');
+    setSelectedProcBedNum('');
     setShowProcedureModal(true);
     try {
       const [svcRes, roomRes] = await Promise.all([
         servicesService.getServices({ category: 'Muolaja', is_active: 'true' }),
-        ambulatorService.getRooms()
+        ambulatorInpatientService.getRooms()
       ]);
       setProcedureList(svcRes.data || []);
-      setAvailableRooms((roomRes.data || []).filter(r => r.status === 'available'));
+      setProcedureRooms(roomRes.data || []);
     } catch {
       toast.error('Muolajalarni yuklashda xatolik');
     }
@@ -233,7 +235,8 @@ const PatientProfile = () => {
         paid_amount: total,
         payment_method: procedurePayMethod,
         notes: 'Muolaja',
-        ...(selectedRoomId ? { room_id: selectedRoomId } : {})
+        ...(selectedProcRoomId ? { room_id: selectedProcRoomId } : {}),
+        ...(selectedProcBedNum ? { bed_number: parseInt(selectedProcBedNum) } : {})
       });
       toast.success('Muolaja biriktirildi va billing yaratildi');
       setShowProcedureModal(false);
@@ -982,6 +985,7 @@ const PatientProfile = () => {
                 <span className="material-symbols-outlined text-teal-600 dark:text-teal-400 text-lg">meeting_room</span>
                 <span className="text-sm font-semibold text-teal-800 dark:text-teal-200">
                   Ambulator xona: {currentRoom.room_number} — {currentRoom.room_name}
+                  {currentRoom.bed_number && <span className="ml-2 font-normal text-xs">Ko'yka #{currentRoom.bed_number}</span>}
                 </span>
               </div>
             )}
@@ -1309,6 +1313,7 @@ const PatientProfile = () => {
                     <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">Joriy ambulator xona</p>
                     <p className="font-bold text-teal-800 dark:text-teal-200 text-sm">
                       {currentRoom.room_number} — {currentRoom.room_name}
+                      {currentRoom.bed_number && <span className="ml-2">Ko'yka #{currentRoom.bed_number}</span>}
                       {currentRoom.floor && <span className="font-normal text-xs ml-2">({currentRoom.floor}-qavat)</span>}
                     </p>
                   </div>
@@ -1326,7 +1331,7 @@ const PatientProfile = () => {
                           <p className="font-semibold text-gray-900 dark:text-white text-sm">{proc.service_name}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             Miqdor: {proc.quantity} • #{proc.invoice_number}
-                            {proc.room_number && <span className="ml-1 text-teal-600 dark:text-teal-400">• Xona: {proc.room_number}</span>}
+                            {proc.room_number && <span className="ml-1 text-teal-600 dark:text-teal-400">• Xona: {proc.room_number}{proc.bed_number ? ` Ko'yka #${proc.bed_number}` : ''}</span>}
                             {proc.nurse_first_name && ` • Hamshira: ${proc.nurse_first_name} ${proc.nurse_last_name}`}
                           </p>
                           <p className="text-xs text-gray-400 dark:text-gray-500">{formatDate(proc.created_at)}</p>
@@ -3268,24 +3273,44 @@ const PatientProfile = () => {
                 </div>
               )}
 
-              {/* Room selection */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                  Xona biriktirish
-                  {availableRooms.length === 0 && <span className="ml-1 text-yellow-500">(bo'sh xona yo'q)</span>}
-                </label>
-                <select
-                  value={selectedRoomId}
-                  onChange={e => setSelectedRoomId(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
-                >
-                  <option value="">— Xona tanlanmagan —</option>
-                  {availableRooms.map(r => (
-                    <option key={r.id} value={r.id}>
-                      {r.room_number} — {r.room_name}
-                    </option>
-                  ))}
-                </select>
+              {/* Room + Bed selection */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Xona</label>
+                  <select
+                    value={selectedProcRoomId}
+                    onChange={e => { setSelectedProcRoomId(e.target.value); setSelectedProcBedNum(''); }}
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white"
+                  >
+                    <option value="">— Xona —</option>
+                    {procedureRooms.map(r => {
+                      const availBeds = (r.beds || []).filter(b => b.status === 'available').length
+                      return (
+                        <option key={r._id || r.id} value={r._id || r.id} disabled={availBeds === 0}>
+                          {r.room_number} ({availBeds} bo'sh)
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Ko'yka</label>
+                  <select
+                    value={selectedProcBedNum}
+                    onChange={e => setSelectedProcBedNum(e.target.value)}
+                    disabled={!selectedProcRoomId}
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white disabled:opacity-50"
+                  >
+                    <option value="">— Ko'yka —</option>
+                    {(procedureRooms.find(r => (r._id || r.id) === selectedProcRoomId)?.beds || [])
+                      .filter(b => b.status === 'available')
+                      .map(b => (
+                        <option key={b._id || b.bed_number} value={b.bed_number}>
+                          Ko'yka #{b.bed_number}
+                        </option>
+                      ))}
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-4 gap-2">

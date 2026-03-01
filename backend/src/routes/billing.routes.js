@@ -12,6 +12,7 @@ import LabTest from '../models/LabTest.js';
 import DoctorService from '../models/DoctorService.js';
 import AmbulatorProcedure from '../models/AmbulatorProcedure.js';
 import AmbulatorRoom from '../models/AmbulatorRoom.js';
+import Bed from '../models/Bed.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -42,7 +43,8 @@ const createInvoiceSchema = Joi.object({
   discount_amount: Joi.number().min(0).default(0),
   notes: Joi.string().allow('', null),
   doctor_id: Joi.string().allow(null),
-  room_id: Joi.string().allow(null)
+  room_id: Joi.string().allow(null),
+  bed_number: Joi.number().integer().min(1).allow(null)
 });
 
 const addPaymentSchema = Joi.object({
@@ -303,7 +305,7 @@ router.post('/invoices',
 
       await session.startTransaction();
 
-      const { patient_id, items, payment_method, paid_amount, discount_amount, notes, doctor_id, room_id } = req.body;
+      const { patient_id, items, payment_method, paid_amount, discount_amount, notes, doctor_id, room_id, bed_number } = req.body;
 
       // Get patient to check last visit
       const patient = await Patient.findById(patient_id);
@@ -505,6 +507,31 @@ router.post('/invoices',
 
       // Create AmbulatorProcedure records so nurses can see and execute procedures
       if (notes === 'Muolaja') {
+        // Find bed if room_id and bed_number provided
+        let assignedBed = null
+        if (room_id && mongoose.Types.ObjectId.isValid(room_id) && bed_number) {
+          assignedBed = await Bed.findOne({ room_id, bed_number }).session(session)
+          if (!assignedBed) {
+            // Create bed if not exists
+            const [newBed] = await Bed.create([{
+              room_id,
+              bed_number,
+              status: 'occupied',
+              current_patient_id: patient_id,
+              occupied_at: new Date()
+            }], { session })
+            assignedBed = newBed
+          } else {
+            await Bed.findByIdAndUpdate(assignedBed._id, {
+              status: 'occupied',
+              current_patient_id: patient_id,
+              occupied_at: new Date()
+            }, { session })
+          }
+          // Update room status
+          await AmbulatorRoom.findByIdAndUpdate(room_id, { status: 'occupied', current_patient_id: patient_id }, { session })
+        }
+
         const ambulatorProcedures = invoiceItems.map(item => ({
           invoice_id: invoice[0]._id,
           invoice_number: invoiceNumber,
@@ -512,18 +539,9 @@ router.post('/invoices',
           service_name: item.service_name,
           quantity: item.quantity || 1,
           status: 'pending',
-          ...(room_id ? { bed_id: room_id } : {})
+          ...(assignedBed ? { bed_id: assignedBed._id, bed_number: assignedBed.bed_number } : {})
         }))
         await AmbulatorProcedure.insertMany(ambulatorProcedures, { session })
-
-        // Assign patient to ambulatory room if provided
-        if (room_id && mongoose.Types.ObjectId.isValid(room_id)) {
-          await AmbulatorRoom.findByIdAndUpdate(
-            room_id,
-            { status: 'occupied', current_patient_id: patient_id },
-            { session }
-          )
-        }
       }
 
       // Create transaction if payment made

@@ -327,19 +327,18 @@ router.get('/:id',
         .lean();
       
       // Get ambulatory procedures (assigned via billing)
+      const Bed = (await import('../models/Bed.js')).default
       const ambulatorProcedures = await AmbulatorProcedure.find({ patient_id: patient._id })
         .populate('nurse_id', 'first_name last_name')
-        .populate('bed_id', 'room_number room_name floor')
+        .populate({ path: 'bed_id', populate: { path: 'room_id', select: 'room_number room_name floor' } })
         .sort({ createdAt: -1 })
         .limit(50)
         .lean()
 
-      // Get current ambulatory room for this patient
-      const currentAmbulatorRoom = await AmbulatorRoom.findOne({
-        current_patient_id: patient._id,
-        department: 'ambulator',
-        status: 'occupied'
-      }).lean()
+      // Get current bed assignment for this patient
+      const currentBed = await Bed.findOne({ current_patient_id: patient._id })
+        .populate('room_id', 'room_number room_name floor')
+        .lean()
 
       // Get lab results
       const labResults = await LabOrder.find({ patient_id: patient._id })
@@ -464,11 +463,12 @@ router.get('/:id',
             created_at: q.createdAt,
             completed_at: q.completed_at
           })),
-          current_room: currentAmbulatorRoom ? {
-            id: currentAmbulatorRoom._id,
-            room_number: currentAmbulatorRoom.room_number,
-            room_name: currentAmbulatorRoom.room_name,
-            floor: currentAmbulatorRoom.floor
+          current_room: currentBed ? {
+            id: currentBed.room_id?._id,
+            room_number: currentBed.room_id?.room_number,
+            room_name: currentBed.room_id?.room_name,
+            floor: currentBed.room_id?.floor,
+            bed_number: currentBed.bed_number
           } : null,
           ambulatorProcedures: ambulatorProcedures.map(p => ({
             id: p._id,
@@ -478,8 +478,9 @@ router.get('/:id',
             invoice_number: p.invoice_number,
             nurse_first_name: p.nurse_id?.first_name,
             nurse_last_name: p.nurse_id?.last_name,
-            room_number: p.bed_id?.room_number,
-            room_name: p.bed_id?.room_name,
+            room_number: p.bed_id?.room_id?.room_number,
+            room_name: p.bed_id?.room_id?.room_name,
+            bed_number: p.bed_number,
             started_at: p.started_at,
             completed_at: p.completed_at,
             created_at: p.createdAt

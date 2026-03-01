@@ -14,7 +14,8 @@ const ambulatorProcedureSchema = new mongoose.Schema({
   started_at: Date,
   completed_at: Date,
   nurse_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff' },
-  bed_id: { type: mongoose.Schema.Types.ObjectId, ref: 'AmbulatorRoom' }
+  bed_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Bed' },
+  bed_number: { type: Number }
 }, { timestamps: true })
 
 ambulatorProcedureSchema.index({ invoice_id: 1 })
