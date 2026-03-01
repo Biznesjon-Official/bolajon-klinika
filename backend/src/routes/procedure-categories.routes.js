@@ -20,12 +20,11 @@ router.post('/', authenticate, authorize('admin', 'receptionist'), async (req, r
   try {
     const { name, description, procedure_type } = req.body
     if (!name?.trim()) return res.status(400).json({ success: false, message: 'Nom majburiy' })
-    if (!procedure_type) return res.status(400).json({ success: false, message: 'Tur majburiy' })
 
     const exists = await ProcedureCategory.findOne({ name: name.trim() })
     if (exists) return res.status(400).json({ success: false, message: 'Bu nom allaqachon mavjud' })
 
-    const category = await ProcedureCategory.create({ name: name.trim(), description: description?.trim() || '', procedure_type })
+    const category = await ProcedureCategory.create({ name: name.trim(), description: description?.trim() || '', ...(procedure_type ? { procedure_type } : {}) })
     res.status(201).json({ success: true, data: category })
   } catch (error) {
     next(error)
