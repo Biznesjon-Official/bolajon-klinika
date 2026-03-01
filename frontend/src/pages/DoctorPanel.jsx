@@ -47,6 +47,7 @@ const DoctorPanel = () => {
   const [urgentPatient, setUrgentPatient] = useState(null)
   const [urgentComplaint, setUrgentComplaint] = useState('')
   const [urgentDiagnosis, setUrgentDiagnosis] = useState('')
+  const [lastUrgentDiagnosis, setLastUrgentDiagnosis] = useState('')
   const [urgentNotes, setUrgentNotes] = useState('')
   const [urgentMeds, setUrgentMeds] = useState([{ name: '', amount: '' }])
   const [urgentSubmitting, setUrgentSubmitting] = useState(false)
@@ -278,7 +279,7 @@ const DoctorPanel = () => {
       }
       setSelectedPatient(patient);
       setShowPrescriptionModal(true);
-      setDiagnosis('');
+      setDiagnosis(lastUrgentDiagnosis || '');
       setPrescriptionType('REGULAR');
       setNotes('');
       setMedications([]);
@@ -546,16 +547,10 @@ const DoctorPanel = () => {
           { ...data, prescription_number: res.data?.prescription_number, doctor_name: user?.full_name || user?.username },
           { first_name: urgentPatient.patientName?.split(' ')[0] || '', last_name: urgentPatient.patientName?.split(' ').slice(1).join(' ') || '' }
         )
+        setLastUrgentDiagnosis(urgentDiagnosis)
         setShowUrgentModal(false)
         showAlert('Tezkor tashxis saqlandi va chek chiqarildi', 'success', 'Muvaffaqiyatli')
         loadMyQueue()
-        // Open prescription modal with diagnosis pre-filled
-        setSelectedPatient(urgentPatient)
-        setDiagnosis(urgentDiagnosis)
-        setPrescriptionType('REGULAR')
-        setNotes('')
-        setMedications([])
-        setShowPrescriptionModal(true)
       }
     } catch (err) {
       showAlert(err.response?.data?.message || 'Xatolik', 'error', 'Xatolik')
@@ -1039,16 +1034,6 @@ const DoctorPanel = () => {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-semibold mb-1">Bezovtalik sababi</label>
-                <input
-                  type="text"
-                  value={urgentComplaint}
-                  onChange={(e) => setUrgentComplaint(e.target.value)}
-                  placeholder="Masalan: bosh og'riq, isitma, yo'tal..."
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm"
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-semibold mb-1">Tashxis *</label>
                 <input
                   type="text"
@@ -1142,20 +1127,23 @@ const DoctorPanel = () => {
         cancelText={confirmModal.cancelText}
       />
 
-      {/* Retsept tahrirlash Modal - TEMPORARILY DISABLED */}
-      {false && (
+      {/* Retsept yozish Modal */}
       <Modal
         isOpen={showPrescriptionModal}
         onClose={() => setShowPrescriptionModal(false)}
-        title="📋 Retsept tahrirlash"
+        title="📋 Retsept yozish"
         size="xl"
       >
         <form onSubmit={handleSubmitPrescription} className="space-y-4 sm:space-y-6">
           {/* Bemor ma'lumotlari */}
           {selectedPatient && (
             <div className="bg-green-50 dark:bg-green-900/20 p-3 sm:p-4 rounded-lg sm:rounded-lg sm:rounded-xl">
-              <p className="font-bold text-base sm:text-lg">{selectedPatient.first_name} {selectedPatient.last_name}</p>
-              <p className="text-sm sm:text-sm sm:text-base text-gray-600">Bemor raqami: {selectedPatient.patient_number}</p>
+              <p className="font-bold text-base sm:text-lg">
+                {selectedPatient.patientName || `${selectedPatient.first_name || ''} ${selectedPatient.last_name || ''}`.trim()}
+              </p>
+              <p className="text-sm sm:text-sm sm:text-base text-gray-600">
+                Bemor raqami: {selectedPatient.patientNumber || selectedPatient.patient_number}
+              </p>
             </div>
           )}
 
@@ -1617,7 +1605,6 @@ const DoctorPanel = () => {
           </div>
         </form>
       </Modal>
-      )}
 
       {/* Hamshiraga Topshiriq Yuborish Modal */}
       <Modal
