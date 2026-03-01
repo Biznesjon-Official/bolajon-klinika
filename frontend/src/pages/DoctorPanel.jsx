@@ -549,6 +549,13 @@ const DoctorPanel = () => {
         setShowUrgentModal(false)
         showAlert('Tezkor tashxis saqlandi va chek chiqarildi', 'success', 'Muvaffaqiyatli')
         loadMyQueue()
+        // Open prescription modal with diagnosis pre-filled
+        setSelectedPatient(urgentPatient)
+        setDiagnosis(urgentDiagnosis)
+        setPrescriptionType('REGULAR')
+        setNotes('')
+        setMedications([])
+        setShowPrescriptionModal(true)
       }
     } catch (err) {
       showAlert(err.response?.data?.message || 'Xatolik', 'error', 'Xatolik')
