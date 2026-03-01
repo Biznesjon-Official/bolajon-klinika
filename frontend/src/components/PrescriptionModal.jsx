@@ -412,35 +412,6 @@ const PrescriptionModal = ({
 
 
         {/* Prescription Type */}
-        <div>
-          <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            {t('common.prescriptionType')}
-          </label>
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={() => setPrescriptionType('REGULAR')}
-              className={`px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                prescriptionType === 'REGULAR'
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {t('common.regular')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setPrescriptionType('URGENT')}
-              className={`px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                prescriptionType === 'URGENT'
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {t('common.urgent')}
-            </button>
-          </div>
-        </div>
 
         {/* Medications */}
         <div>
