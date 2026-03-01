@@ -444,18 +444,10 @@ const PrescriptionModal = ({
 
         {/* Medications */}
         <div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
+          <div className="mb-3">
             <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
               {t('common.medications')} <span className="text-red-500">*</span>
             </label>
-            <button
-              type="button"
-              onClick={addMedication}
-              className="w-full sm:w-auto px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-green-600 flex items-center justify-center gap-1"
-            >
-              <span className="material-symbols-outlined text-base">add</span>
-              {t('common.addMedication')}
-            </button>
           </div>
 
           {medications.length === 0 ? (
@@ -527,34 +519,30 @@ const PrescriptionModal = ({
                         {/* Frequency per day */}
                         <div className="sm:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border-2 border-blue-200 dark:border-blue-700">
                           <label className="block text-sm font-bold mb-2 text-blue-900 dark:text-blue-100">
-                            📊 Kuniga necha marta qabul qilish kerak? *
+                            📊 Kuniga necha marta? *
                           </label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="10"
-                            value={med.frequency_per_day || ''}
-                            onChange={(e) => {
-                              const count = parseInt(e.target.value) || 0;
-                              updateMedication(index, 'frequency_per_day', count);
-                              if (count > 0) {
-                                const times = [];
-                                const interval = Math.floor(24 / count);
-                                for (let i = 0; i < count; i++) {
-                                  const hour = (8 + i * interval) % 24;
-                                  times.push(`${String(hour).padStart(2, '0')}:00`);
-                                }
-                                updateMedication(index, 'schedule_times', times);
-                              } else {
-                                updateMedication(index, 'schedule_times', []);
-                              }
-                            }}
-                            className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg text-base sm:text-lg font-bold"
-                            placeholder="Masalan: 3"
-                          />
-                          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                            💡 Vaqtlar avtomatik yaratiladi, keyin o'zgartirishingiz mumkin
-                          </p>
+                          <div className="flex gap-2">
+                            {[1,2,3,4,5].map(n => (
+                              <button
+                                key={n}
+                                type="button"
+                                onClick={() => {
+                                  updateMedication(index, 'frequency_per_day', n)
+                                  const interval = Math.floor(24 / n)
+                                  const times = Array.from({ length: n }, (_, i) => {
+                                    const hour = (8 + i * interval) % 24
+                                    return `${String(hour).padStart(2, '0')}:00`
+                                  })
+                                  updateMedication(index, 'schedule_times', times)
+                                }}
+                                className={`flex-1 py-2 rounded-lg text-sm font-bold border-2 transition-all ${
+                                  med.frequency_per_day === n
+                                    ? 'bg-blue-600 border-blue-600 text-white'
+                                    : 'bg-white dark:bg-gray-700 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:border-blue-400'
+                                }`}
+                              >{n}</button>
+                            ))}
+                          </div>
                         </div>
                         
                         {/* Schedule times */}
@@ -664,6 +652,14 @@ const PrescriptionModal = ({
                   </div>
                 </div>
               ))}
+              <button
+                type="button"
+                onClick={addMedication}
+                className="w-full py-2.5 border-2 border-dashed border-green-400 dark:border-green-600 text-green-600 dark:text-green-400 rounded-xl text-sm font-semibold hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center justify-center gap-2 transition-colors"
+              >
+                <span className="material-symbols-outlined text-base">add</span>
+                {t('common.addMedication')}
+              </button>
             </div>
           )}
         </div>
