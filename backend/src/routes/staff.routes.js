@@ -184,10 +184,10 @@ router.post('/', authenticate, authorize('admin', 'doctor'), async (req, res, ne
 // Update staff
 router.put('/:id', authenticate, authorize('admin', 'doctor'), async (req, res, next) => {
   try {
-    const { first_name, last_name, middle_name, email, phone, department, specialization, license_number, salary, is_active, username, password } = req.body;
-    
+    const { first_name, last_name, middle_name, email, phone, department, specialization, license_number, salary, is_active, status, username, password, role_id } = req.body;
+
     const updateData = {};
-    
+
     if (first_name) updateData.first_name = first_name;
     if (last_name) updateData.last_name = last_name;
     if (middle_name !== undefined) updateData.middle_name = middle_name;
@@ -197,13 +197,21 @@ router.put('/:id', authenticate, authorize('admin', 'doctor'), async (req, res, 
     if (specialization !== undefined) updateData.specialization = specialization;
     if (license_number !== undefined) updateData.license_number = license_number;
     if (salary !== undefined) updateData.salary = parseFloat(salary);
+    if (status) updateData.status = status;
     if (is_active !== undefined) updateData.status = is_active ? 'active' : 'inactive';
-    
+
+    // Role update
+    if (role_id) {
+      const roleDoc = await Role.findById(role_id).lean()
+      if (roleDoc) updateData.role = roleDoc.name
+    }
+
     // Username va parolni yangilash
     if (username) updateData.username = username;
     if (password) {
-      updateData.password = password;
-      updateData.plain_password = password; // Haqiqiy parolni saqlash
+      const bcrypt = (await import('bcrypt')).default
+      updateData.password = await bcrypt.hash(password, 10)
+      updateData.plain_password = password
     }
     
     const staff = await Staff.findByIdAndUpdate(

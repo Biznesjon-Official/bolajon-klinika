@@ -163,7 +163,7 @@ const StaffManagementAdvanced = () => {
       setEditingStaff(staffMember);
       setStaffForm({
         username: staffMember.username || '',
-        password: staffMember.password || '',
+        password: '',
         email: staffMember.email || '',
         role_id: staffMember.role_id || '',
         first_name: staffMember.first_name || '',
@@ -173,7 +173,8 @@ const StaffManagementAdvanced = () => {
         specialization: staffMember.specialization || '',
         license_number: staffMember.license_number || '',
         hire_date: staffMember.hire_date ? staffMember.hire_date.split('T')[0] : '',
-        salary: staffMember.salary || ''
+        salary: staffMember.salary || '',
+        status: staffMember.status || 'active'
       });
     } else {
       setEditingStaff(null);
@@ -234,7 +235,11 @@ const StaffManagementAdvanced = () => {
           phone: staffForm.phone,
           specialization: staffForm.specialization,
           license_number: staffForm.license_number,
-          salary: staffForm.salary ? parseFloat(staffForm.salary) : null
+          salary: staffForm.salary ? parseFloat(staffForm.salary) : null,
+          status: staffForm.status,
+          ...(staffForm.role_id ? { role_id: staffForm.role_id } : {}),
+          ...(staffForm.username ? { username: staffForm.username } : {}),
+          ...(staffForm.password ? { password: staffForm.password } : {})
         };
 
         const response = await staffService.updateStaff(editingStaff.id, data);
@@ -804,71 +809,119 @@ Iltimos, bu ma'lumotlarni saqlang!
           {/* Step 2: Shaxsiy ma'lumotlar */}
           {(!editingStaff && currentStep === 2) || editingStaff ? (
             <div className="space-y-2 sm:space-y-3 animate-fadeIn">
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg sm:rounded-lg sm:rounded-xl p-2">
-                <div className="flex items-center gap-2 sm:gap-2 sm:gap-3 text-green-700 dark:text-green-400">
-                  <span className="material-symbols-outlined text-sm sm:text-base">account_circle</span>
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-2">
+                <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                  <span className="material-symbols-outlined text-sm">account_circle</span>
                   <span className="text-xs font-semibold">Shaxsiy ma'lumotlar</span>
                 </div>
               </div>
 
-              <div className="space-y-2 sm:space-y-3">
-                <div className="group">
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+              {/* Ism / Familiya / Otasining ismi */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Ism <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    value={staffForm.first_name}
+                  <input type="text" value={staffForm.first_name}
                     onChange={(e) => setStaffForm({ ...staffForm, first_name: e.target.value })}
-                    className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
-                    placeholder="Ism"
-                    required
-                  />
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+                    placeholder="Ism" required />
                 </div>
-
-                <div className="group">
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     Familiya <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    value={staffForm.last_name}
+                  <input type="text" value={staffForm.last_name}
                     onChange={(e) => setStaffForm({ ...staffForm, last_name: e.target.value })}
-                    className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
-                    placeholder="Familiya"
-                    required
-                  />
-                </div>
-
-                <div className="group">
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                    Otasining ismi
-                  </label>
-                  <input
-                    type="text"
-                    value={staffForm.middle_name}
-                    onChange={(e) => setStaffForm({ ...staffForm, middle_name: e.target.value })}
-                    className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
-                    placeholder="Otasining ismi"
-                  />
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+                    placeholder="Familiya" required />
                 </div>
               </div>
 
-              <div className="group">
-                <label className="block text-sm sm:text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  <span className="flex items-center gap-2 sm:gap-2 sm:gap-3">
-                    <span className="material-symbols-outlined text-sm sm:text-base">phone</span>
-                    Telefon <span className="text-red-500">*</span>
-                  </span>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Otasining ismi</label>
+                <input type="text" value={staffForm.middle_name}
+                  onChange={(e) => setStaffForm({ ...staffForm, middle_name: e.target.value })}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+                  placeholder="Otasining ismi" />
+              </div>
+
+              {/* Telefon */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Telefon <span className="text-red-500">*</span>
                 </label>
-                <PhoneInput
-                  value={staffForm.phone}
+                <PhoneInput value={staffForm.phone}
                   onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value })}
-                  className="w-full px-3 py-2 sm:py-2.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm sm:text-sm sm:text-base"
-                  placeholder="+998 XX XXX XX XX"
-                  required
-                />
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+                  placeholder="+998 XX XXX XX XX" required />
               </div>
+
+              {/* Tahrirlashda qo'shimcha maydonlar */}
+              {editingStaff && (
+                <>
+                  {/* Rol */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Tizim roli</label>
+                    <select value={staffForm.role_id}
+                      onChange={(e) => setStaffForm({ ...staffForm, role_id: e.target.value })}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm">
+                      <option value="">Rolni tanlang</option>
+                      {roles.map(role => (
+                        <option key={role.id} value={role.id}>{role.display_name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Lavozim + Maosh */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Lavozim</label>
+                      <input type="text" value={staffForm.specialization}
+                        onChange={(e) => setStaffForm({ ...staffForm, specialization: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+                        placeholder="Pediatr..." />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Maosh (so'm)</label>
+                      <input type="number" value={staffForm.salary}
+                        onChange={(e) => setStaffForm({ ...staffForm, salary: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+                        placeholder="3000000" />
+                    </div>
+                  </div>
+
+                  {/* Username + Yangi parol */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Login</label>
+                      <input type="text" value={staffForm.username}
+                        onChange={(e) => setStaffForm({ ...staffForm, username: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+                        placeholder="username" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Yangi parol</label>
+                      <input type="text" value={staffForm.password}
+                        onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm"
+                        placeholder="Bo'sh qoldirsa o'zgarmaydi" />
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                    <select value={staffForm.status || 'active'}
+                      onChange={(e) => setStaffForm({ ...staffForm, status: e.target.value })}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary text-sm">
+                      <option value="active">Faol</option>
+                      <option value="inactive">Nofaol</option>
+                      <option value="blocked">Bloklangan</option>
+                    </select>
+                  </div>
+                </>
+              )}
             </div>
           ) : null}
 
