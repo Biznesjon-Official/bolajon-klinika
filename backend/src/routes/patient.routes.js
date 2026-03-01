@@ -327,7 +327,6 @@ router.get('/:id',
         .lean();
       
       // Get ambulatory procedures (assigned via billing)
-      const Bed = (await import('../models/Bed.js')).default
       const ambulatorProcedures = await AmbulatorProcedure.find({ patient_id: patient._id })
         .populate('nurse_id', 'first_name last_name')
         .populate({ path: 'bed_id', populate: { path: 'room_id', select: 'room_number room_name floor' } })
