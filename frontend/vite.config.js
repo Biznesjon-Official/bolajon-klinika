@@ -5,10 +5,8 @@ import { compression } from 'vite-plugin-compression2'
 export default defineConfig({
   plugins: [
     react(),
-    // Gzip compression for build output
-    compression({ algorithm: 'gzip', exclude: [/\.(png|jpg|jpeg|gif|webp|svg|ico)$/] }),
-    // Brotli compression (better ratio, supported by nginx)
-    compression({ algorithm: 'brotliCompress', exclude: [/\.(png|jpg|jpeg|gif|webp|svg|ico)$/] })
+    // Pre-compressed .gz files for nginx gzip_static
+    compression({ algorithm: 'gzip', include: [/\.(js|css)$/], threshold: 1024, deleteOriginalAssets: false })
   ],
   server: {
     port: 3000,
