@@ -888,7 +888,7 @@ const PatientProfile = () => {
               </button>
             </>
           )}
-          {!isDoctor && !isNurse && (
+          {(isReceptionist || isChiefDoctor) && (
             <button
               onClick={() => navigate(`/patients/${id}/edit`)}
               className="flex-1 sm:flex-none px-3 sm:px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-primary text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:opacity-90 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
@@ -2199,7 +2199,7 @@ const PatientProfile = () => {
                             <div className="size-16 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
                               <span className="material-symbols-outlined text-white text-2xl sm:text-3xl">bed</span>
                             </div>
-                            {!isNurse && (
+                            {(isReceptionist || isDoctor || isChiefDoctor) && (
                               <button
                                 onClick={() => handleOpenDischargeModal(admission.id)}
                                 className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-semibold hover:bg-red-600 flex items-center gap-1"
@@ -2296,7 +2296,7 @@ const PatientProfile = () => {
                                     Qabulni yakunlash
                                   </button>
                                 )}
-                                {q.status === 'WAITING' && (
+                                {q.status === 'WAITING' && (isReceptionist || isDoctor || isChiefDoctor) && (
                                   <button
                                     onClick={() => handleCancelQueue(q.id)}
                                     className="px-3 py-1.5 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-lg text-xs font-semibold hover:bg-red-200"
