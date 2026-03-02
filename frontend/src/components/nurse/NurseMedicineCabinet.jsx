@@ -28,7 +28,7 @@ const emptyForm = {
 
 const NurseMedicineCabinet = ({ medicines, onDispense, onRefresh }) => {
   const { user } = useAuth()
-  const isAdmin = ['admin', 'super admin'].includes(user?.role?.name)
+  const isAdmin = ['admin'].includes(user?.role_name || user?.role)
 
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState(emptyForm)

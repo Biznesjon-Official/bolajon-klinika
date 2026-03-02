@@ -178,10 +178,6 @@ const PrescriptionModal = ({
   const handleSubmit = async (e, shouldPrint = false) => {
     e.preventDefault();
     
-    if (!diagnosis && !selectedDisease && medications.length === 0) {
-      alert('Kasallik tanlang yoki tashxis kiriting va dori qo\'shing');
-      return;
-    }
     if (medications.length === 0) {
       alert(t('queue.enterDiagnosisAndMedication'));
       return;
@@ -206,11 +202,11 @@ const PrescriptionModal = ({
         patient_id: patient.patient_id || patient._id || patient.id,
         queue_id: patient.id,
         diagnosis: fullDiagnosis,
-        complaint: complaint || undefined,
-        disease_name: selectedDisease?.name || undefined,
-        secondary_disease_name: selectedSecondaryDisease?.name || undefined,
-        selected_diagnoses: allDiagTexts.length > 0 ? allDiagTexts : undefined,
-        recommendations: allRecTexts.length > 0 ? allRecTexts : undefined,
+        complaint: complaint || null,
+        disease_name: selectedDisease?.name || null,
+        secondary_disease_name: selectedSecondaryDisease?.name || null,
+        selected_diagnoses: allDiagTexts.length > 0 ? allDiagTexts : [],
+        recommendations: allRecTexts.length > 0 ? allRecTexts : [],
         prescription_type: prescriptionType,
         medications,
         nurse_id: null

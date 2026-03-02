@@ -69,40 +69,6 @@ router.get('/',
 );
 
 /**
- * Get single cashier report
- * GET /api/v1/cashier-reports/:id
- */
-router.get('/:id',
-  authenticate,
-  authorize('admin', 'doctor'),
-  async (req, res) => {
-    try {
-      const report = await CashierReport.findById(req.params.id)
-        .populate('staff_id', 'first_name last_name employee_id role')
-        .populate('invoices.invoice_id')
-        .lean();
-
-      if (!report) {
-        return res.status(404).json({
-          success: false,
-          message: 'Hisobot topilmadi'
-        });
-      }
-
-      res.json({
-        success: true,
-        data: report
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Server xatosi'
-      });
-    }
-  }
-);
-
-/**
  * Get my cashier reports (for cashier/reception staff)
  * GET /api/v1/cashier-reports/my/reports
  */
@@ -224,6 +190,40 @@ router.get('/today/summary',
       res.json({
         success: true,
         data: summary
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Server xatosi'
+      });
+    }
+  }
+);
+
+/**
+ * Get single cashier report
+ * GET /api/v1/cashier-reports/:id
+ */
+router.get('/:id',
+  authenticate,
+  authorize('admin', 'doctor'),
+  async (req, res) => {
+    try {
+      const report = await CashierReport.findById(req.params.id)
+        .populate('staff_id', 'first_name last_name employee_id role')
+        .populate('invoices.invoice_id')
+        .lean();
+
+      if (!report) {
+        return res.status(404).json({
+          success: false,
+          message: 'Hisobot topilmadi'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: report
       });
     } catch (error) {
       res.status(500).json({

@@ -23,7 +23,7 @@ export default function MyTasks() {
   // On-duty shifts for doctors
   const [onDutyShifts, setOnDutyShifts] = useState([]);
   const [shiftsLoading, setShiftsLoading] = useState(false);
-  const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role?.name || user?.role_name);
+  const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role_name || user?.role);
   
   // Attendance
   const [todayAttendance, setTodayAttendance] = useState(null);

@@ -45,7 +45,7 @@ const Invoices = () => {
 
     setLoading(true);
     try {
-      const response = await billingService.addPayment(selectedInvoice.id, {
+      const response = await billingService.addPayment(selectedInvoice._id, {
         amount: parseFloat(paymentAmount),
         payment_method: paymentMethod
       });
@@ -64,7 +64,7 @@ const Invoices = () => {
       setShowPaymentModal(false);
       setPaymentAmount('');
       loadInvoices();
-      handleViewDetails(selectedInvoice.id);
+      handleViewDetails(selectedInvoice._id);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Xatolik yuz berdi');
     } finally {
@@ -212,7 +212,7 @@ const Invoices = () => {
                   </td>
                   <td className="px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
                     <button
-                      onClick={() => handleViewDetails(invoice.id)}
+                      onClick={() => handleViewDetails(invoice._id)}
                       className="text-primary hover:underline text-sm sm:text-sm sm:text-base font-semibold"
                     >
                       Ko'rish
@@ -376,8 +376,9 @@ const Invoices = () => {
                   className="w-full px-3 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-lg sm:rounded-xl bg-white dark:bg-gray-800"
                 >
                   <option value="cash">Naqd</option>
-                  <option value="card">Karta</option>
-                  <option value="transfer">O'tkazma</option>
+                  <option value="click">Click</option>
+                  <option value="humo">Humo</option>
+                  <option value="uzcard">UzCard</option>
                 </select>
               </div>
               <div>

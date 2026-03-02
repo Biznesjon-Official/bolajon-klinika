@@ -15,7 +15,7 @@ const billingService = {
 
   // Get service categories
   getServiceCategories: async () => {
-    const response = await api.get('/billing/services/categories');
+    const response = await api.get('/billing/service-categories');
     return response.data;
   },
 

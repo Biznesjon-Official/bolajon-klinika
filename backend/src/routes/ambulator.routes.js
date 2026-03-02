@@ -75,9 +75,9 @@ router.get('/today', authenticate, async (req, res, next) => {
 
     res.json({ success: true, data: queues });
   } catch (error) {
-    res.json({ success: true, data: [] });
+    next(error)
   }
-});
+})
 
 // ============================================
 // QR CHEKLAR

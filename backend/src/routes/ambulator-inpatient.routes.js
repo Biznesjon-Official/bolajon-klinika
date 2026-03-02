@@ -629,9 +629,6 @@ router.post('/admissions/:id/discharge', authenticate, authorize('admin', 'chief
     
     const admission = await Admission.findById(req.params.id);
     
-    if (admission) {
-    }
-    
     if (!admission) {
       return res.status(404).json({
         success: false,

@@ -13,9 +13,6 @@ import NewOrderModal from '../components/laboratory/NewOrderModal';
 import ResultModal from '../components/laboratory/ResultModal';
 
 export default function Laboratory() {
-  console.log('=== LABORATORY COMPONENT LOADED ===');
-  console.log('Version: 2.0 - with PDF support');
-  
   const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('orders'); // orders, tests, results, pharmacy
@@ -136,26 +133,11 @@ export default function Laboratory() {
   };
 
   const handleEnterResult = async (order) => {
-    console.log('=== HANDLE ENTER RESULT ===');
-    console.log('Order:', order);
-    console.log('Patient ID:', order.patient_id);
-    
-    // Avval to'lovni tekshirish
     if (order.patient_id) {
-      console.log('Checking payment status for patient:', order.patient_id);
-      
       try {
         const response = await api.get(`/billing/invoices/patient/${order.patient_id}/unpaid`);
-        
-        console.log('Payment check response:', response.data);
-        
         if (response.data.success && response.data.data && response.data.data.length > 0) {
-          // To'lanmagan hisob-fakturalar bor
           const totalUnpaid = response.data.data.reduce((sum, inv) => sum + (inv.total_amount - inv.paid_amount), 0);
-          
-          console.log('❌ UNPAID INVOICES FOUND:', totalUnpaid);
-          
-          // Ogohlantirish ko'rsatamiz va tasdiqlash so'raymiz
           setConfirmModal({
             isOpen: true,
             title: 'To\'lov kerak',
@@ -164,26 +146,17 @@ export default function Laboratory() {
             confirmText: 'Ha, davom etish',
             cancelText: 'Bekor qilish',
             onConfirm: () => {
-              // Tasdiqlansa, natija kiritish modalini ochamiz
-              console.log('✅ User confirmed, opening result modal');
               setSelectedOrder(order);
               setShowResultModal(true);
               setConfirmModal({ isOpen: false, message: '', onConfirm: null });
             }
           });
           return;
-        } else {
-          console.log('✅ No unpaid invoices');
         }
-      } catch (invoiceError) {
-        console.error('❌ Invoice check error:', invoiceError);
-        // Xatolik bo'lsa ham davom etamiz
+      } catch {
+        // Continue even if invoice check fails
       }
-    } else {
-      console.log('⚠️ No patient_id in order');
     }
-    
-    console.log('✅ Opening result modal');
     setSelectedOrder(order);
     setShowResultModal(true);
   };

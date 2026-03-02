@@ -574,14 +574,30 @@ router.get('/patients', authenticate, async (req, res) => {
 })
 
 /**
- * Get calls (placeholder)
+ * Get calls (real-time via Socket.io, returns empty persistent list)
  * GET /api/v1/nurse/calls
  */
 router.get('/calls', authenticate, async (req, res) => {
+  res.json({ success: true, data: [] })
+})
+
+/**
+ * Accept a nurse call
+ * POST /api/v1/nurse/calls/:id/accept
+ */
+router.post('/calls/:id/accept', authenticate, async (req, res) => {
   try {
-    res.json({ success: true, data: [] })
+    const nurseId = req.user._id || req.user.id
+    if (global.io) {
+      global.io.emit('nurse-call-accepted', {
+        callId: req.params.id,
+        nurseId,
+        acceptedAt: new Date()
+      })
+    }
+    res.json({ success: true, message: 'Chaqiruv qabul qilindi' })
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Chaqiruvlarni olishda xatolik', error: error.message })
+    res.status(500).json({ success: false, message: 'Xatolik yuz berdi' })
   }
 })
 
