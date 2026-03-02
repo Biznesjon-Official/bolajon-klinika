@@ -1,5 +1,6 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
+import { withCache, bust } from '../utils/routeCache.js';
 import Medicine from '../models/Medicine.js';
 import Supplier from '../models/Supplier.js';
 import PharmacyRequest from '../models/PharmacyRequest.js';
@@ -96,7 +97,7 @@ router.get('/medicines/out-of-stock', authenticate, async (req, res, next) => {
 });
 
 // Get medicines with search and filter
-router.get('/medicines', authenticate, async (req, res, next) => {
+router.get('/medicines', authenticate, withCache('pharmacy:medicines', 120), async (req, res, next) => {
   try {
     const { search = '', floor, category, status } = req.query;
     
@@ -182,8 +183,7 @@ router.post('/medicines', authenticate, authorize('admin'), async (req, res, nex
     
     const medicine = new Medicine(medicineData);
     await medicine.save();
-    
-    
+    await bust('pharmacy:medicines')
     res.status(201).json({
       success: true,
       message: 'Dori muvaffaqiyatli qo\'shildi',
@@ -213,6 +213,7 @@ router.put('/medicines/:id', authenticate, authorize('admin'), async (req, res, 
       });
     }
     
+    await bust('pharmacy:medicines')
     res.json({
       success: true,
       message: 'Dori yangilandi',
@@ -238,6 +239,7 @@ router.delete('/medicines/:id', authenticate, authorize('admin'), async (req, re
       });
     }
     
+    await bust('pharmacy:medicines')
     res.json({
       success: true,
       message: 'Dori o\'chirildi'
@@ -703,6 +705,7 @@ router.post('/medicines/:id/dispense', authenticate, authorize('admin', 'nurse')
       created_by: req.user.id
     });
 
+    await bust('pharmacy:medicines')
     res.json({
       success: true,
       message: 'Dori muvaffaqiyatli berildi',

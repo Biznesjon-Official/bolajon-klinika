@@ -1,5 +1,6 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
+import { withCache } from '../utils/routeCache.js';
 import Invoice from '../models/Invoice.js';
 import Transaction from '../models/Transaction.js';
 import Patient from '../models/Patient.js';
@@ -17,6 +18,7 @@ const router = express.Router();
 router.get('/daily',
   authenticate,
   authorize('admin', 'doctor'),
+  withCache('reports:daily', 60),
   async (req, res, next) => {
     try {
       const { date } = req.query;
@@ -133,6 +135,7 @@ router.get('/daily',
 router.get('/dashboard',
   authenticate,
   authorize('admin', 'doctor'),
+  withCache('reports:dashboard', 60),
   async (req, res, next) => {
     try {
       const today = new Date();

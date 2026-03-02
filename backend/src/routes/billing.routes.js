@@ -1,5 +1,6 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
+import { withCache, bust } from '../utils/routeCache.js';
 import Joi from 'joi';
 import Invoice from '../models/Invoice.js';
 import BillingItem from '../models/BillingItem.js';
@@ -60,6 +61,7 @@ const addPaymentSchema = Joi.object({
 router.get('/stats',
   authenticate,
   authorize('admin', 'receptionist'),
+  withCache('billing:stats', 60),
   async (req, res, next) => {
     try {
       const today = new Date();
@@ -225,6 +227,7 @@ router.get('/revenue',
  */
 router.get('/service-categories',
   authenticate,
+  withCache('billing:service-categories', 300),
   async (req, res, next) => {
     try {
       const categories = await ServiceCategory.find().sort({ name: 1 });
@@ -259,6 +262,7 @@ router.get('/services/categories',
  */
 router.get('/services',
   authenticate,
+  withCache('billing:services', 300),
   async (req, res, next) => {
     try {
       const { category, is_active } = req.query;
@@ -1103,6 +1107,7 @@ router.post('/services',
       
       await service.save();
       
+      await bust('billing:services', 'billing:service-categories')
       res.status(201).json({
         success: true,
         message: 'Xizmat muvaffaqiyatli qo\'shildi',
@@ -1143,7 +1148,7 @@ router.put('/services/:id',
       if (procedure_category_id !== undefined) service.procedure_category_id = procedure_category_id || null;
       
       await service.save();
-      
+      await bust('billing:services', 'billing:service-categories')
       res.json({
         success: true,
         message: 'Xizmat muvaffaqiyatli yangilandi',
@@ -1173,7 +1178,7 @@ router.delete('/services/:id',
       
       // Hard delete - completely remove from database
       await Service.findByIdAndDelete(req.params.id);
-      
+      await bust('billing:services', 'billing:service-categories')
       res.json({
         success: true,
         message: 'Xizmat muvaffaqiyatli o\'chirildi'
