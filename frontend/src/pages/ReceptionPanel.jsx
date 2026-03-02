@@ -428,6 +428,7 @@ export default function ReceptionPanel() {
           patients={patients}
           tests={tests}
           onSuccess={handleLabOrderSuccess}
+          t={(key) => key.split('.').pop()}
         />
       )}
     </div>

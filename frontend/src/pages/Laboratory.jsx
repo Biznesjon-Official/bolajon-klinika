@@ -164,9 +164,9 @@ export default function Laboratory() {
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400',
-      sample_taken: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400',
+      sample_collected: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
       in_progress: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400',
-      ready: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400',
+      completed: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400',
       approved: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400',
       cancelled: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
     };
@@ -176,16 +176,16 @@ export default function Laboratory() {
   const getStatusText = (status) => {
     const texts = {
       pending: t('lab.pending'),
-      sample_taken: t('lab.sampleTaken'),
+      sample_collected: t('lab.sampleTaken'),
       in_progress: t('lab.inProgress'),
-      ready: t('lab.ready'),
+      completed: t('lab.ready'),
       approved: t('lab.approved'),
       cancelled: t('lab.cancelled')
     };
     return texts[status] || status;
   };
 
-  const roleName = user?.role?.name || user?.role_name;
+  const roleName = user?.role_name || user?.role;
   const isAdmin = roleName === 'admin';
   const isLaborant = roleName === 'laborant' || roleName === 'chef_laborant';
   const isDoctor = ['doctor', 'chief_doctor'].includes(roleName);
