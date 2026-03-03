@@ -8,6 +8,7 @@ import Patient from '../models/Patient.js';
 import Staff from '../models/Staff.js';
 import mongoose from 'mongoose';
 import multer from 'multer';
+import { requirePayment } from '../utils/paymentCheck.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -661,7 +662,16 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
 router.put('/orders/:id/status', authenticate, authorize('admin', 'laborant', 'chef_laborant'), async (req, res, next) => {
   try {
     const { status, results, laborant_id } = req.body;
-    
+
+    // Payment check: only for processing statuses, skip for admin
+    if (['sample_collected', 'in_progress'].includes(status) && req.user.role_name !== 'admin') {
+      const order = await LabOrder.findById(req.params.id).lean()
+      if (order) {
+        const blocked = await requirePayment(order.patient_id, { 'items.notes': order.order_number })
+        if (blocked) return res.status(blocked.status).json({ success: false, message: blocked.message })
+      }
+    }
+
     const updateData = { status };
     
     if (results) {
@@ -1037,15 +1047,20 @@ router.post('/scan-qr', authenticate, authorize('laborant', 'chef_laborant', 'ad
             last_name: patient.last_name,
             patient_number: patient.patient_number
           },
-          orders: orders.map(o => ({
-            id: o._id,
-            order_number: o.order_number,
-            test_name: o.test_name,
-            test_type: o.test_type,
-            status: o.status,
-            priority: o.priority,
-            doctor_name: o.doctor_id ? `${o.doctor_id.first_name} ${o.doctor_id.last_name}` : '',
-            created_at: o.createdAt
+          orders: await Promise.all(orders.map(async o => {
+            const Invoice = (await import('../models/Invoice.js')).default
+            const inv = await Invoice.findOne({ 'items.notes': o.order_number }, 'payment_status').lean()
+            return {
+              id: o._id,
+              order_number: o.order_number,
+              test_name: o.test_name,
+              test_type: o.test_type,
+              status: o.status,
+              priority: o.priority,
+              payment_status: inv?.payment_status || 'pending',
+              doctor_name: o.doctor_id ? `${o.doctor_id.first_name} ${o.doctor_id.last_name}` : '',
+              created_at: o.createdAt
+            }
           }))
         }
       })

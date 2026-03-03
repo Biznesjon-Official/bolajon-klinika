@@ -1,5 +1,6 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
+import { requirePayment } from '../utils/paymentCheck.js';
 import AmbulatorRoom from '../models/AmbulatorRoom.js';
 import AmbulatorQRTicket from '../models/AmbulatorQRTicket.js';
 import AmbulatorCheckinLog from '../models/AmbulatorCheckinLog.js';
@@ -653,6 +654,10 @@ router.patch('/procedures/:id/start', authenticate, async (req, res, next) => {
   try {
     const procedure = await AmbulatorProcedure.findById(req.params.id)
     if (!procedure) return res.status(404).json({ success: false, message: 'Muolaja topilmadi' })
+
+    // Payment check (inpatient is exempt)
+    const blocked = await requirePayment(procedure.patient_id, { _id: procedure.invoice_id })
+    if (blocked) return res.status(blocked.status).json({ success: false, message: blocked.message })
 
     procedure.status = 'in_progress'
     procedure.started_at = new Date()
