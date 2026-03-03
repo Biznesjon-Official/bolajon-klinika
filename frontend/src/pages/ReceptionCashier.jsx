@@ -99,6 +99,44 @@ export default function ReceptionCashier() {
         ))}
       </div>
 
+      {/* Doktorlar bo'yicha kirim */}
+      {stats?.todayByDoctor?.length > 0 && (
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+            <h2 className="font-bold text-gray-900 dark:text-white">Bugun doktorlar bo'yicha kirim</h2>
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            {stats.todayByDoctor.map((d, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
+                  {(d.doctor_name || '?')[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                    {d.doctor_name || 'Noma\'lum'}
+                  </p>
+                  <div className="flex gap-3 mt-0.5">
+                    {d.lab > 0 && (
+                      <span className="text-xs text-blue-600 dark:text-blue-400">
+                        Lab: {d.lab.toLocaleString()}
+                      </span>
+                    )}
+                    {d.procedure > 0 && (
+                      <span className="text-xs text-green-600 dark:text-green-400">
+                        Muolaja: {d.procedure.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <p className="font-bold text-sm text-gray-900 dark:text-white flex-shrink-0">
+                  {d.total.toLocaleString()} so'm
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Bugungi tranzaksiyalar */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
         <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">

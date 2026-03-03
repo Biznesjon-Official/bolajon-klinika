@@ -153,6 +153,63 @@ router.get('/stats',
         }
       ]);
 
+      // Today's revenue by doctor (from invoices with metadata.doctor_id)
+      const todayByDoctor = await Invoice.aggregate([
+        {
+          $match: {
+            created_at: { $gte: today },
+            payment_status: { $in: ['paid', 'partial'] }
+          }
+        },
+        {
+          $group: {
+            _id: '$metadata.doctor_id',
+            total: { $sum: '$paid_amount' },
+            lab: {
+              $sum: {
+                $cond: [
+                  { $gt: [{ $size: { $filter: { input: '$items', as: 'i', cond: { $eq: ['$$i.item_type', 'laboratory'] } } } }, 0] },
+                  '$paid_amount', 0
+                ]
+              }
+            },
+            procedure: {
+              $sum: {
+                $cond: [
+                  { $gt: [{ $size: { $filter: { input: '$items', as: 'i', cond: { $ne: ['$$i.item_type', 'laboratory'] } } } }, 0] },
+                  '$paid_amount', 0
+                ]
+              }
+            },
+            doctor_name: { $first: '$metadata.doctor_name' }
+          }
+        },
+        {
+          $lookup: {
+            from: 'staffs',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'staff'
+          }
+        },
+        {
+          $project: {
+            doctor_id: '$_id',
+            doctor_name: {
+              $cond: [
+                { $gt: [{ $size: '$staff' }, 0] },
+                { $concat: [{ $arrayElemAt: ['$staff.first_name', 0] }, ' ', { $arrayElemAt: ['$staff.last_name', 0] }] },
+                { $ifNull: ['$doctor_name', 'Noma\'lum'] }
+              ]
+            },
+            total: 1,
+            lab: 1,
+            procedure: 1
+          }
+        },
+        { $sort: { total: -1 } }
+      ])
+
       // Format payment method breakdown
       const formatMethodBreakdown = (rows) => {
         const breakdown = {
@@ -172,6 +229,7 @@ router.get('/stats',
         data: {
           todayRevenue: todayRevenue[0]?.total || 0,
           todayByMethod: formatMethodBreakdown(todayByMethod),
+          todayByDoctor,
           pendingInvoices: pendingInvoices,
           totalDebt: totalDebtResult[0]?.total || 0,
           monthRevenue: monthRevenue[0]?.total || 0,

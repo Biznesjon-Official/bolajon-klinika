@@ -579,6 +579,7 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
     const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
 
     // Create invoice
+    const effectiveDoctorId = doctor_id || null
     const invoiceData = {
       patient_id,
       invoice_number: invoiceNumber,
@@ -595,7 +596,8 @@ router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor'
       discount_amount: 0,
       payment_status: 'pending',
       notes: `Laboratoriya tahlili: ${test.name} (${order.order_number})`,
-      created_by: req.user.id
+      created_by: req.user.id,
+      ...(effectiveDoctorId && { metadata: { doctor_id: effectiveDoctorId } })
     }
     const invoice = useTransaction ? await Invoice.create([invoiceData], { session }) : [await Invoice.create(invoiceData)]
 
