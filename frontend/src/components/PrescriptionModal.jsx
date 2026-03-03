@@ -292,8 +292,9 @@ const PrescriptionModal = ({
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
+    <>
+    <Modal
+      isOpen={isOpen}
       onClose={onClose}
       title={t('queue.writePrescription')}
       size="xl"
@@ -781,6 +782,7 @@ const PrescriptionModal = ({
         </div>
       </div>
     )}
+    </>
   );
 };
 
