@@ -43,12 +43,23 @@ export default function PatientQRModal({ patient, onClose }) {
     const printWindow = window.open('', '_blank', 'width=400,height=600');
     printWindow.document.write(`
       <html><head><title>QR - ${qrData}</title>
-      <style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:sans-serif}
-      h2{margin:0 0 4px;font-size:18px}p{margin:0 0 16px;color:#666;font-size:14px}</style></head>
+      <style>
+        @page { size: A4; margin: 20mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding-top: 30px; background: #fff; }
+        .name { font-size: 20px; font-weight: 800; color: #111; margin-bottom: 4px; text-align: center; }
+        .num  { font-size: 14px; color: #555; margin-bottom: 20px; text-align: center; }
+        .qr-wrap { border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; background: #fff; }
+        svg { display: block; width: 220px; height: 220px; }
+        @media print {
+          body { padding-top: 0; }
+          .qr-wrap { border-color: #000; }
+        }
+      </style></head>
       <body>
-        <h2>${patient.first_name} ${patient.last_name}</h2>
-        <p>${qrData}</p>
-        ${svgData}
+        <p class="name">${patient.first_name} ${patient.last_name}</p>
+        <p class="num">${qrData}</p>
+        <div class="qr-wrap">${svgData}</div>
         <script>window.onload=function(){window.print();window.close()}<\/script>
       </body></html>
     `);
