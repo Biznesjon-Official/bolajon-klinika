@@ -200,33 +200,37 @@ const DoctorPanel = () => {
   // QR kod skanerlash va bemor ma'lumotlarini olish
   const handleQRScan = async (qrCode) => {
     try {
-      // QR kod formatini tekshirish: PATIENT_NUMBER-INVOICE_NUMBER
-      if (!qrCode || !qrCode.includes('-')) {
-        showAlert('Noto\'g\'ri QR kod formati', 'error', 'Xatolik');
+      if (!qrCode) return;
+
+      // First try: find patient by patient_number (patient QR)
+      const patientRes = await api.get('/patients', { params: { search: qrCode.trim(), limit: 1 } });
+      const patients = patientRes.data?.data || [];
+      const exactMatch = patients.find(p =>
+        p.patient_number?.toLowerCase() === qrCode.trim().toLowerCase()
+      );
+      if (exactMatch) {
+        navigate(`/patients/${exactMatch._id || exactMatch.id}`);
+        setQrSearch('');
         return;
       }
-      
-      const [patientNumber, invoiceNumber] = qrCode.split('-');
 
-      // Backend'dan bemor va invoice ma'lumotlarini olish
+      // Fallback: try invoice QR (PATIENT_NUMBER-INVOICE_NUMBER format)
+      if (!qrCode.includes('-')) {
+        showAlert('Bemor topilmadi', 'error', 'Xatolik');
+        return;
+      }
+      const parts = qrCode.split('-');
+      const invoiceNumber = parts.slice(1).join('-');
       const response = await api.get(`/billing/invoice/${invoiceNumber}`);
-
       if (response.data.success) {
         const invoiceData = response.data.data;
-        
-        // Bemor ma'lumotlarini olish
         const patientResponse = await api.get(`/patients/${invoiceData.patient_id}`);
-
         if (patientResponse.data.success) {
-          const patientData = patientResponse.data.data;
-          
-          // Ma'lumotlarni birlashtirish
           setScannedPatientInfo({
-            patient: patientData,
+            patient: patientResponse.data.data,
             invoice: invoiceData,
             services: invoiceData.items || []
           });
-          
           setShowPatientInfoModal(true);
         }
       }
