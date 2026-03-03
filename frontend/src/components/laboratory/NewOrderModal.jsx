@@ -66,20 +66,26 @@ export default function NewOrderModal({ isOpen, onClose, patients, tests, onSucc
 
     try {
       setLoading(true)
-      const results = await Promise.all(
-        selectedTests.map(test_id =>
-          laboratoryService.createOrder({
-            ...formData,
-            test_id
-          })
-        )
-      )
+      let successCount = 0
+      const errors = []
+      for (const test_id of selectedTests) {
+        try {
+          const res = await laboratoryService.createOrder({ ...formData, test_id })
+          if (res.success) successCount++
+        } catch (err) {
+          errors.push(err.response?.data?.error || err.response?.data?.message || err.message)
+        }
+      }
 
-      const successCount = results.filter(r => r.success).length
-      toast.success(`${successCount} ta buyurtma yaratildi`)
-      setSelectedTests([])
-      onClose()
-      onSuccess()
+      if (successCount > 0) {
+        toast.success(`${successCount} ta buyurtma yaratildi`)
+        setSelectedTests([])
+        onClose()
+        onSuccess()
+      }
+      if (errors.length > 0) {
+        toast.error(errors[0])
+      }
     } catch (error) {
       toast.error(error.response?.data?.error || error.response?.data?.message || error.message)
     } finally {

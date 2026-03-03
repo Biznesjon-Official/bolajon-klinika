@@ -1,14 +1,15 @@
 import api from './api'
+import { generateQRDataUrl } from '../utils/qrUtils'
 
 const labPrintService = {
   // Fetch result data and print
   fetchAndPrint: async (resultId) => {
     const response = await api.get(`/laboratory/orders/${resultId}/result`)
-    labPrintService.printResult(response.data.data)
+    await labPrintService.printResult(response.data.data)
   },
 
   // Print result directly (when data already loaded)
-  printResult: (result) => {
+  printResult: async (result) => {
     const logoUrl = window.location.origin + '/image.jpg'
     const testName = (result.test_name || '').toLowerCase()
 
@@ -116,6 +117,7 @@ const labPrintService = {
     }
 
     const dateStr = new Date(result.order_date).toLocaleDateString('uz-UZ')
+    const qrDataUrl = result.patient_number ? await generateQRDataUrl(`${result.patient_number}|lab`) : null
 
     const patientInfoHtml = isCoagulogram ? `
       <table>
@@ -251,6 +253,7 @@ const labPrintService = {
     <div class="signature-line">
       <div><strong>Лаборант:</strong></div>
       <div class="sig">${result.laborant_name || '___________________'}</div>
+      ${qrDataUrl ? `<img src="${qrDataUrl}" width="70" height="70" style="margin-left:10px" title="Bemor profili - Tahlillar">` : ''}
     </div>
     <div style="text-align:right;margin-top:8px;font-size:11px;color:#666">
       ${result.approved_at ? 'Тасдиқланган: ' + new Date(result.approved_at).toLocaleString('uz-UZ') : ''}

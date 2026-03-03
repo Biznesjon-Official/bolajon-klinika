@@ -112,20 +112,16 @@ labOrderSchema.virtual('tat_minutes').get(function() {
 labOrderSchema.set('toJSON', { virtuals: true })
 labOrderSchema.set('toObject', { virtuals: true })
 
-// Auto-increment order_number
+// Auto-increment order_number with retry on duplicate
 labOrderSchema.pre('save', async function() {
   if (!this.isNew || this.order_number) {
     return;
   }
-  
-  const lastOrder = await mongoose.model('LabOrder').findOne().sort({ order_number: -1 });
-  
-  if (lastOrder && lastOrder.order_number) {
-    const lastNumber = parseInt(lastOrder.order_number.replace('LAB', ''));
-    this.order_number = `LAB${String(lastNumber + 1).padStart(6, '0')}`;
-  } else {
-    this.order_number = 'LAB000001';
-  }
+
+  // Use timestamp + random to avoid race condition duplicates
+  const ts = Date.now().toString(36).toUpperCase()
+  const rand = Math.random().toString(36).substr(2, 4).toUpperCase()
+  this.order_number = `LAB-${ts}-${rand}`
 });
 
 const LabOrder = mongoose.model('LabOrder', labOrderSchema);

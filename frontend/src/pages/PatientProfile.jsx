@@ -244,7 +244,8 @@ const PatientProfile = () => {
       if (res.success && res.data) {
         billingService.printProcedureReceipt(
           { ...res.data.invoice, items: res.data.items },
-          `${patient.first_name} ${patient.last_name}`
+          `${patient.first_name} ${patient.last_name}`,
+          patient.patient_number
         );
       }
     } catch (err) {
@@ -303,6 +304,8 @@ const PatientProfile = () => {
   useEffect(() => {
     loadPatientData();
     if (isDoctor || isSpecialist) loadQueueData();
+    const tabParam = searchParams.get('tab')
+    if (tabParam) setActiveTab(tabParam)
   }, [id]);
 
   useEffect(() => {
@@ -543,7 +546,7 @@ const PatientProfile = () => {
             const updatedInvoice = { ...invoice, paid_amount: invoice.total_amount };
             const selectedDoctor = doctors.find(d => d.id === queueForm.doctor_id);
             const doctorName = selectedDoctor ? `${selectedDoctor.first_name} ${selectedDoctor.last_name}` : '';
-            billingService.printQueueReceipt(updatedInvoice, `${patient.first_name} ${patient.last_name}`, doctorName, response.data?.queue_number || '');
+            billingService.printQueueReceipt(updatedInvoice, `${patient.first_name} ${patient.last_name}`, doctorName, response.data?.queue_number || '', patient.patient_number);
           } catch {
             // Payment error — still continue
           }

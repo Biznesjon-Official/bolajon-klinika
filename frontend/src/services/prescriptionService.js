@@ -1,4 +1,5 @@
 import api from './api'
+import { generateQRDataUrl } from '../utils/qrUtils'
 
 export const prescriptionService = {
   // Retsept yaratish
@@ -46,7 +47,7 @@ export const prescriptionService = {
   },
 
   // A4 formatda retsept chop etish
-  printPrescriptionReceipt: (prescription, patient) => {
+  printPrescriptionReceipt: async (prescription, patient) => {
     const printWindow = window.open('', '_blank')
     if (!printWindow) {
       alert('Popup bloklandi. Iltimos popup-blocker ni o\'chiring.')
@@ -55,6 +56,8 @@ export const prescriptionService = {
     const logoUrl = window.location.origin + '/image.jpg'
     const now = new Date()
     const dateStr = now.toLocaleDateString('uz-UZ', { year: 'numeric', month: '2-digit', day: '2-digit' })
+    const patientNumber = patient?.patient_number || prescription?.patient_number
+    const qrDataUrl = patientNumber ? await generateQRDataUrl(`${patientNumber}|prescriptions`) : null
 
     // SVG icons
     const iconPhone = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:3px"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 0117 1.18 2 2 0 0119 3.18v3a2 2 0 01-1.45 1.93 15.94 15.94 0 00-1.25 3.77 2 2 0 01-.5 1.85l-1.21 1.21a16 16 0 006.29 6.29l1.21-1.21a2 2 0 011.85-.5 15.94 15.94 0 003.77 1.25A2 2 0 0122 16.92z"/></svg>`
@@ -369,6 +372,7 @@ export const prescriptionService = {
         <div class="sig-label">Shifokor imzosi</div>
         <div class="sig-line">_________________________</div>
       </div>
+      ${qrDataUrl ? `<img src="${qrDataUrl}" width="70" height="70" style="margin-left:12px" title="Bemor profili - Retseptlar">` : ''}
     </div>
     <div class="social-row">
       <span class="social-tg">${iconTelegram} Telegram: @bolajon_klinika</span>
@@ -393,11 +397,13 @@ export const prescriptionService = {
   },
 
   // Small printer format (58/80mm) for urgent prescriptions
-  printSmallPrescription: (prescription, patient) => {
+  printSmallPrescription: async (prescription, patient) => {
     const win = window.open('', '_blank', 'width=400,height=500')
     if (!win) return
     const now = new Date()
     const dateStr = now.toLocaleDateString('uz-UZ')
+    const patientNumber = patient?.patient_number || prescription?.patient_number
+    const qrDataUrl = patientNumber ? await generateQRDataUrl(`${patientNumber}|prescriptions`, 80) : null
     const meds = (prescription.medications || []).filter(m => m.medication_name).map((med, i) =>
       `<p>${i + 1}. <b>${med.medication_name}</b> ${med.dosage || ''}<br>&nbsp;&nbsp;&nbsp;${med.instructions || med.frequency || ''}</p>`
     ).join('')
@@ -426,6 +432,7 @@ ${meds}
 ${prescription.notes ? `<p class="note">${prescription.notes}</p><hr>` : ''}
 ${prescription.prescription_type === 'URGENT' ? '<p class="center" style="font-weight:bold;margin:6px 0;font-size:13px">* QABULXONAGA MUROJAAT QILING *</p><hr>' : ''}
 <p class="center note">* Retsept bo'yicha</p>
+${qrDataUrl ? `<div class="center" style="margin:6px 0"><img src="${qrDataUrl}" width="80" height="80"></div>` : ''}
 <div class="no-print"><button onclick="window.print()">Chop etish</button> <button onclick="window.close()">Yopish</button></div>
 </body></html>`)
     win.document.close()

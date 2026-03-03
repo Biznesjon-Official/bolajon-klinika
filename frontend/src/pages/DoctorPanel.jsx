@@ -202,24 +202,34 @@ const DoctorPanel = () => {
     try {
       if (!qrCode) return;
 
-      // First try: find patient by patient_number (patient QR)
-      const patientRes = await api.get('/patients', { params: { search: qrCode.trim(), limit: 1 } });
+      // Parse pipe format: "patient_number|tab"
+      let rawCode = qrCode.trim()
+      let tabParam = null
+      if (rawCode.includes('|')) {
+        const parts = rawCode.split('|')
+        rawCode = parts[0]
+        tabParam = parts[1]
+      }
+
+      // Find patient by patient_number
+      const patientRes = await api.get('/patients', { params: { search: rawCode, limit: 1 } });
       const patients = patientRes.data?.data || [];
       const exactMatch = patients.find(p =>
-        p.patient_number?.toLowerCase() === qrCode.trim().toLowerCase()
+        p.patient_number?.toLowerCase() === rawCode.toLowerCase()
       );
       if (exactMatch) {
-        navigate(`/patients/${exactMatch._id || exactMatch.id}`);
+        const patientId = exactMatch._id || exactMatch.id
+        navigate(`/patients/${patientId}${tabParam ? `?tab=${tabParam}` : ''}`);
         setQrSearch('');
         return;
       }
 
       // Fallback: try invoice QR (PATIENT_NUMBER-INVOICE_NUMBER format)
-      if (!qrCode.includes('-')) {
+      if (!rawCode.includes('-')) {
         showAlert('Bemor topilmadi', 'error', 'Xatolik');
         return;
       }
-      const parts = qrCode.split('-');
+      const parts = rawCode.split('-');
       const invoiceNumber = parts.slice(1).join('-');
       const response = await api.get(`/billing/invoice/${invoiceNumber}`);
       if (response.data.success) {

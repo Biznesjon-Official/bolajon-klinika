@@ -1,4 +1,5 @@
 import api from './api';
+import { generateQRDataUrl } from '../utils/qrUtils'
 
 const billingService = {
   // Get billing statistics
@@ -62,7 +63,7 @@ const billingService = {
   },
 
   // Print queue receipt (mini check)
-  printQueueReceipt: (invoice, patientName, doctorName, queueNumber) => {
+  printQueueReceipt: async (invoice, patientName, doctorName, queueNumber, patientNumber) => {
     const win = window.open('', '_blank', 'width=400,height=600')
     if (!win) return
     const now = new Date()
@@ -70,6 +71,7 @@ const billingService = {
     const items = (invoice.items || []).map(item =>
       `<tr><td style="padding:2px 0">${item.description || ''}</td><td style="text-align:right;padding:2px 0">${(item.total_price || item.unit_price || 0).toLocaleString()}</td></tr>`
     ).join('')
+    const qrDataUrl = patientNumber ? await generateQRDataUrl(`${patientNumber}|billing`) : null
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   @page{size:80mm auto;margin:4mm}
@@ -99,6 +101,7 @@ ${(invoice.total_amount || 0) > (invoice.paid_amount || 0) ? `<tr><td>Qoldiq:</t
 <hr>
 <p class="queue">Navbat: #${queueNumber} → Dr. ${doctorName}</p>
 <p style="font-size:10px">${invoice.invoice_number || ''}</p>
+${qrDataUrl ? `<div style="text-align:center;margin:6px 0"><img src="${qrDataUrl}" width="80" height="80"></div>` : ''}
 <div class="no-print"><button onclick="window.print()">Chop etish</button> <button onclick="window.close()">Yopish</button></div>
 </body></html>`)
     win.document.close()
@@ -106,7 +109,7 @@ ${(invoice.total_amount || 0) > (invoice.paid_amount || 0) ? `<tr><td>Qoldiq:</t
   },
 
   // Print procedure receipt (mini check)
-  printProcedureReceipt: (invoice, patientName) => {
+  printProcedureReceipt: async (invoice, patientName, patientNumber) => {
     const win = window.open('', '_blank', 'width=400,height=600')
     if (!win) return
     const now = new Date()
@@ -114,6 +117,7 @@ ${(invoice.total_amount || 0) > (invoice.paid_amount || 0) ? `<tr><td>Qoldiq:</t
     const items = (invoice.items || []).map(item =>
       `<tr><td style="padding:2px 0">${item.description || ''} × ${item.quantity || 1}</td><td style="text-align:right;padding:2px 0">${(item.total_price || 0).toLocaleString()}</td></tr>`
     ).join('')
+    const qrDataUrl = patientNumber ? await generateQRDataUrl(`${patientNumber}|billing`) : null
     win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
   @page{size:80mm auto;margin:4mm}
@@ -141,6 +145,7 @@ ${(invoice.total_amount || 0) > (invoice.paid_amount || 0) ? `<tr><td>Qoldiq:</t
 <hr>
 <p style="font-size:10px">${invoice.invoice_number || ''}</p>
 <p class="note">Bu chek bilan Ambulator xonaga boring</p>
+${qrDataUrl ? `<div style="text-align:center;margin:6px 0"><img src="${qrDataUrl}" width="80" height="80"></div>` : ''}
 <div class="no-print"><button onclick="window.print()">Chop etish</button> <button onclick="window.close()">Yopish</button></div>
 </body></html>`)
     win.document.close()
