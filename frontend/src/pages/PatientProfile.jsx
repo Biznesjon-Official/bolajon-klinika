@@ -33,7 +33,7 @@ const PatientProfile = () => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const { user } = useAuth();
-  const roleName = user?.role?.name?.toLowerCase();
+  const roleName = (user?.role_name || user?.role)?.toLowerCase();
   const isChiefDoctor = ['chief_doctor', 'bosh_shifokor'].includes(roleName);
   const isDoctor = ['doctor', 'shifokor', 'врач'].includes(roleName) || isChiefDoctor;
   const isReceptionist = ['receptionist', 'reception', 'qabulxona', 'registrator', 'admin', 'super admin'].includes(roleName);

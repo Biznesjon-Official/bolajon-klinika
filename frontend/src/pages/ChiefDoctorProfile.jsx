@@ -20,7 +20,7 @@ export default function ChiefDoctorProfile() {
   const [filterStatus, setFilterStatus] = useState('all')
   const [onDutyShifts, setOnDutyShifts] = useState([])
   const [shiftsLoading, setShiftsLoading] = useState(false)
-  const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role?.name || user?.role_name)
+  const isDoctor = ['doctor', 'chief_doctor'].includes(user?.role_name || user?.role)
   const [todayAttendance, setTodayAttendance] = useState(null)
   const [workSchedule, setWorkSchedule] = useState(null)
   const [checkingIn, setCheckingIn] = useState(false)

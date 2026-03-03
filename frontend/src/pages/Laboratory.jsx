@@ -114,11 +114,10 @@ export default function Laboratory() {
       
       // Faqat laborantlarni filtrlash
       const allStaff = staffRes.data.data || staffRes.data;
-      const laborants = allStaff.filter(staff => 
-        staff.role_name === 'laborant' || 
-        staff.role_name === 'Laborant' ||
-        (staff.role && (staff.role.name === 'laborant' || staff.role.name === 'Laborant'))
-      );
+      const laborants = allStaff.filter(staff => {
+        const r = (staff.role_name || staff.role || '').toLowerCase()
+        return r === 'laborant' || r === 'chef_laborant'
+      });
       
       setDoctors(laborants);
     } catch (error) {

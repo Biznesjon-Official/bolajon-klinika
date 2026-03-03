@@ -110,12 +110,12 @@ router.get('/today-queue', authenticate, async (req, res, next) => {
 })
 
 // Dashboard root
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req, res, next) => {
   try {
     const totalPatients = await Patient.countDocuments()
     res.json({ success: true, data: { total_patients: totalPatients, date: new Date() } })
   } catch (error) {
-    res.json({ success: true, data: {} })
+    next(error)
   }
 })
 

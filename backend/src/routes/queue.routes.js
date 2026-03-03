@@ -188,7 +188,7 @@ router.get('/today',
 
       res.json({ success: true, data: queueData });
     } catch (error) {
-      res.json({ success: true, data: [] });
+      next(error)
     }
   }
 );
@@ -231,10 +231,7 @@ router.get('/stats',
         }
       });
     } catch (error) {
-      res.json({
-        success: true,
-        data: { waiting: 0, in_progress: 0, completed: 0, cancelled: 0, total: 0 }
-      });
+      next(error)
     }
   }
 );
