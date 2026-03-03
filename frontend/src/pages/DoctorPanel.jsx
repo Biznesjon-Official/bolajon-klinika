@@ -427,7 +427,8 @@ const DoctorPanel = () => {
               {
                 ...prescriptionData,
                 prescription_number: response.data?.prescription_number,
-                doctor_name: user?.full_name || user?.username
+                doctor_name: user?.full_name || user?.username,
+                doctor_phone: user?.phone || null
               },
               patientData
             );

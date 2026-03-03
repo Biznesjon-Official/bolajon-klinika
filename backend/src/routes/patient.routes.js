@@ -404,6 +404,7 @@ router.get('/:id',
             notes: presc.notes,
             doctor_first_name: presc.doctor_id?.first_name,
             doctor_last_name: presc.doctor_id?.last_name,
+            doctor_phone: presc.doctor_id?.phone || null,
             created_at: presc.created_at
           })),
           labResults: labResults.map(lab => ({

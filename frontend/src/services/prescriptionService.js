@@ -292,9 +292,6 @@ export const prescriptionService = {
     </div>
     <div class="header-right">
       <div><strong>Call center:</strong> +998 91 XXX XX XX</div>
-      <div class="social">&#128222; Telegram: @bolajon_klinika</div>
-      <div class="social">&#128247; Instagram: @bolajon_klinika</div>
-      <div class="social">&#128339; Facebook: Bolajon Klinika</div>
     </div>
   </div>
 
@@ -376,10 +373,17 @@ export const prescriptionService = {
   <!-- Footer -->
   <div class="footer">
     <div class="signature-line">
-      <div><strong>Shifokor:</strong></div>
+      <div>
+        <strong>Shifokor:</strong>${prescription.doctor_phone ? ` <span style="font-size:12px;color:#444">&#128222; ${prescription.doctor_phone}</span>` : ''}
+      </div>
       <div class="sig">Dr. ${prescription.doctor_name || 'N/A'}</div>
     </div>
-    <div class="footer-info">
+    <div class="footer-info" style="margin-top:20px;padding-top:10px;border-top:1px solid #ccc;display:flex;justify-content:center;gap:24px;font-size:11px;color:#555">
+      <span>&#128222; Telegram: @bolajon_klinika</span>
+      <span>&#128247; Instagram: @bolajon_klinika</span>
+      <span>&#128339; Facebook: Bolajon Klinika</span>
+    </div>
+    <div style="text-align:center;margin-top:6px;font-size:10px;color:#888">
       BOLAJON KLINIKASI &bull; Farzandingiz sog'ligi uchun!
     </div>
   </div>

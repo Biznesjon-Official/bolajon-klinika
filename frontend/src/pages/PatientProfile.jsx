@@ -1554,7 +1554,8 @@ const PatientProfile = () => {
                                   recommendations: prescription.recommendations,
                                   prescription_type: prescription.prescription_type,
                                   medications: prescription.medications,
-                                  doctor_name: `${prescription.doctor_first_name} ${prescription.doctor_last_name}`
+                                  doctor_name: `${prescription.doctor_first_name} ${prescription.doctor_last_name}`,
+                                  doctor_phone: prescription.doctor_phone || null
                                 },
                                 {
                                   first_name: patient?.first_name,

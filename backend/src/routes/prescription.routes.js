@@ -255,7 +255,8 @@ router.get('/patient/:patientId', authenticate, async (req, res) => {
       id: p._id,
       doctor_first_name: p.doctor_id?.first_name,
       doctor_last_name: p.doctor_id?.last_name,
-      doctor_specialization: p.doctor_id?.specialization
+      doctor_specialization: p.doctor_id?.specialization,
+      doctor_phone: p.doctor_id?.phone || null
     }));
 
     res.json({
