@@ -4,8 +4,12 @@ import { generateQRDataUrl } from '../utils/qrUtils'
 const labPrintService = {
   // Fetch result data and print
   fetchAndPrint: async (resultId) => {
-    const response = await api.get(`/laboratory/orders/${resultId}/result`)
-    await labPrintService.printResult(response.data.data)
+    try {
+      const response = await api.get(`/laboratory/orders/${resultId}/result`)
+      await labPrintService.printResult(response.data.data)
+    } catch (err) {
+      alert('Natijani yuklashda xatolik: ' + (err.response?.data?.message || err.message))
+    }
   },
 
   // Print result directly (when data already loaded)

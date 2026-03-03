@@ -193,11 +193,11 @@ const PatientPrescriptions = () => {
                       Batafsil
                     </button>
                     <button
-                      onClick={() => {
-                        prescriptionService.printPrescriptionReceipt(
+                      onClick={async () => {
+                        await prescriptionService.printPrescriptionReceipt(
                           prescription,
                           patient
-                        );
+                        )
                       }}
                       className="px-4 sm:px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 bg-green-600 text-white rounded-lg sm:rounded-lg sm:rounded-xl text-sm sm:text-sm sm:text-base font-semibold hover:bg-green-700 flex items-center gap-2 sm:gap-2 sm:gap-3"
                       title="Chekni chiqarish"
@@ -372,11 +372,11 @@ const PatientPrescriptions = () => {
 
             <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 flex gap-2 sm:gap-3">
               <button
-                onClick={() => {
-                  prescriptionService.printPrescriptionReceipt(
+                onClick={async () => {
+                  await prescriptionService.printPrescriptionReceipt(
                     selectedPrescription,
                     patient
-                  );
+                  )
                 }}
                 className="flex-1 px-4 sm:px-6 lg:px-4 sm:px-6 lg:px-8 py-2 sm:py-3 bg-green-600 text-white rounded-lg sm:rounded-xl font-semibold hover:bg-green-700 flex items-center justify-center gap-2 sm:gap-2 sm:gap-3"
               >

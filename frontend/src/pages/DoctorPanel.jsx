@@ -467,17 +467,15 @@ const DoctorPanel = () => {
 
         // If shouldPrint is true, print the receipt
         if (shouldPrint) {
-          setTimeout(() => {
-            prescriptionService.printPrescriptionReceipt(
-              {
-                ...prescriptionData,
-                prescription_number: response.data?.prescription_number,
-                doctor_name: user?.full_name || user?.username,
-                doctor_phone: user?.phone || null
-              },
-              patientData
-            );
-          }, 300);
+          await prescriptionService.printPrescriptionReceipt(
+            {
+              ...prescriptionData,
+              prescription_number: response.data?.prescription_number,
+              doctor_name: user?.full_name || user?.username,
+              doctor_phone: user?.phone || null
+            },
+            patientData
+          )
         }
 
         setSelectedPatient(null);
@@ -589,9 +587,9 @@ const DoctorPanel = () => {
       const res = await prescriptionService.createPrescription(data)
       if (res.success) {
         // Print small format
-        prescriptionService.printSmallPrescription(
+        await prescriptionService.printSmallPrescription(
           { ...data, prescription_number: res.data?.prescription_number, doctor_name: user?.full_name || user?.username },
-          { first_name: urgentPatient.patientName?.split(' ')[0] || '', last_name: urgentPatient.patientName?.split(' ').slice(1).join(' ') || '' }
+          { first_name: urgentPatient.patientName?.split(' ')[0] || '', last_name: urgentPatient.patientName?.split(' ').slice(1).join(' ') || '', patient_number: urgentPatient.patientNumber || urgentPatient.patient_number }
         )
         setLastUrgentDiagnosis(urgentDiagnosis)
         setShowUrgentModal(false)

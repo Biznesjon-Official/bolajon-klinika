@@ -270,16 +270,14 @@ const PrescriptionModal = ({
         
         // Print if requested
         if (shouldPrint) {
-          setTimeout(() => {
-            prescriptionService.printPrescriptionReceipt(
-              {
-                ...prescriptionData,
-                prescription_number: response.data?.prescription_number,
-                doctor_name: user?.full_name || user?.username
-              },
-              patientData
-            );
-          }, 300);
+          await prescriptionService.printPrescriptionReceipt(
+            {
+              ...prescriptionData,
+              prescription_number: response.data?.prescription_number,
+              doctor_name: user?.full_name || user?.username
+            },
+            patientData
+          )
         }
 
         onSuccess(response);

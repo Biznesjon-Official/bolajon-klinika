@@ -33,7 +33,7 @@ const Login = () => {
       
       if (result.success) {
         // Redirect based on role
-        const roleName = result.user?.role?.name || result.user?.role_name;
+        const roleName = result.user?.role_name || result.user?.role;
         
         if (roleName === 'admin') {
           navigate('/dashboard');

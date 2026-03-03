@@ -64,16 +64,16 @@ export default function LabResultView() {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
-            onClick={() => labPrintService.printResult(result)}
+            onClick={async () => await labPrintService.printResult(result)}
             className="px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 flex items-center justify-center gap-2 transition"
           >
             <span className="material-symbols-outlined">print</span>
             Чоп этиш
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
               toast.success('PDF учун чоп этиш ойнасида "PDF сифатида сақлаш" ни танланг', { duration: 4000 })
-              setTimeout(() => labPrintService.printResult(result), 500)
+              await labPrintService.printResult(result)
             }}
             className="px-6 py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 flex items-center justify-center gap-2 transition"
           >

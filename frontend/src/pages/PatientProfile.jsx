@@ -173,9 +173,9 @@ const PatientProfile = () => {
       }
       const res = await prescriptionService.createPrescription(data)
       if (res.success) {
-        prescriptionService.printSmallPrescription(
+        await prescriptionService.printSmallPrescription(
           { ...data, prescription_number: res.data?.prescription_number, doctor_name: user?.full_name || user?.username },
-          { first_name: patient?.first_name || '', last_name: patient?.last_name || '' }
+          { first_name: patient?.first_name || '', last_name: patient?.last_name || '', patient_number: patient?.patient_number }
         )
         setShowUrgentModal(false)
         showAlert('Tezkor tashxis saqlandi va chek chiqarildi', 'success', 'Muvaffaqiyatli')
@@ -546,7 +546,7 @@ const PatientProfile = () => {
             const updatedInvoice = { ...invoice, paid_amount: invoice.total_amount };
             const selectedDoctor = doctors.find(d => d.id === queueForm.doctor_id);
             const doctorName = selectedDoctor ? `${selectedDoctor.first_name} ${selectedDoctor.last_name}` : '';
-            billingService.printQueueReceipt(updatedInvoice, `${patient.first_name} ${patient.last_name}`, doctorName, response.data?.queue_number || '', patient.patient_number);
+            await billingService.printQueueReceipt(updatedInvoice, `${patient.first_name} ${patient.last_name}`, doctorName, response.data?.queue_number || '', patient.patient_number);
           } catch {
             // Payment error — still continue
           }
@@ -1546,8 +1546,8 @@ const PatientProfile = () => {
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <button
-                            onClick={() => {
-                              prescriptionService.printPrescriptionReceipt(
+                            onClick={async () => {
+                              await prescriptionService.printPrescriptionReceipt(
                                 {
                                   prescription_number: prescription.prescription_number,
                                   diagnosis: prescription.diagnosis,
