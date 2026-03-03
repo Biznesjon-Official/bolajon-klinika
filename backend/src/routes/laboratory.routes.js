@@ -1,5 +1,4 @@
 import express from 'express';
-import rateLimit from 'express-rate-limit';
 import { authenticate, authorize } from '../middleware/auth.js';
 import LabOrder from '../models/LabOrder.js';
 import LabTest from '../models/LabTest.js';
@@ -46,32 +45,6 @@ const upload = multer({
 });
 
 // Rate limiter for lab order creation (prevent abuse)
-const createOrderLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 30, // Max 30 orders per minute per IP
-  message: {
-    success: false,
-    message: 'Juda ko\'p so\'rov. Iltimos, bir daqiqa kuting.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-// General rate limiter for all lab routes
-const generalLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 100, // Max 100 requests per minute per IP
-  message: {
-    success: false,
-    message: 'Juda ko\'p so\'rov. Iltimos, bir daqiqa kuting.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-// Apply general rate limiter to all routes
-router.use(generalLimiter);
-
 // Get all lab tests
 router.get('/tests', authenticate, async (req, res, next) => {
   try {
@@ -440,7 +413,7 @@ router.get('/orders/:id/result', authenticate, async (req, res, next) => {
 });
 
 // Create lab order
-router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor', 'chef_laborant', 'receptionist'), createOrderLimiter, async (req, res, next) => {
+router.post('/orders', authenticate, authorize('admin', 'doctor', 'chief_doctor', 'chef_laborant', 'receptionist'), async (req, res, next) => {
   let session = null
   let useTransaction = false
 

@@ -34,7 +34,6 @@ import { connectMongoDB } from './config/mongodb.js';
 import { isRedisAvailable } from './config/redis.js';
 import { logger } from './utils/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { rateLimiter } from './middleware/rateLimiter.js';
 
 // Import routes - MongoDB versions ONLY
 import authRoutes from './routes/auth.routes.js';
@@ -108,9 +107,6 @@ app.use(cors({
 
 // Trust proxy - for Nginx reverse proxy
 app.set('trust proxy', 1);
-
-// Apply rate limiting before other middleware
-app.use(rateLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

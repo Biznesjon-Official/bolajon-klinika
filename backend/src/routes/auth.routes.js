@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import Staff from '../models/Staff.js';
 import Patient from '../models/Patient.js';
-import { loginRateLimiter } from '../middleware/rateLimiter.js';
 import { authenticate } from '../middleware/auth.js';
 import { AppError } from '../utils/errors.js';
 
@@ -12,7 +11,7 @@ const router = express.Router();
 /**
  * Staff Login
  */
-router.post('/login', loginRateLimiter, async (req, res, next) => {
+router.post('/login', async (req, res, next) => {
   try {
     const { username, password, twoFaToken } = req.body;
     
@@ -110,7 +109,7 @@ router.post('/login', loginRateLimiter, async (req, res, next) => {
 /**
  * Patient Login
  */
-router.post('/patient-login', loginRateLimiter, async (req, res, next) => {
+router.post('/patient-login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     
