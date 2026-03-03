@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { prescriptionService } from '../services/prescriptionService';
 import doctorNurseService from '../services/doctorNurseService';
 import diseaseService from '../services/diseaseService';
+import prescriptionTemplateService from '../services/prescriptionTemplateService';
+import toast from 'react-hot-toast';
 import Modal from './Modal';
 
 const PrescriptionModal = ({ 
@@ -42,6 +44,11 @@ const PrescriptionModal = ({
   const [customRecommendation, setCustomRecommendation] = useState('');
   const [customRecommendations, setCustomRecommendations] = useState([]);
 
+  // Template picker
+  const [templates, setTemplates] = useState([]);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState('');
+
   // Nurses list (for reference only, not for selection)
   const [nurses, setNurses] = useState([]);
 
@@ -49,6 +56,7 @@ const PrescriptionModal = ({
     if (isOpen) {
       loadNurses();
       loadDiseases();
+      loadTemplates();
       resetForm();
       const savedDiagnoses = JSON.parse(localStorage.getItem('prescription_diagnoses') || '[]');
       const savedMeds = JSON.parse(localStorage.getItem('prescription_medications') || '[]');
@@ -62,6 +70,39 @@ const PrescriptionModal = ({
       const response = await diseaseService.getAll();
       if (response.success) setAllDiseases(response.data);
     } catch (error) { /* silent */ }
+  };
+
+  const loadTemplates = async () => {
+    try {
+      const res = await prescriptionTemplateService.getAll();
+      if (res.success) setTemplates(res.data);
+    } catch { /* silent */ }
+  };
+
+  const applyTemplate = (tmpl) => {
+    if (tmpl.diagnosis) setDiagnosis(tmpl.diagnosis);
+    if (tmpl.medications?.length) {
+      setMedications(tmpl.medications.map(m => ({
+        medication_name: m.medication_name || '',
+        dosage: m.dosage || '',
+        per_dose_amount: m.per_dose_amount || '',
+        frequency: m.frequency || '',
+        frequency_per_day: m.frequency_per_day || '',
+        schedule_times: m.schedule_times || [],
+        duration_days: m.duration_days || '',
+        instructions: m.instructions || '',
+        is_urgent: m.is_urgent || false
+      })));
+    }
+    if (tmpl.recommendations?.length) {
+      setCustomRecommendations(tmpl.recommendations);
+    }
+    if (tmpl.notes) {
+      // notes is stored but PrescriptionModal may not have a notes field visible; skip silently
+    }
+    setShowTemplatePicker(false);
+    setTemplateSearch('');
+    toast.success(`"${tmpl.title}" shabloni qo'llanildi`);
   };
 
   const loadNurses = async () => {
@@ -90,6 +131,8 @@ const PrescriptionModal = ({
     setSelectedSecondaryRecommendations([]);
     setCustomRecommendation('');
     setCustomRecommendations([]);
+    setShowTemplatePicker(false);
+    setTemplateSearch('');
   };
 
   const handleAddCustomRecommendation = () => {
@@ -411,10 +454,20 @@ const PrescriptionModal = ({
 
         {/* Medications */}
         <div>
-          <div className="mb-3">
+          <div className="mb-3 flex items-center justify-between">
             <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
               {t('common.medications')} <span className="text-red-500">*</span>
             </label>
+            {templates.length > 0 && (
+              <button
+                type="button"
+                onClick={() => { setShowTemplatePicker(true); setTemplateSearch('') }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg hover:bg-indigo-700"
+              >
+                <span className="material-symbols-outlined text-sm">library_books</span>
+                Shablon tanlash
+              </button>
+            )}
           </div>
 
           {medications.length === 0 ? (
@@ -673,6 +726,61 @@ const PrescriptionModal = ({
         </div>
       </form>
     </Modal>
+
+    {/* Template Picker Modal */}
+    {showTemplatePicker && (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-3 sm:p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl max-w-lg w-full max-h-[80vh] flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Shablon tanlash</h3>
+            <button onClick={() => setShowTemplatePicker(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+              <input
+                type="text"
+                value={templateSearch}
+                onChange={(e) => setTemplateSearch(e.target.value)}
+                placeholder="Shablon qidirish..."
+                autoFocus
+                className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+          <div className="overflow-y-auto flex-1 p-3 space-y-2">
+            {templates
+              .filter(t => !templateSearch || t.title.toLowerCase().includes(templateSearch.toLowerCase()) || t.diagnosis?.toLowerCase().includes(templateSearch.toLowerCase()))
+              .map(t => (
+                <button
+                  key={t._id}
+                  type="button"
+                  onClick={() => applyTemplate(t)}
+                  className="w-full text-left p-3 bg-gray-50 dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 rounded-xl transition-colors"
+                >
+                  <div className="font-semibold text-gray-900 dark:text-white text-sm">{t.title}</div>
+                  {t.diagnosis && <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t.diagnosis}</div>}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {t.medications?.slice(0, 4).map((m, i) => (
+                      <span key={i} className="text-xs px-2 py-0.5 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded-full">
+                        {m.medication_name}
+                      </span>
+                    ))}
+                    {(t.medications?.length || 0) > 4 && (
+                      <span className="text-xs text-gray-400">+{t.medications.length - 4}</span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            {templates.filter(t => !templateSearch || t.title.toLowerCase().includes(templateSearch.toLowerCase()) || t.diagnosis?.toLowerCase().includes(templateSearch.toLowerCase())).length === 0 && (
+              <p className="text-center text-gray-500 text-sm py-8">Shablon topilmadi</p>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
   );
 };
 

@@ -49,6 +49,7 @@ export default function ChiefDoctorPanel() {
     { name: 'Xodimlar faoliyati', icon: 'groups', path: '/chief-doctor/staff', color: 'from-blue-500 to-cyan-500' },
     { name: 'Navbatdagi shifokorlar', icon: 'event_available', path: '/chief-doctor/on-duty', color: 'from-green-500 to-emerald-500' },
     { name: 'Kasalliklar bazasi', icon: 'medical_information', path: '/chief-doctor/diseases', color: 'from-amber-500 to-orange-500' },
+    { name: 'Retsept shablonlari', icon: 'library_books', path: '/chief-doctor/prescription-templates', color: 'from-teal-500 to-cyan-500' },
     { name: 'Mening profilim', icon: 'person', path: '/chief-doctor/profile', color: 'from-purple-500 to-pink-500' }
   ]
 

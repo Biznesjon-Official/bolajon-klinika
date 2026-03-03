@@ -210,6 +210,24 @@ router.get('/stats',
         { $sort: { total: -1 } }
       ])
 
+      // Today's revenue by direction (item_type)
+      const todayByDirection = await Invoice.aggregate([
+        {
+          $match: {
+            created_at: { $gte: today },
+            payment_status: { $in: ['paid', 'partial'] }
+          }
+        },
+        { $unwind: { path: '$items', preserveNullAndEmptyArrays: false } },
+        {
+          $group: {
+            _id: { $ifNull: ['$items.item_type', 'other'] },
+            total: { $sum: '$items.total_price' }
+          }
+        },
+        { $sort: { total: -1 } }
+      ])
+
       // Format payment method breakdown
       const formatMethodBreakdown = (rows) => {
         const breakdown = {
@@ -229,6 +247,7 @@ router.get('/stats',
         data: {
           todayRevenue: todayRevenue[0]?.total || 0,
           todayByMethod: formatMethodBreakdown(todayByMethod),
+          todayByDirection,
           todayByDoctor,
           pendingInvoices: pendingInvoices,
           totalDebt: totalDebtResult[0]?.total || 0,

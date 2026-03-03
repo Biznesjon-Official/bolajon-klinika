@@ -99,6 +99,40 @@ export default function ReceptionCashier() {
         ))}
       </div>
 
+      {/* Yo'nalish bo'yicha kirim */}
+      {stats?.todayByDirection?.length > 0 && (
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+            <h2 className="font-bold text-gray-900 dark:text-white">Bugun yo'nalish bo'yicha kirim</h2>
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            {stats.todayByDirection.map((d, i) => {
+              const labels = {
+                consultation: { label: 'Konsultatsiya', icon: 'stethoscope', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                laboratory: { label: 'Laboratoriya', icon: 'science', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                service: { label: 'Muolajalar', icon: 'healing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                bed_charge: { label: 'Statsionar', icon: 'bed', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                medication: { label: 'Dori-darmon', icon: 'medication', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                reagent: { label: 'Reagent', icon: 'biotech', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                other: { label: 'Boshqa', icon: 'receipt', color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }
+              }
+              const info = labels[d._id] || labels.other
+              return (
+                <div key={i} className="flex items-center gap-3 px-4 py-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${info.color}`}>
+                    <span className="material-symbols-outlined text-base">{info.icon}</span>
+                  </div>
+                  <p className="flex-1 font-semibold text-sm text-gray-900 dark:text-white">{info.label}</p>
+                  <p className="font-bold text-sm text-gray-900 dark:text-white flex-shrink-0">
+                    {(d.total || 0).toLocaleString()} so'm
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Doktorlar bo'yicha kirim */}
       {stats?.todayByDoctor?.length > 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">

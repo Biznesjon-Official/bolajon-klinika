@@ -20,6 +20,7 @@ const ChiefDoctorPanel = lazy(() => import(/* webpackPrefetch: true */ './pages/
 const ChiefDoctorStaff = lazy(() => import('./pages/ChiefDoctorStaff'));
 const ChiefDoctorOnDuty = lazy(() => import('./pages/ChiefDoctorOnDuty'));
 const ChiefDoctorDiseases = lazy(() => import('./pages/ChiefDoctorDiseases'));
+const ChiefDoctorPrescriptionTemplates = lazy(() => import('./pages/ChiefDoctorPrescriptionTemplates'));
 const ChiefDoctorProfile = lazy(() => import('./pages/ChiefDoctorProfile'));
 const OnDutyDoctors = lazy(() => import(/* webpackPrefetch: true */ './pages/OnDutyDoctors'));
 const DoctorServicesManagement = lazy(() => import('./pages/DoctorServicesManagement'))
@@ -134,6 +135,7 @@ function AppContent() {
               <Route path="/chief-doctor/staff" element={<ProtectedRoute><DashboardLayout><ChiefDoctorStaff /></DashboardLayout></ProtectedRoute>} />
               <Route path="/chief-doctor/on-duty" element={<ProtectedRoute><DashboardLayout><ChiefDoctorOnDuty /></DashboardLayout></ProtectedRoute>} />
               <Route path="/chief-doctor/diseases" element={<ProtectedRoute><DashboardLayout><ChiefDoctorDiseases /></DashboardLayout></ProtectedRoute>} />
+              <Route path="/chief-doctor/prescription-templates" element={<ProtectedRoute><DashboardLayout><ChiefDoctorPrescriptionTemplates /></DashboardLayout></ProtectedRoute>} />
               <Route path="/chief-doctor/profile" element={<ProtectedRoute><DashboardLayout><ChiefDoctorProfile /></DashboardLayout></ProtectedRoute>} />
               <Route path="/on-duty-doctors" element={<ProtectedRoute><DashboardLayout><OnDutyDoctors /></DashboardLayout></ProtectedRoute>} />
               <Route path="/doctor-services" element={<ProtectedRoute><DashboardLayout><DoctorServicesManagement /></DashboardLayout></ProtectedRoute>} />

@@ -7,6 +7,7 @@ import { prescriptionService } from '../services/prescriptionService';
 import ambulatorInpatientService from '../services/ambulatorInpatientService';
 import inpatientRoomService from '../services/inpatientRoomService';
 import api from '../services/api';
+import admissionRequestService from '../services/admissionRequestService';
 import toast, { Toaster } from 'react-hot-toast';
 import NewOrderModal from '../components/laboratory/NewOrderModal';
 
@@ -28,11 +29,63 @@ export default function ReceptionPanel() {
     }
   }
 
+  // Admission requests (doctor so'rovlari)
+  const [admissionRequests, setAdmissionRequests] = useState([]);
+  const [admissionRequestsLoading, setAdmissionRequestsLoading] = useState(false);
+  const [admitFromRequest, setAdmitFromRequest] = useState(null); // pre-filled request
+
+  const loadAdmissionRequests = async () => {
+    try {
+      setAdmissionRequestsLoading(true);
+      const res = await admissionRequestService.getAll({ status: 'pending' });
+      if (res.success) setAdmissionRequests(res.data || []);
+    } catch {
+      // silent
+    } finally {
+      setAdmissionRequestsLoading(false);
+    }
+  };
+
+  const handleRejectAdmissionRequest = async (id) => {
+    if (!confirm('So\'rovni rad etmoqchimisiz?')) return;
+    try {
+      await admissionRequestService.reject(id, '');
+      toast.success('Rad etildi');
+      loadAdmissionRequests();
+    } catch {
+      toast.error('Xatolik');
+    }
+  };
+
+  const handleOpenAdmitFromRequest = async (req) => {
+    setAdmitFromRequest(req);
+    const type = req.admission_type === 'inpatient' ? 'inpatient' : 'ambulator';
+    setAdmitType(type);
+    setAdmitSelectedPatient(req.patient_id);
+    setAdmitPatientSearch('');
+    setAdmitPatientResults([]);
+    setAdmitSelectedBed(null);
+    setAdmitRooms([]);
+    setShowAdmitModal(true);
+    try {
+      const res = type === 'ambulator'
+        ? await ambulatorInpatientService.getRooms()
+        : await inpatientRoomService.getRooms();
+      if (res.success) setAdmitRooms(res.data);
+    } catch {
+      toast.error('Xonalar yuklanmadi');
+    }
+  };
+
   useEffect(() => {
-    loadUrgentPending()
-    const interval = setInterval(loadUrgentPending, 30000)
-    return () => clearInterval(interval)
-  }, [])
+    loadUrgentPending();
+    loadAdmissionRequests();
+    const interval = setInterval(() => {
+      loadUrgentPending();
+      loadAdmissionRequests();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const [stats] = useState({
     todayPatients: 0,
@@ -82,25 +135,39 @@ export default function ReceptionPanel() {
   }
 
   const handleSubmitAdmit = async () => {
-    if (!admitSelectedPatient) return toast.error('Bemor tanlang')
-    if (!admitSelectedBed) return toast.error('Koyka tanlang')
+    if (!admitSelectedPatient) return toast.error('Bemor tanlang');
+    if (!admitSelectedBed) return toast.error('Koyka tanlang');
     try {
-      setAdmitSubmitting(true)
-      const res = await ambulatorInpatientService.createAdmission({
-        patient_id: admitSelectedPatient._id,
-        room_id: admitSelectedBed.room_id,
-        bed_number: admitSelectedBed.bed_number
-      })
-      if (res.success) {
-        toast.success(`${admitSelectedPatient.first_name} ${admitSelectedPatient.last_name} ${admitType === 'ambulator' ? 'ambulatorga' : 'statsionarga'} yotqizildi`)
-        setShowAdmitModal(false)
+      setAdmitSubmitting(true);
+      // If opened from admission request — use approve endpoint
+      if (admitFromRequest) {
+        const res = await admissionRequestService.approve(admitFromRequest._id, {
+          room_id: admitSelectedBed.room_id,
+          bed_number: admitSelectedBed.bed_number
+        });
+        if (res.success) {
+          toast.success(`${admitSelectedPatient.first_name} ${admitSelectedPatient.last_name} yotqizildi`);
+          setShowAdmitModal(false);
+          setAdmitFromRequest(null);
+          loadAdmissionRequests();
+        }
+      } else {
+        const res = await ambulatorInpatientService.createAdmission({
+          patient_id: admitSelectedPatient._id,
+          room_id: admitSelectedBed.room_id,
+          bed_number: admitSelectedBed.bed_number
+        });
+        if (res.success) {
+          toast.success(`${admitSelectedPatient.first_name} ${admitSelectedPatient.last_name} ${admitType === 'ambulator' ? 'ambulatorga' : 'statsionarga'} yotqizildi`);
+          setShowAdmitModal(false);
+        }
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Xatolik yuz berdi')
+      toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
     } finally {
-      setAdmitSubmitting(false)
+      setAdmitSubmitting(false);
     }
-  }
+  };
 
   // Lab order modal state
   const [showLabOrderModal, setShowLabOrderModal] = useState(false);
@@ -251,6 +318,83 @@ export default function ReceptionPanel() {
         </div>
       )}
 
+      {/* Statsionar so'rovlari (doctor dan) */}
+      {(admissionRequests.length > 0 || admissionRequestsLoading) && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-teal-200 dark:border-teal-800">
+          <div className="p-4 sm:p-5 border-b border-teal-100 dark:border-teal-900/30">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-teal-700 dark:text-teal-400 flex items-center gap-2">
+                <span className="material-symbols-outlined">bed</span>
+                Statsionar so'rovlari
+                <span className="px-2 py-0.5 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 rounded-full text-sm font-bold">{admissionRequests.length}</span>
+              </h2>
+              <button onClick={loadAdmissionRequests} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <span className={`material-symbols-outlined ${admissionRequestsLoading ? 'animate-spin' : ''}`}>refresh</span>
+              </button>
+            </div>
+          </div>
+          <div className="p-4 sm:p-5 grid gap-3">
+            {admissionRequests.map(req => {
+              const patient = req.patient_id;
+              const doctor = req.doctor_id;
+              return (
+                <div key={req._id} className="bg-teal-50 dark:bg-teal-900/10 border border-teal-200 dark:border-teal-800 rounded-xl p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          {patient?.first_name} {patient?.last_name}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-600 dark:text-gray-300">
+                          {patient?.patient_number}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                          req.admission_type === 'inpatient'
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
+                        }`}>
+                          {req.admission_type === 'inpatient' ? 'Statsionar' : 'Ambulator'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Shifokor: {doctor?.first_name} {doctor?.last_name}
+                      </p>
+                      {req.diagnosis && (
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                          <span className="font-semibold">Tashxis:</span> {req.diagnosis}
+                        </p>
+                      )}
+                      {req.reason && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 italic">{req.reason}</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(req.created_at).toLocaleString('uz-UZ')}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={() => handleRejectAdmissionRequest(req._id)}
+                        className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">close</span>
+                        Rad
+                      </button>
+                      <button
+                        onClick={() => handleOpenAdmitFromRequest(req)}
+                        className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">bed</span>
+                        Yotqizish
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
         <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-900 dark:text-white">Tez harakatlar</h2>
@@ -337,7 +481,7 @@ export default function ReceptionPanel() {
               <h2 className="text-lg font-black text-blue-600">
                 {admitType === 'ambulator' ? 'Ambulatorga yotqizish' : 'Statsionarga yotqizish'}
               </h2>
-              <button onClick={() => setShowAdmitModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => { setShowAdmitModal(false); setAdmitFromRequest(null) }} className="text-gray-400 hover:text-gray-600">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -404,7 +548,7 @@ export default function ReceptionPanel() {
               )}
 
               <div className="flex gap-2 pt-2">
-                <button onClick={() => setShowAdmitModal(false)} className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm">
+                <button onClick={() => { setShowAdmitModal(false); setAdmitFromRequest(null) }} className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm">
                   Bekor qilish
                 </button>
                 <button

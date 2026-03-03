@@ -9,8 +9,8 @@ import pharmacyService from '../services/pharmacyService';
 import api from '../services/api';
 import { laboratoryService } from '../services/laboratoryService';
 import NewOrderModal from '../components/laboratory/NewOrderModal';
-import { patientService } from '../services/patientService'
-;
+import { patientService } from '../services/patientService';
+import admissionRequestService from '../services/admissionRequestService';
 import Modal from '../components/Modal';
 import AlertModal from '../components/AlertModal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -78,8 +78,39 @@ const DoctorPanel = () => {
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
+  // Admission request (statsionarga yuborish)
+  const [showAdmissionModal, setShowAdmissionModal] = useState(false);
+  const [admissionPatient, setAdmissionPatient] = useState(null);
+  const [admissionForm, setAdmissionForm] = useState({ admission_type: 'inpatient', diagnosis: '', reason: '' });
+  const [admissionSubmitting, setAdmissionSubmitting] = useState(false);
+
   const showAlert = (message, type = 'info', title = '') => {
     setAlertModal({ isOpen: true, title, message, type });
+  };
+
+  const handleOpenAdmissionModal = (patient) => {
+    setAdmissionPatient(patient);
+    setAdmissionForm({ admission_type: 'inpatient', diagnosis: '', reason: '' });
+    setShowAdmissionModal(true);
+  };
+
+  const handleSubmitAdmissionRequest = async () => {
+    if (!admissionForm.diagnosis.trim()) return toast.error('Tashxisni kiriting');
+    setAdmissionSubmitting(true);
+    try {
+      await admissionRequestService.create({
+        patient_id: admissionPatient.patient_id,
+        admission_type: admissionForm.admission_type,
+        diagnosis: admissionForm.diagnosis,
+        reason: admissionForm.reason
+      });
+      toast.success('So\'rov receptsiyaga yuborildi!');
+      setShowAdmissionModal(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Xatolik yuz berdi');
+    } finally {
+      setAdmissionSubmitting(false);
+    }
   };
 
   const showConfirm = (message, onConfirm, options = {}) => {
@@ -891,6 +922,13 @@ const DoctorPanel = () => {
                     >
                       <span className="material-symbols-outlined text-sm">biotech</span>
                       Tahlil
+                    </button>
+                    <button
+                      onClick={() => handleOpenAdmissionModal(patient)}
+                      className="col-span-2 py-2 bg-teal-600 text-white rounded-lg text-xs font-semibold hover:bg-teal-700 flex items-center justify-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">bed</span>
+                      Statsionarga yuborish
                     </button>
                     <button
                       onClick={() => handleCompleteConsultation(patient.id)}
@@ -1846,6 +1884,102 @@ const DoctorPanel = () => {
           </div>
         )}
       </Modal>
+
+      {/* Statsionarga yuborish modal */}
+      {showAdmissionModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl max-w-md w-full">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <span className="material-symbols-outlined text-teal-600">bed</span>
+                Statsionarga yuborish
+              </h3>
+              <button onClick={() => setShowAdmissionModal(false)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-4 sm:p-5 space-y-4">
+              {admissionPatient && (
+                <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-lg p-3">
+                  <p className="font-semibold text-teal-800 dark:text-teal-300">
+                    {admissionPatient.first_name} {admissionPatient.last_name}
+                  </p>
+                  <p className="text-xs text-teal-600 dark:text-teal-400">№ {admissionPatient.patient_number}</p>
+                </div>
+              )}
+
+              {/* Admission type */}
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Yo'nalish turi *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: 'inpatient', label: 'Statsionar', icon: 'apartment' },
+                    { value: 'ambulator', label: 'Ambulator', icon: 'meeting_room' }
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setAdmissionForm(p => ({ ...p, admission_type: opt.value }))}
+                      className={`py-3 rounded-lg border-2 text-sm font-semibold flex flex-col items-center gap-1 transition-colors ${
+                        admissionForm.admission_type === opt.value
+                          ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300'
+                          : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">{opt.icon}</span>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Diagnosis */}
+              <div>
+                <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Tashxis *</label>
+                <input
+                  type="text"
+                  value={admissionForm.diagnosis}
+                  onChange={(e) => setAdmissionForm(p => ({ ...p, diagnosis: e.target.value }))}
+                  placeholder="Asosiy tashxis..."
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+
+              {/* Reason */}
+              <div>
+                <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Sabab / Izoh</label>
+                <textarea
+                  value={admissionForm.reason}
+                  onChange={(e) => setAdmissionForm(p => ({ ...p, reason: e.target.value }))}
+                  rows="2"
+                  placeholder="Nima uchun statsionarga yuborilayotgani..."
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setShowAdmissionModal(false)}
+                className="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-200"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleSubmitAdmissionRequest}
+                disabled={admissionSubmitting}
+                className="flex-1 py-2.5 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {admissionSubmitting ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  <span className="material-symbols-outlined text-sm">send</span>
+                )}
+                Receptsiyaga yuborish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
