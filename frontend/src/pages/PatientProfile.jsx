@@ -416,7 +416,7 @@ const PatientProfile = () => {
   // Doctor: Lab buyurtma
   const handleOpenLabOrderModal = async () => {
     try {
-      const testsRes = await laboratoryService.getTests()
+      const testsRes = await laboratoryService.getTests({ is_active: true })
       setLabTests(testsRes.data || [])
     } catch {
       setLabTests([])
