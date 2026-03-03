@@ -186,7 +186,7 @@ router.get('/stats',
         },
         {
           $lookup: {
-            from: 'staffs',
+            from: 'staff',
             localField: '_id',
             foreignField: '_id',
             as: 'staff'
@@ -985,6 +985,7 @@ router.post('/invoices/:id/payment',
       );
 
       await session.commitTransaction();
+      await bust('billing:stats');
 
       res.json({
         success: true,
