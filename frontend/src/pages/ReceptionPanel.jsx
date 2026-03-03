@@ -8,6 +8,7 @@ import ambulatorInpatientService from '../services/ambulatorInpatientService';
 import inpatientRoomService from '../services/inpatientRoomService';
 import api from '../services/api';
 import admissionRequestService from '../services/admissionRequestService';
+import billingService from '../services/billingService';
 import toast, { Toaster } from 'react-hot-toast';
 import NewOrderModal from '../components/laboratory/NewOrderModal';
 
@@ -147,6 +148,14 @@ export default function ReceptionPanel() {
         });
         if (res.success) {
           toast.success(`${admitSelectedPatient.first_name} ${admitSelectedPatient.last_name} yotqizildi`);
+          if (admitType === 'ambulator') {
+            const room = admitRooms.find(r => (r._id || r.id) === admitSelectedBed.room_id)
+            await billingService.printAdmissionReceipt(
+              admitSelectedPatient,
+              { room_number: room?.room_number, bed_number: admitSelectedBed.bed_number },
+              admitSelectedPatient.patient_number
+            )
+          }
           setShowAdmitModal(false);
           setAdmitFromRequest(null);
           loadAdmissionRequests();

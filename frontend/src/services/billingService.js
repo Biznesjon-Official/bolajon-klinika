@@ -108,6 +108,43 @@ ${qrDataUrl ? `<div style="text-align:center;margin:6px 0"><img src="${qrDataUrl
     setTimeout(() => win.print(), 300)
   },
 
+  // Print admission receipt (ambulator)
+  printAdmissionReceipt: async (patient, roomInfo, patientNumber) => {
+    const win = window.open('', '_blank', 'width=400,height=600')
+    if (!win) return
+    const now = new Date()
+    const dateStr = now.toLocaleDateString('uz-UZ') + ' ' + now.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+    const patientName = `${patient.first_name || ''} ${patient.last_name || ''}`.trim()
+    const qrDataUrl = patientNumber ? await generateQRDataUrl(patientNumber) : null
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  @page{size:80mm auto;margin:4mm}
+  body{font-family:monospace;font-size:12px;width:72mm;margin:0}
+  h2{text-align:center;font-size:13px;margin:0 0 4px}
+  p{margin:2px 0;text-align:center}
+  hr{border:none;border-top:1px dashed #000;margin:6px 0}
+  .big{text-align:center;font-size:16px;font-weight:bold;margin:8px 0}
+  .note{font-size:11px;text-align:center;font-style:italic;border:1px solid #000;padding:4px;margin:6px 0}
+  .no-print{text-align:center;margin-top:10px}
+  @media print{.no-print{display:none}}
+</style>
+</head><body>
+<h2>BOLAJON KLINIKASI — AMBULATOR CHEKI</h2>
+<p>Bemor: <b>${patientName}</b></p>
+<p>${dateStr}</p>
+<hr>
+${roomInfo?.room_number ? `<p class="big">Xona: ${roomInfo.room_number}</p>` : ''}
+${roomInfo?.bed_number ? `<p>Ko'yka: #${roomInfo.bed_number}</p>` : ''}
+<hr>
+${qrDataUrl ? `<div style="text-align:center;margin:8px 0"><img src="${qrDataUrl}" width="100" height="100"></div>` : ''}
+<p style="font-size:10px">${patientNumber || ''}</p>
+<p class="note">Bu chekni hamshiraga ko'rsating</p>
+<div class="no-print"><button onclick="window.print()">Chop etish</button> <button onclick="window.close()">Yopish</button></div>
+</body></html>`)
+    win.document.close()
+    setTimeout(() => win.print(), 300)
+  },
+
   // Print procedure receipt (mini check)
   printProcedureReceipt: async (invoice, patientName, patientNumber) => {
     const win = window.open('', '_blank', 'width=400,height=600')

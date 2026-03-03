@@ -43,6 +43,7 @@ export default function NursePanel() {
   const [inpatients, setInpatients] = useState([])
   const [ambulatorProcs, setAmbulatorProcs] = useState([])
   const [ambulatorLoading, setAmbulatorLoading] = useState(false)
+  const [qrFilter, setQrFilter] = useState(null)
 
   // Load inpatients for dispense modal
   useEffect(() => {
@@ -184,8 +185,12 @@ export default function NursePanel() {
   // Render active page
   const renderTab = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return <NurseDashboard stats={stats} treatments={treatments} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} ambulatorProcs={ambulatorProcs} ambulatorLoading={ambulatorLoading} onStartAmbulatorProc={handleStartAmbulatorProc} onCompleteAmbulatorProc={handleCompleteAmbulatorProc} />
+      case 'dashboard': {
+        const filteredProcs = qrFilter
+          ? ambulatorProcs.filter(p => p.patient_number === qrFilter)
+          : ambulatorProcs
+        return <NurseDashboard stats={stats} treatments={treatments} onStartTreatment={handleStartTreatment} onCompleteTreatment={setCompleteTreatment} getStatusColor={getStatusColor} getStatusText={getStatusText} ambulatorProcs={filteredProcs} ambulatorLoading={ambulatorLoading} onStartAmbulatorProc={handleStartAmbulatorProc} onCompleteAmbulatorProc={handleCompleteAmbulatorProc} qrFilter={qrFilter} onSetQrFilter={(val) => setQrFilter(val ? val.split('|')[0].trim() : null)} />
+      }
       case 'medicine-cabinet':
         return <NurseMedicineCabinet medicines={medicines} onDispense={setDispenseMedicine} onRefresh={refresh} />
       case 'calls':

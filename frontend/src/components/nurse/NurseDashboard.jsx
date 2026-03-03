@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-const NurseDashboard = ({ stats, treatments, onStartTreatment, onCompleteTreatment, getStatusColor, getStatusText, ambulatorProcs = [], ambulatorLoading, onStartAmbulatorProc, onCompleteAmbulatorProc }) => {
+const NurseDashboard = ({ stats, treatments, onStartTreatment, onCompleteTreatment, getStatusColor, getStatusText, ambulatorProcs = [], ambulatorLoading, onStartAmbulatorProc, onCompleteAmbulatorProc, qrFilter, onSetQrFilter }) => {
   // Group treatments by time
   const grouped = useMemo(() => {
     const now = new Date()
@@ -189,7 +189,29 @@ const NurseDashboard = ({ stats, treatments, onStartTreatment, onCompleteTreatme
 
       {/* Ambulatory procedures */}
       <div className="space-y-3">
-        <h3 className="text-lg sm:text-xl font-bold">Ambulator muolajalar</h3>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h3 className="text-lg sm:text-xl font-bold">Ambulator muolajalar</h3>
+          <div className="flex items-center gap-2">
+            {qrFilter && (
+              <span className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-semibold">
+                <span className="material-symbols-outlined text-sm">qr_code_scanner</span>
+                {qrFilter}
+                <button onClick={() => onSetQrFilter(null)} className="ml-1 text-blue-500 hover:text-blue-700">✕</button>
+              </span>
+            )}
+            <input
+              type="text"
+              placeholder="QR skan..."
+              className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  onSetQrFilter(e.target.value.trim() || null)
+                  e.target.value = ''
+                }
+              }}
+            />
+          </div>
+        </div>
         {ambulatorLoading ? (
           <p className="text-sm text-gray-500">Yuklanmoqda...</p>
         ) : ambulatorProcs.length === 0 ? (
