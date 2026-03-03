@@ -20,11 +20,11 @@ export default function Inpatient() {
   const audioTimeoutRef = useRef(null);
   
   // Role checking
-  const userRole = user?.role?.name || user?.role_name;
+  const userRole = user?.role_name || user?.role;
   const isNurse = userRole?.toLowerCase() === 'hamshira' || userRole?.toLowerCase() === 'nurse';
-  const isDoctor = userRole?.toLowerCase() === 'shifokor' || userRole?.toLowerCase() === 'doctor';
+  const isDoctor = userRole?.toLowerCase() === 'shifokor' || userRole?.toLowerCase() === 'doctor' || userRole?.toLowerCase() === 'chief_doctor';
   const isAdmin = userRole?.toLowerCase() === 'admin' || userRole?.toLowerCase() === 'administrator';
-  const isReadOnly = isNurse || isDoctor; // Hamshira va shifokor faqat ko'radi
+  const isReadOnly = isNurse || isDoctor; // Hamshira, shifokor va bosh shifokor faqat ko'radi
   const canAddRoom = isAdmin; // Faqat admin xona qo'sha oladi
   
   // Hamshiraga biriktirilgan bemorlar ID'lari

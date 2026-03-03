@@ -32,7 +32,7 @@ const RoleBasedRedirect = ({ children }) => {
         defaultPath = '/chef-laborant'
       } else if (roleName === 'lab' || roleName === 'laborant') {
         defaultPath = '/lab'; // Laborant Dashboard - birinchi
-      } else if (roleName === 'cleaner' || roleName === 'tozalovchi') {
+      } else if (roleName === 'cleaner' || roleName === 'tozalovchi' || roleName === 'sanitar') {
         defaultPath = '/sanitar'; // Tozalovchi paneli - birinchi
       } else if (roleName === 'masseur' || roleName === 'massajchi') {
         defaultPath = '/masseur'; // Massajchi paneli - birinchi

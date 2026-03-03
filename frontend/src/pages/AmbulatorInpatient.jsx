@@ -12,7 +12,7 @@ export default function AmbulatorInpatient() {
   const { user } = useAuth();
   
   // Role checking - hamshira faqat ko'radi
-  const userRole = user?.role?.name || user?.role_name;
+  const userRole = user?.role_name || user?.role;
   const isNurse = userRole?.toLowerCase() === 'hamshira' || userRole?.toLowerCase() === 'nurse';
   const isReadOnly = isNurse; // Hamshira faqat ko'radi
   
