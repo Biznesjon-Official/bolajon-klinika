@@ -80,7 +80,7 @@ export const prescriptionService = {
   <meta charset="UTF-8">
   <title>Retsept - ${prescription.prescription_number || ''}</title>
   <style>
-    @page { size: A4; margin: 10mm 15mm; }
+    @page { size: A4; margin: 8mm 12mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: Arial, Helvetica, sans-serif;
@@ -88,197 +88,152 @@ export const prescriptionService = {
       color: #1a1a1a;
       max-width: 210mm;
       margin: 0 auto;
-      padding: 10mm 15mm;
       background: #fff;
     }
 
-    /* Header */
+    /* ===== HEADER ===== */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-bottom: 12px;
-      border-bottom: 3px solid #000;
+      padding: 12px 16px 10px;
+      background: linear-gradient(135deg, #1a6fba 0%, #0ea5e9 60%, #22d3ee 100%);
+      border-radius: 0 0 16px 16px;
       margin-bottom: 0;
     }
-    .header-logo { width: 70px; height: 70px; object-fit: contain; }
-    .header-center { text-align: center; flex: 1; padding: 0 15px; }
+    .header-logo {
+      width: 68px; height: 68px; object-fit: contain;
+      background: #fff; border-radius: 50%; padding: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .header-center { text-align: center; flex: 1; padding: 0 12px; }
     .header-center .clinic-name {
-      font-size: 22px;
-      font-weight: 800;
-      color: #000;
-      letter-spacing: 1px;
+      font-size: 21px; font-weight: 900; color: #fff;
+      letter-spacing: 1.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
     .header-center .clinic-sub {
-      font-size: 11px;
-      color: #333;
-      margin-top: 3px;
+      font-size: 11px; color: #dbeafe; margin-top: 2px; font-weight: 600; letter-spacing: 0.5px;
     }
-    .header-right { text-align: right; font-size: 11px; color: #333; }
-    .header-right div { margin-bottom: 3px; }
-    .header-right .social { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+    .header-right { text-align: right; font-size: 11px; color: #dbeafe; font-weight: 600; }
 
-    /* Patient info */
+    /* ===== RAINBOW STRIPE ===== */
+    .rainbow {
+      height: 5px;
+      background: linear-gradient(to right, #f87171, #fb923c, #facc15, #4ade80, #38bdf8, #818cf8, #e879f9);
+      margin-bottom: 12px;
+    }
+
+    /* ===== PATIENT INFO ===== */
     .patient-info {
-      background: #f5f5f5;
-      border: 1px solid #ccc;
-      border-top: none;
+      background: #eff6ff;
+      border: 2px solid #bfdbfe;
+      border-radius: 10px;
       padding: 10px 14px;
-      margin-bottom: 16px;
+      margin: 0 12px 12px;
     }
     .patient-info table { width: 100%; border-collapse: collapse; }
-    .patient-info td {
-      padding: 4px 8px;
-      font-size: 12px;
-      vertical-align: middle;
-    }
-    .patient-info .label {
-      font-weight: 700;
-      color: #000;
-      white-space: nowrap;
-      width: 120px;
-    }
-    .patient-info .value {
-      font-weight: 600;
-      color: #1a1a1a;
-      border-bottom: 1px solid #999;
-    }
+    .patient-info td { padding: 3px 8px; font-size: 12px; vertical-align: middle; }
+    .patient-info .label { font-weight: 700; color: #1e40af; white-space: nowrap; width: 110px; }
+    .patient-info .value { font-weight: 600; color: #1a1a1a; border-bottom: 1px dashed #93c5fd; }
     .rx-number {
-      font-size: 13px;
-      font-weight: 700;
-      color: #000;
-      text-align: right;
+      font-size: 12px; font-weight: 800; color: #1d4ed8;
+      text-align: right; background: #dbeafe; border-radius: 6px;
+      padding: 4px 8px; white-space: nowrap;
     }
 
-    /* Section title */
+    /* ===== SECTION TITLES ===== */
     .section-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #000;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 14px 0 8px;
-      padding-bottom: 4px;
-      border-bottom: 2px solid #999;
+      font-size: 13px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.6px; margin: 10px 12px 6px;
+      padding: 5px 12px; border-radius: 6px;
+      display: flex; align-items: center; gap: 6px;
     }
+    .section-title.blue  { background: #dbeafe; color: #1e40af; border-left: 4px solid #2563eb; }
+    .section-title.green { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
+    .section-title.orange{ background: #ffedd5; color: #9a3412; border-left: 4px solid #ea580c; }
+    .section-title.pink  { background: #fce7f3; color: #9d174d; border-left: 4px solid #db2777; }
 
-    /* Diagnosis box */
+    /* ===== DIAGNOSIS BOX ===== */
     .diagnosis-box {
-      background: #f9f9f9;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 10px 14px;
-      margin: 8px 0;
+      background: #f0fdf4; border: 1.5px solid #86efac;
+      border-radius: 8px; padding: 10px 14px; margin: 0 12px 8px;
     }
-    .diagnosis-box .label { font-weight: 700; color: #000; margin-bottom: 4px; }
-    .diagnosis-box .value { font-size: 13px; }
+    .diagnosis-box td { padding: 3px 0; font-size: 12px; vertical-align: top; }
+    .diagnosis-box .dlabel { font-weight: 700; color: #166534; width: 130px; }
 
-    /* Disease tags */
-    .disease-tags { margin: 8px 0; display: flex; gap: 10px; flex-wrap: wrap; }
-    .disease-tag {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .disease-tag.primary { background: #f0f0f0; color: #000; border: 1px solid #999; }
-    .disease-tag.secondary { background: #f0f0f0; color: #000; border: 1px solid #999; }
-
-    /* Complaint */
+    /* ===== COMPLAINT ===== */
     .complaint-box {
-      background: #f5f5f5;
-      border-left: 3px solid #000;
-      padding: 8px 12px;
-      margin: 8px 0;
-      font-size: 13px;
+      background: #fff7ed; border-left: 4px solid #f97316;
+      border-radius: 0 8px 8px 0; padding: 8px 12px;
+      margin: 0 12px 8px; font-size: 12px; color: #7c2d12;
     }
-    .complaint-box .label { font-weight: 700; color: #333; }
+    .complaint-box .label { font-weight: 700; }
 
-    /* Tables */
+    /* ===== TABLES ===== */
     .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 8px 0;
-      font-size: 12px;
+      width: calc(100% - 24px); margin: 0 12px 8px;
+      border-collapse: collapse; font-size: 12px;
+      border-radius: 8px; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
     .data-table th {
-      background: #333;
-      color: #fff;
-      padding: 8px 10px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
+      background: #2563eb; color: #fff;
+      padding: 7px 10px; text-align: left;
+      font-weight: 700; font-size: 11px; text-transform: uppercase;
     }
-    .data-table td {
-      padding: 7px 10px;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    .data-table tr.even { background: #fafafa; }
-    .data-table tr.odd { background: #fff; }
-    .data-table tr:hover { background: #f0f0f0; }
+    .data-table td { padding: 6px 10px; border-bottom: 1px solid #e0e7ff; }
+    .data-table tr.even { background: #eff6ff; }
+    .data-table tr.odd  { background: #fff; }
 
-    /* Recommendations */
-    .rec-table { width: 100%; border-collapse: collapse; margin: 6px 0; }
-    .rec-table td {
-      padding: 5px 8px;
-      font-size: 12px;
-      border-bottom: 1px solid #e8e8e8;
-      vertical-align: top;
-    }
+    /* ===== REC TABLE ===== */
+    .rec-table { width: calc(100% - 24px); margin: 0 12px 8px; border-collapse: collapse; }
+    .rec-table td { padding: 4px 8px; font-size: 12px; border-bottom: 1px solid #e0e7ff; vertical-align: top; }
+    .rec-table tr.even { background: #f0fdf4; }
 
-    /* Footer */
+    /* ===== FOOTER ===== */
     .footer {
-      margin-top: 30px;
-      padding-top: 15px;
-      border-top: 2px solid #000;
+      margin: 14px 12px 0;
+      padding: 12px 14px 10px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
     }
     .signature-line {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-top: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 10px; border-bottom: 1px dashed #cbd5e1;
     }
-    .signature-line .sig {
-      border-bottom: 1px solid #333;
-      min-width: 200px;
-      padding-bottom: 2px;
-      text-align: center;
-      font-size: 12px;
+    .doctor-info { font-size: 12px; color: #334155; }
+    .doctor-info strong { color: #1e40af; }
+    .sig {
+      border-bottom: 1.5px solid #2563eb; min-width: 180px;
+      padding-bottom: 2px; text-align: center; font-size: 12px;
+      font-weight: 700; color: #1e40af;
     }
-    .footer-info {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 10px;
-      color: #888;
+    .social-row {
+      display: flex; justify-content: center; gap: 20px;
+      margin-top: 10px; font-size: 11px; flex-wrap: wrap;
+    }
+    .social-row span { display: flex; align-items: center; gap: 4px; color: #475569; font-weight: 600; }
+    .social-tg   { color: #0ea5e9 !important; }
+    .social-ig   { color: #db2777 !important; }
+    .social-fb   { color: #2563eb !important; }
+    .footer-brand {
+      text-align: center; margin-top: 8px; font-size: 10px;
+      color: #94a3b8; font-weight: 600; letter-spacing: 0.5px;
     }
 
     /* Print */
     @media print {
-      body { padding: 0; margin: 0; }
       .no-print { display: none !important; }
+      .data-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .rainbow { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .section-title { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
-
-    .no-print {
-      text-align: center;
-      margin-top: 20px;
-      padding: 15px;
-    }
-    .btn {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      margin: 0 5px;
-    }
-    .btn-print { background: #333; color: #fff; }
-    .btn-print:hover { background: #111; }
-    .btn-close { background: #757575; color: #fff; }
-    .btn-close:hover { background: #616161; }
+    .no-print { text-align: center; margin: 18px 0 8px; }
+    .btn { padding: 9px 22px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; margin: 0 5px; }
+    .btn-print { background: #2563eb; color: #fff; }
+    .btn-close  { background: #64748b; color: #fff; }
   </style>
 </head>
 <body>
@@ -288,12 +243,14 @@ export const prescriptionService = {
     <img src="${logoUrl}" class="header-logo" alt="Logo" />
     <div class="header-center">
       <div class="clinic-name">BOLAJON KLINIKASI</div>
-      <div class="clinic-sub">Bolalar shifoxonasi</div>
+      <div class="clinic-sub">GRAND SOXIB MEDLINE</div>
     </div>
     <div class="header-right">
-      <div><strong>Call center:</strong> +998 91 XXX XX XX</div>
+      <div>&#128222; Call center:</div>
+      <div style="font-size:13px;color:#fff;font-weight:800">+998 91 XXX XX XX</div>
     </div>
   </div>
+  <div class="rainbow"></div>
 
   <!-- Patient Info -->
   <div class="patient-info">
@@ -313,7 +270,7 @@ export const prescriptionService = {
         <td class="label">Telefon:</td>
         <td class="value">${patient.phone || 'N/A'}</td>
         <td class="label">Turi:</td>
-        <td class="value">${prescription.prescription_type === 'REGULAR' ? 'Oddiy' : prescription.prescription_type === 'URGENT' ? 'Shoshilinch' : 'Surunkali'}</td>
+        <td class="value">${prescription.prescription_type === 'REGULAR' ? 'Oddiy' : prescription.prescription_type === 'URGENT' ? '🔴 Shoshilinch' : 'Surunkali'}</td>
         <td></td>
       </tr>
     </table>
@@ -322,42 +279,41 @@ export const prescriptionService = {
   <!-- Complaint -->
   ${prescription.complaint ? `
   <div class="complaint-box">
-    <span class="label">Shikoyat:</span> ${prescription.complaint}
-  </div>
-  ` : ''}
+    <span class="label">&#128172; Shikoyat:</span> ${prescription.complaint}
+  </div>` : ''}
 
   <!-- Diagnosis -->
+  <div class="section-title blue">&#129657; Tashxis</div>
   <div class="diagnosis-box">
     <table style="width:100%;border-collapse:collapse;">
       <tr>
-        <td style="padding:4px 0;vertical-align:top;width:140px;font-weight:700;">Tashxis:</td>
-        <td style="padding:4px 0;">${prescription.diagnosis || 'Kiritilmagan'}</td>
+        <td class="dlabel">Tashxis:</td>
+        <td>${prescription.diagnosis || 'Kiritilmagan'}</td>
       </tr>
       ${prescription.disease_name ? `<tr>
-        <td style="padding:4px 0;vertical-align:top;font-weight:700;">Kasallik:</td>
-        <td style="padding:4px 0;">${prescription.disease_name}</td>
+        <td class="dlabel">Kasallik:</td>
+        <td>${prescription.disease_name}</td>
       </tr>` : ''}
       ${prescription.secondary_disease_name ? `<tr>
-        <td style="padding:4px 0;vertical-align:top;font-weight:700;">Yondosh kasallik:</td>
-        <td style="padding:4px 0;">${prescription.secondary_disease_name}</td>
+        <td class="dlabel">Yondosh kasallik:</td>
+        <td>${prescription.secondary_disease_name}</td>
       </tr>` : ''}
     </table>
   </div>
 
   <!-- Recommendations -->
   ${(prescription.recommendations && prescription.recommendations.length > 0) ? `
-  <div class="section-title">Maslahatlar</div>
+  <div class="section-title green">&#9989; Maslahatlar</div>
   <table class="rec-table">
     ${recommendationsList}
-  </table>
-  ` : ''}
+  </table>` : ''}
 
   <!-- Medications -->
-  <div class="section-title">Dorilar</div>
+  <div class="section-title orange">&#128138; Dorilar</div>
   <table class="data-table">
     <thead>
       <tr>
-        <th style="width:30px;text-align:center">№</th>
+        <th style="width:28px;text-align:center">№</th>
         <th>Dori nomi</th>
         <th style="text-align:center">Dozasi</th>
         <th style="text-align:center">Kuniga</th>
@@ -365,32 +321,29 @@ export const prescriptionService = {
         <th>Ko'rsatma</th>
       </tr>
     </thead>
-    <tbody>
-      ${medicationsTable}
-    </tbody>
+    <tbody>${medicationsTable}</tbody>
   </table>
 
   <!-- Footer -->
   <div class="footer">
     <div class="signature-line">
-      <div>
-        <strong>Shifokor:</strong>${prescription.doctor_phone ? ` <span style="font-size:12px;color:#444">&#128222; ${prescription.doctor_phone}</span>` : ''}
+      <div class="doctor-info">
+        <strong>Shifokor:</strong>
+        ${prescription.doctor_phone ? `<span style="margin-left:8px;color:#64748b">&#128222; ${prescription.doctor_phone}</span>` : ''}
       </div>
       <div class="sig">Dr. ${prescription.doctor_name || 'N/A'}</div>
     </div>
-    <div class="footer-info" style="margin-top:20px;padding-top:10px;border-top:1px solid #ccc;display:flex;justify-content:center;gap:24px;font-size:11px;color:#555">
-      <span>&#128222; Telegram: @bolajon_klinika</span>
-      <span>&#128247; Instagram: @bolajon_klinika</span>
-      <span>&#128339; Facebook: Bolajon Klinika</span>
+    <div class="social-row">
+      <span class="social-tg">&#9992; Telegram: @bolajon_klinika</span>
+      <span class="social-ig">&#128247; Instagram: @bolajon_klinika</span>
+      <span class="social-fb">&#128218; Facebook: Bolajon Klinika</span>
     </div>
-    <div style="text-align:center;margin-top:6px;font-size:10px;color:#888">
-      BOLAJON KLINIKASI &bull; Farzandingiz sog'ligi uchun!
-    </div>
+    <div class="footer-brand">BOLAJON KLINIKASI &bull; GRAND SOXIB MEDLINE &bull; Farzandingiz sog'ligi uchun! &#128149;</div>
   </div>
 
   <!-- Buttons -->
   <div class="no-print">
-    <button class="btn btn-print" onclick="window.print()">Chop etish</button>
+    <button class="btn btn-print" onclick="window.print()">&#128424; Chop etish</button>
     <button class="btn btn-close" onclick="window.close()">Yopish</button>
   </div>
 
