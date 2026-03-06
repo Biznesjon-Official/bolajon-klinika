@@ -1,5 +1,6 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
+import { requirePayment } from '../utils/paymentCheck.js';
 import LabOrder from '../models/LabOrder.js';
 import LabTest from '../models/LabTest.js';
 import LabCategory from '../models/LabCategory.js';
@@ -7,7 +8,6 @@ import Patient from '../models/Patient.js';
 import Staff from '../models/Staff.js';
 import mongoose from 'mongoose';
 import multer from 'multer';
-import { requirePayment } from '../utils/paymentCheck.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';

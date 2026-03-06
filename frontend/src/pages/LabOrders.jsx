@@ -22,6 +22,15 @@ export default function LabOrders() {
     status: 'all',
     patient_search: ''
   })
+  const [expandedPatients, setExpandedPatients] = useState(new Set())
+
+  const togglePatient = (key) => {
+    setExpandedPatients(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
 
   // Reagent state
   const [reagents, setReagents] = useState([])
@@ -64,6 +73,18 @@ export default function LabOrders() {
         const order = orders.find(o => o.id === orderId)
         if (order) handleOpenResultModal(order)
       }
+    } catch (error) {
+      toast.error('Xatolik yuz berdi')
+    }
+  }
+
+  const handleCollectAllSamples = async (group) => {
+    const pendingOrders = group.orders.filter(o => o.status === 'pending')
+    if (!pendingOrders.length) return
+    try {
+      await Promise.all(pendingOrders.map(o => laboratoryService.updateOrderStatus(o.id, 'sample_collected')))
+      toast.success(`${pendingOrders.length} ta namuna olindi`)
+      await loadData()
     } catch (error) {
       toast.error('Xatolik yuz berdi')
     }
@@ -243,6 +264,24 @@ export default function LabOrders() {
     return true
   })
 
+  // Group orders by patient
+  const groupedOrders = filteredOrders.reduce((acc, order) => {
+    const key = order.patient_number || order.patient_id
+    if (!acc[key]) {
+      acc[key] = {
+        key,
+        patient_number: order.patient_number,
+        patient_first_name: order.patient_first_name,
+        patient_last_name: order.patient_last_name,
+        patient_id: order.patient_id,
+        orders: []
+      }
+    }
+    acc[key].orders.push(order)
+    return acc
+  }, {})
+  const patientGroups = Object.values(groupedOrders)
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -299,104 +338,155 @@ export default function LabOrders() {
           />
         </div>
 
-        {/* Orders List */}
+        {/* Orders List — grouped by patient */}
         <div className="space-y-2 sm:space-y-3">
-          {filteredOrders.map(order => (
-            <div
-              key={order.id}
-              className={`bg-gray-50 dark:bg-gray-900 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:shadow-md transition-shadow ${order.critical_alert ? 'border-2 border-red-500 ring-2 ring-red-200' : ''}`}
-            >
-              {/* Critical Alert Banner */}
-              {order.critical_alert && (
-                <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/30 border border-red-300 rounded-lg flex items-center gap-2">
-                  <span className="material-symbols-outlined text-red-600 text-xl">warning</span>
-                  <span className="text-sm font-bold text-red-700 dark:text-red-400">KRITIK QIYMAT ANIQLANGAN</span>
-                  {order.critical_values?.map((cv, i) => (
-                    <span key={i} className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">
-                      {cv.parameter_name}: {cv.value} ({cv.critical_type === 'high' ? '↑' : '↓'})
-                    </span>
-                  ))}
-                </div>
-              )}
+          {patientGroups.map(group => {
+            const isExpanded = expandedPatients.has(group.key)
+            const hasCritical = group.orders.some(o => o.critical_alert)
+            const pendingCount = group.orders.filter(o => o.status === 'pending').length
+            const doneCount = group.orders.filter(o => ['completed','approved'].includes(o.status)).length
+            const inProgressCount = group.orders.filter(o => ['sample_collected','in_progress'].includes(o.status)).length
 
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                    <span className="material-symbols-outlined text-xl sm:text-2xl text-primary">person</span>
-                    <div>
+            return (
+              <div
+                key={group.key}
+                className={`bg-gray-50 dark:bg-gray-900 rounded-xl border-2 transition-shadow ${hasCritical ? 'border-red-500 ring-2 ring-red-200' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700'}`}
+              >
+                {/* Patient header — click to expand */}
+                <button
+                  onClick={() => togglePatient(group.key)}
+                  className="w-full text-left p-3 sm:p-4 flex items-center gap-3"
+                >
+                  <span className="material-symbols-outlined text-2xl text-primary">person</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold text-base sm:text-lg">
-                        {order.patient_first_name} {order.patient_last_name}
+                        {group.patient_first_name} {group.patient_last_name}
                       </p>
-                      <p className="text-sm text-gray-600">{order.patient_number}</p>
+                      <span className="text-xs text-gray-500 bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                        {group.patient_number}
+                      </span>
+                      {hasCritical && (
+                        <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">
+                          KRITIK
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {group.orders.length} ta tahlil
+                      </span>
+                      {pendingCount > 0 && (
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">{pendingCount} kutilmoqda</span>
+                      )}
+                      {inProgressCount > 0 && (
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{inProgressCount} jarayonda</span>
+                      )}
+                      {doneCount > 0 && (
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">{doneCount} tayyor</span>
+                      )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                    <p><span className="font-semibold">Tahlil:</span> {order.test_name}</p>
-                    <p><span className="font-semibold">Sana:</span> {new Date(order.created_at).toLocaleString('uz-UZ')}</p>
-                    {order.tat_minutes && (
-                      <p><span className="font-semibold">TAT:</span> {order.tat_minutes} daqiqa</p>
-                    )}
+                  <span className={`material-symbols-outlined text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                    expand_more
+                  </span>
+                </button>
+                {pendingCount > 0 && (
+                  <div className="px-3 pb-3 -mt-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleCollectAllSamples(group) }}
+                      className="w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-semibold flex items-center justify-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-base">colorize</span>
+                      Hammasi uchun namuna olish ({pendingCount} ta)
+                    </button>
                   </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  {getStatusBadge(order)}
+                )}
 
-                  {order.status === 'pending' && (
-                    <button
-                      onClick={() => handleCollectSample(order.id)}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm"
-                    >
-                      Namuna olish
-                    </button>
-                  )}
-                  {order.status === 'sample_collected' && (
-                    <button
-                      onClick={() => handleOpenResultModal(order)}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm"
-                    >
-                      Natija kiritish
-                    </button>
-                  )}
-                  {order.status === 'completed' && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleApproveOrder(order.id)}
-                        className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-sm flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-sm">check_circle</span>
-                        Tasdiqlash
-                      </button>
-                      <button
-                        onClick={() => window.open(`/laboratory/result/${order.id}`, '_blank')}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
-                        PDF
-                      </button>
-                      <button
-                        onClick={() => handleOpenResultModal(order)}
-                        className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm flex items-center gap-1"
-                      >
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                        Tahrirlash
-                      </button>
-                    </div>
-                  )}
-                  {order.status === 'approved' && (
-                    <button
-                      onClick={() => window.open(`/laboratory/result/${order.id}`, '_blank')}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm flex items-center gap-1"
-                    >
-                      <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
-                      PDF
-                    </button>
-                  )}
-                </div>
+                {/* Expanded: individual orders */}
+                {isExpanded && (
+                  <div className="border-t border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
+                    {group.orders.map(order => (
+                      <div key={order.id} className="p-3 sm:p-4">
+                        {order.critical_alert && (
+                          <div className="mb-2 p-2 bg-red-50 dark:bg-red-900/30 border border-red-300 rounded-lg flex items-center gap-2 flex-wrap">
+                            <span className="material-symbols-outlined text-red-600 text-base">warning</span>
+                            <span className="text-xs font-bold text-red-700 dark:text-red-400">KRITIK</span>
+                            {order.critical_values?.map((cv, i) => (
+                              <span key={i} className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">
+                                {cv.parameter_name}: {cv.value} ({cv.critical_type === 'high' ? '↑' : '↓'})
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm">{order.test_name}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {new Date(order.created_at).toLocaleString('uz-UZ')}
+                              {order.tat_minutes ? ` · TAT: ${order.tat_minutes} daq` : ''}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+                            {getStatusBadge(order)}
+                            {order.status === 'pending' && (
+                              <button
+                                onClick={() => handleCollectSample(order.id)}
+                                className="px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 text-xs"
+                              >
+                                Namuna olish
+                              </button>
+                            )}
+                            {order.status === 'sample_collected' && (
+                              <button
+                                onClick={() => handleOpenResultModal(order)}
+                                className="px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs"
+                              >
+                                Natija kiritish
+                              </button>
+                            )}
+                            {order.status === 'completed' && (
+                              <div className="flex gap-1.5">
+                                <button
+                                  onClick={() => handleApproveOrder(order.id)}
+                                  className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 text-xs flex items-center gap-1"
+                                >
+                                  <span className="material-symbols-outlined text-xs">check_circle</span>
+                                  Tasdiqlash
+                                </button>
+                                <button
+                                  onClick={() => window.open(`/laboratory/result/${order.id}`, '_blank')}
+                                  className="px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs"
+                                >
+                                  PDF
+                                </button>
+                                <button
+                                  onClick={() => handleOpenResultModal(order)}
+                                  className="px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-xs"
+                                >
+                                  Tahrirlash
+                                </button>
+                              </div>
+                            )}
+                            {order.status === 'approved' && (
+                              <button
+                                onClick={() => window.open(`/laboratory/result/${order.id}`, '_blank')}
+                                className="px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-xs"
+                              >
+                                PDF
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
 
-          {filteredOrders.length === 0 && (
+          {patientGroups.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               <span className="material-symbols-outlined text-5xl mb-3 block">science</span>
               <p className="text-lg font-semibold">Buyurtmalar topilmadi</p>
