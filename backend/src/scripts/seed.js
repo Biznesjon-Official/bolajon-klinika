@@ -38,7 +38,13 @@ staffSchema.pre('save', async function () {
 
 const Staff       = mongoose.model('Staff', staffSchema, 'staff')
 const LabCategory = mongoose.model('LabCategory', new mongoose.Schema({ name: { type: String, required: true, unique: true }, description: String, is_active: { type: Boolean, default: true } }, { timestamps: true }))
-const LabTest     = mongoose.model('LabTest', new mongoose.Schema({ name: { type: String, required: true }, category: { type: mongoose.Schema.Types.ObjectId, ref: 'LabCategory', required: true }, price: { type: Number, required: true }, code: String, sample_type: String, duration_minutes: Number, is_active: { type: Boolean, default: true } }, { timestamps: true }))
+const LabTest     = mongoose.model('LabTest', new mongoose.Schema({
+  name: { type: String, required: true },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'LabCategory', required: true },
+  price: { type: Number, required: true },
+  code: String, sample_type: String, duration_minutes: Number, is_active: { type: Boolean, default: true },
+  test_parameters: [{ name: String, unit: String, normal_range: String, critical_low: String, critical_high: String }]
+}, { timestamps: true }))
 
 const LabReagent  = mongoose.model('LabReagent', new mongoose.Schema({
   name: { type: String, required: true },
@@ -188,49 +194,233 @@ async function seed() {
   console.log('\n🔬 LabTests...')
   const labTestsData = [
     // Qon tahlili
-    { name: 'Umumiy qon tahlili (OAK)', category: 'Qon tahlili', price: 45000, sample_type: 'Venoz qon', duration_minutes: 30 },
-    { name: 'Umumiy qon tahlili + leykoformula', category: 'Qon tahlili', price: 55000, sample_type: 'Venoz qon', duration_minutes: 45 },
-    { name: 'Gemoglobin (Hb)', category: 'Qon tahlili', price: 20000, sample_type: 'Kapillyar qon', duration_minutes: 20 },
-    { name: 'Qondagi glyukoza (shakar)', category: 'Qon tahlili', price: 30000, sample_type: 'Kapillyar qon', duration_minutes: 15 },
-    { name: 'Qon ivish vaqti (VSK)', category: 'Qon tahlili', price: 5000, sample_type: 'Kapillyar qon', duration_minutes: 10 },
-    { name: 'Qon guruhi va Rh-omil', category: 'Qon tahlili', price: 30000, sample_type: 'Venoz qon', duration_minutes: 30 },
-    { name: 'Qonda gijjani aniqlash (eozinofil)', category: 'Qon tahlili', price: 80000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Koagulogamma (PT, APTT, fibrinogen)', category: 'Qon tahlili', price: 70000, sample_type: 'Venoz qon', duration_minutes: 60 },
+    {
+      name: 'Umumiy qon tahlili (OAK)', category: 'Qon tahlili', price: 45000, sample_type: 'Venoz qon', duration_minutes: 30,
+      test_parameters: [
+        { name: 'Leykotsitlar (WBC)', unit: '×10⁹/L', normal_range: '4.5—13.5', critical_low: '2.0', critical_high: '30.0' },
+        { name: 'Eritrotsitlar (RBC)', unit: '×10¹²/L', normal_range: '3.8—5.5', critical_low: '2.5', critical_high: '7.0' },
+        { name: 'Gemoglobin (HGB)', unit: 'g/L', normal_range: '110—160', critical_low: '70', critical_high: '200' },
+        { name: 'Gematokrit (HCT)', unit: '%', normal_range: '33—45', critical_low: '20', critical_high: '60' },
+        { name: 'Trombositlar (PLT)', unit: '×10⁹/L', normal_range: '150—400', critical_low: '50', critical_high: '1000' },
+        { name: "O'rtacha eritrotsit hajmi (MCV)", unit: 'fL', normal_range: '75—95', critical_low: '60', critical_high: '120' },
+        { name: "O'rtacha Hb miqdori (MCH)", unit: 'pg', normal_range: '25—33', critical_low: '15', critical_high: '45' },
+        { name: 'ESR', unit: 'mm/soat', normal_range: '1—15', critical_low: '', critical_high: '100' },
+      ]
+    },
+    {
+      name: 'Umumiy qon tahlili + leykoformula', category: 'Qon tahlili', price: 55000, sample_type: 'Venoz qon', duration_minutes: 45,
+      test_parameters: [
+        { name: 'Leykotsitlar (WBC)', unit: '×10⁹/L', normal_range: '4.5—13.5', critical_low: '2.0', critical_high: '30.0' },
+        { name: 'Eritrotsitlar (RBC)', unit: '×10¹²/L', normal_range: '3.8—5.5', critical_low: '2.5', critical_high: '7.0' },
+        { name: 'Gemoglobin (HGB)', unit: 'g/L', normal_range: '110—160', critical_low: '70', critical_high: '200' },
+        { name: 'Trombositlar (PLT)', unit: '×10⁹/L', normal_range: '150—400', critical_low: '50', critical_high: '1000' },
+        { name: 'Neytrofillar', unit: '%', normal_range: '45—70', critical_low: '', critical_high: '' },
+        { name: 'Limfotsitlar', unit: '%', normal_range: '20—45', critical_low: '', critical_high: '' },
+        { name: 'Monotsitlar', unit: '%', normal_range: '2—10', critical_low: '', critical_high: '' },
+        { name: 'Eozinofil', unit: '%', normal_range: '1—5', critical_low: '', critical_high: '20' },
+        { name: 'Bazofil', unit: '%', normal_range: '0—1', critical_low: '', critical_high: '' },
+        { name: 'ESR', unit: 'mm/soat', normal_range: '1—15', critical_low: '', critical_high: '100' },
+      ]
+    },
+    {
+      name: 'Gemoglobin (Hb)', category: 'Qon tahlili', price: 20000, sample_type: 'Kapillyar qon', duration_minutes: 20,
+      test_parameters: [
+        { name: 'Gemoglobin (Hb)', unit: 'g/L', normal_range: '110—160', critical_low: '70', critical_high: '200' },
+      ]
+    },
+    {
+      name: 'Qondagi glyukoza (shakar)', category: 'Qon tahlili', price: 30000, sample_type: 'Kapillyar qon', duration_minutes: 15,
+      test_parameters: [
+        { name: 'Glyukoza', unit: 'mmol/L', normal_range: '3.3—5.5', critical_low: '2.2', critical_high: '16.7' },
+      ]
+    },
+    {
+      name: 'Qon ivish vaqti (VSK)', category: 'Qon tahlili', price: 5000, sample_type: 'Kapillyar qon', duration_minutes: 10,
+      test_parameters: [
+        { name: 'Ivish boshlanishi', unit: 'min', normal_range: '2—4', critical_low: '', critical_high: '15' },
+        { name: 'Ivish tugashi', unit: 'min', normal_range: '4—8', critical_low: '', critical_high: '20' },
+      ]
+    },
+    { name: 'Qon guruhi va Rh-omil', category: 'Qon tahlili', price: 30000, sample_type: 'Venoz qon', duration_minutes: 30, test_parameters: [] },
+    {
+      name: 'Qonda gijjani aniqlash (eozinofil)', category: 'Qon tahlili', price: 80000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Eozinofil', unit: '%', normal_range: '1—5', critical_low: '', critical_high: '20' },
+        { name: 'Leykotsitlar (WBC)', unit: '×10⁹/L', normal_range: '4.5—13.5', critical_low: '2.0', critical_high: '30.0' },
+      ]
+    },
+    {
+      name: 'Koagulogamma (PT, APTT, fibrinogen)', category: 'Qon tahlili', price: 70000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Protrombin vaqti (PT)', unit: 'sek', normal_range: '11—15', critical_low: '', critical_high: '25' },
+        { name: 'Protrombin indeksi (PTI)', unit: '%', normal_range: '80—120', critical_low: '50', critical_high: '' },
+        { name: 'INR', unit: '', normal_range: '0.8—1.2', critical_low: '', critical_high: '3.5' },
+        { name: 'APTT', unit: 'sek', normal_range: '25—38', critical_low: '', critical_high: '70' },
+        { name: 'Fibrinogen', unit: 'g/L', normal_range: '2.0—4.0', critical_low: '1.0', critical_high: '8.0' },
+      ]
+    },
     // Siynak va axlat
-    { name: 'Umumiy siynak tahlili (OAM)', category: 'Siynak va axlat tahlili', price: 25000, sample_type: 'Siynak', duration_minutes: 30 },
-    { name: 'Umumiy axlat tahlili (koprogramma)', category: 'Siynak va axlat tahlili', price: 25000, sample_type: 'Axlat', duration_minutes: 30 },
-    { name: 'Axlatda gijja tuxumlari', category: 'Siynak va axlat tahlili', price: 20000, sample_type: 'Axlat', duration_minutes: 30 },
-    { name: 'Axlatni yashirin qonga tekshirish', category: 'Siynak va axlat tahlili', price: 25000, sample_type: 'Axlat', duration_minutes: 30 },
-    { name: "Siynak madaniyati (ekin)", category: 'Siynak va axlat tahlili', price: 60000, sample_type: 'Siynak', duration_minutes: 180 },
+    {
+      name: 'Umumiy siynak tahlili (OAM)', category: 'Siynak va axlat tahlili', price: 25000, sample_type: 'Siynak', duration_minutes: 30,
+      test_parameters: [
+        { name: 'Rang', unit: '', normal_range: 'Sarg\'ish', critical_low: '', critical_high: '' },
+        { name: 'Tiniqlik', unit: '', normal_range: 'Tiniq', critical_low: '', critical_high: '' },
+        { name: "Zichlik (solishtirma og'irlik)", unit: '', normal_range: '1010—1025', critical_low: '', critical_high: '' },
+        { name: 'pH (reaksiya)', unit: '', normal_range: '5.0—7.0', critical_low: '', critical_high: '' },
+        { name: 'Oqsil', unit: 'g/L', normal_range: 'Yo\'q (0)', critical_low: '', critical_high: '' },
+        { name: 'Glyukoza', unit: '', normal_range: 'Yo\'q', critical_low: '', critical_high: '' },
+        { name: 'Leykotsitlar', unit: 'ko\'r. mayd.', normal_range: '0—3', critical_low: '', critical_high: '' },
+        { name: 'Eritrotsitlar', unit: 'ko\'r. mayd.', normal_range: '0—1', critical_low: '', critical_high: '' },
+        { name: 'Silindrlar', unit: 'ko\'r. mayd.', normal_range: 'Yo\'q', critical_low: '', critical_high: '' },
+        { name: 'Tuzlar', unit: '', normal_range: 'Yo\'q/oz', critical_low: '', critical_high: '' },
+        { name: 'Bakteriyalar', unit: '', normal_range: 'Yo\'q', critical_low: '', critical_high: '' },
+      ]
+    },
+    {
+      name: 'Umumiy axlat tahlili (koprogramma)', category: 'Siynak va axlat tahlili', price: 25000, sample_type: 'Axlat', duration_minutes: 30,
+      test_parameters: [
+        { name: 'Konsistentsiya', unit: '', normal_range: 'Qalin', critical_low: '', critical_high: '' },
+        { name: 'Rang', unit: '', normal_range: 'Jigarrang', critical_low: '', critical_high: '' },
+        { name: 'Hid', unit: '', normal_range: 'Oddiy', critical_low: '', critical_high: '' },
+        { name: 'Qon', unit: '', normal_range: 'Yo\'q', critical_low: '', critical_high: '' },
+        { name: 'Shilimshiq', unit: '', normal_range: 'Yo\'q', critical_low: '', critical_high: '' },
+        { name: 'Leykotsitlar', unit: 'ko\'r. mayd.', normal_range: '0—2', critical_low: '', critical_high: '' },
+        { name: 'Eritrotsitlar', unit: 'ko\'r. mayd.', normal_range: 'Yo\'q', critical_low: '', critical_high: '' },
+        { name: "Hazm bo'lmagan tolalar", unit: '', normal_range: 'Oz', critical_low: '', critical_high: '' },
+      ]
+    },
+    { name: 'Axlatda gijja tuxumlari', category: 'Siynak va axlat tahlili', price: 20000, sample_type: 'Axlat', duration_minutes: 30, test_parameters: [] },
+    { name: 'Axlatni yashirin qonga tekshirish', category: 'Siynak va axlat tahlili', price: 25000, sample_type: 'Axlat', duration_minutes: 30, test_parameters: [] },
+    { name: "Siynak madaniyati (ekin)", category: 'Siynak va axlat tahlili', price: 60000, sample_type: 'Siynak', duration_minutes: 180, test_parameters: [] },
     // Biokimyo
-    { name: 'ALT (alanin aminotransferaza)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'AST (aspartat aminotransferaza)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'ALT + AST + Bilirubin (umumiy)', category: 'Biokimyoviy tahlil', price: 60000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Kaltsiy (Ca)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Mochevina', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Kaliy (K)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Kreatinin', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Umumiy oqsil', category: 'Biokimyoviy tahlil', price: 25000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: "Siydik kislotasi", category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Xolesterin (umumiy)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Triglitseridlar', category: 'Biokimyoviy tahlil', price: 35000, sample_type: 'Venoz qon', duration_minutes: 60 },
+    {
+      name: 'ALT (alanin aminotransferaza)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'ALT', unit: 'U/L', normal_range: '7—40', critical_low: '', critical_high: '200' },
+      ]
+    },
+    {
+      name: 'AST (aspartat aminotransferaza)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'AST', unit: 'U/L', normal_range: '10—40', critical_low: '', critical_high: '200' },
+      ]
+    },
+    {
+      name: 'ALT + AST + Bilirubin (umumiy)', category: 'Biokimyoviy tahlil', price: 60000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'ALT', unit: 'U/L', normal_range: '7—40', critical_low: '', critical_high: '200' },
+        { name: 'AST', unit: 'U/L', normal_range: '10—40', critical_low: '', critical_high: '200' },
+        { name: 'Bilirubin (umumiy)', unit: 'μmol/L', normal_range: '5—21', critical_low: '', critical_high: '200' },
+        { name: "Bilirubin (to'g'ri)", unit: 'μmol/L', normal_range: '0—5', critical_low: '', critical_high: '' },
+        { name: "Bilirubin (egri)", unit: 'μmol/L', normal_range: '0—16', critical_low: '', critical_high: '' },
+      ]
+    },
+    {
+      name: 'Kaltsiy (Ca)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Kaltsiy (Ca)', unit: 'mmol/L', normal_range: '2.1—2.7', critical_low: '1.75', critical_high: '3.5' },
+      ]
+    },
+    {
+      name: 'Mochevina', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Mochevina', unit: 'mmol/L', normal_range: '2.5—6.4', critical_low: '1.0', critical_high: '35.7' },
+      ]
+    },
+    {
+      name: 'Kaliy (K)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Kaliy (K)', unit: 'mmol/L', normal_range: '3.5—5.1', critical_low: '2.5', critical_high: '6.5' },
+      ]
+    },
+    {
+      name: 'Kreatinin', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Kreatinin', unit: 'μmol/L', normal_range: '44—97', critical_low: '', critical_high: '884' },
+      ]
+    },
+    {
+      name: 'Umumiy oqsil', category: 'Biokimyoviy tahlil', price: 25000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Umumiy oqsil', unit: 'g/L', normal_range: '60—80', critical_low: '40', critical_high: '' },
+      ]
+    },
+    {
+      name: "Siydik kislotasi", category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Siydik kislotasi', unit: 'μmol/L', normal_range: '120—340', critical_low: '', critical_high: '714' },
+      ]
+    },
+    {
+      name: 'Xolesterin (umumiy)', category: 'Biokimyoviy tahlil', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Xolesterin (umumiy)', unit: 'mmol/L', normal_range: '3.0—5.2', critical_low: '', critical_high: '7.8' },
+      ]
+    },
+    {
+      name: 'Triglitseridlar', category: 'Biokimyoviy tahlil', price: 35000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Triglitseridlar', unit: 'mmol/L', normal_range: '0.5—1.7', critical_low: '', critical_high: '5.6' },
+      ]
+    },
     // Immunologiya
-    { name: 'S-reaktiv oqsil (SRB)', category: 'Immunologiya va serologiya', price: 25000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Antistreptolizin-O (ASLO)', category: 'Immunologiya va serologiya', price: 25000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Revmatoidli omil (RF)', category: 'Immunologiya va serologiya', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Revmo proba (4 ko\'rsatkich)', category: 'Immunologiya va serologiya', price: 60000, sample_type: 'Venoz qon', duration_minutes: 90 },
-    { name: 'Vitamin D (25-OH)', category: 'Immunologiya va serologiya', price: 125000, sample_type: 'Venoz qon', duration_minutes: 120 },
-    { name: 'Gepatit B (HBsAg)', category: 'Immunologiya va serologiya', price: 40000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'Gepatit C (anti-HCV)', category: 'Immunologiya va serologiya', price: 40000, sample_type: 'Venoz qon', duration_minutes: 60 },
-    { name: 'TSH (qalqonsimon bez gormonlari)', category: 'Immunologiya va serologiya', price: 80000, sample_type: 'Venoz qon', duration_minutes: 120 },
-    { name: 'Ferritin', category: 'Immunologiya va serologiya', price: 80000, sample_type: 'Venoz qon', duration_minutes: 120 },
+    {
+      name: 'S-reaktiv oqsil (SRB)', category: 'Immunologiya va serologiya', price: 25000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'S-reaktiv oqsil (CRP)', unit: 'mg/L', normal_range: '0—5', critical_low: '', critical_high: '100' },
+      ]
+    },
+    {
+      name: 'Antistreptolizin-O (ASLO)', category: 'Immunologiya va serologiya', price: 25000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'ASLO', unit: 'IU/mL', normal_range: '0—200', critical_low: '', critical_high: '' },
+      ]
+    },
+    {
+      name: 'Revmatoidli omil (RF)', category: 'Immunologiya va serologiya', price: 30000, sample_type: 'Venoz qon', duration_minutes: 60,
+      test_parameters: [
+        { name: 'Revmatoidli omil (RF)', unit: 'IU/mL', normal_range: '0—14', critical_low: '', critical_high: '' },
+      ]
+    },
+    {
+      name: 'Revmo proba (4 ko\'rsatkich)', category: 'Immunologiya va serologiya', price: 60000, sample_type: 'Venoz qon', duration_minutes: 90,
+      test_parameters: [
+        { name: 'CRP (S-reaktiv oqsil)', unit: 'mg/L', normal_range: '0—5', critical_low: '', critical_high: '100' },
+        { name: 'ASLO', unit: 'IU/mL', normal_range: '0—200', critical_low: '', critical_high: '' },
+        { name: 'Revmatoidli omil (RF)', unit: 'IU/mL', normal_range: '0—14', critical_low: '', critical_high: '' },
+        { name: 'Fibrinogen', unit: 'g/L', normal_range: '2.0—4.0', critical_low: '1.0', critical_high: '8.0' },
+      ]
+    },
+    {
+      name: 'Vitamin D (25-OH)', category: 'Immunologiya va serologiya', price: 125000, sample_type: 'Venoz qon', duration_minutes: 120,
+      test_parameters: [
+        { name: 'Vitamin D (25-OH)', unit: 'ng/mL', normal_range: '30—100', critical_low: '10', critical_high: '' },
+      ]
+    },
+    { name: 'Gepatit B (HBsAg)', category: 'Immunologiya va serologiya', price: 40000, sample_type: 'Venoz qon', duration_minutes: 60, test_parameters: [] },
+    { name: 'Gepatit C (anti-HCV)', category: 'Immunologiya va serologiya', price: 40000, sample_type: 'Venoz qon', duration_minutes: 60, test_parameters: [] },
+    {
+      name: 'TSH (qalqonsimon bez gormonlari)', category: 'Immunologiya va serologiya', price: 80000, sample_type: 'Venoz qon', duration_minutes: 120,
+      test_parameters: [
+        { name: 'TSH', unit: 'mIU/L', normal_range: '0.4—4.0', critical_low: '0.1', critical_high: '10.0' },
+        { name: 'T4 (erkin)', unit: 'pmol/L', normal_range: '12—22', critical_low: '', critical_high: '' },
+        { name: 'T3 (erkin)', unit: 'pmol/L', normal_range: '3.1—6.8', critical_low: '', critical_high: '' },
+      ]
+    },
+    {
+      name: 'Ferritin', category: 'Immunologiya va serologiya', price: 80000, sample_type: 'Venoz qon', duration_minutes: 120,
+      test_parameters: [
+        { name: 'Ferritin', unit: 'ng/mL', normal_range: '15—150', critical_low: '5', critical_high: '500' },
+      ]
+    },
     // Bakteriologiya
-    { name: "Tomoq surtmasi (ekini)", category: 'Bakteriologiya', price: 70000, sample_type: 'Tomoq surtmasi', duration_minutes: 240 },
-    { name: "Burun surtmasi (ekini)", category: 'Bakteriologiya', price: 70000, sample_type: 'Burun surtmasi', duration_minutes: 240 },
+    { name: "Tomoq surtmasi (ekini)", category: 'Bakteriologiya', price: 70000, sample_type: 'Tomoq surtmasi', duration_minutes: 240, test_parameters: [] },
+    { name: "Burun surtmasi (ekini)", category: 'Bakteriologiya', price: 70000, sample_type: 'Burun surtmasi', duration_minutes: 240, test_parameters: [] },
   ]
   for (const t of labTestsData) {
     const catId = labCats[t.category]
-    await LabTest.create({ ...t, category: catId, is_active: true })
+    const { test_parameters, ...rest } = t
+    await LabTest.create({ ...rest, category: catId, is_active: true, test_parameters: test_parameters || [] })
     console.log(`  ✓ ${t.name} (${(t.price/1000).toFixed(0)}k)`)
   }
 

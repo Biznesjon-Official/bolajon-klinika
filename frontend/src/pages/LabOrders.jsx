@@ -36,6 +36,11 @@ export default function LabOrders() {
   const [reagents, setReagents] = useState([])
   const [selectedReagent, setSelectedReagent] = useState(null)
 
+  // Multi-result modal (batch)
+  const [showMultiModal, setShowMultiModal] = useState(false)
+  const [multiItems, setMultiItems] = useState([]) // [{order, params, reagent, tableRows, notes, loading}]
+  const [multiSubmitting, setMultiSubmitting] = useState(false)
+
   useEffect(() => {
     loadData()
     loadReagents()
@@ -85,8 +90,108 @@ export default function LabOrders() {
       await Promise.all(pendingOrders.map(o => laboratoryService.updateOrderStatus(o.id, 'sample_collected')))
       toast.success(`${pendingOrders.length} ta namuna olindi`)
       await loadData()
+      // Open multi-result modal for collected orders
+      const updatedOrders = pendingOrders.map(o => ({ ...o, status: 'sample_collected' }))
+      handleOpenMultiResultModal({ ...group, orders: updatedOrders })
     } catch (error) {
       toast.error('Xatolik yuz berdi')
+    }
+  }
+
+  const handleOpenMultiResultModal = async (group) => {
+    const targetOrders = group.orders.filter(o => o.status === 'sample_collected')
+    if (!targetOrders.length) return
+    // Init items with loading state
+    const items = targetOrders.map(o => ({
+      order: o,
+      params: [],
+      reagent: null,
+      tableRows: [['', ''], ['', ''], ['', ''], ['', '']],
+      notes: '',
+      loading: true
+    }))
+    setMultiItems(items)
+    setShowMultiModal(true)
+    // Load params for each test
+    const loaded = await Promise.all(items.map(async (item) => {
+      if (!item.order.test_id) return { ...item, loading: false }
+      try {
+        const res = await laboratoryService.getTestById(item.order.test_id)
+        if (res.success && res.data?.test_parameters?.length) {
+          return {
+            ...item,
+            params: res.data.test_parameters.map(p => ({
+              name: p.name || p.parameter,
+              value: '',
+              unit: p.unit || '',
+              normalRange: p.normal_range || p.normalRange || '',
+              critical_low: p.critical_low || '',
+              critical_high: p.critical_high || ''
+            })),
+            loading: false
+          }
+        }
+      } catch (_) { /* ignore */ }
+      return { ...item, loading: false }
+    }))
+    setMultiItems(loaded)
+  }
+
+  const updateMultiParam = (itemIdx, paramIdx, value) => {
+    setMultiItems(prev => prev.map((item, i) => {
+      if (i !== itemIdx) return item
+      const params = [...item.params]
+      params[paramIdx] = { ...params[paramIdx], value }
+      return { ...item, params }
+    }))
+  }
+
+  const updateMultiTableCell = (itemIdx, rowIdx, colIdx, value) => {
+    setMultiItems(prev => prev.map((item, i) => {
+      if (i !== itemIdx) return item
+      const tableRows = item.tableRows.map((r, ri) => ri === rowIdx ? r.map((c, ci) => ci === colIdx ? value : c) : r)
+      return { ...item, tableRows }
+    }))
+  }
+
+  const handleSubmitMultiResults = async () => {
+    for (const item of multiItems) {
+      if (!item.reagent) {
+        toast.error(`"${item.order.test_name}" uchun reaktiv tanlang`)
+        return
+      }
+    }
+    setMultiSubmitting(true)
+    let successCount = 0
+    for (const item of multiItems) {
+      try {
+        let test_results
+        if (item.params.length > 0) {
+          test_results = item.params.filter(p => p.value.trim()).map(p => ({
+            parameter_name: p.name, value: p.value, unit: p.unit,
+            normal_range: p.normalRange, is_normal: isCriticalValue(p) === null
+          }))
+          if (!test_results.length) test_results = [{ parameter_name: 'Natija', value: '-', unit: '', normal_range: '', is_normal: null }]
+        } else {
+          const tableText = item.tableRows.filter(r => r[0] || r[1]).map(r => `${r[0]}\t${r[1]}`).join('\n')
+          test_results = [{ parameter_name: 'Natija', value: tableText || '-', unit: '', normal_range: '', is_normal: null }]
+        }
+        const res = await laboratoryService.submitResults(item.order.id, {
+          test_results, notes: item.notes,
+          reagent_id: item.reagent._id, patient_id: item.order.patient_id
+        })
+        if (res.success) successCount++
+      } catch (_) { /* continue others */ }
+    }
+    setMultiSubmitting(false)
+    if (successCount > 0) {
+      toast.success(`${successCount} ta natija kiritildi`)
+      setShowMultiModal(false)
+      setMultiItems([])
+      loadData()
+      loadReagents()
+    } else {
+      toast.error('Natijalarni kiritishda xatolik')
     }
   }
 
@@ -345,7 +450,7 @@ export default function LabOrders() {
             const hasCritical = group.orders.some(o => o.critical_alert)
             const pendingCount = group.orders.filter(o => o.status === 'pending').length
             const doneCount = group.orders.filter(o => ['completed','approved'].includes(o.status)).length
-            const inProgressCount = group.orders.filter(o => ['sample_collected','in_progress'].includes(o.status)).length
+            const inProgressCount = group.orders.filter(o => o.status === 'sample_collected').length
 
             return (
               <div
@@ -391,15 +496,26 @@ export default function LabOrders() {
                     expand_more
                   </span>
                 </button>
-                {pendingCount > 0 && (
-                  <div className="px-3 pb-3 -mt-1">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleCollectAllSamples(group) }}
-                      className="w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-semibold flex items-center justify-center gap-2"
-                    >
-                      <span className="material-symbols-outlined text-base">colorize</span>
-                      Hammasi uchun namuna olish ({pendingCount} ta)
-                    </button>
+                {(pendingCount > 0 || inProgressCount > 0) && (
+                  <div className="px-3 pb-3 -mt-1 flex gap-2">
+                    {pendingCount > 0 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleCollectAllSamples(group) }}
+                        className="flex-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-semibold flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-base">colorize</span>
+                        Namuna olish ({pendingCount} ta)
+                      </button>
+                    )}
+                    {inProgressCount > 0 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleOpenMultiResultModal(group) }}
+                        className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-semibold flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-base">edit_note</span>
+                        Natija kiritish ({inProgressCount} ta)
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -706,6 +822,148 @@ export default function LabOrders() {
                   Natijani yuborish
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Multi-result Modal */}
+      {showMultiModal && multiItems.length > 0 && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-start justify-center z-50 p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl w-full max-w-3xl my-4">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 rounded-t-2xl p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between z-10">
+              <div>
+                <h3 className="text-xl font-bold">Natijalarni kiritish</h3>
+                <p className="text-sm text-gray-500">{multiItems[0]?.order.patient_first_name} {multiItems[0]?.order.patient_last_name} — {multiItems.length} ta tahlil</p>
+              </div>
+              <button onClick={() => { setShowMultiModal(false); setMultiItems([]) }} className="text-gray-500 hover:text-gray-700">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-6 space-y-6">
+              {multiItems.map((item, itemIdx) => (
+                <div key={item.order.id} className="border-2 border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                  {/* Test header */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 px-4 py-3 flex items-center gap-3">
+                    <span className="material-symbols-outlined text-blue-600">science</span>
+                    <div className="flex-1">
+                      <p className="font-bold text-blue-900 dark:text-blue-100">{item.order.test_name}</p>
+                      <p className="text-xs text-blue-600">{item.order.order_number}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 space-y-4">
+                    {/* Reaktiv */}
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">Reaktiv <span className="text-red-500">*</span></label>
+                      <select
+                        value={item.reagent?._id || ''}
+                        onChange={(e) => setMultiItems(prev => prev.map((it, i) => i === itemIdx ? { ...it, reagent: reagents.find(r => r._id === e.target.value) || null } : it))}
+                        className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      >
+                        <option value="">Reaktiv tanlang...</option>
+                        {reagents.map(r => (
+                          <option key={r._id} value={r._id}>{r.name} — {r.remaining_tests} ta qolgan</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Parameters */}
+                    {item.loading ? (
+                      <div className="flex items-center gap-2 py-4 text-gray-500 text-sm">
+                        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        Parametrlar yuklanmoqda...
+                      </div>
+                    ) : item.params.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border-2 border-gray-300 dark:border-gray-600 text-sm">
+                          <thead>
+                            <tr className="bg-gray-50 dark:bg-gray-700">
+                              <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center w-8">№</th>
+                              <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left">PARAMETR</th>
+                              <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center w-36">NATIJA</th>
+                              <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center text-blue-600">ME'YOR</th>
+                              <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center text-blue-600 w-24">BIRLIGI</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {item.params.map((param, paramIdx) => {
+                              const critical = isCriticalValue(param)
+                              const normal = !critical ? isNormalValue(param) : null
+                              return (
+                                <tr key={paramIdx} className={critical ? 'bg-red-50 dark:bg-red-900/20' : normal === true ? 'bg-green-50 dark:bg-green-900/10' : normal === false ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''}>
+                                  <td className="border border-gray-300 dark:border-gray-600 px-2 py-2 text-center font-semibold">{paramIdx + 1}.</td>
+                                  <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 font-semibold uppercase text-xs whitespace-pre-line">{param.name}</td>
+                                  <td className="border border-gray-300 dark:border-gray-600 px-1 py-1">
+                                    <div className="relative">
+                                      <input
+                                        type="text"
+                                        value={param.value}
+                                        onChange={(e) => updateMultiParam(itemIdx, paramIdx, e.target.value)}
+                                        className={`w-full px-2 py-2 border rounded text-center text-sm focus:outline-none focus:ring-2 ${critical ? 'border-red-500 bg-red-50 text-red-700 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-400'}`}
+                                        placeholder="Qiymat"
+                                      />
+                                      {critical && <span className="absolute right-1 top-1/2 -translate-y-1/2 text-red-500"><span className="material-symbols-outlined text-sm">warning</span></span>}
+                                    </div>
+                                  </td>
+                                  <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center text-blue-600 font-semibold text-xs whitespace-pre-line">{param.normalRange}</td>
+                                  <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center text-blue-600 font-semibold text-xs">{param.unit}</td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      /* Free-form fallback */
+                      <div className="space-y-2">
+                        <p className="text-sm font-semibold">Natija (erkin shaklda)</p>
+                        <div className="border rounded-lg overflow-hidden">
+                          <table className="w-full">
+                            <tbody>
+                              {item.tableRows.map((row, rowIdx) => (
+                                <tr key={rowIdx} className="border-b last:border-b-0">
+                                  <td className="p-0 w-1/2 border-r">
+                                    <input type="text" value={row[0]} onChange={(e) => updateMultiTableCell(itemIdx, rowIdx, 0, e.target.value)} className="w-full px-3 py-2 border-0 focus:outline-none text-sm" placeholder="Parametr" />
+                                  </td>
+                                  <td className="p-0 w-1/2">
+                                    <input type="text" value={row[1]} onChange={(e) => updateMultiTableCell(itemIdx, rowIdx, 1, e.target.value)} className="w-full px-3 py-2 border-0 focus:outline-none text-sm" placeholder="Qiymat" />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <button onClick={() => setMultiItems(prev => prev.map((it, i) => i === itemIdx ? { ...it, tableRows: [...it.tableRows, ['', '']] } : it))} className="text-xs text-blue-600 hover:underline">+ Qator qo'shish</button>
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    <textarea
+                      value={item.notes}
+                      onChange={(e) => setMultiItems(prev => prev.map((it, i) => i === itemIdx ? { ...it, notes: e.target.value } : it))}
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                      rows="2"
+                      placeholder="Izoh (ixtiyoriy)..."
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="sticky bottom-0 bg-white dark:bg-gray-800 rounded-b-2xl p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+              <button onClick={() => { setShowMultiModal(false); setMultiItems([]) }} className="flex-1 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 text-sm">
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleSubmitMultiResults}
+                disabled={multiSubmitting}
+                className="flex-1 px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {multiSubmitting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                Barcha natijalarni yuborish ({multiItems.length} ta)
+              </button>
             </div>
           </div>
         </div>
