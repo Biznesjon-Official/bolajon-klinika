@@ -169,7 +169,7 @@ async function seed() {
 
   const staffMap = {}
   for (const s of staffData) {
-    const doc = await Staff.create({ ...s, password: 'Test1234' })
+    const doc = await Staff.create({ ...s, password: '123' })
     staffMap[s.username] = doc._id
     console.log(`  ✓ ${s.username} (${s.role}) — ${s.first_name} ${s.last_name}`)
   }
@@ -662,7 +662,7 @@ async function seed() {
   // ── Summary ───────────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(50))
   console.log('✅ Seed muvaffaqiyatli yakunlandi!\n')
-  console.log('📋 Login ma\'lumotlari (parol: Test1234):')
+  console.log('📋 Login ma\'lumotlari (parol: 123):')
   console.log('  admin         → Akbar Mirzayev (admin)')
   console.log('  bosh_shifokor → Sherzod Rahimov (chief_doctor)')
   console.log('  abdullayev    → Jasur Abdullayev (doctor, Pediatriya)')
